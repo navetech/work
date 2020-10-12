@@ -11,44 +11,146 @@
         <title>Words</title>
 
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m',
+                        'n','o','p','q','r','s','t','u','v','w','x','y','z'];
+            
+            vowelsA = ['a','á','â','ã','à'];
+            vowelsE = ['e','é','ê'        ];
+            vowelsI = ['i','í'            ];
+            vowelsO = ['o','ó','ô','õ'    ];
+            vowelsU = ['u','ú'            ];
+            
+            vowels = {
+                'a': vowelsA,
+                'e': vowelsE,
+                'i': vowelsI,
+                'o': vowelsO,
+                'u': vowelsU
+            };
 
-                letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m',
-                           'n','o','p','q','r','s','t','u','v','w','x','y','z'];
-                
-                vowelsA = ['a','á','â','ã','à'];
-                vowelsE = ['e','é','ê'        ];
-                vowelsI = ['i','í'            ];
-                vowelsO = ['o','ó','ô','õ'    ];
-                vowelsU = ['u','ú'            ];
-                
-                vowels = {
-                    'a': vowelsA,
-                    'e': vowelsE,
-                    'i': vowelsI,
-                    'o': vowelsO,
-                    'u': vowelsU,
+            affix = {
+                "prefix": '',
+                "infix": '',
+                "suffix": ''
+            };
+
+            affixList = {
+                "prefix": [],
+                "infix": [],
+                "suffix": []
+            };
+
+            affixLen = {
+                "prefix": 0,
+                "infix": 0,
+                "suffix": 0
+            }
+
+            function affixListGet(affixType) {
+                len = affix[affixType].length;
+                if (len < 1) {
+                    if (affixType === "prefix") {
+                        affixType = 'infix';
+                        affixListGet(affixType);
+                    }
+                    else if (affixType === 'infix') {
+                        affixType = 'suffix';
+                        affixListGet(affixType);
+                    }
+                    else {
+                        wordListCreate();
+                    }
+
                 }
- 
-                // Listen for submission of form
-                document.querySelector('form').onsubmit = () => {
-                    elem = document.querySelector('#vowel');
-                    vowel = elem.value.toLowerCase();
-                    elem.value = '';
-                    
-                    // Clear words list:
-                    document.querySelector('#words-list').innerHTML = '';
-                    wordsCount = 0;
+                else if ( len < 3 ) {
+                    if (affixType === "prefix") {
+                        prefix = afix[affixType];
+                        letters.forEach(letter => {
+                            affix[affixType] = prefix + letter;
+                            affixListGet(affixType);
+                        });
+                        affixLen[affixType]++;
+                    }
+                }
+                else {
+                    fetch(`https://api.dicionario-aberto.net/${affixType}/${affix[affixType]}`)
+                    // Put response into json form
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data || data.length < 1) {
+                            console.log("No data");
+                            return;
+                        }
+                        if (data.error) {
+                            console.log(data.error);
+                            return;
+                        }
+                        data.forEach(item => {
+                            word = item.word;
+                            len = word.length;
+                            if (len < 3 || len > 6) {
+                                return;
+                            }
+                            affixList[affixType].push(item);
+                        });
 
+                        if (affixLen[affixType] < 3) {
+                            affixListGet(affixType);
+                        }
+                        else if (affixType === "prefix") {
+                        affixType = 'infix';
+                        affixListGet(affixType);
+                        }
+                        else if (affixType === 'infix') {
+                            affixType = 'suffix';
+                            affixListGet(affixType);
+                        }
+                        else {
+                            wordListCreate();
+                        }
+                    });
+                }
+            }
+
+            function wordListCreate() {
+                // Clear words list:
+                document.querySelector('#words-list').innerHTML = '';
+                wordsCount = 0;
+                wordList = affixList['prefix'];
+                wordList.forEach(item => {
+                    // Create a list element
+                    word = item.word;
+                    preview = item.preview;
+                    wordsCount++;
+                    const tr = document.createElement('tr');
+                    const th = document.createElement('th');
+                    th.setAttribute("scope", "row");
+                    th.innerHTML = wordsCount;
+                    const td1 = document.createElement('td');
+                    td1.innerHTML = word;
+                    const td2 = document.createElement('td');
+                    td2.innerHTML = preview;
+
+                    // Add new element to list:
+                    tr.append(th);
+                    tr.append(td1);
+                    tr.append(td2);
+                    document.querySelector('#words-list').append(tr);
+                });
+
+            }
+
+                /*
                     letters2 = vowels[vowel];
                     letters2.forEach(letter2 => {
                         letters.forEach(letter3 => {
                             prefix = 'l';
                             prefix = prefix + letter2 + letter3;
                             console.log(prefix);
+                            prefix = 'lad';
 
                             // Send a GET request to the URL
-                            fetch(`https://api.dicionario-aberto.net/prefix/${prefix}`)
+                            fetch(`https://api.dicionario-aberto.net/infix/${prefix}`)
                             // Put response into json form
                             .then(response => response.json())
                             .then(data => {
@@ -67,28 +169,20 @@
                                     if (len < 3 || len > 6) {
                                         return;
                                     }
-                                    // Create a list element
-                                    preview = item.preview;
-                                    wordsCount++;
-                                    const tr = document.createElement('tr');
-                                    const th = document.createElement('th');
-                                    th.setAttribute("scope", "row");
-                                    th.innerHTML = wordsCount;
-                                    const td1 = document.createElement('td');
-                                    td1.innerHTML = word;
-                                    const td2 = document.createElement('td');
-                                    td2.innerHTML = preview;
+  */
 
-                                    // Add new element to list:
-                                    tr.append(th);
-                                    tr.append(td1);
-                                    tr.append(td2);
-                                    document.querySelector('#words-list').append(tr);
-                                });
-                            });
-                        
-                        });
-                    })
+            document.addEventListener('DOMContentLoaded', function() {
+ 
+                // Listen for submission of form
+                document.querySelector('form').onsubmit = () => {
+                    elem = document.querySelector('#prefix');
+                    prefixIn = elem.value.toLowerCase();
+                    elem.value = '';
+
+                    affixType = "prefix";
+                    affix[affixType] = prefixIn;
+                    affixLen[affixType] = affix[affixType].length;
+                    affixListGet(affixType);
 
                     return false;
                 }; 
@@ -100,8 +194,8 @@
         <div class="container">
             <form>
                 <div class="form-group">
-                    <label for="vowel">Enter a Vowel</label>
-                    <input type="text" id="vowel" placeholder='Vowel' maxlength='1' pattern='[aeiouAEIOU]{1}'>
+                    <label for="prefix">Enter a Prefix</label>
+                    <input type="text" id="prefix" placeholder='Prefix' pattern='[a-zA-Z]{1,}'>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
             </form>
