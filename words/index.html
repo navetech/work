@@ -36,7 +36,7 @@
                     vowel = elem.value.toLowerCase();
                     elem.value = '';
                     
-                    // Clear words list list:
+                    // Clear words list:
                     document.querySelector('#words-list').innerHTML = '';
                     wordsCount = 0;
 
@@ -64,25 +64,26 @@
                                 data.forEach(item => {
                                     word = item.word;
                                     len = word.length;
-                                    if (len < 4 || len > 6) {
+                                    if (len < 3 || len > 6) {
                                         return;
                                     }
                                     // Create a list element
                                     preview = item.preview;
                                     wordsCount++;
-                                    const li = document.createElement('li');
-                                    if (wordsCount % 2 == 0)
-                                    {
-                                        li.setAttribute("class", "list-group-item list-group-item-light");
-                                    }
-                                    else
-                                    {
-                                        li.setAttribute("class", "list-group-item list-group-item-dark");
-                                    }
-                                    li.innerHTML = word + "    " + preview;
+                                    const tr = document.createElement('tr');
+                                    const th = document.createElement('th');
+                                    th.setAttribute("scope", "row");
+                                    th.innerHTML = wordsCount;
+                                    const td1 = document.createElement('td');
+                                    td1.innerHTML = word;
+                                    const td2 = document.createElement('td');
+                                    td2.innerHTML = preview;
 
-                                    // Add new element to our unordered list:
-                                    document.querySelector('#words-list').append(li);
+                                    // Add new element to list:
+                                    tr.append(th);
+                                    tr.append(td1);
+                                    tr.append(td2);
+                                    document.querySelector('#words-list').append(tr);
                                 });
                             });
                         
@@ -101,13 +102,23 @@
                 <div class="form-group">
                     <label for="vowel">Enter a Vowel</label>
                     <input type="text" id="vowel" placeholder='Vowel' maxlength='1' pattern='[aeiouAEIOU]{1}'>
+                    <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
             </form>
         </div>
 
         <div class="container">
-            <ul class="list-group" id="words-list"></ul>
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Word</th>
+                    <th scope="col">Meaning</th>
+                  </tr>
+                </thead>
+                <tbody id='words-list'>
+                </tbody>
+            </table>
         </div>
     </body>
 </html>
