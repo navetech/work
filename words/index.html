@@ -1,12 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
         <title>Words</title>
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
 
-                //vowels = ['a','e','i','o','u'];
                 letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m',
                            'n','o','p','q','r','s','t','u','v','w','x','y','z'];
                 
@@ -30,8 +36,9 @@
                     vowel = elem.value.toLowerCase();
                     elem.value = '';
                     
-                    // Clear our unordered list:
-                    document.querySelector('ul').innerHTML = '';
+                    // Clear words list list:
+                    document.querySelector('#words-list').innerHTML = '';
+                    wordsCount = 0;
 
                     letters2 = vowels[vowel];
                     letters2.forEach(letter2 => {
@@ -55,17 +62,27 @@
                                     return;
                                 }
                                 data.forEach(item => {
-                                    palavra = item.word;
-                                    len = palavra.length;
+                                    word = item.word;
+                                    len = word.length;
                                     if (len < 4 || len > 6) {
                                         return;
                                     }
                                     // Create a list element
+                                    preview = item.preview;
+                                    wordsCount++;
                                     const li = document.createElement('li');
-                                    li.innerHTML = palavra;
+                                    if (wordsCount % 2 == 0)
+                                    {
+                                        li.setAttribute("class", "list-group-item list-group-item-light");
+                                    }
+                                    else
+                                    {
+                                        li.setAttribute("class", "list-group-item list-group-item-dark");
+                                    }
+                                    li.innerHTML = word + "    " + preview;
 
                                     // Add new element to our unordered list:
-                                    document.querySelector('ul').append(li);
+                                    document.querySelector('#words-list').append(li);
                                 });
                             });
                         
@@ -79,11 +96,18 @@
     </head>
 
     <body>
-        <form>
-            <input type='text' id='vowel' placeholder='Vowel' size='1' maxlength='1' pattern='[aeiou]{1}'>
-            <input type='submit'>
-        </form>
-        <ul>
-        </ul>
+        <div class="container">
+            <form>
+                <div class="form-group">
+                    <label for="vowel">Enter a Vowel</label>
+                    <input type="text" id="vowel" placeholder='Vowel' maxlength='1' pattern='[aeiouAEIOU]{1}'>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+
+        <div class="container">
+            <ul class="list-group" id="words-list"></ul>
+        </div>
     </body>
 </html>
