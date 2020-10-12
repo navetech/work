@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Words</title>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+
+                //vowels = ['a','e','i','o','u'];
+                letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m',
+                           'n','o','p','q','r','s','t','u','v','w','x','y','z'];
+                
+                vowelsA = ['a','á','â','ã','à'];
+                vowelsE = ['e','é','ê'        ];
+                vowelsI = ['i','í'            ];
+                vowelsO = ['o','ó','ô','õ'    ];
+                vowelsU = ['u','ú'            ];
+                
+                vowels = {
+                    'a': vowelsA,
+                    'e': vowelsE,
+                    'i': vowelsI,
+                    'o': vowelsO,
+                    'u': vowelsU,
+                }
+ 
+                // Listen for submission of form
+                document.querySelector('form').onsubmit = () => {
+                    elem = document.querySelector('#vowel');
+                    vowel = elem.value.toLowerCase();
+                    elem.value = '';
+                    
+                    // Clear our unordered list:
+                    document.querySelector('ul').innerHTML = '';
+
+                    letters2 = vowels[vowel];
+                    letters2.forEach(letter2 => {
+                        letters.forEach(letter3 => {
+                            prefix = 'l';
+                            prefix = prefix + letter2 + letter3;
+                            console.log(prefix);
+
+                            // Send a GET request to the URL
+                            fetch(`https://api.dicionario-aberto.net/prefix/${prefix}`)
+                            // Put response into json form
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(data);
+                                if (!data || data.length < 1) {
+                                    console.log("No data");
+                                    return;
+                                }
+                                if (data.error) {
+                                    console.log(data.error);
+                                    return;
+                                }
+                                data.forEach(item => {
+                                    palavra = item.word;
+                                    len = palavra.length;
+                                    if (len < 4 || len > 6) {
+                                        return;
+                                    }
+                                    // Create a list element
+                                    const li = document.createElement('li');
+                                    li.innerHTML = palavra;
+
+                                    // Add new element to our unordered list:
+                                    document.querySelector('ul').append(li);
+                                });
+                            });
+                        
+                        });
+                    })
+
+                    return false;
+                }; 
+            });
+        </script>
+    </head>
+
+    <body>
+        <form>
+            <input type='text' id='vowel' placeholder='Vowel' size='1' maxlength='1' pattern='[aeiou]{1}'>
+            <input type='submit'>
+        </form>
+        <ul>
+        </ul>
+    </body>
+</html>
