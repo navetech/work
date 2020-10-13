@@ -12,7 +12,7 @@
 
         <script>
             letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m',
-                        'n','o','p','q','r','s','t','u','v','w','x','y','z'];
+                       'n','o','p','q','r','s','t','u','v','w','x','y','z'];
             
             vowelsA = ['a','á','â','ã','à'];
             vowelsE = ['e','é','ê'        ];
@@ -28,24 +28,22 @@
                 'u': vowelsU
             };
 
-            affix = {
-                "prefix": '',
-                "infix": '',
-                "suffix": ''
-            };
+            prefixIn = '';
+            prefixWords = new Set();
+            //prefixWords = [];
+            prefixMinLength = 3;
 
-            affixList = {
-                "prefix": [],
-                "infix": [],
-                "suffix": []
-            };
+            suffixIn = '';
+            suffixWords = new Set();
+            //suffixWords = [];
+            suffixMinLength = 3;
 
-            affixLen = {
-                "prefix": 0,
-                "infix": 0,
-                "suffix": 0
-            }
+            infixIn = '';
+            infixWords = new Set();
+            //            infixWords = [];
+            infixMinLength = 3;
 
+/*
             function affixListGet(affixType) {
                 len = affix[affixType].length;
                 if (len < 1) {
@@ -73,51 +71,39 @@
                     }
                 }
                 else {
-                    fetch(`https://api.dicionario-aberto.net/${affixType}/${affix[affixType]}`)
-                    // Put response into json form
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data || data.length < 1) {
-                            console.log("No data");
-                            return;
-                        }
-                        if (data.error) {
-                            console.log(data.error);
-                            return;
-                        }
-                        data.forEach(item => {
-                            word = item.word;
-                            len = word.length;
-                            if (len < 3 || len > 6) {
-                                return;
-                            }
-                            affixList[affixType].push(item);
-                        });
-
-                        if (affixLen[affixType] < 3) {
-                            affixListGet(affixType);
-                        }
-                        else if (affixType === "prefix") {
-                        affixType = 'infix';
-                        affixListGet(affixType);
-                        }
-                        else if (affixType === 'infix') {
-                            affixType = 'suffix';
-                            affixListGet(affixType);
-                        }
-                        else {
-                            wordListCreate();
-                        }
-                    });
                 }
             }
+*/
 
-            function wordListCreate() {
+            function interseccao(setA, setB) {
+                var _interseccao = new Set();
+                for (let elemA of setA) {
+                    for (let elemB of setB) {
+                        if (elemA.word === elemB.word) {
+                            interseccao.add(elemA);
+                        }
+                    }
+                }
+                return _interseccao;
+            }
+
+            function wordsProcess() {
+                
                 // Clear words list:
                 document.querySelector('#words-list').innerHTML = '';
                 wordsCount = 0;
-                wordList = affixList['prefix'];
-                wordList.forEach(item => {
+                let words = new Set();
+                if (prefixIn && suffixIn)
+                {
+                    t = interseccao(prefixWords, suffixWords);
+                    if (infixIn) {
+                        words = interseccao(t, infixWords);
+                    }
+                    else {
+                        words = t;
+                    }
+                }
+                for (let item of words) {
                     // Create a list element
                     word = item.word;
                     preview = item.preview;
@@ -136,8 +122,8 @@
                     tr.append(td1);
                     tr.append(td2);
                     document.querySelector('#words-list').append(tr);
-                });
-
+                }
+//                });
             }
 
                 /*
@@ -171,18 +157,132 @@
                                     }
   */
 
+            function affixWordsGet(affixType, affix, affixWords) {
+                console.log(affixType, affix);
+
+                fetch(`https://api.dicionario-aberto.net/${affixType}/${affix}`)
+                // Put response into json form
+                .then(response => response.json())
+                .then(data => {
+                    if (!data || data.length < 1) {
+                        console.log("No data");
+                        return;
+                    }
+                    if (data.error) {
+                        console.log(data.error);
+                        return;
+                    }
+                    data.forEach(item => {
+                        word = item.word;
+                        len = word.length;
+/*                        if (len < 3 || len > 6) {
+                            return;
+                        }
+*/
+//                        affixWords.push(item);
+                        affixWords.add(item);
+                    });
+
+                    switch (affixType) {
+
+                        case 'prefix': prefixProcess();
+                        break;
+                        
+                        case 'suffix': suffixProcess();
+                        break;
+                        
+                        case 'infix': infixProcess();
+                        break;
+                    }
+
+                });
+            }
+
+            function prefixGen() {
+                if (!prefixIn) {
+                    return '';
+                }
+                if (prefixCount < 1) {
+                    const a = prefixIn;
+                    prefixIn = '';
+                    return a;
+                }
+            }
+
+            function prefixProcess() {
+                const prefix = prefixGen();
+                if (!prefix) {
+                    suffixProcess();
+                    return;
+                }
+
+                affixWordsGet("prefix", prefix, prefixWords);
+            }
+
+            function suffixGen() {
+                if (!suffixIn) {
+                    return '';
+                }
+                if (suffixCount < 1) {
+                    const a = suffixIn;
+                    suffixIn = '';
+                    return a;
+                }
+            }
+
+            function suffixProcess() {
+                const suffix = suffixGen();
+                if (!suffix) {
+                    infixProcess();
+                    return;
+                }
+
+                affixWordsGet("suffix", suffix, suffixWords);
+            }
+
+            function infixGen() {
+                if (!infixIn) {
+                    return '';
+                }
+                if (infixCount < 1) {
+                    const a = infixIn;
+                    infixIn = '';
+                    return a;
+                }
+            }
+
+            function infixProcess() {
+                const infix = infixGen();
+                if (!infix) {
+                    wordsProcess();
+                    return;
+                }
+
+                affixWordsGet("infix", infix, infixWords);
+            }
+
             document.addEventListener('DOMContentLoaded', function() {
- 
+
                 // Listen for submission of form
                 document.querySelector('form').onsubmit = () => {
+
                     elem = document.querySelector('#prefix');
                     prefixIn = elem.value.toLowerCase();
                     elem.value = '';
 
-                    affixType = "prefix";
-                    affix[affixType] = prefixIn;
-                    affixLen[affixType] = affix[affixType].length;
-                    affixListGet(affixType);
+                    elem = document.querySelector('#suffix');
+                    suffixIn = elem.value.toLowerCase();
+                    elem.value = '';
+
+                    elem = document.querySelector('#infix');
+                    infixIn = elem.value.toLowerCase();
+                    elem.value = '';
+
+                    prefixCount = prefixMinLength - prefixIn.length;
+                    suffixCount = suffixMinLength - suffixIn.length;
+                    infixCount = infixMinLength - infixIn.length;
+
+                    prefixProcess();
 
                     return false;
                 }; 
@@ -196,6 +296,13 @@
                 <div class="form-group">
                     <label for="prefix">Enter a Prefix</label>
                     <input type="text" id="prefix" placeholder='Prefix' pattern='[a-zA-Z]{1,}'>
+
+                    <label for="suffix">Enter a Suffix</label>
+                    <input type="text" id="suffix" placeholder='Suffix' pattern='[a-zA-Z]{1,}'>
+
+                    <label for="infix">Enter a Infix</label>
+                    <input type="text" id="infix" placeholder='Infix' pattern='[a-zA-Z]{1,}'>
+
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
             </form>
