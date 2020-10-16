@@ -11,16 +11,16 @@
         <title>Words</title>
 
         <script>
-            letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m',
-                       'n','o','p','q','r','s','t','u','v','w','x','y','z'];
+            const letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m',
+                           'n','o','p','q','r','s','t','u','v','w','x','y','z'];
             
-            vowelsA = ['a','á','â','ã','à'];
-            vowelsE = ['e','é','ê'        ];
-            vowelsI = ['i','í'            ];
-            vowelsO = ['o','ó','ô','õ'    ];
-            vowelsU = ['u','ú'            ];
+            const vowelsA = ['a','á','â','ã','à'];
+            const vowelsE = ['e','é','ê'        ];
+            const vowelsI = ['i','í'            ];
+            const vowelsO = ['o','ó','ô','õ'    ];
+            const vowelsU = ['u','ú'            ];
             
-            vowels = {
+            const vowels = {
                 'a': vowelsA,
                 'e': vowelsE,
                 'i': vowelsI,
@@ -28,20 +28,115 @@
                 'u': vowelsU
             };
 
-            prefixIn = '';
-            prefixWords = new Set();
-            //prefixWords = [];
-            prefixMinLength = 3;
+            class Affix {
+                constructor(type) {
+                    this.type = type;
+                    this.minLengthFetch = 3;
+                    this.textIn = '';
+                    this.textFetch = '';
+                    this.countLettersToAdd = this.minLengthFetch - this.textIn.length;;
+                    if (this.textIn.length > 0) {
+                        this.words = [];
+                    }
+                    else {
+                        this.words = null;
+                    }
 
-            suffixIn = '';
-            suffixWords = new Set();
-            //suffixWords = [];
-            suffixMinLength = 3;
+                }
 
-            infixIn = '';
-            infixWords = new Set();
-            //            infixWords = [];
-            infixMinLength = 3;
+                setTextIn(textIn) {
+                    this.textIn = textIn;
+                    this.textFetch = '';
+                    this.countLettersToAdd = this.minLengthFetch - this.textIn.length;;
+                    if (this.textIn.length > 0) {
+                        this.words = [];
+                    }
+                    else {
+                        this.words = null;
+                    }
+                }
+
+                getWords() {
+                    fetch(`https://api.dicionario-aberto.net/${this.type}/${this.textFetch}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            console.log('Network response was not ok.');
+                        }
+                        else {
+                            response.json()
+                            .then(data => {
+                                if (!data || data.length < 1) {
+                                    console.log("No data");
+                                    return;
+                                }
+                                if (data.error) {
+                                    console.log(data.error);
+                                    return;
+                                }
+                                data.forEach(item => {
+                                    const word = item.word;
+                                    const len = word.length;
+                                    if (len < minLengthWords || len > maxLengthWords) {
+                                        return;
+                                    }
+                                    this.words.push(item);
+                                });
+
+                                switch (this.type) {
+                                    case 'prefix': prefix.process();
+                                    break;
+                        
+                                    case 'suffix': suffix.process();
+                                    break;
+                        
+                                    case 'infix': infix.process();
+                                    break;
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.log('Fetch error: ' + error.message);
+                    });
+                }
+
+                genTextFetch() {
+                    if (this.textFetch === this.textIn) {
+                        this.textFetch = '';
+                    }
+                    else {
+                        if (this.countLettersToAdd < 1) {
+                            this.textFetch = this.textIn;
+                        }
+                    }
+                }
+
+                process() {
+                    this.genTextFetch();
+                    if (this.textFetch.length < 1) {
+                        switch (this.type) {
+                            case 'prefix': suffix.process();
+                                break;
+                        
+                            case 'suffix': infix.process();
+                                break;
+                        
+                            case 'infix': wordsProcess();
+                                break;
+                        }
+                        return;
+                    }
+                    this.getWords();
+                }
+            }
+
+            const prefix = new Affix('prefix');
+            const suffix = new Affix('suffix');
+            const infix = new Affix('infix');
+
+            let minLengthWords = 4;
+            let maxLengthWords = 6;
+
 
 /*
             function affixListGet(affixType) {
@@ -75,39 +170,46 @@
             }
 */
 
-            function interseccao(setA, setB) {
-                var _interseccao = new Set();
-                for (let elemA of setA) {
-                    for (let elemB of setB) {
-                        if (elemA.word === elemB.word) {
-                            interseccao.add(elemA);
-                        }
-                    }
+            function wordsIntersection(wordsA, wordsB) {
+                if (!wordsA) {
+                    return wordsB;
                 }
-                return _interseccao;
+                else if (!wordsB) {
+                    return wordsA;
+                }
+                else {
+                    let _intersection = [];
+                    if ((wordsA.length > 0) && (wordsB.length > 0))
+                    {
+                        wordsA.forEach(itemA => {
+                            wordsB.forEach(itemB => {
+                                if (itemA.word === itemB.word) {
+                                    _intersection.push(itemA);
+/*                                    if ((itemA.preview !== itemB.preview) ||
+                                        (itemA.sense !== itemB.sense)
+                                    ) {
+                                        _intersection.push(itemB);
+                                   }
+*/                                }
+                            });
+                        });
+                    }
+                    return _intersection;
+                }
             }
 
             function wordsProcess() {
-                
-                // Clear words list:
                 document.querySelector('#words-list').innerHTML = '';
-                wordsCount = 0;
-                let words = new Set();
-                if (prefixIn && suffixIn)
-                {
-                    t = interseccao(prefixWords, suffixWords);
-                    if (infixIn) {
-                        words = interseccao(t, infixWords);
-                    }
-                    else {
-                        words = t;
-                    }
-                }
-                for (let item of words) {
-                    // Create a list element
-                    word = item.word;
-                    preview = item.preview;
+                let wordsCount = 0;
+
+                let _intersection = wordsIntersection(prefix.words, suffix.words);
+                let words = wordsIntersection(_intersection, infix.words);
+
+                words.forEach(item => {
                     wordsCount++;
+                    const word = item.word;
+                    const preview = item.preview;
+
                     const tr = document.createElement('tr');
                     const th = document.createElement('th');
                     th.setAttribute("scope", "row");
@@ -117,13 +219,11 @@
                     const td2 = document.createElement('td');
                     td2.innerHTML = preview;
 
-                    // Add new element to list:
                     tr.append(th);
                     tr.append(td1);
                     tr.append(td2);
                     document.querySelector('#words-list').append(tr);
-                }
-//                });
+                });
             }
 
                 /*
@@ -157,132 +257,30 @@
                                     }
   */
 
-            function affixWordsGet(affixType, affix, affixWords) {
-                console.log(affixType, affix);
-
-                fetch(`https://api.dicionario-aberto.net/${affixType}/${affix}`)
-                // Put response into json form
-                .then(response => response.json())
-                .then(data => {
-                    if (!data || data.length < 1) {
-                        console.log("No data");
-                        return;
-                    }
-                    if (data.error) {
-                        console.log(data.error);
-                        return;
-                    }
-                    data.forEach(item => {
-                        word = item.word;
-                        len = word.length;
-/*                        if (len < 3 || len > 6) {
-                            return;
-                        }
-*/
-//                        affixWords.push(item);
-                        affixWords.add(item);
-                    });
-
-                    switch (affixType) {
-
-                        case 'prefix': prefixProcess();
-                        break;
-                        
-                        case 'suffix': suffixProcess();
-                        break;
-                        
-                        case 'infix': infixProcess();
-                        break;
-                    }
-
-                });
-            }
-
-            function prefixGen() {
-                if (!prefixIn) {
-                    return '';
-                }
-                if (prefixCount < 1) {
-                    const a = prefixIn;
-                    prefixIn = '';
-                    return a;
-                }
-            }
-
-            function prefixProcess() {
-                const prefix = prefixGen();
-                if (!prefix) {
-                    suffixProcess();
-                    return;
-                }
-
-                affixWordsGet("prefix", prefix, prefixWords);
-            }
-
-            function suffixGen() {
-                if (!suffixIn) {
-                    return '';
-                }
-                if (suffixCount < 1) {
-                    const a = suffixIn;
-                    suffixIn = '';
-                    return a;
-                }
-            }
-
-            function suffixProcess() {
-                const suffix = suffixGen();
-                if (!suffix) {
-                    infixProcess();
-                    return;
-                }
-
-                affixWordsGet("suffix", suffix, suffixWords);
-            }
-
-            function infixGen() {
-                if (!infixIn) {
-                    return '';
-                }
-                if (infixCount < 1) {
-                    const a = infixIn;
-                    infixIn = '';
-                    return a;
-                }
-            }
-
-            function infixProcess() {
-                const infix = infixGen();
-                if (!infix) {
-                    wordsProcess();
-                    return;
-                }
-
-                affixWordsGet("infix", infix, infixWords);
-            }
-
             document.addEventListener('DOMContentLoaded', function() {
-
-                // Listen for submission of form
                 document.querySelector('form').onsubmit = () => {
+                    let elem;
 
                     elem = document.querySelector('#prefix');
-                    prefixIn = elem.value.toLowerCase();
-                    elem.value = '';
+                    const prefixIn = elem.value.toLowerCase();
+//                    elem.value = '';
 
                     elem = document.querySelector('#suffix');
-                    suffixIn = elem.value.toLowerCase();
-                    elem.value = '';
+                    const suffixIn = elem.value.toLowerCase();
+//                    elem.value = '';
 
                     elem = document.querySelector('#infix');
-                    infixIn = elem.value.toLowerCase();
-                    elem.value = '';
+                    const infixIn = elem.value.toLowerCase();
+//                    elem.value = '';
 
-                    prefixCount = prefixMinLength - prefixIn.length;
-                    suffixCount = suffixMinLength - suffixIn.length;
-                    infixCount = infixMinLength - infixIn.length;
+                    minLengthWords = 4;
+                    maxLengthWords = Infinity;
 
-                    prefixProcess();
+                    prefix.setTextIn(prefixIn);
+                    suffix.setTextIn(suffixIn);
+                    infix.setTextIn(infixIn);
+
+                    prefix.process();
 
                     return false;
                 }; 
@@ -294,14 +292,11 @@
         <div class="container">
             <form>
                 <div class="form-group">
-                    <label for="prefix">Enter a Prefix</label>
                     <input type="text" id="prefix" placeholder='Prefix' pattern='[a-zA-Z]{1,}'>
 
-                    <label for="suffix">Enter a Suffix</label>
-                    <input type="text" id="suffix" placeholder='Suffix' pattern='[a-zA-Z]{1,}'>
-
-                    <label for="infix">Enter a Infix</label>
                     <input type="text" id="infix" placeholder='Infix' pattern='[a-zA-Z]{1,}'>
+
+                    <input type="text" id="suffix" placeholder='Suffix' pattern='[a-zA-Z]{1,}'>
 
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
