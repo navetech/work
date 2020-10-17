@@ -12,29 +12,79 @@
 
         <script>
             const letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m',
-                           'n','o','p','q','r','s','t','u','v','w','x','y','z'];
+                             'n','o','p','q','r','s','t','u','v','w','x','y','z'];
             
-            const vowelsA = ['a','á','â','ã','à'];
-            const vowelsE = ['e','é','ê'        ];
-            const vowelsI = ['i','í'            ];
-            const vowelsO = ['o','ó','ô','õ'    ];
-            const vowelsU = ['u','ú'            ];
+            const aVariations = ['a','á','â','ã','à'];
+            const eVariations = ['e','é','ê'        ];
+            const iVariations = ['i','í'            ];
+            const oVariations = ['o','ó','ô','õ'    ];
+            const uVariations = ['u','ú'            ];
             
-            const vowels = {
-                'a': vowelsA,
-                'e': vowelsE,
-                'i': vowelsI,
-                'o': vowelsO,
-                'u': vowelsU
+            const lettersVariations = {
+                'a': aVariations,
+                'e': eVariations,
+                'i': iVariations,
+                'o': oVariations,
+                'u': uVariations
             };
 
+            const AFFIXES_MIN_LENGTH_FETCH = 3;
+            const AFFIXES_MIN_LENGTH_WORDS = 4;
+            const AFFIXES_MAX_LENGTH_WORDS = Infinity;
+
+            function genAffixTextVariation(affixTextLast, affixTextIn) {
+                if (!affixTextLast) {
+                    return '';
+                }
+                else {
+                    return null;
+                }
+            }
+
+            function genAffixTextBase(affixTextLast, affixTextIn) {
+                if (!affixTextLast) {
+                    return affixTextIn;
+                }
+                if (affixTextIn.length >= this.minLengthFetch) {
+                    if (affixTextLast !== affixTextIn) {
+                        return  affixTextIn;
+                    }
+                    else {
+                        return '';
+                    }
+                }
+                else {
+                    return '';
+                }
+
+            }
+
+            function genAffixText(affixTextLast, affixTextIn) {
+                let t = this.genAffixTextVariation(affixTextLast, affixTextIn);
+                if (t.length < 0)
+                {
+                    const t2 = genAffixTextBase(t, affixTextIn);
+                    t = this.genAffixTextVariation(t2, affixTextIn);
+                }
+                return t;
+            }
+
             class Affix {
-                constructor(type) {
-                    this.type = type;
-                    this.minLengthFetch = 3;
+                constructor(affixType) {
+                    this.type = affixType;
+
                     this.textIn = '';
-                    this.textFetch = '';
-                    this.countLettersToAdd = this.minLengthFetch - this.textIn.length;;
+                    this.minLengthFetch = AFFIXES_MIN_LENGTH_FETCH;
+                    this.minLengthWords = AFFIXES_MIN_LENGTH_WORDS;
+                    this.maxLengthWords = AFFIXES_MAX_LENGTH_WORDS;
+                    this.words = null;
+                }
+
+                processInit(affixTextIn, minLengthWords, maxLengthWords) {
+                    this.textIn = affixTextIn;
+                    this.minLengthWords = minLengthWords;
+                    this.maxLengthWords = maxLengthWords;
+
                     if (this.textIn.length > 0) {
                         this.words = [];
                     }
@@ -42,22 +92,30 @@
                         this.words = null;
                     }
 
+                    this.process('');
                 }
 
-                setTextIn(textIn) {
-                    this.textIn = textIn;
-                    this.textFetch = '';
-                    this.countLettersToAdd = this.minLengthFetch - this.textIn.length;;
-                    if (this.textIn.length > 0) {
-                        this.words = [];
+                process(affixTextLast) {
+                    let affixText = genAffixText(affixTextLast, this.textIn);
+                    console.log(affixText);
+                    if (affixText.length < 1) {
+                        switch (this.type) {
+                            case 'prefix': suffix.processInit(suffixTextIn, minLengthWords, maxLengthWords);
+                                break;
+                        
+                            case 'suffix': infix.processInit(infixTextIn, minLengthWords, maxLengthWords);
+                                break;
+                        
+                            case 'infix': wordsProcess();
+                                break;
+                        }
+                        return;
                     }
-                    else {
-                        this.words = null;
-                    }
+                    this.getWords(affixText);
                 }
 
-                getWords() {
-                    fetch(`https://api.dicionario-aberto.net/${this.type}/${this.textFetch}`)
+                getWords(affixText) {
+                    fetch(`https://api.dicionario-aberto.net/${this.type}/${affixText}`)
                     .then(response => {
                         if (!response.ok) {
                             console.log('Network response was not ok.');
@@ -76,22 +134,13 @@
                                 data.forEach(item => {
                                     const word = item.word;
                                     const len = word.length;
-                                    if (len < minLengthWords || len > maxLengthWords) {
+                                    if (len < this.minLengthWords || len > this.maxLengthWords) {
                                         return;
                                     }
                                     this.words.push(item);
                                 });
 
-                                switch (this.type) {
-                                    case 'prefix': prefix.process();
-                                    break;
-                        
-                                    case 'suffix': suffix.process();
-                                    break;
-                        
-                                    case 'infix': infix.process();
-                                    break;
-                                }
+                                this.process(affixText);
                             });
                         }
                     })
@@ -99,43 +148,18 @@
                         console.log('Fetch error: ' + error.message);
                     });
                 }
-
-                genTextFetch() {
-                    if (this.textFetch === this.textIn) {
-                        this.textFetch = '';
-                    }
-                    else {
-                        if (this.countLettersToAdd < 1) {
-                            this.textFetch = this.textIn;
-                        }
-                    }
-                }
-
-                process() {
-                    this.genTextFetch();
-                    if (this.textFetch.length < 1) {
-                        switch (this.type) {
-                            case 'prefix': suffix.process();
-                                break;
-                        
-                            case 'suffix': infix.process();
-                                break;
-                        
-                            case 'infix': wordsProcess();
-                                break;
-                        }
-                        return;
-                    }
-                    this.getWords();
-                }
             }
 
             const prefix = new Affix('prefix');
             const suffix = new Affix('suffix');
             const infix = new Affix('infix');
 
-            let minLengthWords = 4;
-            let maxLengthWords = 6;
+            let prefixTextIn = '';
+            let suffixTextIn = '';
+            let infixTextIn = '';
+
+            let minLengthWords = AFFIXES_MIN_LENGTH_WORDS;
+            let maxLengthWords = AFFIXES_MAX_LENGTH_WORDS;
 
 
 /*
@@ -260,27 +284,27 @@
             document.addEventListener('DOMContentLoaded', function() {
                 document.querySelector('form').onsubmit = () => {
                     let elem;
+                    let text;
 
                     elem = document.querySelector('#prefix');
-                    const prefixIn = elem.value.toLowerCase();
+                    text = elem.value.toLowerCase();
 //                    elem.value = '';
+                    prefixTextIn = text;
 
                     elem = document.querySelector('#suffix');
-                    const suffixIn = elem.value.toLowerCase();
+                    text = elem.value.toLowerCase();
 //                    elem.value = '';
+                    suffixTextIn = text;
 
                     elem = document.querySelector('#infix');
-                    const infixIn = elem.value.toLowerCase();
+                    text = elem.value.toLowerCase();
 //                    elem.value = '';
+                    infixTextIn = text;
 
                     minLengthWords = 4;
                     maxLengthWords = Infinity;
 
-                    prefix.setTextIn(prefixIn);
-                    suffix.setTextIn(suffixIn);
-                    infix.setTextIn(infixIn);
-
-                    prefix.process();
+                    prefix.processInit(prefixTextIn, minLengthWords, maxLengthWords);
 
                     return false;
                 }; 
