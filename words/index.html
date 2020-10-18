@@ -19,150 +19,20 @@
             const iVariations = ['i','í'            ];
             const oVariations = ['o','ó','ô','õ'    ];
             const uVariations = ['u','ú'            ];
+            const cVariations = ['c', 'ç'];
             
             const lettersVariations = {
                 'a': aVariations,
                 'e': eVariations,
                 'i': iVariations,
                 'o': oVariations,
-                'u': uVariations
+                'u': uVariations,
+                'c': cVariations
             };
 
             const AFFIXES_MIN_LENGTH_FETCH = 3;
             const AFFIXES_MIN_LENGTH_WORDS = 4;
             const AFFIXES_MAX_LENGTH_WORDS = Infinity;
-
-            function fillEndAffixFetch(affix) {
-                console.log('fillend');
-                let affixFetch = {
-                    txt: ''
-                };
-
-                affixFetch.txt = affix.txtIn;
-                affixFetch.iLettersFill = [];
-                console.log('fillend2');
-
-                let iLetter = 0
-                for (let i = 0; i < (affix.minLengthFetch - affix.txtIn.length); i++) {
-                    affixFetch.txt += letters[iLetter];
-                    affixFetch.iLettersFill.push(iLetter);
-                }
-                affixFetch.posFill = 0;
-                console.log('fillend3');
-                return affixFetch;
-            }
-
-            function nextEndAffixFetch(affixFetchLast, affix) {
-                let affixFetch = {
-                    txt: ''
-                };
-
-                affixFetch.iLettersFill++;
-                if (affixFetch.iLettersFill >= letters.length) {
-                    affixFetch.iLettersFill = 0;
-                    affixFetch.posFill++;
-                    if (affixFetch.posFill >= (affix.minLengthFetch - affix.txtIn.length)) {
-                        affixFetch.txt = '';
-                        return affixFetch;
-                    }
-                }
-                pos = affixFetch.posFill;
-                iletter = affixFetch.iLettersFill[pos];
-                affixFetch.txt[pos] = letters[iletter];
-                console.log('nextend');
-                return affixFetch;
-            }
-
-            function fillAffixFetch(affix) {
-                let affixFetch = {
-                    txt: ''
-                };
-
-                if(affix.txtIn.length < 1) {
-                    affixFetch.txt = '';
-                    return affixFetch;
-                }
-
-
-                switch (affix.type) {
-                    case 'prefix': affixFetch = fillEndAffixFetch(affix);
-                        break;
-/*                        
-                    case 'suffix': affixFetch = fillBeginningAffixFetch(affix);
-                        break;
-                        
-                    case 'infix': affixFetch = fillEndAffixFetch(affix);
-                      break;
-
-                    default:
-                        affixFetch.txt = '';
-                        break;
-*/ 
-               }
-
-                return affixFetch;
-
-
-            }
-
-
-            function nextAffixFetch(affixFetchLast, affix) {
-                let affixFetch = {
-                    txt: ''
-                };
-
-                if (affixFetchLast.txt.length != affix.minLengthFetch) {
-                    affixFetch.txt = '';
-                    return affixFetch;
-                }
-
-                switch (affix.type) {
-                    case 'prefix': affixFetch = nextEndAffixFetch(affixFetchLast, affix);
-                        break;
-/*                        
-                    case 'suffix': affixFetch = nextBegginingAffixFetch(affixFetchLast, affix);
-                        break;
-                        
-                    case 'infix': affixFetch = nextEndAffixFetch(affixFetchLast, affix);
-                        break;
-
-                    default:
-                        affixFetch.txt = '';
-                        break;
-  */              }
-                return affixFetch;
-            }
-
-            function generateAffixFetch(affixFetchLast, affix) {
-                let affixFetch = {
-                    txt: ''
-                };
-
-                if(affix.txtIn.length < 1) {
-                    affixFetch.txt = '';
-                    return affixFetch;
-                }
-                
-                if (!affixFetchLast) {
-                    if (affix.txtIn.length >= affix.minLengthFetch) {
-                        affixFetch.txt = affix.txtIn;
-                        return affixFetch;
-                    }
-                    else {
-                        affixFetch = fillAffixFetch(affix);
-                        return affixFetch;
-                    }
-                }
-                else {
-                    console.log('antes next');
-                    console.log(affixFetchLast);
-                    affixFetch = nextAffixFetch(affixFetchLast, affix);
-                    console.log('depois nextend');
-                    console.log(affixFetch);
-                    return affixFetch;
-                }
-                return affixFetch;
-            }
 
             class Affix {
                 constructor(affixType) {
@@ -186,7 +56,7 @@
                 }
 
                 process(affixFetchLast) {
-                    let affixFetch = generateAffixFetch(affixFetchLast, this);
+                    affixFetch = this.generateAffixFetch(affixFetchLast);
                     /*************/
                     //return;
                     if (affixFetch.txt.length >= this.minLengthFetch) {
@@ -227,6 +97,7 @@
                                 }
                                 data.forEach(item => {
                                     const word = item.word;
+                                    console.log(word);
                                     const len = word.length;
                                     if (len < this.minLengthWords || len > this.maxLengthWords) {
                                         return;
@@ -242,6 +113,59 @@
                         console.log('Fetch error: ' + error.message);
                     });
                 }
+
+                generateAffixFetch(affixFetchLast) {
+                    if(this.txtIn.length < 1) {
+                        affixFetch.txt = '';
+                        return affixFetch;
+                    }
+
+                    affixFetch.txt = this.txtIn;
+                    if (this.txtIn.length >= this.minLengthFetch) {
+                        if (!affixFetchLast) {
+                            return affixFetch;
+                        }
+                        else {
+                            affixFetch.txt = '';
+                            return affixFetch;
+                        }
+                    }
+
+                    let allPosDone;
+                    if (!affixFetchLast) {
+                        affixFetch.iLettersFill = [];
+                        allPosDone = false;
+                        for (let i = 0; i < (this.minLengthFetch - this.txtIn.length); i++) {
+                            affixFetch.iLettersFill[i] = 0;
+                        }
+                    }
+                    else {
+                        allPosDone = true;
+                        for (let i = 0; i < (this.minLengthFetch - this.txtIn.length); i++) {
+                            affixFetch.iLettersFill[i]++;
+                            if (affixFetch.iLettersFill[i] < letters.length) {
+                                allPosDone = false;
+                                break;
+                            }
+                            else {
+                                affixFetch.iLettersFill[i] = 0;
+                            }
+                        }
+                    }
+
+                    if(allPosDone) {
+                        affixFetch.txt = '';
+                        return affixFetch;
+                    }
+
+                    for (let i = 0; i < (this.minLengthFetch - this.txtIn.length); i++) {
+                        const iLetter = affixFetch.iLettersFill[i];
+                        affixFetch.txt += letters[iLetter];
+                    }
+                    return affixFetch;
+
+                }
+
             }
 
             const prefix = new Affix('prefix');
@@ -254,6 +178,11 @@
 
             let minLengthWords = AFFIXES_MIN_LENGTH_WORDS;
             let maxLengthWords = AFFIXES_MAX_LENGTH_WORDS;
+
+            let affixFetch = {
+                txt: ''
+            };
+
 
 
 /*
