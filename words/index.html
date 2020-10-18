@@ -32,78 +32,57 @@
             const AFFIXES_MIN_LENGTH_WORDS = 4;
             const AFFIXES_MAX_LENGTH_WORDS = Infinity;
 
-            function genAffixTextVariation(affixTextLast, affixTextIn) {
-                if (!affixTextLast) {
-                    return '';
-                }
-                else {
-                    return null;
-                }
-            }
-
-            function genAffixTextBase(affixTextLast, affixTextIn) {
-                if (!affixTextLast) {
-                    return affixTextIn;
-                }
-                if (affixTextIn.length >= this.minLengthFetch) {
-                    if (affixTextLast !== affixTextIn) {
-                        return  affixTextIn;
+            function generateAffixFetch(affixFetchLast, affix) {
+                let affixFetch = {
+                    txt: ''
+                };
+                
+                if (!affixFetchLast) {
+                    if (affix.txtIn.length >= affix.minLengthFetch) {
+                        affixFetch.txt = affix.txtIn;
                     }
                     else {
-                        return '';
+                        affixFetch.txt = '';
                     }
                 }
                 else {
-                    return '';
+                    affixFetch.txt = '';
                 }
-
-            }
-
-            function genAffixText(affixTextLast, affixTextIn) {
-                let t = this.genAffixTextVariation(affixTextLast, affixTextIn);
-                if (t.length < 0)
-                {
-                    const t2 = genAffixTextBase(t, affixTextIn);
-                    t = this.genAffixTextVariation(t2, affixTextIn);
-                }
-                return t;
+                return affixFetch;
             }
 
             class Affix {
                 constructor(affixType) {
                     this.type = affixType;
 
-                    this.textIn = '';
+                    this.txtIn = '';
                     this.minLengthFetch = AFFIXES_MIN_LENGTH_FETCH;
                     this.minLengthWords = AFFIXES_MIN_LENGTH_WORDS;
                     this.maxLengthWords = AFFIXES_MAX_LENGTH_WORDS;
                     this.words = null;
                 }
 
-                processInit(affixTextIn, minLengthWords, maxLengthWords) {
-                    this.textIn = affixTextIn;
+                processInit(affixTxtIn, minLengthWords, maxLengthWords) {
+                    this.txtIn = affixTxtIn;
                     this.minLengthWords = minLengthWords;
                     this.maxLengthWords = maxLengthWords;
 
-                    if (this.textIn.length > 0) {
-                        this.words = [];
-                    }
-                    else {
-                        this.words = null;
-                    }
+                    this.words = (this.txtIn.length > 0) ? [] : null;
 
-                    this.process('');
+                    this.process(null);
                 }
 
-                process(affixTextLast) {
-                    let affixText = genAffixText(affixTextLast, this.textIn);
-                    console.log(affixText);
-                    if (affixText.length < 1) {
+                process(affixFetchLast) {
+                    let affixFetch = generateAffixFetch(affixFetchLast, this);
+                    if (affixFetch.txt.length >= this.minLengthFetch) {
+                        this.getWords(affixFetch);
+                    }
+                    else {
                         switch (this.type) {
-                            case 'prefix': suffix.processInit(suffixTextIn, minLengthWords, maxLengthWords);
+                            case 'prefix': suffix.processInit(suffixTxtIn, minLengthWords, maxLengthWords);
                                 break;
                         
-                            case 'suffix': infix.processInit(infixTextIn, minLengthWords, maxLengthWords);
+                            case 'suffix': infix.processInit(infixTxtIn, minLengthWords, maxLengthWords);
                                 break;
                         
                             case 'infix': wordsProcess();
@@ -111,11 +90,10 @@
                         }
                         return;
                     }
-                    this.getWords(affixText);
                 }
 
-                getWords(affixText) {
-                    fetch(`https://api.dicionario-aberto.net/${this.type}/${affixText}`)
+                getWords(affixFetch) {
+                    fetch(`https://api.dicionario-aberto.net/${this.type}/${affixFetch.txt}`)
                     .then(response => {
                         if (!response.ok) {
                             console.log('Network response was not ok.');
@@ -140,7 +118,7 @@
                                     this.words.push(item);
                                 });
 
-                                this.process(affixText);
+                                this.process(affixFetch);
                             });
                         }
                     })
@@ -284,27 +262,27 @@
             document.addEventListener('DOMContentLoaded', function() {
                 document.querySelector('form').onsubmit = () => {
                     let elem;
-                    let text;
+                    let txt;
 
                     elem = document.querySelector('#prefix');
-                    text = elem.value.toLowerCase();
+                    txt = elem.value.toLowerCase();
 //                    elem.value = '';
-                    prefixTextIn = text;
+                    prefixTxtIn = txt;
 
                     elem = document.querySelector('#suffix');
-                    text = elem.value.toLowerCase();
+                    txt = elem.value.toLowerCase();
 //                    elem.value = '';
-                    suffixTextIn = text;
+                    suffixTxtIn = txt;
 
                     elem = document.querySelector('#infix');
-                    text = elem.value.toLowerCase();
+                    txt = elem.value.toLowerCase();
 //                    elem.value = '';
-                    infixTextIn = text;
+                    infixTxtIn = txt;
 
                     minLengthWords = 4;
                     maxLengthWords = Infinity;
 
-                    prefix.processInit(prefixTextIn, minLengthWords, maxLengthWords);
+                    prefix.processInit(prefixTxtIn, minLengthWords, maxLengthWords);
 
                     return false;
                 }; 
