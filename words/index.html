@@ -57,8 +57,6 @@
 
                 process(affixFetchLast) {
                     affixFetch = this.generateAffixFetch(affixFetchLast);
-                    /*************/
-                    //return;
                     if (affixFetch.txt.length >= this.minLengthFetch) {
                         this.getWords(affixFetch);
                     }
@@ -86,7 +84,6 @@
                         else {
                             response.json()
                             .then(data => {
-//                                if (!data || data.length < 1) {
                                 if (!data) {
                                     console.log("No data");
                                     this.process(affixFetch);
@@ -97,7 +94,6 @@
                                 }
                                 data.forEach(item => {
                                     const word = item.word;
-                                    console.log(word);
                                     const len = word.length;
                                     if (len < this.minLengthWords || len > this.maxLengthWords) {
                                         return;
@@ -153,14 +149,63 @@
                         }
                     }
 
+                    switch (this.type) {
+                        case 'prefix':
+                            direction = 1;
+                            break;
+                    
+                        case 'suffix':
+                            direction = -1;
+                            break;
+                    
+                        case 'infix':
+                            if (!direction) {
+                                direction = 1;
+                            }
+                            break;
+                    }
+
                     if(allPosDone) {
+                        switch (this.type) {
+                            case 'prefix':
+                                direction = 0;
+                                break;
+                    
+                            case 'suffix':
+                                direction = 0;
+                                break;
+                    
+                            case 'infix':
+                                if (!direction) {
+                                    direction = 1;
+                                }
+                                else if (direction > 0) {
+                                    direction = -1;
+                                    affixFetch = this.generateAffixFetch(null);
+                                    return affixFetch;
+                                }
+                                else {
+                                    direction = null;
+                                }
+                                break;
+                        }
+
                         affixFetch.txt = '';
                         return affixFetch;
                     }
 
                     for (let i = 0; i < (this.minLengthFetch - this.txtIn.length); i++) {
                         const iLetter = affixFetch.iLettersFill[i];
-                        affixFetch.txt += letters[iLetter];
+                        if (direction > 0) {
+                            affixFetch.txt = affixFetch.txt + letters[iLetter];
+                        }
+                        else if (direction < 0) {
+                            affixFetch.txt = letters[iLetter] + affixFetch.txt;
+                        }
+                        else {
+                            affixFetch.txt = '';
+                            return affixFetch;
+                        }
                     }
                     return affixFetch;
 
@@ -183,39 +228,7 @@
                 txt: ''
             };
 
-
-
-/*
-            function affixListGet(affixType) {
-                len = affix[affixType].length;
-                if (len < 1) {
-                    if (affixType === "prefix") {
-                        affixType = 'infix';
-                        affixListGet(affixType);
-                    }
-                    else if (affixType === 'infix') {
-                        affixType = 'suffix';
-                        affixListGet(affixType);
-                    }
-                    else {
-                        wordListCreate();
-                    }
-
-                }
-                else if ( len < 3 ) {
-                    if (affixType === "prefix") {
-                        prefix = afix[affixType];
-                        letters.forEach(letter => {
-                            affix[affixType] = prefix + letter;
-                            affixListGet(affixType);
-                        });
-                        affixLen[affixType]++;
-                    }
-                }
-                else {
-                }
-            }
-*/
+            let direction = null;
 
             function wordsIntersection(wordsA, wordsB) {
                 if (!wordsA) {
@@ -232,12 +245,12 @@
                             wordsB.forEach(itemB => {
                                 if (itemA.word === itemB.word) {
                                     _intersection.push(itemA);
-/*                                    if ((itemA.preview !== itemB.preview) ||
+                                    if ((itemA.preview !== itemB.preview) ||
                                         (itemA.sense !== itemB.sense)
                                     ) {
                                         _intersection.push(itemB);
                                    }
-*/                                }
+                                }
                             });
                         });
                     }
@@ -311,17 +324,14 @@
 
                     elem = document.querySelector('#prefix');
                     txt = elem.value.toLowerCase();
-//                    elem.value = '';
                     prefixTxtIn = txt;
 
                     elem = document.querySelector('#suffix');
                     txt = elem.value.toLowerCase();
-//                    elem.value = '';
                     suffixTxtIn = txt;
 
                     elem = document.querySelector('#infix');
                     txt = elem.value.toLowerCase();
-//                    elem.value = '';
                     infixTxtIn = txt;
 
                     minLengthWords = 4;
