@@ -31,8 +31,31 @@
             };
 
             const AFFIXES_MIN_LENGTH_FETCH = 3;
-            const AFFIXES_MIN_LENGTH_WORDS = 4;
-            const AFFIXES_MAX_LENGTH_WORDS = Infinity;
+            const WORDS_MIN_LENGTH = 4;
+            const WORDS_MAX_LENGTH = Infinity;
+
+            PROCESS_IDLE = '';
+            PROCESS_PREFIX_FETCH = 'prefix-fetch';
+            PROCESS_SUFFIX_FETCH = 'suffix-fetch';
+            PROCESS_INFIX_FETCH = 'infix-fetch';
+            PROCESS_WORDS_BUILD = 'words-build';
+            PROCESS_WORDS_SHOW = 'words-show';
+
+
+            let prefixTextIn = '';
+            let suffixTextIn = '';
+            let infixTextIn = '';
+
+            let minLengthWords = WORDS_MIN_LENGTH;
+            let maxLengthWords = WORDS_MAX_LENGTH;
+
+            let affixFetch = {
+                txt: ''
+            };
+
+            let direction = null;
+            let processStep = PROCESS_IDLE;
+            let wordsNum = 0;
 
             class Affix {
                 constructor(affixType) {
@@ -40,8 +63,8 @@
 
                     this.txtIn = '';
                     this.minLengthFetch = AFFIXES_MIN_LENGTH_FETCH;
-                    this.minLengthWords = AFFIXES_MIN_LENGTH_WORDS;
-                    this.maxLengthWords = AFFIXES_MAX_LENGTH_WORDS;
+                    this.minLengthWords = WORDS_MIN_LENGTH;
+                    this.maxLengthWords = WORDS_MAX_LENGTH;
                     this.words = null;
                 }
 
@@ -62,13 +85,19 @@
                     }
                     else {
                         switch (this.type) {
-                            case 'prefix': suffix.processInit(suffixTxtIn, minLengthWords, maxLengthWords);
+                            case 'prefix':
+                                processStep = PROCESS_SUFFIX_FETCH;
+                                suffix.processInit(suffixTxtIn, minLengthWords, maxLengthWords);
                                 break;
                         
-                            case 'suffix': infix.processInit(infixTxtIn, minLengthWords, maxLengthWords);
+                            case 'suffix':
+                                processStep = PROCESS_INFIX_FETCH;
+                                infix.processInit(infixTxtIn, minLengthWords, maxLengthWords);
                                 break;
                         
-                            case 'infix': wordsProcess();
+                            case 'infix':
+                                processStep = PROCESS_WORDS_BUILD;
+                                wordsProcess();
                                 break;
                         }
                         return;
@@ -194,41 +223,29 @@
                         return affixFetch;
                     }
 
-                    for (let i = 0; i < (this.minLengthFetch - this.txtIn.length); i++) {
-                        const iLetter = affixFetch.iLettersFill[i];
-                        if (direction > 0) {
-                            affixFetch.txt = affixFetch.txt + letters[iLetter];
-                        }
-                        else if (direction < 0) {
-                            affixFetch.txt = letters[iLetter] + affixFetch.txt;
-                        }
-                        else {
-                            affixFetch.txt = '';
-                            return affixFetch;
+                    if (direction == 0) {
+                        affixFetch.txt = '';
+                        return affixFetch;
+                    }
+                    else {
+                        for (let i = (this.minLengthFetch - this.txtIn.length) - 1; i >= 0; i--) {
+                            const iLetter = affixFetch.iLettersFill[i];
+                            if (direction > 0) {
+                                affixFetch.txt = affixFetch.txt + letters[iLetter];
+                            }
+                            else if (direction < 0) {
+                                affixFetch.txt = letters[iLetter] + affixFetch.txt;
+                            }
                         }
                     }
                     return affixFetch;
-
                 }
-
             }
 
             const prefix = new Affix('prefix');
             const suffix = new Affix('suffix');
             const infix = new Affix('infix');
 
-            let prefixTextIn = '';
-            let suffixTextIn = '';
-            let infixTextIn = '';
-
-            let minLengthWords = AFFIXES_MIN_LENGTH_WORDS;
-            let maxLengthWords = AFFIXES_MAX_LENGTH_WORDS;
-
-            let affixFetch = {
-                txt: ''
-            };
-
-            let direction = null;
 
             function wordsIntersection(wordsA, wordsB) {
                 if (!wordsA) {
@@ -245,11 +262,13 @@
                             wordsB.forEach(itemB => {
                                 if (itemA.word === itemB.word) {
                                     _intersection.push(itemA);
-                                    if ((itemA.preview !== itemB.preview) ||
-                                        (itemA.sense !== itemB.sense)
-                                    ) {
-                                        _intersection.push(itemB);
-                                   }
+//                                    if ((itemA.preview !== itemB.preview)
+//                                     ||
+  //                                      (itemA.sense !== itemB.sense)
+//                                    ) {
+//
+  //                                      _intersection.push(itemB);
+    //                               }
                                 }
                             });
                         });
@@ -265,6 +284,8 @@
                 let _intersection = wordsIntersection(prefix.words, suffix.words);
                 let words = wordsIntersection(_intersection, infix.words);
 
+                processStep = PROCESS_WORDS_SHOW;
+                wordsNum = (!words) ? 0 : words.length;
                 words.forEach(item => {
                     wordsCount++;
                     const word = item.word;
@@ -317,7 +338,48 @@
                                     }
   */
 
+            function messageShow() {
+                let message = '';
+                switch (processStep) {
+                    case PROCESS_IDLE:
+                        message = '';
+                        break;
+
+                    case PROCESS_PREFIX_FETCH:
+                        message = `Fetching prefix: ${affixFetch.txt}`
+                        break;
+
+                    case PROCESS_SUFFIX_FETCH:
+                        message = `Fetching suffix: ${affixFetch.txt}`
+                        break;
+
+                    case PROCESS_INFIX_FETCH:
+                        message = `Fetching infix: ${affixFetch.txt}`
+                        break;
+
+                    case PROCESS_WORDS_BUILD:
+                        message = 'Building words list';
+                        break;
+
+                    case PROCESS_WORDS_SHOW:
+                        if (wordsNum > 0)
+                        {
+                            message = `${wordsNum} WORDS FOUND`;
+                        }
+                        else {
+                            message = `NO WORD FOUND`;
+                        }
+                        break;
+
+                    default:
+                        message = 'Error: Invalid Process Step';
+                }
+                document.querySelector('#message').innerHTML = message;
+            }
+
             document.addEventListener('DOMContentLoaded', function() {
+                setInterval(messageShow, 2000);
+
                 document.querySelector('form').onsubmit = () => {
                     let elem;
                     let txt;
@@ -334,9 +396,26 @@
                     txt = elem.value.toLowerCase();
                     infixTxtIn = txt;
 
-                    minLengthWords = 4;
-                    maxLengthWords = Infinity;
+                    minLengthWords = document.querySelector('#words-min-length').value;
+                    if (minLengthWords < WORDS_MIN_LENGTH) {
+                        minLengthWords = WORDS_MIN_LENGTH;                        
+                    }
+                    maxLengthWords = document.querySelector('#words-max-length').value;
+                    console.log("max");
+                    console.log(maxLengthWords);
+                    if (maxLengthWords < 1) {
+                        maxLengthWords = WORDS_MAX_LENGTH;                        
+                    }
+                    else {
+                        if (maxLengthWords < minLengthWords) {
+                            maxLengthWords = minLengthWords;
+                        }                        
+                    }
 
+
+                    document.querySelector('#words-list').innerHTML = '';
+
+                    processStep = PROCESS_PREFIX_FETCH;
                     prefix.processInit(prefixTxtIn, minLengthWords, maxLengthWords);
 
                     return false;
@@ -349,15 +428,18 @@
         <div class="container">
             <form>
                 <div class="form-group">
-                    <input type="text" id="prefix" placeholder='Prefix' pattern='[a-zA-Z]{1,}'>
+                    <input type="text" id="prefix" placeholder='Prefix' pattern='[a-zA-Z]{1,}' value= ''>
+                    <input type="text" id="infix" placeholder='Infix' pattern='[a-zA-Z]{1,}' value= ''>
+                    <input type="text" id="suffix" placeholder='Suffix' pattern='[a-zA-Z]{1,}' value= ''>
+                    <br>
+                    <input type="number" id="words-min-length" placeholder='Min. Length' min='1'>
+                    <input type="number" id="words-max-length" placeholder='Max. Length' min='1'>
 
-                    <input type="text" id="infix" placeholder='Infix' pattern='[a-zA-Z]{1,}'>
-
-                    <input type="text" id="suffix" placeholder='Suffix' pattern='[a-zA-Z]{1,}'>
-
+                    <button type="reset" class="btn btn-secondary">Reset</button> 
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
             </form>
+            <div id="message"></div>
         </div>
 
         <div class="container">
