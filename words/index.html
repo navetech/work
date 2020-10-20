@@ -30,8 +30,10 @@
                 'c': cVariations
             };
 
-            const AFFIXES_MIN_LENGTH_FETCH = 3;
-            const WORDS_MIN_LENGTH = 4;
+            const AFFIX_IN_MIN_LENGTH = 1;
+            const AFFIX_MIN_LENGTH_FETCH = 3;
+            const AVAILABLE_WORDS_MIN_LENGTH = 4;
+            const WORDS_MIN_LENGTH = 1;
             const WORDS_MAX_LENGTH = Infinity;
 
             PROCESS_IDLE = '';
@@ -62,7 +64,7 @@
                     this.type = affixType;
 
                     this.txtIn = '';
-                    this.minLengthFetch = AFFIXES_MIN_LENGTH_FETCH;
+                    this.minLengthFetch = AFFIX_MIN_LENGTH_FETCH;
                     this.minLengthWords = WORDS_MIN_LENGTH;
                     this.maxLengthWords = WORDS_MAX_LENGTH;
                     this.words = null;
@@ -73,7 +75,7 @@
                     this.minLengthWords = minLengthWords;
                     this.maxLengthWords = maxLengthWords;
 
-                    this.words = (this.txtIn.length > 0) ? [] : null;
+                    this.words = (this.txtIn.length >= AFFIX_IN_MIN_LENGTH) ? [] : null;
 
                     this.process(null);
                 }
@@ -140,65 +142,128 @@
                 }
 
                 generateAffixFetch(affixFetchLast) {
-                    if(this.txtIn.length < 1) {
+                    if(this.txtIn.length < AFFIX_IN_MIN_LENGTH) {
                         affixFetch.txt = '';
                         return affixFetch;
                     }
 
-                    affixFetch.txt = this.txtIn;
-                    if (this.txtIn.length >= this.minLengthFetch) {
-                        if (!affixFetchLast) {
-                            return affixFetch;
-                        }
-                        else {
-                            affixFetch.txt = '';
-                            return affixFetch;
-                        }
-                    }
-
-                    let allPosDone;
+                    const numLettersToChange = this.txtIn.length;
+                    const numLettersToFill = this.minLengthFetch - this.txtIn.length;
+                    let changeDone = false;
+                    let fillDone = false;
                     if (!affixFetchLast) {
-                        affixFetch.iLettersFill = [];
-                        allPosDone = false;
-                        for (let i = 0; i < (this.minLengthFetch - this.txtIn.length); i++) {
-                            affixFetch.iLettersFill[i] = 0;
+                        changeDone = false;
+                        this.changeInit(numLettersToChange);
+                        if (numLettersToFill > 0) {
+                            fillDone = false;
+                            console.log('antesfillinit');
+                            this.fillInit(numLettersToFill);
+                            console.log('depoisfillinit');
                         }
                     }
                     else {
-                        allPosDone = true;
-                        for (let i = 0; i < (this.minLengthFetch - this.txtIn.length); i++) {
+                        changeDone = this.changeProcess(numLettersToChange);
+                        if (numLettersToFill > 0) {
+                            console.log('antesfillProcess');
+                            console.log(fillDone);
+                            affixFetch.txt = '';
+                            return affixFetch;
+                            fillDone = this.fillProcess(numLettersToFill);
+                            console.log('depoisfillProcess');
+                            console.log(fillDone);
+                            affixFetch.txt = '';
+                            return affixFetch;
+
+                        }
+                    }
+                    affixFetch = this.build(numLettersToChange, numLettersToFill, changeDone, fillDone);
+                    return affixFetch;
+
+                }
+
+                changeInit(numLettersToChange) {
+                    affixFetch.iVariationsChange = [];
+                    for (let i = 0; i < numLettersToChange; i++) {
+                        affixFetch.iVariationsChange[i] = 0;
+                    }
+                }
+
+                fillInit(numLettersToFill) {
+                    affixFetch.iLettersFill = [];
+                    affixFetch.iVariationsFill = [];
+                    for (let i = 0; i < numLettersToFill; i++) {
+                        affixFetch.iLettersFill[i] = 0;
+                        affixFetch.iVariationsFill[i] = 0;
+                    }
+                }
+
+                changeProcess(numLettersToChange) {
+                    let changeDone = true;
+                    for (let i = 0; i < numLettersToChange; i++) {
+                        affixFetch.iVariationsChange[i]++;
+                        const letter = this.txtIn[i];
+                        const variations = lettersVariations[letter];
+                        if (variations && (affixFetch.iVariationsChange[i]  < variations.length)) {
+                            changeDone = false;
+                            break;
+                        }
+                    }
+                    return changeDone;
+                }
+
+                fillProcess(numLettersToFill) {
+                    let fillDone = true;
+                    for (let i = 0; i < numLettersToFill; i++) {
+                        affixFetch.iVariationsFill[i]++;
+                        const iLetter = affixFetch.iLettersFill[i];
+                        const letter = letters[iLetter];
+                        const variations = lettersVariations[letter];
+                        if (variations && (affixFetch.iVariationsFill[i]  < variations.length)) {
+                            fillDone = false;
+                            break;
+                        }
+                        else {
                             affixFetch.iLettersFill[i]++;
+                            affixFetch.iVariationsFill[i] = 0;
                             if (affixFetch.iLettersFill[i] < letters.length) {
-                                allPosDone = false;
+                                fillDone = false;
                                 break;
                             }
                             else {
                                 affixFetch.iLettersFill[i] = 0;
+                                affixFetch.iVariationsFill[i] = 0;
                             }
                         }
                     }
+                    console.log('fillprocess');
+                    console.log(fillDone);
 
-                    switch (this.type) {
-                        case 'prefix':
-                            direction = 1;
-                            break;
-                    
-                        case 'suffix':
-                            direction = -1;
-                            break;
-                    
-                        case 'infix':
-                            if (!direction) {
-                                direction = 1;
-                            }
-                            break;
-                    }
+                    return fillDone;
+                }
 
-                    if(allPosDone) {
+                setDirection(fillDone) {
+                    if (!fillDone) {
                         switch (this.type) {
                             case 'prefix':
-                                direction = 0;
+                                direction = 1;
                                 break;
+
+                            case 'suffix':
+                                direction = -1;
+                                break;
+
+                            case 'infix':
+                                if (!direction) {
+                                    direction = 1;
+                                }
+                                break;
+                        }
+                    }
+                    else {
+                        switch (this.type) {
+                            case 'prefix':
+                                    direction = 0;
+                                    break;
                     
                             case 'suffix':
                                 direction = 0;
@@ -210,37 +275,71 @@
                                 }
                                 else if (direction > 0) {
                                     direction = -1;
-                                    affixFetch = this.generateAffixFetch(null);
-                                    return affixFetch;
+                                    const t = this.generateAffixFetch(null);
+                                    return t;
                                 }
                                 else {
                                     direction = null;
                                 }
                                 break;
                         }
+                    }
+                    return null;
+                }
 
-                        affixFetch.txt = '';
-                        return affixFetch;
+                build(numLettersToChange, numLettersToFill, changeDone, fillDone) {
+                    if (numLettersToFill > 0) {
+                        const t = this.setDirection(fillDone);
+                        if (t) {
+                            affixFetch = t;
+                            return affixFetch;
+                        }
                     }
 
-                    if (direction == 0) {
-                        affixFetch.txt = '';
-                        return affixFetch;
-                    }
-                    else {
-                        for (let i = (this.minLengthFetch - this.txtIn.length) - 1; i >= 0; i--) {
-                            const iLetter = affixFetch.iLettersFill[i];
-                            if (direction > 0) {
-                                affixFetch.txt = affixFetch.txt + letters[iLetter];
-                            }
-                            else if (direction < 0) {
-                                affixFetch.txt = letters[iLetter] + affixFetch.txt;
+                    if (changeDone) {
+                        if (numLettersToFill < 1) {
+                            affixFetch.txt = '';
+                            return affixFetch;
+                        }
+                        else {
+                            if (fillDone) {
+                                affixFetch.txt = '';
+                                return affixFetch;
                             }
                         }
                     }
+
+                    affixFetch.txt = '';
+                    for (let i = 0; i < numLettersToChange + numLettersToFill; i++) {
+//                        for (let i = numLettersToChange + numLettersToFill - 1; i >= 0; i--) {
+                        if ( i < numLettersToChange) {
+                            const letter = this.txtIn[i];
+                            const iVariation = affixFetch.iVariationsChange[i];
+                            const variations = lettersVariations[letter];
+                            const letterVariation = (variations) ? variations[iVariation] : letter;
+                            affixFetch.txt = affixFetch.txt + letterVariation;
+                        }
+                        else {
+                            const letter = letters[iLetter];
+                            const iVariation = affixFetch.iVariationsFill[i];
+                            const variations = lettersVariations[letter];
+                            const letterVariation = (variations) ? variations[iVariation] : letter;
+                            console.log("direction  ", direction);
+                            if (direction < 0) {
+//                                affixFetch.txt = affixFetch.txt + letterVariation;
+                                affixFetch.txt = 'lam';
+                            }
+                            else if (direction > 0) {
+//                                affixFetch.txt = letterVariation + affixFetch.txt;
+                                affixFetch.txt = 'por';
+                            }
+                        }
+                    }
+                    console.log(affixFetch.txt);
                     return affixFetch;
                 }
             }
+
 
             const prefix = new Affix('prefix');
             const suffix = new Affix('suffix');
@@ -307,37 +406,6 @@
                 });
             }
 
-                /*
-                    letters2 = vowels[vowel];
-                    letters2.forEach(letter2 => {
-                        letters.forEach(letter3 => {
-                            prefix = 'l';
-                            prefix = prefix + letter2 + letter3;
-                            console.log(prefix);
-                            prefix = 'lad';
-
-                            // Send a GET request to the URL
-                            fetch(`https://api.dicionario-aberto.net/infix/${prefix}`)
-                            // Put response into json form
-                            .then(response => response.json())
-                            .then(data => {
-                                console.log(data);
-                                if (!data || data.length < 1) {
-                                    console.log("No data");
-                                    return;
-                                }
-                                if (data.error) {
-                                    console.log(data.error);
-                                    return;
-                                }
-                                data.forEach(item => {
-                                    word = item.word;
-                                    len = word.length;
-                                    if (len < 3 || len > 6) {
-                                        return;
-                                    }
-  */
-
             function messageShow() {
                 let message = '';
                 switch (processStep) {
@@ -378,7 +446,7 @@
             }
 
             document.addEventListener('DOMContentLoaded', function() {
-                setInterval(messageShow, 2000);
+                setInterval(messageShow, 3);
 
                 document.querySelector('form').onsubmit = () => {
                     let elem;
@@ -400,18 +468,18 @@
                     if (minLengthWords < WORDS_MIN_LENGTH) {
                         minLengthWords = WORDS_MIN_LENGTH;                        
                     }
+
                     maxLengthWords = document.querySelector('#words-max-length').value;
-                    console.log("max");
-                    console.log(maxLengthWords);
                     if (maxLengthWords < 1) {
                         maxLengthWords = WORDS_MAX_LENGTH;                        
                     }
-                    else {
-                        if (maxLengthWords < minLengthWords) {
-                            maxLengthWords = minLengthWords;
-                        }                        
+                    else if (maxLengthWords < AVAILABLE_WORDS_MIN_LENGTH) {
+                        maxLengthWords = AVAILABLE_WORDS_MIN_LENGTH;                        
                     }
 
+                    if (maxLengthWords < minLengthWords) {
+                        maxLengthWords = minLengthWords;
+                    }
 
                     document.querySelector('#words-list').innerHTML = '';
 
