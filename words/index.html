@@ -11,6 +11,7 @@
         <title>Words</title>
 
         <script>
+            /*
             const letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m',
                              'n','o','p','q','r','s','t','u','v','w','x','y','z'];
             
@@ -42,6 +43,208 @@
             PROCESS_INFIX_FETCH = 'infix-fetch';
             PROCESS_WORDS_BUILD = 'words-build';
             PROCESS_WORDS_SHOW = 'words-show';
+
+            */
+
+
+            const AVAILABLE_WORDS_MIN_LENGTH = 4;
+            const WORDS_MIN_LENGTH = 1;
+            const WORDS_MAX_LENGTH = Infinity;
+
+            const AFFIX_IN_MIN_LENGTH = 1;
+            const AFFIX_FETCH_MIN_LENGTH = 3;
+
+
+
+            document.addEventListener('DOMContentLoaded', function() {
+                //setInterval(messageShow, 3);
+
+                document.querySelector('form').onsubmit = () => {
+
+                    // Clear words list on web page
+                    document.querySelector('#words-list').innerHTML = '';
+
+                    // Input affixes from web page
+                    let elem;
+                    elem = document.querySelector('#prefix');
+                    const inPrefix = elem.value.toLowerCase();
+
+                    elem = document.querySelector('#suffix');
+                    const inSuffix = elem.value.toLowerCase();
+
+                    elem = document.querySelector('#infix');
+                    const inInfix = elem.value.toLowerCase();
+
+                    // Input limits for words lengths from web page
+                    let wordsMinLen = document.querySelector('#words-min-length').value;
+                    let wordsMaxLen = document.querySelector('#words-max-length').value;
+
+                    // Validate limits for words lengths
+                    if (wordsMinLen < WORDS_MIN_LENGTH) {
+                        wordsMinLen = WORDS_MIN_LENGTH;                        
+                    }
+
+                    if (wordsMaxLen < 1) {
+                        wordsMaxLen = WORDS_MAX_LENGTH;                        
+                    }
+                    else if (wordsMaxLen < AVAILABLE_WORDS_MIN_LENGTH) {
+                        wordsMaxLen = AVAILABLE_WORDS_MIN_LENGTH;                        
+                    }
+
+                    if (wordsMaxLen < wordsMinLen) {
+                        wordsMaxLen = wordsMinLen;
+                    }
+
+/*
+                    console.log("prefix ", inPrefix);
+                    console.log("infix ", inInfix);
+                    console.log("suffix ", inSuffix);
+                    console.log("min ", wordsMinLen, "    max ", wordsMaxLen);
+*/
+
+                    // Initialize affixes list
+                    const affixesList = [];
+                    if (inPrefix.length >= AFFIX_IN_MIN_LENGTH) {
+                        const prefix = new Prefix(inPrefix, wordsMinLen, wordsMaxLen);
+                        affixesList.push(prefix);
+                    }
+                    if (inSuffix.length >= AFFIX_IN_MIN_LENGTH) {
+                        const suffix = new Suffix(inSuffix, wordsMinLen, wordsMaxLen);
+                        affixesList.push(suffix);
+                    }
+                    if (inInfix.length >= AFFIX_IN_MIN_LENGTH) {
+                        const infix = new Infix(inInfix, wordsMinLen, wordsMaxLen);
+                        affixesList.push(infix);
+                    }
+
+/*
+                    console.log('affixes list');
+                    console.log(affixesList);
+*/
+
+                    // Process affixes list
+                    processAffixesList(affixesList);
+
+                    return false;
+                }; 
+            });
+
+            
+            class Affix {
+                constructor(type, inTxt, wordsMinLen, wordsMaxLen) {
+                    // Attributes
+                    this.type = type;
+                    this.inTxt = inTxt;
+                    this.minLenFetch = AFFIX_FETCH_MIN_LENGTH;
+                    this.wordsMinLen = wordsMinLen;
+                    this.wordsMaxLen = wordsMaxLen;
+                    this.wordsList = [];
+
+                    // Methods
+                    this.processAffix = processAffix;
+                    this.generateAffixFetch = generateAffixFetch;
+                }
+            }
+
+            class Prefix extends Affix {
+                constructor(inTxt, wordsMinLen, wordsMaxLen) {
+                    super('prefix', inTxt, wordsMinLen, wordsMaxLen);
+                }
+            }
+
+            class Suffix extends Affix {
+                constructor(inTxt, wordsMinLen, wordsMaxLen) {
+                    super('suffix', inTxt, wordsMinLen, wordsMaxLen);
+                }
+            }
+
+            class Infix extends Affix {
+                constructor(inTxt, wordsMinLen, wordsMaxLen) {
+                    super('infix', inTxt, wordsMinLen, wordsMaxLen);
+                }
+            }
+
+
+            function processAffixesList(affixesList) {
+/*
+                console.log('processAffixesList');
+                console.log(affixesList);
+*/
+                // Process first affix in the list
+                const iAffix = 0;
+                const affix = affixesList[iAffix];
+                const affixFetchFirst = null;
+                affix.processAffix(affixFetchFirst, affixesList, iAffix);
+            }
+
+            function processAffix(affixFetchLast, affixesList, iAffix) {
+/*
+                console.log('processAffix');
+                console.log(affixFetchLast);
+                console.log(this);
+*/
+                const affixFetch = this.generateAffixFetch(affixFetchLast);
+                /*
+                console.log('depois generateAffixFetch');
+                console.log(affixFetch);
+                */
+
+                if (affixFetch) {
+                    this.fetchWords(affixFetch);
+                }
+                else {
+                    iAffix++;
+                    if (iAffix < affixesList.length) {
+                        const affix = affixesList[iAffix];
+                        const affixFetchFirst = null;
+                        affix.processAffix(affixFetchFirst, affixesList, iAffix);
+                    }
+                    else {
+                        wordsProcess();
+
+                    }
+                }
+
+               /*
+                    affixFetch = this.generateAffixFetch(affixFetchLast);
+                    if (affixFetch.txt.length >= this.minLengthFetch) {
+                        this.getWords(affixFetch);
+                    }
+                    else {
+                        switch (this.type) {
+                            case 'prefix':
+                                processStep = PROCESS_SUFFIX_FETCH;
+                                suffix.processInit(suffixTxtIn, minLengthWords, maxLengthWords);
+                                break;
+                        
+                            case 'suffix':
+                                processStep = PROCESS_INFIX_FETCH;
+                                infix.processInit(infixTxtIn, minLengthWords, maxLengthWords);
+                                break;
+                        
+                            case 'infix':
+                                processStep = PROCESS_WORDS_BUILD;
+                                wordsProcess();
+                                break;
+                        }
+                        return;
+                    }
+                */
+            }
+
+            function generateAffixFetch(affixFetchLast) {
+                console.log('generateAffixFetch');
+                console.log(affixFetchLast);
+                const affixFetch = null;
+                console.log(affixFetch);
+                return affixFetch;
+            }
+
+
+
+
+
+            /*
 
 
             let prefixTextIn = '';
@@ -445,50 +648,8 @@
                 document.querySelector('#message').innerHTML = message;
             }
 
-            document.addEventListener('DOMContentLoaded', function() {
-                setInterval(messageShow, 3);
+            */
 
-                document.querySelector('form').onsubmit = () => {
-                    let elem;
-                    let txt;
-
-                    elem = document.querySelector('#prefix');
-                    txt = elem.value.toLowerCase();
-                    prefixTxtIn = txt;
-
-                    elem = document.querySelector('#suffix');
-                    txt = elem.value.toLowerCase();
-                    suffixTxtIn = txt;
-
-                    elem = document.querySelector('#infix');
-                    txt = elem.value.toLowerCase();
-                    infixTxtIn = txt;
-
-                    minLengthWords = document.querySelector('#words-min-length').value;
-                    if (minLengthWords < WORDS_MIN_LENGTH) {
-                        minLengthWords = WORDS_MIN_LENGTH;                        
-                    }
-
-                    maxLengthWords = document.querySelector('#words-max-length').value;
-                    if (maxLengthWords < 1) {
-                        maxLengthWords = WORDS_MAX_LENGTH;                        
-                    }
-                    else if (maxLengthWords < AVAILABLE_WORDS_MIN_LENGTH) {
-                        maxLengthWords = AVAILABLE_WORDS_MIN_LENGTH;                        
-                    }
-
-                    if (maxLengthWords < minLengthWords) {
-                        maxLengthWords = minLengthWords;
-                    }
-
-                    document.querySelector('#words-list').innerHTML = '';
-
-                    processStep = PROCESS_PREFIX_FETCH;
-                    prefix.processInit(prefixTxtIn, minLengthWords, maxLengthWords);
-
-                    return false;
-                }; 
-            });
         </script>
     </head>
 
