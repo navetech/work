@@ -61,8 +61,9 @@
 
                 document.querySelector('form').onsubmit = () => {
 
-                    // Clear words list on web page
+                    // Clear words list
                     document.querySelector('#words-list').innerHTML = '';
+                    const wordsList = [];
 
                     // Input affixes from web page
                     let elem;
@@ -123,18 +124,19 @@
 */
 
                     // Process affixes list
-                    processAffixesList(affixesList);
+                    processAffixesList(affixesList, wordsList);
 
                     return false;
                 }; 
             });
 
-            
+
+            // Parent class for prefixes, suffixes and infixes            
             class Affix {
                 constructor(type, inTxt, wordsMinLen, wordsMaxLen) {
                     // Attributes
                     this.type = type;
-                    this.inTxt = inTxt;
+                    this.inTxt = inTxt; // affix text from the yser
                     this.minLenFetch = AFFIX_FETCH_MIN_LENGTH;
                     this.wordsMinLen = wordsMinLen;
                     this.wordsMaxLen = wordsMaxLen;
@@ -143,6 +145,7 @@
                     // Methods
                     this.processAffix = processAffix;
                     this.generateAffixFetch = generateAffixFetch;
+                    this.fetchWords = fetchWords;
                 }
             }
 
@@ -165,81 +168,202 @@
             }
 
 
-            function processAffixesList(affixesList) {
+            // Process all affixes, getting their words list and showing a words list which is the
+            // combination of the individual affixes' words lists.
+            function processAffixesList(affixesList, wordsList) {
 /*
                 console.log('processAffixesList');
                 console.log(affixesList);
+                console.log(wordsList);
 */
                 // Process first affix in the list
                 const iAffix = 0;
                 const affix = affixesList[iAffix];
-                const affixFetchFirst = null;
-                affix.processAffix(affixFetchFirst, affixesList, iAffix);
+                const affixFetch = null; // Initial affix data for fetching
+                affix.processAffix(affixFetch, affixesList, wordsList);
             }
 
-            function processAffix(affixFetchLast, affixesList, iAffix) {
-/*
-                console.log('processAffix');
+            // Process one affix, getting its words list
+            function processAffix(affixFetchLast, affixesList, wordsList) {
+/*                console.log('processAffix');
                 console.log(affixFetchLast);
+                console.log(affixesList);
+                console.log(wordsList);
                 console.log(this);
 */
+                // Generate affix data for fetching according to the last fetch done
+//                console.log('antes generateAffixFetch');
                 const affixFetch = this.generateAffixFetch(affixFetchLast);
-                /*
+/*
                 console.log('depois generateAffixFetch');
                 console.log(affixFetch);
-                */
-
+*/
                 if (affixFetch) {
-                    this.fetchWords(affixFetch);
+                    // Fetch the words list for the affix text generated
+                    this.fetchWords(affixFetch, affixesList, wordsList);
                 }
                 else {
+                    let iAffix = affixesList.indexOf(this);
                     iAffix++;
                     if (iAffix < affixesList.length) {
+                        // Process the next affix on the list
                         const affix = affixesList[iAffix];
-                        const affixFetchFirst = null;
-                        affix.processAffix(affixFetchFirst, affixesList, iAffix);
+                        const affixFetch = null;
+                        affix.processAffix(affixFetch, affixesList, wordsList);
                     }
                     else {
-                        wordsProcess();
-
+                        // All affixes list processed: process the combined words list
+                        // for all the affixes
+                        processWordsList(wordsList, affixesList);
                     }
                 }
+           }
 
-               /*
-                    affixFetch = this.generateAffixFetch(affixFetchLast);
-                    if (affixFetch.txt.length >= this.minLengthFetch) {
-                        this.getWords(affixFetch);
-                    }
-                    else {
-                        switch (this.type) {
-                            case 'prefix':
-                                processStep = PROCESS_SUFFIX_FETCH;
-                                suffix.processInit(suffixTxtIn, minLengthWords, maxLengthWords);
-                                break;
-                        
-                            case 'suffix':
-                                processStep = PROCESS_INFIX_FETCH;
-                                infix.processInit(infixTxtIn, minLengthWords, maxLengthWords);
-                                break;
-                        
-                            case 'infix':
-                                processStep = PROCESS_WORDS_BUILD;
-                                wordsProcess();
-                                break;
-                        }
-                        return;
-                    }
-                */
-            }
-
+            // Generate affix data for fetching according to the last fetch done
+            // Different affix texts for fetching are generated from one affix text provided
+            // by the user.
+            // That is because the minimal length of the affix text for fetching words allowed
+            // by the service used in this application may be greater than the affix text provided
+            // by the user.
+            // So the text for fetching is filled by all combinations of the
+            // letters of the alphabet.  
             function generateAffixFetch(affixFetchLast) {
-                console.log('generateAffixFetch');
-                console.log(affixFetchLast);
-                const affixFetch = null;
-                console.log(affixFetch);
+//                console.log('generateAffixFetch');
+//                console.log(affixFetchLast);
+                let affixFetch;
+                if (!affixFetchLast) {
+                    affixFetch = {
+                        txt: this.inTxt
+                    };
+                }
+                else {
+                    affixFetch = null;
+                }
                 return affixFetch;
             }
 
+            // Fetch the words list for the affix text generated
+            function fetchWords(affixFetch, affixesList, wordsList) {
+                console.log('fetchWords');
+                console.log(affixFetch);
+
+                // Request to and get from the service api the words list for the affix
+                fetch(`https://api.dicionario-aberto.net/${this.type}/${affixFetch.txt}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            console.log('Network response was not ok.');
+                        }
+                        else {
+                            response.json()
+                            .then(data => {
+                                if (!data) {
+                                    console.log("No data");
+                                    this.processAffix(affixFetch, affixesList, wordsList);
+                                }
+                                if (data.error) {
+                                    console.log(data.error);
+                                    this.processAffix(affixFetch, affixesList, wordsList);
+                                }
+                                data.forEach(item => {
+                                    const word = item.word;
+                                    const len = word.length;
+                                    if (len < this.wordsMinLen || len > this.wordsMaxLen) {
+                                        return;
+                                    }
+                                    this.wordsList.push(item);
+                                });
+
+                                // Process next affix for fetching
+                                this.processAffix(affixFetch, affixesList, wordsList);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.log('Fetch error: ' + error.message);
+                    });
+            }
+
+            // Process the combined words list for all the affixes
+            // Processs the words list which is the combination of the individual
+            // affixes' words lists.
+            function processWordsList(wordsList, affixesList) {
+                console.log('processWordsList');
+                console.log(affixesList);
+                //document.querySelector('#words-list').innerHTML = '';
+                let wordsList = [];
+                let wordsCount = 0;
+
+                let listWordsList = null;
+                for (i = 0; i < affixesList.length; i++){
+                    ///PAREI AQUI
+                }
+                let words2 = null;
+                let words3 = null;
+                if (affixList.length > 0) {
+                    affix1 = affixesList[0];
+                }
+
+                switch (affixesList.length) {
+                    case 1:
+                        wordsList = 
+                }
+
+                let _intersection = wordsIntersection(prefix.words, suffix.words);
+                wordsList = wordsIntersection(_intersection, infix.words);
+
+                processStep = PROCESS_WORDS_SHOW;
+                wordsNum = (!words) ? 0 : words.length;
+                words.forEach(item => {
+                    wordsCount++;
+                    const word = item.word;
+                    const preview = item.preview;
+
+                    const tr = document.createElement('tr');
+                    const th = document.createElement('th');
+                    th.setAttribute("scope", "row");
+                    th.innerHTML = wordsCount;
+                    const td1 = document.createElement('td');
+                    td1.innerHTML = word;
+                    const td2 = document.createElement('td');
+                    td2.innerHTML = preview;
+
+                    tr.append(th);
+                    tr.append(td1);
+                    tr.append(td2);
+                    document.querySelector('#words-list').append(tr);
+                });
+            }
+            }
+
+            function wordsIntersection(wordsA, wordsB) {
+                if (!wordsA) {
+                    return wordsB;
+                }
+                else if (!wordsB) {
+                    return wordsA;
+                }
+                else {
+                    let _intersection = [];
+                    if ((wordsA.length > 0) && (wordsB.length > 0))
+                    {
+                        wordsA.forEach(itemA => {
+                            wordsB.forEach(itemB => {
+                                if (itemA.word === itemB.word) {
+                                    _intersection.push(itemA);
+//                                    if ((itemA.preview !== itemB.preview)
+//                                     ||
+  //                                      (itemA.sense !== itemB.sense)
+//                                    ) {
+//
+  //                                      _intersection.push(itemB);
+    //                               }
+                                }
+                            });
+                        });
+                    }
+                    return _intersection;
+                }
+            }
 
 
 
@@ -310,38 +434,6 @@
                 }
 
                 getWords(affixFetch) {
-                    fetch(`https://api.dicionario-aberto.net/${this.type}/${affixFetch.txt}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            console.log('Network response was not ok.');
-                        }
-                        else {
-                            response.json()
-                            .then(data => {
-                                if (!data) {
-                                    console.log("No data");
-                                    this.process(affixFetch);
-                                }
-                                if (data.error) {
-                                    console.log(data.error);
-                                    this.process(affixFetch);
-                                }
-                                data.forEach(item => {
-                                    const word = item.word;
-                                    const len = word.length;
-                                    if (len < this.minLengthWords || len > this.maxLengthWords) {
-                                        return;
-                                    }
-                                    this.words.push(item);
-                                });
-
-                                this.process(affixFetch);
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.log('Fetch error: ' + error.message);
-                    });
                 }
 
                 generateAffixFetch(affixFetchLast) {
@@ -549,65 +641,6 @@
             const infix = new Affix('infix');
 
 
-            function wordsIntersection(wordsA, wordsB) {
-                if (!wordsA) {
-                    return wordsB;
-                }
-                else if (!wordsB) {
-                    return wordsA;
-                }
-                else {
-                    let _intersection = [];
-                    if ((wordsA.length > 0) && (wordsB.length > 0))
-                    {
-                        wordsA.forEach(itemA => {
-                            wordsB.forEach(itemB => {
-                                if (itemA.word === itemB.word) {
-                                    _intersection.push(itemA);
-//                                    if ((itemA.preview !== itemB.preview)
-//                                     ||
-  //                                      (itemA.sense !== itemB.sense)
-//                                    ) {
-//
-  //                                      _intersection.push(itemB);
-    //                               }
-                                }
-                            });
-                        });
-                    }
-                    return _intersection;
-                }
-            }
-
-            function wordsProcess() {
-                document.querySelector('#words-list').innerHTML = '';
-                let wordsCount = 0;
-
-                let _intersection = wordsIntersection(prefix.words, suffix.words);
-                let words = wordsIntersection(_intersection, infix.words);
-
-                processStep = PROCESS_WORDS_SHOW;
-                wordsNum = (!words) ? 0 : words.length;
-                words.forEach(item => {
-                    wordsCount++;
-                    const word = item.word;
-                    const preview = item.preview;
-
-                    const tr = document.createElement('tr');
-                    const th = document.createElement('th');
-                    th.setAttribute("scope", "row");
-                    th.innerHTML = wordsCount;
-                    const td1 = document.createElement('td');
-                    td1.innerHTML = word;
-                    const td2 = document.createElement('td');
-                    td2.innerHTML = preview;
-
-                    tr.append(th);
-                    tr.append(td1);
-                    tr.append(td2);
-                    document.querySelector('#words-list').append(tr);
-                });
-            }
 
             function messageShow() {
                 let message = '';
