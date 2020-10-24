@@ -369,15 +369,66 @@
 //                console.log('generateAffixFetch');
 //                console.log(affixFetchLast);
                 let affixFetch;
+                if(this.txtIn.length < AFFIX_IN_MIN_LENGTH) {
+                    affixFetch = null;
+                    return affixFetch;
+                 }
+
                 if (!affixFetchLast) {
-                    affixFetch = {
-                        txt: this.inTxt
+                    affixFetchLast = {
+                        countChangesToDo: this.inTxt.length
                     };
+                }
+                if (affixFetchLast.countChangesToDo > 0) {
+                    affixFetch = this.doChange(affixFetchLast);
                 }
                 else {
                     affixFetch = null;
                 }
+
                 return affixFetch;
+            }
+
+
+                return affixFetch;
+
+
+                generateAffixFetch(affixFetchLast) {
+
+                    const numLettersToChange = this.txtIn.length;
+                    const numLettersToFill = this.minLengthFetch - this.txtIn.length;
+                    let fillDone = false;
+                    if (!affixFetchLast) {
+                        changeDone = false;
+                        this.changeInit(numLettersToChange);
+                        if (numLettersToFill > 0) {
+                            fillDone = false;
+                            console.log('antesfillinit');
+                            this.fillInit(numLettersToFill);
+                            console.log('depoisfillinit');
+                        }
+                    }
+                    else {
+                        changeDone = this.changeProcess(numLettersToChange);
+                        if (numLettersToFill > 0) {
+                            console.log('antesfillProcess');
+                            console.log(fillDone);
+                            affixFetch.txt = '';
+                            return affixFetch;
+                            fillDone = this.fillProcess(numLettersToFill);
+                            console.log('depoisfillProcess');
+                            console.log(fillDone);
+                            affixFetch.txt = '';
+                            return affixFetch;
+
+                        }
+                    }
+                    affixFetch = this.build(numLettersToChange, numLettersToFill, changeDone, fillDone);
+                    return affixFetch;
+
+                }
+
+
             }
 
 
