@@ -11,28 +11,6 @@
         <title>Words</title>
 
         <script>
-            /*
-            const letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m',
-                             'n','o','p','q','r','s','t','u','v','w','x','y','z'];
-            
-            const aVariations = ['a','á','â','ã','à'];
-            const eVariations = ['e','é','ê'        ];
-            const iVariations = ['i','í'            ];
-            const oVariations = ['o','ó','ô','õ'    ];
-            const uVariations = ['u','ú'            ];
-            const cVariations = ['c', 'ç'];
-            
-            const lettersVariations = {
-                'a': aVariations,
-                'e': eVariations,
-                'i': iVariations,
-                'o': oVariations,
-                'u': uVariations,
-                'c': cVariations
-            };
-
-            */
-
 
             const AVAILABLE_WORDS_MIN_LENGTH = 4;
             const WORDS_MIN_LENGTH = 1;
@@ -41,10 +19,28 @@
             const AFFIX_IN_MIN_LENGTH = 1;
             const AFFIX_FETCH_MIN_LENGTH = 3;
 
+            const LETTERS = ['a','b','c','d','e','f','g','h','i','j','k','l','m',
+                             'n','o','p','q','r','s','t','u','v','w','x','y','z'];
+            
+            const A_VARIATIONS = ['a','á','â','ã','à'];
+            const E_VARIATIONS = ['e','é','ê'        ];
+            const I_VARIATIONS = ['i','í'            ];
+            const O_VARIATIONS = ['o','ó','ô','õ'    ];
+            const U_VARIATIONS = ['u','ú'            ];
+            const C_VARIATIONS = ['c', 'ç'];
+            
+            const LETTER_VARIATIONS = {
+                'a': A_VARIATIONS,
+                'e': E_VARIATIONS,
+                'i': I_VARIATIONS,
+                'o': O_VARIATIONS,
+                'u': U_VARIATIONS,
+                'c': C_VARIATIONS
+            };
+
             const PROCESS_IDLE = '';
             const PROCESS_AFFIX_FETCH = 'affix';
             const PROCESS_WORDS_SHOW = 'words';
-            
 
             const processingStatus = {
                     step: PROCESS_IDLE,
@@ -137,6 +133,7 @@
                     this.processAffix = processAffix;
                     this.generateAffixFetch = generateAffixFetch;
                     this.fetchWords = fetchWords;
+                    this.buildAffixFetch = buildAffixFetch;
                 }
             }
 
@@ -205,18 +202,9 @@
 
             // Process one affix, getting its words list
             function processAffix(affixFetchLast, affixesList) {
-/*                console.log('processAffix');
-                console.log(affixFetchLast);
-                console.log(affixesList);
-                console.log(this);
-*/
+
                 // Generate affix data for fetching according to the last fetch done
-//                console.log('antes generateAffixFetch');
                 const affixFetch = this.generateAffixFetch(affixFetchLast);
-/*
-                console.log('depois generateAffixFetch');
-                console.log(affixFetch);
-*/
                 if (affixFetch) {
                     // Fetch the words list for the affix text generated
                     processingStatus.affixFetch = affixFetch;
@@ -245,8 +233,6 @@
             // Processs the words list which is the combination of the individual
             // affixes' words lists.
             function processWordsList(affixesList) {
-                console.log('processWordsList');
-                console.log(affixesList);
 
                 // Build wordsList
                 let wordsList = [];
@@ -318,8 +304,6 @@
 
             // Fetch the words list for the affix text generated
             function fetchWords(affixFetch, affixesList) {
-                console.log('fetchWords');
-                console.log(affixFetch);
 
                 // Request to and get from the service api the words list for the affix
                 fetch(`https://api.dicionario-aberto.net/${this.type}/${affixFetch.txt}`)
@@ -364,73 +348,106 @@
             // by the service used in this application may be greater than the affix text provided
             // by the user.
             // So the text for fetching is filled by all combinations of the
-            // letters of the alphabet.  
+            // letters of the alphabet.
             function generateAffixFetch(affixFetchLast) {
-//                console.log('generateAffixFetch');
-//                console.log(affixFetchLast);
-                let affixFetch;
-                if(this.txtIn.length < AFFIX_IN_MIN_LENGTH) {
-                    affixFetch = null;
+                let affixFetch = null;
+                if(this.inTxt.length < AFFIX_IN_MIN_LENGTH) {
                     return affixFetch;
-                 }
+                }
+
+                const txtLength = Math.max(this.inTxt.length, this.minLenFetch);
+
+                let iChar = 0;
+                let iLetterVariation = [];
+                let iLetter = [];
 
                 if (!affixFetchLast) {
-                    affixFetchLast = {
-                        countChangesToDo: this.inTxt.length
-                    };
-                }
-                if (affixFetchLast.countChangesToDo > 0) {
-                    affixFetch = this.doChange(affixFetchLast);
+                    iChar = 0;
+                    for (i = 0; i < txtLength; i++) {
+                        iLetterVariation[i] = 0;
+                        iLetter[i] = 0;
+                    }
                 }
                 else {
-                    affixFetch = null;
+                    iChar = affixFetchLast.iChar;
+                    iLetterVariation = affixFetchLast.iLetterVariation;
+                    iLetter = affixFetchLast.iLetter;
                 }
 
+                if (iChar >= txtLength) {
+                    affixFetch = null;
+                    return affixFetch;
+                }
+                else {
+                    affixFetch = this.buildAffixFetch(txtLength, iLetterVariation, iLetter);
+                }
                 return affixFetch;
             }
 
+            function buildAffixFetch(txtLength, iLetterVariation, iLetter) {
+                console.log('buildAffixFetch');
 
-                return affixFetch;
+                let iChar = 0;
+                let txt = '';
+                for (i = 0; i < txtLength; i++) {
+                    let letter;
+                    if (i < this.inTxt.length) {
+                        letter = this.inTxt[i];
+                    }
+                    else {
+                        letter = LETTERS[iLetter[i]];
+                    }
 
-
-                generateAffixFetch(affixFetchLast) {
-
-                    const numLettersToChange = this.txtIn.length;
-                    const numLettersToFill = this.minLengthFetch - this.txtIn.length;
-                    let fillDone = false;
-                    if (!affixFetchLast) {
-                        changeDone = false;
-                        this.changeInit(numLettersToChange);
-                        if (numLettersToFill > 0) {
-                            fillDone = false;
-                            console.log('antesfillinit');
-                            this.fillInit(numLettersToFill);
-                            console.log('depoisfillinit');
+                    let letterVariation;
+                    if (LETTER_VARIATIONS[letter]) {
+                        const iVar = iLetterVariation[i];
+                        letterVariation = LETTER_VARIATIONS[letter][iVar];
+                        iLetterVariation[i]++;
+                        if (iLetterVariation[i] >= LETTER_VARIATIONS[letter].length) {
+                            if (i < this.inTxt.length) {
+                                iChar++;
+                                iLetter[i] = 0;
+                                iLetterVariation[i] = 0;
+                            }
+                            else {
+                                iLetter[i]++;
+                                iLetterVariation[i] = 0;
+                                if (iLetter[i] >= LETTERS.length) {
+                                    iChar++;
+                                    iLetter[i] = 0;
+                                    iLetterVariation[i] = 0;
+                                }
+                            }
                         }
                     }
                     else {
-                        changeDone = this.changeProcess(numLettersToChange);
-                        if (numLettersToFill > 0) {
-                            console.log('antesfillProcess');
-                            console.log(fillDone);
-                            affixFetch.txt = '';
-                            return affixFetch;
-                            fillDone = this.fillProcess(numLettersToFill);
-                            console.log('depoisfillProcess');
-                            console.log(fillDone);
-                            affixFetch.txt = '';
-                            return affixFetch;
-
+                        letterVariation = letter;
+                        if (i < this.inTxt.length) {
+                            iChar++;
+                            iLetter[i] = 0;
+                            iLetterVariation[i] = 0;
+                        }
+                        else {
+                            iLetter[i]++;
+                            iLetterVariation[i] = 0;
+                            if (iLetter[i] >= LETTERS.length) {
+                                iChar++;
+                                iLetter[i] = 0;
+                                iLetterVariation[i] = 0;
+                            }
                         }
                     }
-                    affixFetch = this.build(numLettersToChange, numLettersToFill, changeDone, fillDone);
-                    return affixFetch;
-
+                    txt += letterVariation;
                 }
-
-
+                const affixFetch = {
+                    iChar: iChar,
+                    iLetterVariation: iLetterVariation,
+                    iLetter: iLetter,
+                    txt: txt
+                };
+                console.log(affixFetch);
+                return affixFetch;
             }
-
 
 
 
