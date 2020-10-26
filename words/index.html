@@ -38,9 +38,12 @@
                 'c': C_VARIATIONS
             };
 
-            const PROCESS_IDLE = '';
-            const PROCESS_AFFIX_FETCH = 'affix';
-            const PROCESS_WORDS_SHOW = 'words';
+            const DIRECTION_TO_END = 0;
+            const DIRECTION_TO_BEGINNING = 1;
+
+            const PROCESS_IDLE = 0;
+            const PROCESS_AFFIX_FETCH = 1;
+            const PROCESS_WORDS_SHOW = 2;
 
             const processingStatus = {
                     step: PROCESS_IDLE,
@@ -118,40 +121,59 @@
             });
 
 
-            // Parent class for prefixes, suffixes and infixes            
+            // Parent class for prefixes, suffixes and infixes
             class Affix {
-                constructor(type, inTxt, wordsMinLen, wordsMaxLen) {
+                constructor(type, inTxt, wordsMinLen, wordsMaxLen, directions) {
                     // Attributes
                     this.type = type;
-                    this.inTxt = inTxt; // affix text from the yser
-                    this.minLenFetch = AFFIX_FETCH_MIN_LENGTH;
+                    this.inTxt = inTxt; // affix text from the user
                     this.wordsMinLen = wordsMinLen;
                     this.wordsMaxLen = wordsMaxLen;
+                    this.directions = directions;
+                    this.minLenFetch = AFFIX_FETCH_MIN_LENGTH;
                     this.wordsList = [];
 
                     // Methods
                     this.processAffix = processAffix;
                     this.generateAffixFetch = generateAffixFetch;
                     this.fetchWords = fetchWords;
-                    this.buildAffixFetch = buildAffixFetch;
                 }
             }
 
             class Prefix extends Affix {
                 constructor(inTxt, wordsMinLen, wordsMaxLen) {
-                    super('prefix', inTxt, wordsMinLen, wordsMaxLen);
+                    const directions = [DIRECTION_TO_END];
+                    super('prefix', inTxt, wordsMinLen, wordsMaxLen, directions);
                 }
             }
 
             class Suffix extends Affix {
                 constructor(inTxt, wordsMinLen, wordsMaxLen) {
-                    super('suffix', inTxt, wordsMinLen, wordsMaxLen);
+                    const directions = [DIRECTION_TO_BEGINNING];
+                    super('suffix', inTxt, wordsMinLen, wordsMaxLen, directions);
                 }
             }
 
             class Infix extends Affix {
                 constructor(inTxt, wordsMinLen, wordsMaxLen) {
-                    super('infix', inTxt, wordsMinLen, wordsMaxLen);
+                    const directions = [DIRECTION_TO_END, DIRECTION_TO_BEGINNING];
+                    super('infix', inTxt, wordsMinLen, wordsMaxLen, directions);
+                }
+            }
+
+            // Parent class for prefixes, suffixes and infixes
+            class AffixFetch {
+                constructor(affix) {
+                    // Attributes
+                    this.length = Math.max(affix.inTxt.length, affix.minLenFetch);
+                    this.lengthVaried = 0;
+                    this.iVariation = [];
+                    this.iLetter = [];
+                    this.iDirection = 0;
+                    this.txt = '';
+
+                    // Methods
+                    this.processAffixFetch = processAffixFetch;
                 }
             }
 
@@ -349,30 +371,43 @@
             // by the user.
             // So the text for fetching is filled by all combinations of the
             // letters of the alphabet.
-            function generateAffixFetch(affixFetchLast) {
-                let affixFetch = null;
+            function generateAffixFetch(affixFetch) {
+                // Return no affix fetch if length of affix from user less than minimum limit 
                 if(this.inTxt.length < AFFIX_IN_MIN_LENGTH) {
+                    return null;
+                }
+
+                if (!affixFetch) {
+                    // Create affix fetch is there was not one
+                    const affixFetch = new AffixFetch(this);
+                }
+                
+                // Process affix fetch
+                if (affixFetch.processAffixFetch(this)) {
                     return affixFetch;
                 }
+                else {
+                    return null;
+                }
+            }
 
-                const txtLength = Math.max(this.inTxt.length, this.minLenFetch);
-
-                let iChar = 0;
-                let iLetterVariation = [];
-                let iLetter = [];
-
-                if (!affixFetchLast) {
-                    iChar = 0;
-                    for (i = 0; i < txtLength; i++) {
-                        iLetterVariation[i] = 0;
-                        iLetter[i] = 0;
-                    }
+            function processAffixFetch(affix) {
+                // Build affix fetch with the current direction
+                if (this.buildAffixFetch(affix)) {
+                    return true;
                 }
                 else {
-                    iChar = affixFetchLast.iChar;
-                    iLetterVariation = affixFetchLast.iLetterVariation;
-                    iLetter = affixFetchLast.iLetter;
+                    // All builds done: change direction and build again 
+                    if (this.changeBuildDirection(affix)) {
+                        return this.buildAffixFetch(affix);
+                    }
+                    else {
+                        // All directions done
+                        return false;
+                    }
                 }
+            }
+
 
                 if (iChar >= txtLength) {
                     affixFetch = null;
