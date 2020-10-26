@@ -16,7 +16,7 @@
             const WORDS_MIN_LENGTH = 1;
             const WORDS_MAX_LENGTH = Infinity;
 
-            const AFFIX_IN_MIN_LENGTH = 1;
+            const AFFIX_IN_MIN_LENGTH = 2;
             const AFFIX_FETCH_MIN_LENGTH = 3;
 
             const LETTERS = ['a','b','c','d','e','f','g','h','i','j','k','l','m',
@@ -593,9 +593,9 @@
         <div class="container">
             <form>
                 <div class="form-group">
-                    <input type="text" id="prefix" placeholder='Prefix' pattern='[a-zA-Z]{1,}' value= ''>
-                    <input type="text" id="infix" placeholder='Infix' pattern='[a-zA-Z]{1,}' value= ''>
-                    <input type="text" id="suffix" placeholder='Suffix' pattern='[a-zA-Z]{1,}' value= ''>
+                    <input type="text" id="prefix" placeholder='Prefix' pattern='[a-zA-Z]{1,}' value= '' minlength='2'>
+                    <input type="text" id="infix" placeholder='Infix' pattern='[a-zA-Z]{1,}' value= '' minlength='2'>
+                    <input type="text" id="suffix" placeholder='Suffix' pattern='[a-zA-Z]{1,}' value= '' minlength='2'>
                     <br>
                     <input type="number" id="words-min-length" placeholder='Min. Length' min='1'>
                     <input type="number" id="words-max-length" placeholder='Max. Length' min='1'>
