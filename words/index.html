@@ -454,6 +454,7 @@
                 }
                 // Build text
                 this.buildAffixFetchTxt(affix);
+                console.log(this.txt);
 
                 // Update indexes, beginning from the last position
                 j = 0;
@@ -463,7 +464,10 @@
             function buildAffixFetchTxt(affix) {
                 // Build text setting, for each position, a letter and its variations
                 this.txt = '';
-                for (j = 0; j < this.length; j++) {
+                for (let j = 0; j < this.length; j++) {
+                    const i = this.length - 1 - j;
+//                    const i = j;
+/*
                     if (affix.directions[this.iDirection] === DIRECTION_TO_END)
                     {
                         i = this.length - 1 - j;
@@ -471,6 +475,21 @@
                     else {
                         i = j;
                     }
+*/
+/*
+                    if (affix.directions[this.iDirection] === DIRECTION_TO_END)
+                    {
+                        i = this.length - 1 - j;
+                    }
+                    else {
+                        if (j < affix.inTxt.length) {
+                            i = this.length - 1 - j;
+                        }
+                        else {
+                            i = j;
+                        }
+                    }
+*/
 
                     // Determine letter
                     let letter;
@@ -491,37 +510,67 @@
                     }
                     if (affix.directions[this.iDirection] === DIRECTION_TO_END)
                     {
+//                            this.txt = this.txt + variation;
                         this.txt = variation + this.txt;
                     }
                     else {
                         if (i < affix.inTxt.length) {
-                            this.txt = this.txt + variation;
+//                            this.txt = this.txt + variation;
+                            this.txt = variation + this.txt;
                         }
                         else {
                             this.txt = variation + this.txt;
+//                            this.txt = this.txt + variation;
                         }
                     }
+                }
+                let txt = '';
+                if ((affix.directions[this.iDirection] === DIRECTION_TO_BEGINNING) &&
+                    (affix.inTxt.length < affix.minLenFetch)) {
+                    for (i = this.length - 1; i >= affix.inTxt.length; i--) {
+                        txt += this.txt[i];
+                    }
+                    const res = this.txt.slice(0, affix.inTxt.length);
+                    txt += res;
+                    this.txt = txt;
                 }
             }
 
             function updateAffixFetchIndexes(j, affix) {
+                const i = this.length - 1 - j;
+//                const i = j;
                 if (j >= this.length) {
+                    console.log('Done');
+                    console.log(j);
+                    console.log(this);
                     // All variations done
                     return false;
                 }
                 else {
+/*
                     if (affix.directions[this.iDirection] === DIRECTION_TO_END)
                     {
                         i = this.length - 1 - j;
                     }
                     else {
-                        if (i < affix.inTxt.length) {
-                            i = j;
-                        }
-                        else {
+                        i = j;
+                    }
+*/
+/*
+                    if (affix.directions[this.iDirection] === DIRECTION_TO_END)
+                    {
+                        i = this.length - 1 - j;
+                    }
+                    else {
+                        if (j < affix.inTxt.length) {
                             i = this.length - 1 - j;
                         }
+                        else {
+                            i = j;
+                        }
                     }
+*/
+
                     // Determine letter
                     let letter;
                     if (i < affix.inTxt.length) {
@@ -551,19 +600,33 @@
             }
 
             function updateAffixFetchEndVariations(j, affix) {
+                const i = this.length - 1 - j;
+//                const i = j;
+/*
                 if (affix.directions[this.iDirection] === DIRECTION_TO_END)
                 {
                     i = this.length - 1 - j;
                 }
                 else {
-                    if (i < affix.inTxt.length) {
-                        i = j;
-                    }
-                    else {
+                    i = j;
+                }
+*/
+/*
+                if (affix.directions[this.iDirection] === DIRECTION_TO_END)
+                {
+                    i = this.length - 1 - j;
+                }
+                else {
+                    if (j < affix.inTxt.length) {
                         i = this.length - 1 - j;
                     }
+                    else {
+                        i = j;
+                    }
                 }
-                // Initialize index for variation
+*/
+
+               // Initialize index for variation
                 this.iVariation[i] = 0;
 
                 if (i < affix.inTxt.length) {

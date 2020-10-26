@@ -505,7 +505,13 @@
             }
 
             function updateAffixFetchIndexes(j, affix) {
+                if (j > 0) {
+                    console.log("updateAffixFetchIndexes");
+                    console.log(j);
+                    console.log(this.txt);
+                }
                 if (j >= this.length) {
+                    console.log("ALL variatons done");
                     // All variations done
                     return false;
                 }
@@ -515,7 +521,7 @@
                         i = this.length - 1 - j;
                     }
                     else {
-                        if (i < affix.inTxt.length) {
+                        if (j < affix.inTxt.length) {
                             i = j;
                         }
                         else {
@@ -556,7 +562,7 @@
                     i = this.length - 1 - j;
                 }
                 else {
-                    if (i < affix.inTxt.length) {
+                    if (j < affix.inTxt.length) {
                         i = j;
                     }
                     else {
