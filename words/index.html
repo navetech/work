@@ -11,17 +11,20 @@
         <title>Words</title>
 
         <script>
+            const AVAILABLE_WORDS_MIN_LENGTH = 4; // Minimum length of words returned by the service
 
-            const AVAILABLE_WORDS_MIN_LENGTH = 4;
-            const WORDS_MIN_LENGTH = 1;
+            // Minimum and maximum length of words provided by the user
+             const WORDS_MIN_LENGTH = 1;
             const WORDS_MAX_LENGTH = Infinity;
 
-            const AFFIX_IN_MIN_LENGTH = 1;
-            const AFFIX_FETCH_MIN_LENGTH = 3;
+            const AFFIX_IN_MIN_LENGTH = 1; // Minimum affixes' length allowed for the application
+            const AFFIX_FETCH_MIN_LENGTH = 3; // Minimum affixes' length required by the api service
 
+            // Portuguese (Roman) letters
             const LETTERS = ['a','b','c','d','e','f','g','h','i','j','k','l','m',
                              'n','o','p','q','r','s','t','u','v','w','x','y','z'];
-            
+
+            // Variation of Portuguese letters            
             const A_VARIATIONS = ['a','á','â','ã','à'];
             const E_VARIATIONS = ['e','é','ê'        ];
             const I_VARIATIONS = ['i','í'            ];
@@ -38,9 +41,11 @@
                 'c': C_VARIATIONS
             };
 
+            // Directions to fill the affixes for provide them with minimum length required by the api
             const DIRECTION_TO_END = 0;
             const DIRECTION_TO_BEGINNING = 1;
 
+            // Application's processing statuses
             const PROCESS_IDLE = 0;
             const PROCESS_AFFIX_FETCH = 1;
             const PROCESS_WORDS_SHOW = 2;
@@ -52,19 +57,19 @@
                     wordsList: []
                 };
 
-
+            // Set on load page callback
             document.addEventListener('DOMContentLoaded', function() {
-
-                // Schedule message showing callback
+                // Schedule processing status showing callback
                 setInterval(showStatus, 3000);
 
-                // Set on submit callback
+                // Set on submit form callback
                 document.querySelector('form').onsubmit = () => {
 
                     // Initialize processing status
                     processingStatus.step = PROCESS_IDLE;
+                    showStatus();
 
-                    // Clear words list
+                    // Clear words list on the web page
                     document.querySelector('#words-list').innerHTML = '';
 
                     // Input affixes from web page
@@ -98,7 +103,7 @@
                         wordsMaxLen = wordsMinLen;
                     }
 
-                    // Initialize affixes list
+                    // Initialize affixes list for fetching
                     const affixesList = [];
                     if (inPrefix.length >= AFFIX_IN_MIN_LENGTH) {
                         const prefix = new Prefix(inPrefix, wordsMinLen, wordsMaxLen);
@@ -126,7 +131,7 @@
                 constructor(type, inTxt, wordsMinLen, wordsMaxLen, directions) {
                     // Attributes
                     this.type = type;
-                    this.inTxt = inTxt; // affix text from the user
+                    this.inTxt = inTxt; // affix text provided by the user
                     this.wordsMinLen = wordsMinLen;
                     this.wordsMaxLen = wordsMaxLen;
                     this.directions = directions;
@@ -143,6 +148,7 @@
             class Prefix extends Affix {
                 constructor(inTxt, wordsMinLen, wordsMaxLen) {
                     const type = 'prefix';
+                    // List of directions for filling the affix
                     const directions = [DIRECTION_TO_END];
                     super(type, inTxt, wordsMinLen, wordsMaxLen, directions);
                 }
@@ -151,6 +157,7 @@
             class Suffix extends Affix {
                 constructor(inTxt, wordsMinLen, wordsMaxLen) {
                     const type = 'suffix';
+                    // List of directions for filling the affix
                     const directions = [DIRECTION_TO_BEGINNING];
                     super(type, inTxt, wordsMinLen, wordsMaxLen, directions);
                 }
@@ -159,19 +166,26 @@
             class Infix extends Affix {
                 constructor(inTxt, wordsMinLen, wordsMaxLen) {
                     const type = 'infix';
+                    // List of directions for filling the affix
                     const directions = [DIRECTION_TO_END, DIRECTION_TO_BEGINNING];
                     super(type, inTxt, wordsMinLen, wordsMaxLen, directions);
                 }
             }
 
-            // Parent class for prefixes, suffixes and infixes
+            // Class for fetching affixes
             class AffixFetch {
                 constructor(affix) {
                     // Attributes
+                        // Affix text length for fetching (maximum of length of affix provided by user and
+                        // the minimun length required for fetching by the api)
                     this.length = Math.max(affix.inTxt.length, affix.minLenFetch);
+                        // Initialize lists of indexes for letters and letters variations
                     this.iVariation = [];
                     this.iLetter = [];
+                        // Clear affix text for fetching
                     this.txt = '';
+                        // Initialize direction for filling affix with the first direction from
+                        // the list of directions of the affix
                     this.iDirection = 0;
 
                     // Methods
@@ -185,6 +199,7 @@
             }
 
 
+            // Processing status showing callback
             function showStatus() {
                 const step = processingStatus.step;
                 const affix = processingStatus.affix;
@@ -218,10 +233,9 @@
             }
 
             // Process all affixes, getting their words list and showing a words list which is the
-            // combination of the individual affixes' words lists.
+            // intersection of the individual affixes' words lists.
             function processAffixesList(affixesList) {
-
-                // Process first affix in the list
+                // Process first affix on the list
                 if (affixesList.length > 0) {
                     const iAffix = 0;
                     const affix = affixesList[iAffix];
@@ -232,7 +246,6 @@
 
             // Process one affix, getting its words list
             function processAffix(affixFetchLast, affixesList) {
-
                 // Generate affix data for fetching according to the last fetch done
                 const affixFetch = this.generateAffixFetch(affixFetchLast);
                 if (affixFetch) {
@@ -253,18 +266,17 @@
                     }
                     else {
                         // All affixes list processed: process the combined words list
-                        // for all the affixes
+                        // for all affixes
                         processWordsList(affixesList);
                     }
                 }
            }
 
             // Process the combined words list for all the affixes
-            // Processs the words list which is the combination of the individual
+            // Processs the words list which is the intersection of the individual
             // affixes' words lists.
             function processWordsList(affixesList) {
-
-                // Build wordsList
+                // Build words list
                 let wordsList = [];
                 if (affixesList.length > 0) {
                     let affix = affixesList[0];
@@ -302,6 +314,7 @@
                 }
             }
 
+            // Words list intersection
             function wordsIntersection(wordsA, wordsB) {
                 if (!wordsA) {
                     return wordsB;
@@ -334,8 +347,7 @@
 
             // Fetch the words list for the affix text generated
             function fetchWords(affixFetch, affixesList) {
-
-                // Request to and get from the service api the words list for the affix
+                // Request to and get from the api service the words list for the affix
                 fetch(`https://api.dicionario-aberto.net/${this.type}/${affixFetch.txt}`)
                     .then(response => {
                         if (!response.ok) {
@@ -383,15 +395,18 @@
             // by the user.
             // So the text for fetching is filled by all combinations of the
             // letters of the alphabet.
+            // And also because the api is letter variation sensitive (for example, differentiates
+            // one affix containing the letter 'a' from other intead containing the variation 'á').
+            // So the text for fetching is also generated for all combinations of the differents
+            // variations of each letter.
             function generateAffixFetch(affixFetch) {
-
-                // Return no affix fetch if length of affix from user less than minimum limit 
+                // Return no affix fetch if length of affix from user is less than the minimum 
                 if(this.inTxt.length < AFFIX_IN_MIN_LENGTH) {
                     return null;
                 }
 
                 if (!affixFetch) {
-                    // Create affix fetch is there was not one
+                    // Create affix fetch is there was not one yet
                     affixFetch = new AffixFetch(this);
                 }
                 
@@ -404,8 +419,9 @@
                 }
             }
 
+            // Process fetch affix, building its variations and changing to next direction for filling
+            // when all variation are done for a direction
             function processAffixFetch(affix) {
-
                 // Build affix fetch for the current direction
                 if (this.buildAffixFetch(affix)) {
                     return true;
@@ -422,6 +438,7 @@
                 }
             }
 
+            // Change to next direction for filling
             function changeAffixFetchDirection(affix) {
                 if (affix.inTxt.length >= affix.minLenFetch) {
                     // No filling: do not change direction
@@ -444,53 +461,30 @@
             
             }
 
+            // Build fetch affix text and lists of indexes for letters and
+            // letters variations
             function buildAffixFetch(affix) {
-                // Initialize indexes, if not initialized
+                // Initializing the lists of indexes for letters and
+                // letters variations, if not initialized yet
                 if (this.iVariation.length <= 0) {
-                    for (i = 0; i < this.length; i++) {
+                    for (i = this.length - 1; i >= 0; i--) {
                         this.iVariation[i] = 0;
                         this.iLetter[i] = 0;
                     }
                 }
                 // Build text
                 this.buildAffixFetchTxt(affix);
-                console.log(this.txt);
 
                 // Update indexes, beginning from the last position
-                j = 0;
-                return this.updateAffixFetchIndexes(j, affix);
+                i = this.length - 1;
+                return this.updateAffixFetchIndexes(i, affix);
             }
 
+            // Build affix text for fetching
             function buildAffixFetchTxt(affix) {
-                // Build text setting, for each position, a letter and its variations
+                // Build text, setting, for each position, a letter and its variations
                 this.txt = '';
-                for (let j = 0; j < this.length; j++) {
-                    const i = this.length - 1 - j;
-//                    const i = j;
-/*
-                    if (affix.directions[this.iDirection] === DIRECTION_TO_END)
-                    {
-                        i = this.length - 1 - j;
-                    }
-                    else {
-                        i = j;
-                    }
-*/
-/*
-                    if (affix.directions[this.iDirection] === DIRECTION_TO_END)
-                    {
-                        i = this.length - 1 - j;
-                    }
-                    else {
-                        if (j < affix.inTxt.length) {
-                            i = this.length - 1 - j;
-                        }
-                        else {
-                            i = j;
-                        }
-                    }
-*/
-
+                for (let i = this.length - 1; i >= 0; i--) {
                     // Determine letter
                     let letter;
                     if (i < affix.inTxt.length) {
@@ -508,25 +502,14 @@
                     else {
                         variation = letter;
                     }
-                    if (affix.directions[this.iDirection] === DIRECTION_TO_END)
-                    {
-//                            this.txt = this.txt + variation;
-                        this.txt = variation + this.txt;
-                    }
-                    else {
-                        if (i < affix.inTxt.length) {
-//                            this.txt = this.txt + variation;
-                            this.txt = variation + this.txt;
-                        }
-                        else {
-                            this.txt = variation + this.txt;
-//                            this.txt = this.txt + variation;
-                        }
-                    }
+                    this.txt = variation + this.txt;
                 }
                 let txt = '';
                 if ((affix.directions[this.iDirection] === DIRECTION_TO_BEGINNING) &&
                     (affix.inTxt.length < affix.minLenFetch)) {
+                    // Invert affix text (excepting the part provided by the user),
+                    // if direction is 'to beginning' and the text from user is shorter than
+                    // the minimum required by the service for fetching
                     for (i = this.length - 1; i >= affix.inTxt.length; i--) {
                         txt += this.txt[i];
                     }
@@ -536,41 +519,13 @@
                 }
             }
 
-            function updateAffixFetchIndexes(j, affix) {
-                const i = this.length - 1 - j;
-//                const i = j;
-                if (j >= this.length) {
-                    console.log('Done');
-                    console.log(j);
-                    console.log(this);
+            // Update indexes for letters and letters variations
+            function updateAffixFetchIndexes(i, affix) {
+                if (i < 0) {
                     // All variations done
                     return false;
                 }
                 else {
-/*
-                    if (affix.directions[this.iDirection] === DIRECTION_TO_END)
-                    {
-                        i = this.length - 1 - j;
-                    }
-                    else {
-                        i = j;
-                    }
-*/
-/*
-                    if (affix.directions[this.iDirection] === DIRECTION_TO_END)
-                    {
-                        i = this.length - 1 - j;
-                    }
-                    else {
-                        if (j < affix.inTxt.length) {
-                            i = this.length - 1 - j;
-                        }
-                        else {
-                            i = j;
-                        }
-                    }
-*/
-
                     // Determine letter
                     let letter;
                     if (i < affix.inTxt.length) {
@@ -585,7 +540,7 @@
                         this.iVariation[i]++;
                         if (this.iVariation[i] >= LETTER_VARIATIONS[letter].length) {
                             // Update indexes for ending variation 
-                            return this.updateAffixFetchEndVariations(j, affix);
+                            return this.updateAffixFetchEndVariations(i, affix);
                         }
                         else {
                             return true;
@@ -593,45 +548,20 @@
                     }
                     else {
                         // Update indexes for ending variation 
-                        return this.updateAffixFetchEndVariations(j, affix);
+                        return this.updateAffixFetchEndVariations(i, affix);
                     }
                 }
                 return true;
             }
 
-            function updateAffixFetchEndVariations(j, affix) {
-                const i = this.length - 1 - j;
-//                const i = j;
-/*
-                if (affix.directions[this.iDirection] === DIRECTION_TO_END)
-                {
-                    i = this.length - 1 - j;
-                }
-                else {
-                    i = j;
-                }
-*/
-/*
-                if (affix.directions[this.iDirection] === DIRECTION_TO_END)
-                {
-                    i = this.length - 1 - j;
-                }
-                else {
-                    if (j < affix.inTxt.length) {
-                        i = this.length - 1 - j;
-                    }
-                    else {
-                        i = j;
-                    }
-                }
-*/
-
+            // Update indexes when all variation for a letter are done
+            function updateAffixFetchEndVariations(i, affix) {
                // Initialize index for variation
                 this.iVariation[i] = 0;
 
                 if (i < affix.inTxt.length) {
                     // Update indexes for next position on the text
-                    return this.updateAffixFetchIndexes(j + 1, affix);
+                    return this.updateAffixFetchIndexes(i - 1, affix);
                 }
                 else {
                     // Update index for letter
@@ -640,7 +570,7 @@
                         this.iLetter[i] = 0;
 
                         // Update indexes for next position on the text
-                        return this.updateAffixFetchIndexes(j + 1, affix);
+                        return this.updateAffixFetchIndexes(i - 1, affix);
                     }
                     else {
                         return true;
@@ -648,7 +578,6 @@
                 }
                 return true;
             }
-
         </script>
     </head>
 
