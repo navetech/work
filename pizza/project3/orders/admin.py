@@ -6,6 +6,8 @@ from .models import SubFlavor, Sub, ExtraFlavor, Extra
 from .models import PastaFlavor, Pasta
 from .models import SaladFlavor, Salad
 from .models import DinnerPlatterFlavor, DinnerPlatter
+from .models import OrderStatus, Order
+from .models import PizzaOrder, SubOrder, PastaOrder, SaladOrder, DinnerPlatterOrder
 
 # Register your models here.
 admin.site.register(Size)
@@ -24,3 +26,10 @@ admin.site.register(SaladFlavor)
 admin.site.register(Salad)
 admin.site.register(DinnerPlatterFlavor)
 admin.site.register(DinnerPlatter)
+admin.site.register(OrderStatus)
+admin.site.register(Order)
+admin.site.register(PizzaOrder)
+admin.site.register(SubOrder)
+admin.site.register(PastaOrder)
+admin.site.register(SaladOrder)
+admin.site.register(DinnerPlatterOrder)
