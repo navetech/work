@@ -1,0 +1,16 @@
+{% extends "orders/layout.html" %}
+
+
+{% block title %}
+    User
+{% endblock %}
+
+{% block main %}
+    <ul class="list-group">
+        <li class="list-group-item ln-container01">
+            <div>
+                <h1>Hello, {{ user.username }}</h1>
+            </div>
+        </li>
+    </ul>
+{% endblock %}

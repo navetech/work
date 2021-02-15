@@ -1,4 +1,5 @@
-{% extends "layout.html" %}
+{% extends "orders/layout.html" %}
+
 
 {% block title %}
     Register
@@ -7,10 +8,24 @@
 {% block main %}
     <ul class="list-group">
         <li class="list-group-item ln-container01">
-            <form id="form" action="/register" method="post">
+            <div>
+                {% if message %}
+                    {{ message }}
+                {% else %}
+                    Register
+                {% endif %}
+            </div>
+        </li>
+
+        <li class="list-group-item ln-container01">
+            <form action="{% url 'register' %}" method="post">
+                {% csrf_token %}
                 <div class="form-group">
-                    <label for="name">Name</label>
-                    <input required autofocus autocomplete="on" class="form-control" id= "name" name="name" placeholder="Name" type="text">
+                    <label for="username">Username</label>
+                    <input required autofocus autocomplete="on" class="form-control" id= "username" name="username" placeholder="Username" type="text">
+
+                    <label for="password">Password</label>
+                    <input required class="form-control" id= "password" name="password" placeholder="Password" type="password">
                 </div>
 
                 <button class="btn btn-dark" type="submit">Register</button>
