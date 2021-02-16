@@ -1,7 +1,4 @@
-from django.http import HttpResponse
-from django.shortcuts import render
-
-from django.contrib.auth import authenticate, login, logout, get_user
+from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -29,11 +26,8 @@ def login_view(request):
     password = request.POST["password"]
     user = authenticate(request, username=username, password=password)
     if user is not None:
-        if user.is_active:
-            login(request, user)
-            return HttpResponseRedirect(reverse("index"))
-        else:
-            return render(request, "orders/login.html", {"message": "User not active."})
+        login(request, user)
+        return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "orders/login.html", {"message": "Invalid credentials."})
 
@@ -49,11 +43,15 @@ def register_view(request):
 
     username = request.POST["username"]
     password = request.POST["password"]
-    user = authenticate(request, username=username, password=password)
+    user = User.objects.get(username=username)
     if user is None:
         user = User.objects.create_user(username=username, password=password)
         if user is None:
             return render(request, "orders/register.html", {"message": "Invalid credentials."})
+    else:
+        user.is_active = True
+        user.set_password(password)
+        user.save()
 
     login(request, user)
     return HttpResponseRedirect(reverse("index"))
@@ -63,7 +61,9 @@ def unregister_view(request):
     if request.method == "GET":
         return render(request, "orders/unregister.html")
 
-    user = get_user(request)
-    user.is_active = False
-    logout(request)
+    if request.POST["confirm-cancel"] == "confirm":
+        request.user.is_active = False
+        request.user.save()
+        logout(request)
+
     return HttpResponseRedirect(reverse("index"))

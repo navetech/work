@@ -1,4 +1,4 @@
-{% extends "orders/layout.html" %}
+{% extends "orders/base.html" %}
 
 
 {% block title %}
@@ -12,8 +12,8 @@
                 {% csrf_token %}
                 <label>Unregister</label>
                 <div class="ln-group-divider"></div>
-                <button class="btn btn-secondary" type="submit" name="cancel" value="cancel">Cancel</button>
-                <button class="btn btn-dark" type="submit" name="confirm" value="confirm">Confirm</button>
+                <button class="btn btn-secondary" type="submit" name="confirm-cancel" value="cancel">Cancel</button>
+                <button class="btn btn-dark" type="submit" name="confirm-cancel" value="confirm">Confirm</button>
             </form>
         </li>
     </ul>
