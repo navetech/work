@@ -21,16 +21,89 @@ def index(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
     else:
-        sizes = Size.objects.all()
-        pizza_types = PizzaType.objects.all()
-        pizza_flavors = PizzaFlavor.objects.all()
-        pizzas = Pizza.objects.all()
+        item_types = PizzaType.objects.all()
+        item_flavors = PizzaFlavor.objects.all()
+        item_sizes = Size.objects.all()
+        items = Pizza.objects.all()
+
+        page_types_pizzas = []
+        for item_type in item_types:
+
+            page_flavors_types_items = []
+            page_sizes_types_items = []
+            for item_flavor in item_flavors:
+
+                page_sizes_flavors_types_items = []
+                for item_size in item_sizes:
+
+                    for item in items:
+                        if  item.pizza_type == item_type and item.flavor == item_flavor and item.pizza_size == item_size:
+                            page_sizes_flavors_types_items.append({
+                                "size": item_size,
+                                "price": item.price,
+                                })
+
+                            if not {"size": item_size} in page_sizes_types_items:
+                                page_sizes_types_items.append({
+                                    "size": item_size,
+                                })
+
+                            break
+
+                if len(page_sizes_flavors_types_items) > 0:
+                    page_flavors_types_items.append({
+                        "flavor": item_flavor,
+                        "sizes": page_sizes_flavors_types_items,
+                        })
+
+            if len(page_flavors_types_items) > 0 and len(page_sizes_types_items) > 0:
+                page_types_pizzas.append({
+                "type": item_type,
+                "flavors": page_flavors_types_items,
+                "sizes": page_sizes_types_items,
+                })
+
+
+        toppings = Topping.objects.all()
+
+
+        item_flavors = SubFlavor.objects.all()
+        items = Sub.objects.all()
+
+        page_flavors_subs = []
+        page_sizes_subs = []
+        for item_flavor in item_flavors:
+
+            page_sizes_flavors_items = []
+            for item_size in item_sizes:
+
+                for item in items:
+                    if item.flavor == item_flavor and item.sub_size == item_size:
+                        page_sizes_flavors_items.append({
+                                "size": item_size,
+                                "price": item.price,
+                                })
+
+                        if not {"size": item_size} in page_sizes_subs:
+                            page_sizes_subs.append({
+                                "size": item_size,
+                            })
+
+                        break
+
+            if len(page_sizes_flavors_items) > 0:
+                page_flavors_subs.append({
+                    "flavor": item_flavor,
+                    "sizes": page_sizes_flavors_items,
+                    })
+
+
         context = {
             "message": f"Hello, {request.user}",
-            "sizes": sizes,
-            "pizza_types": pizza_types,
-            "pizza_flavors": pizza_flavors,
-            "pizzas": pizzas
+            "types_pizzas": page_types_pizzas,
+            "toppings": toppings,
+            "flavors_subs": page_flavors_subs,
+            "sizes_subs": page_sizes_subs,
         }
         return render(request, "orders/menu.html", context)
 

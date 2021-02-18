@@ -21,73 +21,74 @@
         <li class="list-group-item ln-container01">
             <h2>Pizzas</h2>
             <div class="ln-group-divider"></div>
-            {% regroup pizzas by pizza_type as pizza_types_list %}
-            <ul class="list-group pt-4">
-                {% for pizza_type in pizza_types_list %}
+            {% for type_pizza in types_pizzas %}
+                <ul class="list-group pt-4">
                     <li class="list-group-item ln-container02">
-                        <h3>{{ pizza_type.grouper }}</h3>
+                        <h3>{{ type_pizza.type.name }}</h3>
                         <table style="width:100%">
                             <tr>
-                              <th>Flavor</th>
-                              {% for size in sizes %}
-                                <th>{{ size }}</th>
+                                <th></th>
+                                {% for size_type_pizza in type_pizza.sizes %}
+                                    <th>{{ size_type_pizza.size.name }}</th>
                                 {% endfor %}
                             </tr>
-                            <tr>
-                              <td>Jill</td>
-                              <td>Smith</td>
-                              <td>50</td>
-                            </tr>
-                            <tr>
-                              <td>Eve</td>
-                              <td>Jackson</td>
-                              <td>94</td>
-                            </tr>
-                          </table>
-                          
-                          
-                          <ul class="list-group pt-4">
-                                {% for pizza in pizza_type.list %}
-                                        <li class="list-group-item ln-container03">
-                                            {{ pizza.flavor }} {{ pizza.pizza_size }} : {{ pizza.price }}
-                                        </li>
-                                {% endfor %}
-                        </ul>
+                            {% for flavor_type_pizza in type_pizza.flavors %}
+                                <tr>
+                                    <td>{{ flavor_type_pizza.flavor.name }}</td>
+                                    {% for size_flavor_type_pizza in flavor_type_pizza.sizes %}
+                                        <td>{{ size_flavor_type_pizza.price }}</td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </table>
                     </li>
                     <div class="ln-group-divider"></div>
-                {% endfor %}
+                </ul>
+            {% endfor %}
 
-                <div class="ln-group-divider"></div>
-
-                <div class="ln-group-divider"></div>
-
-                <li class="list-group-item ln-container02">
-                    <h3>Toppings</h3>
-                    <ul class="list-group pt-4">
-                        <li class="list-group-item ln-container03">
-                            Topping 1
-                        </li>
-                        <li class="list-group-item ln-container03">
-                            Topping 2
-                        </li>
-                    </ul>
-                </li>
-            </ul>
+            <div class="ln-group-divider"></div>
         </li>
+
+        <ul class="list-group pt-4">
+            <li class="list-group-item ln-container01">
+                <h2>Toppings</h2>
+                <ul class="list-group pt-4">
+                    {% for topping in toppings %}
+                        <li class="list-group-item ln-container02">
+                            {{ topping.name }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
+        </ul>
 
         <div class="ln-group-divider"></div>
 
-        <li class="list-group-item ln-container01">
-            <h2>Subs</h2>
-            <ul class="list-group pt-4">
-                <li class="list-group-item ln-container02">
-                    Sub 1
-                </li>
-                <li class="list-group-item ln-container02">
-                    Sub 2
-                </li>
-            </ul>
-        </li>
+        <ul class="list-group pt-4">
+            <li class="list-group-item ln-container01">
+                <h2>Subs</h2>
+                <ul class="list-group pt-4">
+                    <li class="list-group-item ln-container02">
+                        <table style="width:100%">
+                            <tr>
+                                <th></th>
+                                {% for size_sub in sizes_subs %}
+                                    <th>{{ size_sub.size.name }}</th>
+                                {% endfor %}
+                            </tr>
+                            {% for flavor_sub in flavors_subs %}
+                                <tr>
+                                    <td>{{ flavor_sub.flavor.name }}</td>
+                                    {% for size_flavor_sub in flavor_sub.sizes %}
+                                        <td>{{ size_flavor_sub.price }}</td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </li>
+                </ul>
+            </li>
+        </ul>
 
         <div class="ln-group-divider"></div>
 
