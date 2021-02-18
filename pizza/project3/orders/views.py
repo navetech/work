@@ -4,6 +4,15 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.models import User
 
+from .models import Size
+from .models import Topping, SpecialPizza, PizzaType, PizzaFlavor, Pizza
+from .models import SubFlavor, Sub, ExtraFlavor, Extra
+from .models import PastaFlavor, Pasta
+from .models import SaladFlavor, Salad
+from .models import DinnerPlatterFlavor, DinnerPlatter
+from .models import OrderStatus, Order
+from .models import PizzaOrder, SubOrder, PastaOrder, SaladOrder, DinnerPlatterOrder
+
 
 # Create your views here.
 def index(request):
@@ -12,10 +21,18 @@ def index(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
     else:
+        sizes = Size.objects.all()
+        pizza_types = PizzaType.objects.all()
+        pizza_flavors = PizzaFlavor.objects.all()
+        pizzas = Pizza.objects.all()
         context = {
-            "user": request.user
+            "message": f"Hello, {request.user}",
+            "sizes": sizes,
+            "pizza_types": pizza_types,
+            "pizza_flavors": pizza_flavors,
+            "pizzas": pizzas
         }
-        return render(request, "orders/user.html", context)
+        return render(request, "orders/menu.html", context)
 
 
 def login_view(request):
@@ -43,12 +60,13 @@ def register_view(request):
 
     username = request.POST["username"]
     password = request.POST["password"]
-    user = User.objects.get(username=username)
-    if user is None:
+    user = User.objects.filter(username=username)
+    if len(user) < 1:
         user = User.objects.create_user(username=username, password=password)
         if user is None:
             return render(request, "orders/register.html", {"message": "Invalid credentials."})
     else:
+        user = user[0]
         user.is_active = True
         user.set_password(password)
         user.save()

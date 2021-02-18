@@ -1,0 +1,134 @@
+{% extends "orders/base.html" %}
+
+
+{% block title %}
+    Menu
+{% endblock %}
+
+{% block main %}
+    <div>
+        {% if message %}
+        <h1>{{ message }}</h1>
+        {% else %}
+        <h1></h1>
+        {% endif %}
+        <h1>Menu</h1>
+    </div>
+
+    <div class="ln-group-divider"></div>
+
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container01">
+            <h2>Pizzas</h2>
+            <div class="ln-group-divider"></div>
+            {% regroup pizzas by pizza_type as pizza_types_list %}
+            <ul class="list-group pt-4">
+                {% for pizza_type in pizza_types_list %}
+                    <li class="list-group-item ln-container02">
+                        <h3>{{ pizza_type.grouper }}</h3>
+                        <table style="width:100%">
+                            <tr>
+                              <th>Flavor</th>
+                              {% for size in sizes %}
+                                <th>{{ size }}</th>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                              <td>Jill</td>
+                              <td>Smith</td>
+                              <td>50</td>
+                            </tr>
+                            <tr>
+                              <td>Eve</td>
+                              <td>Jackson</td>
+                              <td>94</td>
+                            </tr>
+                          </table>
+                          
+                          
+                          <ul class="list-group pt-4">
+                                {% for pizza in pizza_type.list %}
+                                        <li class="list-group-item ln-container03">
+                                            {{ pizza.flavor }} {{ pizza.pizza_size }} : {{ pizza.price }}
+                                        </li>
+                                {% endfor %}
+                        </ul>
+                    </li>
+                    <div class="ln-group-divider"></div>
+                {% endfor %}
+
+                <div class="ln-group-divider"></div>
+
+                <div class="ln-group-divider"></div>
+
+                <li class="list-group-item ln-container02">
+                    <h3>Toppings</h3>
+                    <ul class="list-group pt-4">
+                        <li class="list-group-item ln-container03">
+                            Topping 1
+                        </li>
+                        <li class="list-group-item ln-container03">
+                            Topping 2
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+        <div class="ln-group-divider"></div>
+
+        <li class="list-group-item ln-container01">
+            <h2>Subs</h2>
+            <ul class="list-group pt-4">
+                <li class="list-group-item ln-container02">
+                    Sub 1
+                </li>
+                <li class="list-group-item ln-container02">
+                    Sub 2
+                </li>
+            </ul>
+        </li>
+
+        <div class="ln-group-divider"></div>
+
+        <li class="list-group-item ln-container01">
+            <h2>Pasta</h2>
+            <ul class="list-group pt-4">
+                <li class="list-group-item ln-container02">
+                    Pasta 1
+                </li>
+                <li class="list-group-item ln-container02">
+                    Pasta 2
+                </li>
+            </ul>
+        </li>
+
+        <div class="ln-group-divider"></div>
+
+        <li class="list-group-item ln-container01">
+            <h2>Salads</h2>
+            <ul class="list-group pt-4">
+                <li class="list-group-item ln-container02">
+                    Salad 1
+                </li>
+                <li class="list-group-item ln-container02">
+                    Salad 2
+                </li>
+            </ul>
+        </li>
+
+        <div class="ln-group-divider"></div>
+
+        <li class="list-group-item ln-container01">
+            <h2>Dinner Platters</h2>
+            <ul class="list-group pt-4">
+                <li class="list-group-item ln-container02">
+                    Dinner Platter 1
+                </li>
+                <li class="list-group-item ln-container02">
+                    Dinner Platter 2
+                </li>
+            </ul>
+        </li>
+    </ul>
+{% endblock %}

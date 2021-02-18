@@ -17,8 +17,8 @@
             </div>
         </li>
 
-            <li class="list-group-item ln-container01">
-                <form action="{% url 'login' %}" method="post">
+        <li class="list-group-item ln-container01">
+            <form action="{% url 'login' %}" method="post">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="username">Username</label>
