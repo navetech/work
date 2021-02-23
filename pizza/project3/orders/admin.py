@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from .models import Dish, Adding
 from .models import Size
 from .models import Topping, SpecialPizza, PizzaType, PizzaFlavor, Pizza
 from .models import SubFlavor, Sub, ExtraFlavor, Extra
@@ -10,6 +11,8 @@ from .models import OrderStatus, Order
 from .models import PizzaOrder, SubOrder, PastaOrder, SaladOrder, DinnerPlatterOrder
 
 # Register your models here.
+admin.site.register(Dish)
+admin.site.register(Adding)
 admin.site.register(Size)
 admin.site.register(Topping)
 admin.site.register(SpecialPizza)

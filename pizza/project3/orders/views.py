@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.models import User
 
+from .models import Dish, Adding
 from .models import Size
 from .models import Topping, SpecialPizza, PizzaType, PizzaFlavor, Pizza
 from .models import SubFlavor, Sub, ExtraFlavor, Extra
@@ -25,85 +26,157 @@ def index(request):
 
 
 def menu(request):
-    all_sizes = Size.objects.all()
+    menu_dishes = []
 
-    pizzas = pizzas_menu(all_sizes)
-    toppings = toppings_menu()
-    subs = subs_menu(all_sizes)
-#    pastas = pastas_menu()
-#    salads = salads_menu()
-#    dinnerplatters = dinnerplatters_menu(all_sizes)
+    dish_sizes = Size.objects.all()
+
+    dish = Dish.objects.filter(name="Pizzas")[0]
+    dish_menu = []
+    if dish is not None:
+        dish_types = PizzaType.objects.all()
+        addings = Adding.objects.filter(name="Toppings")[0]
+        dish_menu = pizzas_menu(dish_types, addings, dish_sizes)
+
+    menu_dishes.append({
+        "dish": dish,
+        "menu": dish_menu,
+    })
+
+
+    dish = Dish.objects.filter(name="Subs")[0]
+    dish_menu = []
+    if dish is not None:
+        addings = Adding.objects.filter(name="Extras")[0]
+        dish_menu = subs_menu(addings, dish_sizes)
+
+    menu_dishes.append({
+        "dish": dish,
+        "menu": dish_menu,
+    })
+
+
+    dish = Dish.objects.filter(name="Pasta")[0]
+    dish_menu = []
+    if dish is not None:
+        pass
+        #dish_menu = pastas_menu()
+
+    menu_dishes.append({
+        "dish": dish,
+        "menu": dish_menu,
+    })
+
 
     context = {
-        pizzas: pizzas,
-        toppings: toppings,
-        subs: subs,
-#        pastas: pastas,
-#        salads: salads,
-#        dinnerplatters: dinnerplatters,
+        "menu_dishes": menu_dishes,
     }
-
     return render(request, "orders/menu.html", context)
 
 
-def pizzas_menu(all_sizes):
-    dish_types = PizzaType.objects.all()
-    flavors = PizzaFlavor.objects.all()
-    items = Pizza.objects.all()
+def pizzas_menu(dish_types, addings, dish_sizes):
+    menu_types = []
+    if dish_types:
+        flavors = PizzaFlavor.objects.all()
+        items = Pizza.objects.all()
+        menu_types = types_menu(dish_types, flavors, items, dish_sizes)
 
-    return dish_menu(dish_types, flavors, items, all_sizes)
+    menu_addings = []
+    if addings:
+        menu_addings = Topping.objects.all()
+
+    return {
+        "types": menu_types,
+        "addings": menu_addings,
+    }
 
 
-def toppings_menu():
-    return Topping.objects.all()
-
-
-def subs_menu(all_sizes):
+def subs_menu(addings, dish_sizes):
     dish_types = [None]
     flavors = SubFlavor.objects.all()
     items = Sub.objects.all()
+    menu_types = types_menu(dish_types, flavors, items, dish_sizes)
 
-    return dish_menu(dish_types, flavors, items, all_sizes)
+    menu_addings = []
+    if addings:
+        menu_addings = Extra.objects.all()
+
+    return {
+        "types": menu_types,
+        "addings": menu_addings,
+    }
 
 
+def pastas_menu():
+    dish_types = [None]
+    flavors = PastaFlavor.objects.all()
+    items = Pasta.objects.all()
+    dish_sizes = [None]
+    menu_types = types_menu(dish_types, flavors, items, dish_sizes)
 
-def dish_menu(dish_types, flavors, items, all_sizes):
-    dishes = []
+    menu_addings = []
+
+    return {
+        "types": menu_types,
+        "addings": menu_addings,
+    }
+
+
+def types_menu(dish_types, flavors, items, dish_sizes):
+    menu_types = []
     for dish_type in dish_types:
-        type_flavors = []
         type_sizes = []
+        type_flavors = []
         for flavor in flavors:
-            flavor_sizes = []
-            for dish_size in all_sizes:
+            for dish_size in dish_sizes:
                 for item in items:
                     if item is not None:
                         if (dish_type is not None and dish_type == item.dish_type) or dish_type is None:
                             if (flavor is not None and flavor == item.flavor) or flavor is None:
                                 if dish_size is not None and dish_size == item.dish_size:
-                                    flavor_sizes.append({
+                                    if not dish_size in type_sizes:
+                                        type_sizes.append(dish_size)
+
+                                    break
+
+        for flavor in flavors:
+            flavor_sizes = []
+            for dish_size in type_sizes:
+                flavor_size = {}
+                if dish_size is not None:
+                    flavor_size = {
+                        "size": dish_size,
+                        "price": None,
+                    }
+                for item in items:
+                    if item is not None:
+                        if (dish_type is not None and dish_type == item.dish_type) or dish_type is None:
+                            if (flavor is not None and flavor == item.flavor) or flavor is None:
+                                if dish_size is not None and dish_size == item.dish_size:
+                                    flavor_size = {
                                         "size": dish_size,
                                         "price": item.price,
-                                    })
+                                    }
 
-                                if not dish_size in type_sizes:
-                                    type_sizes.append(dish_size)
+                                    break
 
-                                break
+                flavor_sizes.append(flavor_size)
 
-            if len(flavor_sizes) > 0:
-                type_flavors.append({
-                    "flavor": flavor,
-                    "sizes": flavor_sizes,
-                })
+            for flavor_size in flavor_sizes:
+                if flavor_size is not None and flavor_size["price"] is not None:
+                    type_flavors.append({
+                        "flavor": flavor,
+                        "sizes": flavor_sizes,
+                    })
+                    break
 
         if len(type_flavors) > 0 and len(type_sizes) > 0:
-            dishes.append({
+            menu_types.append({
                 "type": dish_type,
                 "flavors": type_flavors,
                 "sizes": type_sizes,
             })
 
-    return dishes
+    return menu_types
 
 
 def login_view(request):
