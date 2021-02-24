@@ -33,9 +33,7 @@ def menu(request):
     dish = Dish.objects.filter(name="Pizzas")[0]
     dish_menu = []
     if dish is not None:
-        dish_types = PizzaType.objects.all().order_by("sort_number")
-        addings = Adding.objects.filter(name="Toppings")[0]
-        dish_menu = pizzas_menu(dish_types, addings, dish_sizes)
+        dish_menu = pizzas_menu(dish_sizes)
 
     menu_dishes.append({
         "dish": dish,
@@ -46,8 +44,7 @@ def menu(request):
     dish = Dish.objects.filter(name="Subs")[0]
     dish_menu = []
     if dish is not None:
-        addings = Adding.objects.filter(name="Extras")[0]
-        dish_menu = subs_menu(addings, dish_sizes)
+        dish_menu = subs_menu(dish_sizes)
 
     menu_dishes.append({
         "dish": dish,
@@ -58,7 +55,6 @@ def menu(request):
     dish = Dish.objects.filter(name="Pasta")[0]
     dish_menu = []
     if dish is not None:
-        pass
         dish_menu = pastas_menu()
 
     menu_dishes.append({
@@ -73,16 +69,21 @@ def menu(request):
     return render(request, "orders/menu.html", context)
 
 
-def pizzas_menu(dish_types, addings, dish_sizes):
+def pizzas_menu(dish_sizes):
     menu_types = []
+    dish_types = PizzaType.objects.all().order_by("sort_number")
     if dish_types:
         flavors = PizzaFlavor.objects.all().order_by("sort_number")
         items = Pizza.objects.all()
         menu_types = types_menu(dish_types, flavors, items, dish_sizes)
 
     menu_addings = []
-    if addings:
-        menu_addings = Topping.objects.all()
+    dish_addings = Adding.objects.filter(name="Toppings")
+    if dish_addings:
+        flavors = Topping.objects.all().order_by("sort_number")
+        items = [None]
+        dish_sizes = [None]
+        menu_addings = types_menu(dish_addings, flavors, items, dish_sizes)
 
     return {
         "types": menu_types,
@@ -90,12 +91,14 @@ def pizzas_menu(dish_types, addings, dish_sizes):
     }
 
 
-def subs_menu(addings, dish_sizes):
+def subs_menu(dish_sizes):
     dish_types = [None]
+
     flavors = SubFlavor.objects.all().order_by("sort_number")
     items = Sub.objects.all()
     menu_types = types_menu(dish_types, flavors, items, dish_sizes)
 
+    addings = Adding.objects.filter(name="Extras")[0]
     menu_addings = []
     if addings:
         menu_addings = Extra.objects.all()
@@ -135,14 +138,10 @@ def types_menu(dish_types, flavors, items, dish_sizes):
                                 if dish_size is not None and dish_size == item.dish_size or dish_size is None:
                                     if not dish_size in type_sizes:
                                         type_sizes.append(dish_size)
-
                                     break
-
         for flavor in flavors:
             flavor_sizes = []
             for dish_size in type_sizes:
-#                flavor_size = {}
-#                if dish_size is not None:
                 flavor_size = {
                     "size": dish_size,
                     "price": None,
@@ -156,11 +155,8 @@ def types_menu(dish_types, flavors, items, dish_sizes):
                                         "size": dish_size,
                                         "price": item.price,
                                     }
-
                                     break
-
                 flavor_sizes.append(flavor_size)
-
             for flavor_size in flavor_sizes:
                 if flavor_size is not None and flavor_size["price"] is not None:
                     type_flavors.append({

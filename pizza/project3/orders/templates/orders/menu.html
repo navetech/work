@@ -12,11 +12,13 @@
 
     <ul class="list-group pt-4">
         {% for d in menu_dishes %}
+        <ul class="list-group pt-4">
             <li class="list-group-item ln-container01">
                 <h2>{{ d.dish.name }}</h2>
                 <div class="ln-group-divider"></div>
                     <ul class="list-group pt-4">
                         {% for t in d.menu.types %}
+                        <ul class="list-group pt-4">
                             <li class="list-group-item ln-container02">
                                 <h3>{{ t.type.name }}</h3>
                                 <table style="width:100%">
@@ -36,12 +38,43 @@
                                     {% endfor %}
                                 </table>
                             </li>
-                            <div class="ln-group-divider"></div>
+                        </ul>
+                        <div class="ln-group-divider"></div>
                         {% endfor %}
                     </ul>
+
+                    <div class="ln-group-divider"></div>
+
+                    <ul class="list-group pt-4">
+                        {% for t in d.menu.addings %}
+                        <ul class="list-group pt-4">
+                            <li class="list-group-item ln-container02">
+                                <h3>{{ t.type.name }}</h3>
+                                <table style="width:100%">
+                                    <tr>
+                                        <th></th>
+                                        {% for t_size in t.sizes %}
+                                        <th>{{ t_size.name }}</th>
+                                    {% endfor %}
+                                </tr>
+                                {% for f in t.flavors %}
+                                    <tr>
+                                        <td>{{ f.flavor.name }}</td>
+                                        {% for f_size in f.sizes %}
+                                            <td>{{ f_size.price }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </li>
+                    </ul>
+                    <div class="ln-group-divider"></div>
+                    {% endfor %}
+                </ul>
                 <div class="ln-group-divider"></div>
             </li>
-            <div class="ln-group-divider"></div>
+        </ul>
+        <div class="ln-group-divider"></div>
         {% endfor %}
     </ul>
 {% endblock %}
