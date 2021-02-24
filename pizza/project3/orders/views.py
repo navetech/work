@@ -81,8 +81,8 @@ def pizzas_menu(dish_sizes):
     dish_addings = Adding.objects.filter(name="Toppings")
     if dish_addings:
         flavors = Topping.objects.all().order_by("sort_number")
-        items = [None]
-        dish_sizes = [None]
+        items = []
+        dish_sizes = []
         menu_addings = types_menu(dish_addings, flavors, items, dish_sizes)
 
     return {
@@ -98,10 +98,12 @@ def subs_menu(dish_sizes):
     items = Sub.objects.all()
     menu_types = types_menu(dish_types, flavors, items, dish_sizes)
 
-    addings = Adding.objects.filter(name="Extras")[0]
     menu_addings = []
-    if addings:
-        menu_addings = Extra.objects.all()
+    dish_addings = Adding.objects.filter(name="Extras")
+    if dish_addings:
+        flavors = ExtraFlavor.objects.all().order_by("sort_number")
+        items = Extra.objects.all()
+        menu_addings = types_menu(dish_addings, flavors, items, dish_sizes)
 
     return {
         "types": menu_types,
@@ -128,17 +130,17 @@ def types_menu(dish_types, flavors, items, dish_sizes):
     menu_types = []
     for dish_type in dish_types:
         type_sizes = []
-        type_flavors = []
-        for flavor in flavors:
-            for dish_size in dish_sizes:
+        for dish_size in dish_sizes:
+            for flavor in flavors:
                 for item in items:
                     if item is not None:
-                        if (dish_type is not None and dish_type == item.dish_type) or dish_type is None:
+                        if (dish_type is not None and item["dish_type"] and dish_type == item.dish_type) or dish_type is None:
                             if (flavor is not None and flavor == item.flavor) or flavor is None:
                                 if dish_size is not None and dish_size == item.dish_size or dish_size is None:
                                     if not dish_size in type_sizes:
                                         type_sizes.append(dish_size)
                                     break
+        type_flavors = []
         for flavor in flavors:
             flavor_sizes = []
             for dish_size in type_sizes:
@@ -157,15 +159,22 @@ def types_menu(dish_types, flavors, items, dish_sizes):
                                     }
                                     break
                 flavor_sizes.append(flavor_size)
-            for flavor_size in flavor_sizes:
-                if flavor_size is not None and flavor_size["price"] is not None:
-                    type_flavors.append({
-                        "flavor": flavor,
-                        "sizes": flavor_sizes,
-                    })
-                    break
 
-        if len(type_flavors) > 0 and len(type_sizes) > 0:
+            if flavor_sizes:
+                for flavor_size in flavor_sizes:
+                    if flavor_size is not None and flavor_size["price"] is not None:
+                        type_flavors.append({
+                            "flavor": flavor,
+                            "sizes": flavor_sizes,
+                        })
+                        break
+            else:
+                type_flavors.append({
+                    "flavor": flavor,
+                    "sizes": flavor_sizes,
+                })
+#        if len(type_flavors) > 0 and len(type_sizes) > 0:
+        if len(type_flavors) > 0:
             menu_types.append({
                 "type": dish_type,
                 "flavors": type_flavors,
