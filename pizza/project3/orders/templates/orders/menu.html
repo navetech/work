@@ -8,14 +8,11 @@
 {% block main %}
     <h1>Menu</h1>
 
-    <div class="ln-group-divider"></div>
-
     <ul class="list-group pt-4">
         {% for d in menu_dishes %}
         <ul class="list-group pt-4">
             <li class="list-group-item ln-container01">
                 <h2>{{ d.dish.name }}</h2>
-                <div class="ln-group-divider"></div>
                     <ul class="list-group pt-4">
                         {% for t in d.menu.types %}
                         <ul class="list-group pt-4">
@@ -31,19 +28,16 @@
                                     {% for f in t.flavors %}
                                         <tr>
                                             <td>{{ f.flavor.name }}</td>
-                                            {% for f_size in f.sizes %}
-                                                <td>{{ f_size.price }}</td>
+                                            {% for f_price in f.prices %}
+                                                <td>{{ f_price.price }}</td>
                                             {% endfor %}
                                         </tr>
                                     {% endfor %}
                                 </table>
                             </li>
                         </ul>
-                        <div class="ln-group-divider"></div>
                         {% endfor %}
                     </ul>
-
-                    <div class="ln-group-divider"></div>
 
                     <ul class="list-group pt-4">
                         {% for t in d.menu.addings %}
@@ -60,21 +54,18 @@
                                 {% for f in t.flavors %}
                                     <tr>
                                         <td>{{ f.flavor.name }}</td>
-                                        {% for f_size in f.sizes %}
-                                            <td>{{ f_size.price }}</td>
+                                        {% for f_price in f.prices %}
+                                            <td>{{ f_price.price }}</td>
                                         {% endfor %}
                                     </tr>
                                 {% endfor %}
                             </table>
                         </li>
                     </ul>
-                    <div class="ln-group-divider"></div>
                     {% endfor %}
                 </ul>
-                <div class="ln-group-divider"></div>
             </li>
         </ul>
-        <div class="ln-group-divider"></div>
         {% endfor %}
     </ul>
 {% endblock %}
