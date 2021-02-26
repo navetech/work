@@ -27,7 +27,7 @@
                                     </tr>
                                     {% for f in t.flavors %}
                                         <tr>
-                                            <td>{{ f.flavor.name }}</td>
+                                            <td><a href="{% url 'flavor' d.dish.id t.type.id f.flavor.id %}">{{ {{ f.flavor.name }} }}</a></td>
                                             {% for f_price in f.prices %}
                                                 <td>{{ f_price.price }}</td>
                                             {% endfor %}

@@ -250,6 +250,137 @@ def get_type_flavors(dish_type, flavors, items, type_sizes):
     return type_flavors
 
 
+def flavor_view(request, dish_id, adding_id, type_id, flavor_id):
+    dishes_ids = [dish_id]
+    types_ids = [type_id]
+    addings_ids = [adding_id]
+    flavors_ids = [flavor_id]
+    sizes_ids = None
+    views = dishes_view(dishes_ids, types_ids, addings_ids, flavors_ids, sizes_ids)
+
+    context = {
+        "views": views,
+    }
+    return render(request, "orders/flavor.html", context)
+
+
+def menu(request):
+    dishes_ids = None
+    types_ids = None
+    addings_ids = None
+    flavors_ids = None
+    sizes_ids = None
+    views = dishes_view(dishes_ids, types_ids, addings_ids, flavors_ids, sizes_ids)
+
+    context = {
+        "views": views,
+    }
+    return render(request, "orders/menu.html", context)
+
+
+def dishes_view(dishes_ids, types_ids, addings_ids, flavors_ids, sizes_ids):
+    dishes = []
+    if dishes_ids is None:
+        dishes = Dish.objects.all().order_by("sort_number")
+    else:
+        for dish_id in dishes_ids:
+            dish = Dish.objects.filter(pk=dish_id)[0]
+            if dish:
+                dishes.append(dish)
+
+    views = []
+    for dish in dishes:
+        if dish.name == "Pizzas":
+            view = pizzas_view(types_ids, addings_ids, flavors_ids, sizes_ids)
+            views.append({
+                "dish": dish,
+                "view": view,
+            })
+        elif dish.name == "Subs":
+            view = subs_view(types_ids, addings_ids, flavors_ids, sizes_ids)
+            views.append({
+                "dish": dish,
+                "view": view,
+            })
+        elif dish.name == "Pasta":
+            view = pastas_view(types_ids, addings_ids, flavors_ids, sizes_ids)
+            views.append({
+                "dish": dish,
+                "view": view,
+            })
+        elif dish.name == "Salads":
+            view = salads_view(types_ids, addings_ids, flavors_ids, sizes_ids)
+            views.append({
+                "dish": dish,
+                "view": view,
+            })
+        elif dish.name == "Dinner Platters":
+            view = dinnerplaters_view(types_ids, addings_ids, flavors_ids, sizes_ids)
+            views.append({
+                "dish": dish,
+                "view": view,
+            })
+
+    return views
+
+
+def pizzas_view(types_ids, addings_ids, flavors_ids, sizes_ids):
+    dish_types = []
+    if types_ids is None:
+        dish_types = PizzaType.objects.all().order_by("sort_number")
+    else:
+        for id in types_ids:
+            elem = PizzaType.objects.filter(pk=id)[0]
+            if elem:
+                dish_types.append(elem)
+
+    view_types = []
+    if dish_types:
+        flavors = []
+        if flavors_ids is None:
+            flavors = PizzaFlavor.objects.all().order_by("sort_number")
+        else:
+            for id in flavors_ids:
+                elem = PizzaFlavor.objects.filter(pk=id)[0]
+                if elem:
+                    flavors.append(elem)
+
+        items = Pizza.objects.all()
+
+        dish_sizes = []
+        if sizes_ids is None:
+            dish_sizes = Size.objects.all().order_by("sort_number")
+        else:
+            for id in sizes_ids:
+                elem = Size.objects.filter(pk=id)[0]
+                if elem:
+                    dish_sizes.append(elem)
+
+        view_types = types_view(dish_types, flavors, items, dish_sizes)
+
+
+    addings = []
+    if addings_ids is None:
+        addings = Adding.objects.filter(name="Toppings")
+    else:
+        for id in addings_ids:
+            elem = Adding.objects.filter(pk=id)[0]
+            if elem:
+                addings.append(elem)
+
+    view_addings = []
+    if addings:
+        flavors = Topping.objects.all().order_by("sort_number")
+        items = []
+        addings_sizes = []
+        view_addings = types_view(addings, flavors, items, addings_sizes)
+
+    return {
+        "types": view_types,
+        "addings": view_addings,
+    }
+
+
 def login_view(request):
     if request.method == "GET":
         return render(request, "orders/login.html", {"message": None})
