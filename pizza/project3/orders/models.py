@@ -47,14 +47,14 @@ class PriceCommonInfo(models.Model):
 
 
 class SizePriceCommonInfo(PriceCommonInfo):
-    dish_size = models.ForeignKey(Size, on_delete=models.CASCADE,
+    size = models.ForeignKey(Size, on_delete=models.CASCADE,
         related_name="size_%(app_label)s_%(class)s")
 
     class Meta:
         abstract = True
 
     def __str__(self):
-        return f"{self.dish_size} - {PriceCommonInfo.__str__(self)}"
+        return f"{self.size} - {PriceCommonInfo.__str__(self)}"
 
 
 class Topping(CommonInfo):
@@ -80,11 +80,11 @@ class PizzaFlavor(CommonInfo):
         
 
 class Pizza(SizePriceCommonInfo):
-    dish_type = models.ForeignKey(PizzaType, on_delete=models.CASCADE, related_name="type_pizzas")
+    type = models.ForeignKey(PizzaType, on_delete=models.CASCADE, related_name="type_pizzas")
     flavor = models.ForeignKey(PizzaFlavor, on_delete=models.CASCADE, related_name="flavor_pizzas")
 
     def __str__(self):
-        return f"type: {self.dish_type}, flavor: {self.flavor}, {SizePriceCommonInfo.__str__(self)}"
+        return f"type: {self.type}, flavor: {self.flavor}, {SizePriceCommonInfo.__str__(self)}"
 
 
 class SubFlavor(CommonInfo):
@@ -148,51 +148,57 @@ class OrderStatus(CommonInfo):
 
 
 class Order(models.Model):
-    order_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_orders")
-    order_status = models.ForeignKey(OrderStatus, on_delete=models.CASCADE, related_name="status_orders")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_orders")
+    status = models.ForeignKey(OrderStatus, on_delete=models.CASCADE, related_name="status_orders")
 
     def __str__(self):
         return f"{self.order_user} - {self.order_status}"
 
 
-class PizzaOrder(models.Model):
+class DishOrderCommonInfo(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE,
+        related_name="order_%(app_label)s_%(class)s")
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{self.order}"
+
+
+class PizzaOrder(DishOrderCommonInfo):
     dish = models.ForeignKey(Pizza, on_delete=models.CASCADE, related_name="pizza_pizzaorders")
     toppings = models.ManyToManyField(Topping, blank=True, related_name="toppings_pizzaorders")
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_pizzaorders")
 
 
     def __str__(self):
         return f"pizza: {self.dish}, toppings: {self.toppings}"
 
 
-class SubOrder(models.Model):
+class SubOrder(DishOrderCommonInfo):
     dish = models.ForeignKey(Sub, on_delete=models.CASCADE, related_name="sub_suborders")
     extras = models.ManyToManyField(Extra, blank=True, related_name="extras_suborders")
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_suborders")
 
     def __str__(self):
         return f"sub: {self.dish}, extra: {self.extras}"
 
 
-class PastaOrder(models.Model):
+class PastaOrder(DishOrderCommonInfo):
     dish = models.ForeignKey(Pasta, on_delete=models.CASCADE, related_name="pasta_pastaorders")
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_pastaorders")
 
     def __str__(self):
         return f"pasta: {self.dish}"
 
 
-class SaladOrder(models.Model):
+class SaladOrder(DishOrderCommonInfo):
     dish = models.ForeignKey(Salad, on_delete=models.CASCADE, related_name="salad_saladorders")
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_saladorders")
 
     def __str__(self):
         return f"salad: {self.dish}"
 
 
-class DinnerPlatterOrder(models.Model):
+class DinnerPlatterOrder(DishOrderCommonInfo):
     dish = models.ForeignKey(DinnerPlatter, on_delete=models.CASCADE, related_name="dinnerplatter_dinnerplatterorders")
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_dinnerplatterorders")
 
     def __str__(self):
         return f"dinner platter: {self.dish}"
