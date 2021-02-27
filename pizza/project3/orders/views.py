@@ -256,10 +256,10 @@ def flavor_view(request, dish_id, type_id, flavor_id):
     addings_ids = None
     flavors_ids = [flavor_id]
     sizes_ids = None
-    views = build_dishes_views(dishes_ids, types_ids, addings_ids, flavors_ids, sizes_ids)
+    view_dishes = build_view_dishes(dishes_ids, types_ids, addings_ids, flavors_ids, sizes_ids)
 
     context = {
-        "views": views,
+        "dishes": view_dishes,
     }
     return render(request, "orders/flavor.html", context)
 
@@ -270,15 +270,15 @@ def menu(request):
     addings_ids = None
     flavors_ids = None
     sizes_ids = None
-    dishes_views = build_dishes_views(dishes_ids, types_ids, addings_ids, flavors_ids, sizes_ids)
+    view_dishes = build_view_dishes(dishes_ids, types_ids, addings_ids, flavors_ids, sizes_ids)
 
     context = {
-        "views": dishes_views,
+        "dishes": view_dishes,
     }
     return render(request, "orders/menu.html", context)
 
 
-def build_dishes_views(dishes_ids, types_ids, addings_ids, flavors_ids, sizes_ids):
+def build_view_dishes(dishes_ids, types_ids, addings_ids, flavors_ids, sizes_ids):
     dishes = []
     if dishes_ids is None:
         dishes = Dish.objects.all().order_by("sort_number")
@@ -288,15 +288,15 @@ def build_dishes_views(dishes_ids, types_ids, addings_ids, flavors_ids, sizes_id
             if dish:
                 dishes.append(dish)
 
-    dishes_views = []
+    view_dishes = []
     for dish in dishes:
         if dish.name == "Pizzas":
             view = build_pizzas_view(types_ids, addings_ids, flavors_ids, sizes_ids)
-            dishes_views.append({
-                "dish": dish,
+            view_dishes.append({
+                "self": dish,
                 "view": view,
             })
-    return dishes_views
+    return view_dishes
 
 """        elif dish.name == "Subs":
             view = subs_view(types_ids, addings_ids, flavors_ids, sizes_ids)
@@ -355,21 +355,35 @@ def build_pizzas_view(types_ids, addings_ids, flavors_ids, sizes_ids):
             for id in sizes_ids:
                 size = Size.objects.filter(pk=id)[0]
                 if size:
-                    dish_sizes.append(size)
+                    sizes.append(size)
 
-        types_view = build_dish_groups_view(types, flavors, items, sizes)
+        types_view = build_types_or_addings_view(types, flavors, items, sizes)
 
 
     addings = []
     if addings_ids is None:
         addings = Adding.objects.filter(name="Toppings")
+    else:
+        for id in addings_ids:
+            adding = Adding.objects.filter(pk=id)[0]
+            if adding:
+                addings.append(adding)
 
     addings_view = []
     if addings:
-        flavors = Topping.objects.all().order_by("sort_number")
+        flavors = []
+        if flavors_ids is None:
+            flavors = Topping.objects.all().order_by("sort_number")
+        else:
+            for id in flavors_ids:
+                flavor = Topping.objects.filter(pk=id)[0]
+                if flavor:
+                    flavors.append(flavor)
+
         items = []
         sizes = []
-        addings_view = build_dish_groups_view(addings, flavors, items, sizes)
+
+        addings_view = build_types_or_addings_view(addings, flavors, items, sizes)
 
     return {
         "types": types_view,
@@ -377,76 +391,76 @@ def build_pizzas_view(types_ids, addings_ids, flavors_ids, sizes_ids):
     }
 
 
-def build_dish_groups_view(groups, dish_flavors, items, dish_sizes):
-    groups_view = []
-    for group in groups:
-        group_sizes = get_group_sizes(group, dish_flavors, items, dish_sizes)
-        group_flavors = get_group_flavors(group, dish_flavors, items, group_sizes)
-        if group_flavors:
-            groups_view.append({
-                "group": group,
-                "flavors": group_flavors,
-                "sizes": group_sizes,
+def build_types_or_addings_view(types_or_addings, dish_flavors, items, dish_sizes):
+    types_or_addings_view = []
+    for type_or_adding in types_or_addings:
+        type_or_adding_sizes = get_type_or_adding_sizes(type_or_adding, dish_flavors, items, dish_sizes)
+        type_or_adding_flavors = get_type_or_adding_flavors(type_or_adding, dish_flavors, items, type_or_adding_sizes)
+        if type_or_adding_flavors:
+            types_or_addings_view.append({
+                "self": type_or_adding,
+                "flavors": type_or_adding_flavors,
+                "sizes": type_or_adding_sizes,
             })
-    return groups_view
+    return types_or_addings_view
 
 
-def get_group_sizes(group, dish_flavors, items, dish_sizes):
-    group_sizes = []
+def get_type_or_adding_sizes(type_or_adding, dish_flavors, items, dish_sizes):
+    type_or_adding_sizes = []
     for size in dish_sizes:
         for flavor in dish_flavors:
             for item in items:
                 if item:
                     has_attr = hasattr(item, "type")
-                    if (group and has_attr and group == item.type) or not group or not has_attr:
+                    if (type_or_adding and has_attr and type_or_adding == item.type) or not type_or_adding or not has_attr:
                         has_attr = hasattr(item, "flavor")
                         if (flavor and has_attr and flavor == item.flavor) or not flavor or not has_attr:
                             has_attr = hasattr(item, "size")
                             if (size and has_attr and size == item.size) or not size or not has_attr:
-                                if not size in group_sizes:
-                                    group_sizes.append(size)
+                                if not size in type_or_adding_sizes:
+                                    type_or_adding_sizes.append(size)
                                 break
-    return group_sizes
+    return type_or_adding_sizes
 
 
-def get_group_flavors(group, dish_flavors, items, group_sizes):
-    group_flavors = []
+def get_type_or_adding_flavors(type_or_adding, dish_flavors, items, type_or_adding_sizes):
+    type_or_adding_flavors = []
     for flavor in dish_flavors:
-        flavor_prices = []
-        for size in group_sizes:
-            flavor_price = {
+        flavor_sizes_and_prices = []
+        for size in type_or_adding_sizes:
+            size_and_price = {
                 "size": size,
                 "price": None,
             }
             for item in items:
                 if item:
                     has_attr = hasattr(item, "type")
-                    if (group and has_attr and group == item.type) or not group or not has_attr:
+                    if (type_or_adding and has_attr and type_or_adding == item.type) or not type_or_adding or not has_attr:
                         has_attr = hasattr(item, "flavor")
                         if (flavor and has_attr and flavor == item.flavor) or not flavor or not has_attr:
                             has_attr = hasattr(item, "size")
                             if (size and has_attr and size == item.size) or not size or not has_attr:
-                                flavor_price = {
+                                size_and_price = {
                                     "size": size,
                                     "price": item.price,
                                 }
                                 break
-            flavor_prices.append(flavor_price)
+            flavor_sizes_and_prices.append(size_and_price)
 
-        if flavor_prices:
-            for flavor_price in flavor_prices:
-                if flavor_price and flavor_price["price"]:
-                    group_flavors.append({
-                        "flavor": flavor,
-                        "prices": flavor_prices,
+        if flavor_sizes_and_prices:
+            for size_and_price in flavor_sizes_and_prices:
+                if size_and_price and size_and_price["price"]:
+                    type_or_adding_flavors.append({
+                        "self": flavor,
+                        "sizes_and_prices": flavor_sizes_and_prices,
                     })
                     break
         else:
-            group_flavors.append({
-                "flavor": flavor,
-                "prices": flavor_prices,
+            type_or_adding_flavors.append({
+                "self": flavor,
+                "sizes_and_prices": flavor_sizes_and_prices,
             })
-    return group_flavors
+    return type_or_adding_flavors
 
 
 

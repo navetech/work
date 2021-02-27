@@ -9,31 +9,31 @@
     <h1>Menu</h1>
 
     <ul class="list-group pt-4">
-        {% for d in views %}
+        {% for dish in dishes %}
         <ul class="list-group pt-4">
             <li class="list-group-item ln-container01">
-                <h2>{{ d.dish.name }}</h2>
+                <h2>{{ dish.self.name }}</h2>
                     <ul class="list-group pt-4">
-                        {% for t in d.view.types %}
+                        {% for type in dish.view.types %}
                         <ul class="list-group pt-4">
                             <li class="list-group-item ln-container02">
-                                <h3>{{ t.group.name }}</h3>
+                                <h3>{{ type.self.name }}</h3>
                                 <table style="width:100%">
                                     <tr>
                                         <th></th>
-                                        {% for s in t.sizes %}
-                                            <th>{{ s.name }}</th>
+                                        {% for size in type.sizes %}
+                                            <th>{{ size.name }}</th>
                                         {% endfor %}
                                     </tr>
-                                    {% for f in t.flavors %}
+                                    {% for flavor in type.flavors %}
                                         <tr>
-                                            {% if t.group is None %}
-                                                <td><a href="{% url 'flavor' d.dish.id None f.flavor.id %}">{{ f.flavor.name }}</a></td>
+                                            {% if type is None %}
+                                                <td><a href="{% url 'flavor' dish.self.id None flavor.self.id %}">{{ flavor.self.name }}</a></td>
                                             {% else %}
-                                                <td><a href="{% url 'flavor' d.dish.id t.group.id f.flavor.id %}">{{ f.flavor.name }}</a></td>
+                                                <td><a href="{% url 'flavor' dish.self.id type.self.id flavor.self.id %}">{{ flavor.self.name }}</a></td>
                                             {% endif %}
-                                            {% for p in f.prices %}
-                                                <td>{{ p.price }}</td>
+                                            {% for size_and_price in flavor.sizes_and_prices %}
+                                                <td>{{ size_and_price.price }}</td>
                                             {% endfor %}
                                         </tr>
                                     {% endfor %}
@@ -44,22 +44,22 @@
                     </ul>
 
                     <ul class="list-group pt-4">
-                        {% for t in d.view.addings %}
+                        {% for adding in dish.view.addings %}
                         <ul class="list-group pt-4">
                             <li class="list-group-item ln-container02">
-                                <h3>{{ t.group.name }}</h3>
+                                <h3>{{ adding.self.name }}</h3>
                                 <table style="width:100%">
                                     <tr>
                                         <th></th>
-                                        {% for s in t.sizes %}
-                                        <th>{{ s.name }}</th>
+                                        {% for size in adding.sizes %}
+                                        <th>{{ size.name }}</th>
                                     {% endfor %}
                                 </tr>
-                                {% for f in t.flavors %}
+                                {% for flavor in adding.flavors %}
                                     <tr>
-                                        <td>{{ f.flavor.name }}</td>
-                                        {% for p in f.prices %}
-                                            <td>{{ p.price }}</td>
+                                        <td>{{ flavor.self.name }}</td>
+                                        {% for size_and_price in flavor.sizes_and_prices %}
+                                            <td>{{ size_and_price.price }}</td>
                                         {% endfor %}
                                     </tr>
                                 {% endfor %}
