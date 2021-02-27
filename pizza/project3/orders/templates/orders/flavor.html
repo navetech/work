@@ -1,12 +1,15 @@
 {% extends "orders/base.html" %}
 
 
+{% load static %}
+
+
 {% block title %}
-    Menu
+    Flavor
 {% endblock %}
 
 {% block main %}
-    <h1>Menu</h1>
+    <h1>Flavor</h1>
 
     <ul class="list-group pt-4">
         {% for dish in dishes %}
@@ -27,11 +30,13 @@
                                     </tr>
                                     {% for flavor in type.flavors %}
                                         <tr>
-                                            {% if type.self is None %}
-                                                <td><a href="{% url 'flavor' dish.self.id None flavor.self.id %}">{{ flavor.self.name }}</a></td>
-                                            {% else %}
-                                                <td><a href="{% url 'flavor' dish.self.id type.self.id flavor.self.id %}">{{ flavor.self.name }}</a></td>
-                                            {% endif %}
+                                            <td>{{ flavor.self.name }}</td>
+                                            <td>
+                                                <figure>
+                                                    <img src="{% static 'orders/images/dishes/pizza-regular-cheese.jpg' %}" alt="Minha Figura">
+                                                    <figcaption>Informações da Figura</figcaption>
+                                                </figure>
+                                            </td>
                                             {% for size_and_price in flavor.sizes_and_prices %}
                                                 <td>{{ size_and_price.price }}</td>
                                             {% endfor %}
