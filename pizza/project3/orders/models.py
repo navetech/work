@@ -57,7 +57,25 @@ class SizePriceCommonInfo(PriceCommonInfo):
         return f"{self.size} - {PriceCommonInfo.__str__(self)}"
 
 
-class Topping(CommonInfo):
+class Image(models.Model):
+    src = models.CharField(max_length=128)
+
+    def __str__(self):
+        return f"{self.src}"
+
+
+class FlavorCommonInfo(CommonInfo):
+    img = models.ForeignKey(Image, on_delete=models.CASCADE,
+        related_name="size_%(app_label)s_%(class)s")
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{self.img} - {CommonInfo.__str__(self)}"
+
+
+class Topping(FlavorCommonInfo):
     pass
 
 
@@ -72,7 +90,7 @@ class PizzaType(CommonInfo):
     pass
         
 
-class PizzaFlavor(CommonInfo):
+class PizzaFlavor(FlavorCommonInfo):
     code = models.IntegerField(default=0)
 
     def __str__(self):
@@ -87,7 +105,7 @@ class Pizza(SizePriceCommonInfo):
         return f"type: {self.type}, flavor: {self.flavor}, {SizePriceCommonInfo.__str__(self)}"
 
 
-class SubFlavor(CommonInfo):
+class SubFlavor(FlavorCommonInfo):
     pass
         
 
@@ -98,7 +116,7 @@ class Sub(SizePriceCommonInfo):
         return f"flavor: {self.flavor}, {SizePriceCommonInfo.__str__(self)}"
 
 
-class ExtraFlavor(CommonInfo):
+class ExtraFlavor(FlavorCommonInfo):
     pass
         
 
@@ -109,7 +127,7 @@ class Extra(PriceCommonInfo):
         return f"flavor: {self.flavor}, {PriceCommonInfo.__str__(self)}"
 
 
-class PastaFlavor(CommonInfo):
+class PastaFlavor(FlavorCommonInfo):
     pass
         
 
@@ -120,7 +138,7 @@ class Pasta(PriceCommonInfo):
         return f"flavor: {self.flavor}, {PriceCommonInfo.__str__(self)}"
 
 
-class SaladFlavor(CommonInfo):
+class SaladFlavor(FlavorCommonInfo):
     pass
         
 
@@ -131,7 +149,7 @@ class Salad(PriceCommonInfo):
         return f"flavor: {self.flavor}, {PriceCommonInfo.__str__(self)}"
 
 
-class DinnerPlatterFlavor(CommonInfo):
+class DinnerPlatterFlavor(FlavorCommonInfo):
     pass
         
 

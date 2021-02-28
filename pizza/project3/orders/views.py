@@ -23,8 +23,8 @@ ALL_ADDINGS = None
 ALL_FLAVORS = None
 ALL_SIZES = None
 
-UNDEFINED_TYPE = None
-UNDEFINED_SIZE = None
+GENERIC_TYPE = None
+ONE_SIZE = None
 
 
 def index(request):
@@ -38,11 +38,17 @@ def index(request):
 
 def menu(request):
     dishes_ids = ALL_DISHES
+
     types_ids = ALL_TYPES
+    type_flavors_ids = ALL_FLAVORS
+    type_flavor_sizes_ids = ALL_SIZES
+
     addings_ids = ALL_ADDINGS
-    flavors_ids = ALL_FLAVORS
-    sizes_ids = ALL_SIZES
-    dishes_view = build_dishes_view(dishes_ids, types_ids, addings_ids, flavors_ids, sizes_ids)
+    adding_flavors_ids = ALL_FLAVORS
+    adding_flavor_sizes_ids = ALL_SIZES
+
+    dishes_view = build_dishes_view(dishes_ids, types_ids, type_flavors_ids, type_flavor_sizes_ids,
+        addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
 
     context = {
         "dishes": dishes_view,
@@ -52,11 +58,17 @@ def menu(request):
 
 def flavor_view(request, dish_id, type_id, flavor_id):
     dishes_ids = [dish_id]
+
     types_ids = [type_id]
+    type_flavors_ids = [flavor_id]
+    type_flavor_sizes_ids = ALL_SIZES
+
     addings_ids = ALL_ADDINGS
-    flavors_ids = [flavor_id]
-    sizes_ids = ALL_SIZES
-    dishes_view = build_dishes_view(dishes_ids, types_ids, addings_ids, flavors_ids, sizes_ids)
+    adding_flavors_ids = ALL_FLAVORS
+    adding_flavor_sizes_ids = ALL_SIZES
+
+    dishes_view = build_dishes_view(dishes_ids, types_ids, type_flavors_ids, type_flavor_sizes_ids,
+        addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
 
     context = {
         "dishes": dishes_view,
@@ -64,7 +76,10 @@ def flavor_view(request, dish_id, type_id, flavor_id):
     return render(request, "orders/flavor.html", context)
 
 
-def build_dishes_view(dishes_ids, types_ids, addings_ids, flavors_ids, sizes_ids):
+def build_dishes_view(dishes_ids=ALL_DISHES,
+    types_ids=ALL_TYPES, type_flavors_ids=ALL_FLAVORS, type_flavor_sizes_ids=ALL_SIZES,
+    addings_ids=ALL_ADDINGS, adding_flavors_ids=ALL_FLAVORS, adding_flavor_sizes_ids=ALL_SIZES):
+
     dishes = []
     if dishes_ids is ALL_DISHES:
         dishes = Dish.objects.all().order_by("sort_number")
@@ -73,20 +88,25 @@ def build_dishes_view(dishes_ids, types_ids, addings_ids, flavors_ids, sizes_ids
             dish = Dish.objects.filter(pk=dish_id)[0]
             if dish:
                 dishes.append(dish)
+    if len(dishes) > 1:
+        types_ids = ALL_TYPES
+        addings_ids = ALL_ADDINGS
 
     dishes_view = []
     for dish in dishes:
         view = None
         if dish.name == "Pizzas":
-            view = build_pizzas_view(types_ids, addings_ids, flavors_ids, sizes_ids)
+            view = build_pizzas_view(types_ids, type_flavors_ids, type_flavor_sizes_ids,
+                addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
         elif dish.name == "Subs":
-            view = build_subs_view(addings_ids, flavors_ids, sizes_ids)
+            view = build_subs_view(type_flavors_ids, type_flavor_sizes_ids,
+                addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
         elif dish.name == "Pasta":
-            view = build_pastas_view(flavors_ids)
+            view = build_pastas_view(type_flavors_ids)
         elif dish.name == "Salads":
-            view = build_salads_view(flavors_ids)
+            view = build_salads_view(type_flavors_ids)
         elif dish.name == "Dinner Platters":
-            view = build_dinnerplatters_view(flavors_ids, sizes_ids)
+            view = build_dinnerplatters_view(type_flavors_ids, type_flavor_sizes_ids)
 
         if view is not None:
             dishes_view.append({
@@ -97,7 +117,9 @@ def build_dishes_view(dishes_ids, types_ids, addings_ids, flavors_ids, sizes_ids
     return dishes_view
 
 
-def build_pizzas_view(types_ids, addings_ids, flavors_ids, sizes_ids):
+def build_pizzas_view(types_ids=ALL_TYPES, type_flavors_ids=ALL_FLAVORS, type_flavor_sizes_ids=ALL_SIZES,
+    addings_ids=ALL_ADDINGS, adding_flavors_ids=ALL_FLAVORS, adding_flavor_sizes_ids=ALL_SIZES):
+
     types_view = []
 
     types = []
@@ -108,29 +130,35 @@ def build_pizzas_view(types_ids, addings_ids, flavors_ids, sizes_ids):
             type = PizzaType.objects.filter(pk=id)[0]
             if type:
                 types.append(type)
-
     if types:
+        if len(types) > 1:
+            type_flavors_ids = ALL_FLAVORS
+
         flavors = []
-        if flavors_ids is ALL_FLAVORS:
+        if type_flavors_ids is ALL_FLAVORS:
             flavors = PizzaFlavor.objects.all().order_by("sort_number")
         else:
-            for id in flavors_ids:
+            for id in type_flavors_ids:
                 flavor = PizzaFlavor.objects.filter(pk=id)[0]
                 if flavor:
                     flavors.append(flavor)
+        if flavors:
+            items = Pizza.objects.all()
 
-        items = Pizza.objects.all()
+            if len(flavors) > 1:
+                type_flavor_sizes_ids = ALL_SIZES
 
-        sizes = []
-        if sizes_ids is ALL_SIZES:
-            sizes = Size.objects.all().order_by("sort_number")
-        else:
-            for id in sizes_ids:
-                size = Size.objects.filter(pk=id)[0]
-                if size:
-                    sizes.append(size)
+            sizes = []
+            if type_flavor_sizes_ids is ALL_SIZES:
+                sizes = Size.objects.all().order_by("sort_number")
+            else:
+                for id in type_flavor_sizes_ids:
+                    size = Size.objects.filter(pk=id)[0]
+                    if size:
+                        sizes.append(size)
 
-        types_view = build_types_or_addings_view(types, flavors, items, sizes)
+            if sizes:
+                types_view = build_types_or_addings_view(types, flavors, items, sizes)
 
     addings_view = []
 
@@ -144,22 +172,34 @@ def build_pizzas_view(types_ids, addings_ids, flavors_ids, sizes_ids):
                 addings.append(adding)
 
     if addings:
-        flavors = Topping.objects.all().order_by("sort_number")
-        items = []
-        sizes = []
+        if len(addings) > 1:
+            adding_flavors_ids = ALL_FLAVORS
 
-        addings_view = build_types_or_addings_view(addings, flavors, items, sizes)
+        flavors = []
+        if adding_flavors_ids is ALL_FLAVORS:
+            flavors = Topping.objects.all().order_by("sort_number")
+        else:
+            for id in adding_flavors_ids:
+                flavor = Topping.objects.filter(pk=id)[0]
+                if flavor:
+                    flavors.append(flavor)
+        if flavors:
+            items = []
+            sizes = []
+
+            addings_view = build_types_or_addings_view(addings, flavors, items, sizes)
 
     return {
         "types": types_view,
         "addings": addings_view,
     }
 
+def build_subs_view(flavors_ids=ALL_FLAVORS, flavor_sizes_ids=ALL_SIZES,
+    addings_ids=ALL_ADDINGS, adding_flavors_ids=ALL_FLAVORS, adding_flavor_sizes_ids=ALL_SIZES):
 
-def build_subs_view(addings_ids, flavors_ids, sizes_ids):
     types_view = []
 
-    types = [UNDEFINED_TYPE]
+    types = [GENERIC_TYPE]
 
     flavors = []
     if flavors_ids is ALL_FLAVORS:
@@ -169,19 +209,22 @@ def build_subs_view(addings_ids, flavors_ids, sizes_ids):
             flavor = SubFlavor.objects.filter(pk=id)[0]
             if flavor:
                 flavors.append(flavor)
+    if flavors:
+        items = Sub.objects.all()
 
-    items = Sub.objects.all()
+        if len(flavors) > 1:
+            flavor_sizes_ids = ALL_SIZES
 
-    sizes = []
-    if sizes_ids is ALL_SIZES:
-        sizes = Size.objects.all().order_by("sort_number")
-    else:
-        for id in sizes_ids:
-            size = Size.objects.filter(pk=id)[0]
-            if size:
-                sizes.append(size)
-
-    types_view = build_types_or_addings_view(types, flavors, items, sizes)
+        sizes = []
+        if flavor_sizes_ids is ALL_SIZES:
+            sizes = Size.objects.all().order_by("sort_number")
+        else:
+            for id in flavor_sizes_ids:
+                size = Size.objects.filter(pk=id)[0]
+                if size:
+                    sizes.append(size)
+        if sizes:
+            types_view = build_types_or_addings_view(types, flavors, items, sizes)
 
     addings_view = []
 
@@ -193,13 +236,23 @@ def build_subs_view(addings_ids, flavors_ids, sizes_ids):
             adding = Adding.objects.filter(pk=id)[0]
             if adding:
                 addings.append(adding)
-
     if addings:
-        flavors = ExtraFlavor.objects.all().order_by("sort_number")
-        items = Extra.objects.all()
-        sizes = [UNDEFINED_SIZE]
+        if len(addings) > 1:
+            adding_flavors_ids = ALL_FLAVORS
 
-        addings_view = build_types_or_addings_view(addings, flavors, items, sizes)
+        flavors = []
+        if adding_flavors_ids is ALL_FLAVORS:
+            flavors = ExtraFlavor.objects.all().order_by("sort_number")
+        else:
+            for id in adding_flavors_ids:
+                flavor = ExtraFlavor.objects.filter(pk=id)[0]
+                if flavor:
+                    flavors.append(flavor)
+        if flavors:
+            items = Extra.objects.all()
+            sizes = [ONE_SIZE]
+
+            addings_view = build_types_or_addings_view(addings, flavors, items, sizes)
 
     return {
         "types": types_view,
@@ -207,10 +260,10 @@ def build_subs_view(addings_ids, flavors_ids, sizes_ids):
     }
 
 
-def build_pastas_view(flavors_ids):
+def build_pastas_view(flavors_ids=ALL_FLAVORS):
     types_view = []
 
-    types = [UNDEFINED_TYPE]
+    types = [GENERIC_TYPE]
 
     flavors = []
     if flavors_ids is ALL_FLAVORS:
@@ -220,12 +273,11 @@ def build_pastas_view(flavors_ids):
             flavor = PastaFlavor.objects.filter(pk=id)[0]
             if flavor:
                 flavors.append(flavor)
+    if flavors:
+        items = Pasta.objects.all()
+        sizes = [ONE_SIZE]
 
-    items = Pasta.objects.all()
-
-    sizes = [UNDEFINED_SIZE]
-
-    types_view = build_types_or_addings_view(types, flavors, items, sizes)
+        types_view = build_types_or_addings_view(types, flavors, items, sizes)
 
     addings_view = []
 
@@ -235,10 +287,10 @@ def build_pastas_view(flavors_ids):
     }
 
 
-def build_salads_view(flavors_ids):
+def build_salads_view(flavors_ids=ALL_FLAVORS):
     types_view = []
 
-    types = [UNDEFINED_TYPE]
+    types = [GENERIC_TYPE]
 
     flavors = []
     if flavors_ids is ALL_FLAVORS:
@@ -248,13 +300,12 @@ def build_salads_view(flavors_ids):
             flavor = SaladFlavor.objects.filter(pk=id)[0]
             if flavor:
                 flavors.append(flavor)
+    if flavors:
+        items = Salad.objects.all()
+        sizes = [ONE_SIZE]
 
-    items = Salad.objects.all()
-
-    sizes = [UNDEFINED_SIZE]
-
-    types_view = build_types_or_addings_view(types, flavors, items, sizes)
-
+        types_view = build_types_or_addings_view(types, flavors, items, sizes)
+        
     addings_view = []
 
     return {
@@ -263,10 +314,10 @@ def build_salads_view(flavors_ids):
     }
 
 
-def build_dinnerplatters_view(flavors_ids, sizes_ids):
+def build_dinnerplatters_view(flavors_ids=ALL_FLAVORS, flavor_sizes_ids=ALL_SIZES):
     types_view = []
 
-    types = [UNDEFINED_TYPE]
+    types = [GENERIC_TYPE]
 
     flavors = []
     if flavors_ids is ALL_FLAVORS:
@@ -276,19 +327,22 @@ def build_dinnerplatters_view(flavors_ids, sizes_ids):
             flavor = DinnerPlatterFlavor.objects.filter(pk=id)[0]
             if flavor:
                 flavors.append(flavor)
+    if flavors:
+        items = DinnerPlatter.objects.all()
 
-    items = DinnerPlatter.objects.all()
+        if len(flavors) > 1:
+            flavor_sizes_ids = ALL_SIZES
 
-    sizes = []
-    if sizes_ids is ALL_SIZES:
-        sizes = Size.objects.all().order_by("sort_number")
-    else:
-        for id in sizes_ids:
-            size = Size.objects.filter(pk=id)[0]
-            if size:
-                sizes.append(size)
-
-    types_view = build_types_or_addings_view(types, flavors, items, sizes)
+        sizes = []
+        if flavor_sizes_ids is ALL_SIZES:
+            sizes = Size.objects.all().order_by("sort_number")
+        else:
+            for id in flavor_sizes_ids:
+                size = Size.objects.filter(pk=id)[0]
+                if size:
+                    sizes.append(size)
+        if sizes:
+            types_view = build_types_or_addings_view(types, flavors, items, sizes)
 
     addings_view = []
 
