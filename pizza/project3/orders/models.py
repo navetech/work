@@ -57,16 +57,8 @@ class SizePriceCommonInfo(PriceCommonInfo):
         return f"{self.size} - {PriceCommonInfo.__str__(self)}"
 
 
-class Image(models.Model):
-    src = models.CharField(max_length=128)
-
-    def __str__(self):
-        return f"{self.src}"
-
-
 class FlavorCommonInfo(CommonInfo):
-    img = models.ForeignKey(Image, on_delete=models.CASCADE,
-        related_name="size_%(app_label)s_%(class)s")
+    img = models.ImageField(upload_to='orders/images/dishes/')
 
     class Meta:
         abstract = True

@@ -4,6 +4,8 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.models import User
 
+from django.conf import settings
+
 from .models import Dish, Adding
 from .models import Size
 from .models import Topping, SpecialPizza, PizzaType, PizzaFlavor, Pizza
@@ -52,9 +54,14 @@ def menu(request):
 
     context = {
         "dishes": dishes_view,
+        "settings": settings,
     }
     return render(request, "orders/menu.html", context)
 
+
+def dish_img_view(request, dish_img):
+    return HttpResponse("Project 3: TODO")
+    
 
 def flavor_view(request, dish_id, type_id, flavor_id):
     dishes_ids = [dish_id]
@@ -72,6 +79,7 @@ def flavor_view(request, dish_id, type_id, flavor_id):
 
     context = {
         "dishes": dishes_view,
+        "settings": settings,
     }
     return render(request, "orders/flavor.html", context)
 
@@ -95,17 +103,17 @@ def build_dishes_view(dishes_ids=ALL_DISHES,
     dishes_view = []
     for dish in dishes:
         view = None
-        if dish.name == "Pizzas":
+        if dish.name == "Pizza":
             view = build_pizzas_view(types_ids, type_flavors_ids, type_flavor_sizes_ids,
                 addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
-        elif dish.name == "Subs":
+        elif dish.name == "Sub":
             view = build_subs_view(type_flavors_ids, type_flavor_sizes_ids,
                 addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
         elif dish.name == "Pasta":
             view = build_pastas_view(type_flavors_ids)
-        elif dish.name == "Salads":
+        elif dish.name == "Salad":
             view = build_salads_view(type_flavors_ids)
-        elif dish.name == "Dinner Platters":
+        elif dish.name == "Dinner Platter":
             view = build_dinnerplatters_view(type_flavors_ids, type_flavor_sizes_ids)
 
         if view is not None:

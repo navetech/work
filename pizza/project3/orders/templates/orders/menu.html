@@ -7,6 +7,17 @@
 
 {% block main %}
     <h1>Menu</h1>
+    {{ settings.MEDIA_ROOT }}
+    <br>
+    {{ settings.MEDIA_URL }}
+    <br>
+    {{ settings.STATIC_ROOT }}
+    <br>
+    {{ settings.STATIC_URL }}
+    <br>
+    {{ settings.BASE_DIR }}
+    <br>
+    {{ settings.STATICFILES_DIRS }}
 
     <ul class="list-group pt-4">
         {% for dish in dishes %}

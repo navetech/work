@@ -30,11 +30,10 @@
                                     </tr>
                                     {% for flavor in type.flavors %}
                                         <tr>
-                                            <td>{{ flavor.self.name }}</td>
                                             <td>
                                                 <figure>
-                                                    <img src="{% static 'orders/images/dishes/pizza-regular-cheese.jpg' %}" alt="Minha Figura">
-                                                    <figcaption>Informações da Figura</figcaption>
+                                                    <img src="{% static flavor.self.img.name %}" alt="{{ flavor.self.name }} Image">
+                                                    <figcaption>{{ type.self.name }} {{ flavor.self.name }} {{ dish.self.name }}</figcaption>
                                                 </figure>
                                             </td>
                                             {% for size_and_price in flavor.sizes_and_prices %}
