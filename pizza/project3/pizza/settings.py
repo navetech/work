@@ -33,7 +33,7 @@ ALLOWED_HOSTS = []
 MEDIA_ROOT = 'media'
 
 STATICFILES_DIRS = [
-    f"{MEDIA_ROOT}",
+    f"{MEDIA_ROOT}/orders/static",
 ]
 
 INSTALLED_APPS = [

@@ -11,5 +11,4 @@ urlpatterns = [
     path("unregister", views.unregister_view, name="unregister"),
     path("menu", views.menu, name="menu"),
     path('flavor/<dish_id>/<type_id>/<flavor_id>', views.flavor_view, name="flavor"),
-    path("media/<path:dish_img>", views.dish_img_view, name="dish_img"),
 ]

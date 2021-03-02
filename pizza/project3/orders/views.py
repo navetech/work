@@ -144,10 +144,10 @@ def build_pizzas_view(types_ids=ALL_TYPES, type_flavors_ids=ALL_FLAVORS, type_fl
 
         flavors = []
         if type_flavors_ids is ALL_FLAVORS:
-            flavors = PizzaFlavor.objects.all().order_by("sort_number")
+            flavors = PizzaTypeFlavor.objects.all().order_by("sort_number")
         else:
             for id in type_flavors_ids:
-                flavor = PizzaFlavor.objects.filter(pk=id)[0]
+                flavor = PizzaTypeFlavor.objects.filter(pk=id)[0]
                 if flavor:
                     flavors.append(flavor)
         if flavors:
@@ -380,12 +380,15 @@ def get_type_or_adding_sizes(type_or_adding, dish_flavors, items, dish_sizes):
         for flavor in dish_flavors:
             for item in items:
                 if item:
-                    has_attr = hasattr(item, "type")
-                    if (type_or_adding and has_attr and type_or_adding == item.type) or not type_or_adding or not has_attr:
-                        has_attr = hasattr(item, "flavor")
-                        if (flavor and has_attr and flavor == item.flavor) or not flavor or not has_attr:
-                            has_attr = hasattr(item, "size")
-                            if (size and has_attr and size == item.size) or not size or not has_attr:
+                    has_flavor = hasattr(item, "flavor")
+                    if has_flavor:
+                        has_flavor_type = hasattr(item.flavor, "type")
+                    else:
+                        has_flavor_type = False
+                    if (type_or_adding and has_flavor_type and type_or_adding == item.flavor.type) or not type_or_adding or not has_flavor_type:
+                        if (flavor and has_flavor and flavor == item.flavor) or not flavor or not has_flavor:
+                            has_size = hasattr(item, "size")
+                            if (size and has_size and size == item.size) or not size or not has_size:
                                 if not size in type_or_adding_sizes:
                                     type_or_adding_sizes.append(size)
                                 break
@@ -403,12 +406,15 @@ def get_type_or_adding_flavors(type_or_adding, dish_flavors, items, type_or_addi
             }
             for item in items:
                 if item:
-                    has_attr = hasattr(item, "type")
-                    if (type_or_adding and has_attr and type_or_adding == item.type) or not type_or_adding or not has_attr:
-                        has_attr = hasattr(item, "flavor")
-                        if (flavor and has_attr and flavor == item.flavor) or not flavor or not has_attr:
-                            has_attr = hasattr(item, "size")
-                            if (size and has_attr and size == item.size) or not size or not has_attr:
+                    has_flavor = hasattr(item, "flavor")
+                    if has_flavor:
+                        has_flavor_type = hasattr(item.flavor, "type")
+                    else:
+                        has_flavor_type = False
+                    if (type_or_adding and has_flavor_type and type_or_adding == item.flavor.type) or not type_or_adding or not has_flavor_type:
+                        if (flavor and has_flavor and flavor == item.flavor) or not flavor or not has_flavor:
+                            has_size = hasattr(item, "size")
+                            if (size and has_size and size == item.size) or not size or not has_size:
                                 size_and_price = {
                                     "size": size,
                                     "price": item.price,
