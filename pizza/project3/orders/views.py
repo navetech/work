@@ -8,7 +8,7 @@ from django.conf import settings
 
 from .models import Dish, Adding
 from .models import Size
-from .models import Topping, SpecialPizza, PizzaType, PizzaFlavor, Pizza
+from .models import Topping, SpecialPizza, PizzaType, PizzaFlavor, PizzaTypeFlavor, Pizza
 from .models import SubFlavor, Sub, ExtraFlavor, Extra
 from .models import PastaFlavor, Pasta
 from .models import SaladFlavor, Salad
@@ -58,10 +58,6 @@ def menu(request):
     }
     return render(request, "orders/menu.html", context)
 
-
-def dish_img_view(request, dish_img):
-    return HttpResponse("Project 3: TODO")
-    
 
 def flavor_view(request, dish_id, type_id, flavor_id):
     dishes_ids = [dish_id]
@@ -144,7 +140,7 @@ def build_pizzas_view(types_ids=ALL_TYPES, type_flavors_ids=ALL_FLAVORS, type_fl
 
         flavors = []
         if type_flavors_ids is ALL_FLAVORS:
-            flavors = PizzaTypeFlavor.objects.all().order_by("sort_number")
+            flavors = PizzaTypeFlavor.objects.all().order_by("type__sort_number", "flavor__sort_number")
         else:
             for id in type_flavors_ids:
                 flavor = PizzaTypeFlavor.objects.filter(pk=id)[0]
@@ -197,10 +193,13 @@ def build_pizzas_view(types_ids=ALL_TYPES, type_flavors_ids=ALL_FLAVORS, type_fl
 
             addings_view = build_types_or_addings_view(addings, flavors, items, sizes)
 
-    return {
-        "types": types_view,
-        "addings": addings_view,
-    }
+    if types_view and addings_view:
+        return {
+            "types": types_view,
+            "addings": addings_view,
+        }
+    else:
+        return None
 
 def build_subs_view(flavors_ids=ALL_FLAVORS, flavor_sizes_ids=ALL_SIZES,
     addings_ids=ALL_ADDINGS, adding_flavors_ids=ALL_FLAVORS, adding_flavor_sizes_ids=ALL_SIZES):
@@ -262,10 +261,13 @@ def build_subs_view(flavors_ids=ALL_FLAVORS, flavor_sizes_ids=ALL_SIZES,
 
             addings_view = build_types_or_addings_view(addings, flavors, items, sizes)
 
-    return {
-        "types": types_view,
-        "addings": addings_view,
-    }
+    if types_view and addings_view:
+        return {
+            "types": types_view,
+            "addings": addings_view,
+        }
+    else:
+        return None
 
 
 def build_pastas_view(flavors_ids=ALL_FLAVORS):
@@ -289,10 +291,13 @@ def build_pastas_view(flavors_ids=ALL_FLAVORS):
 
     addings_view = []
 
-    return {
-        "types": types_view,
-        "addings": addings_view,
-    }
+    if types_view and addings_view:
+        return {
+            "types": types_view,
+            "addings": addings_view,
+        }
+    else:
+        return None
 
 
 def build_salads_view(flavors_ids=ALL_FLAVORS):
@@ -316,10 +321,13 @@ def build_salads_view(flavors_ids=ALL_FLAVORS):
         
     addings_view = []
 
-    return {
-        "types": types_view,
-        "addings": addings_view,
-    }
+    if types_view and addings_view:
+        return {
+            "types": types_view,
+            "addings": addings_view,
+        }
+    else:
+        return None
 
 
 def build_dinnerplatters_view(flavors_ids=ALL_FLAVORS, flavor_sizes_ids=ALL_SIZES):
@@ -354,10 +362,13 @@ def build_dinnerplatters_view(flavors_ids=ALL_FLAVORS, flavor_sizes_ids=ALL_SIZE
 
     addings_view = []
 
-    return {
-        "types": types_view,
-        "addings": addings_view,
-    }
+    if types_view and addings_view:
+        return {
+            "types": types_view,
+            "addings": addings_view,
+        }
+    else:
+        return None
 
 
 def build_types_or_addings_view(types_or_addings, dish_flavors, items, dish_sizes):
@@ -382,11 +393,17 @@ def get_type_or_adding_sizes(type_or_adding, dish_flavors, items, dish_sizes):
                 if item:
                     has_flavor = hasattr(item, "flavor")
                     if has_flavor:
+                        item_flavor = item.flavor
                         has_flavor_type = hasattr(item.flavor, "type")
+                        has_flavor_flavor = hasattr(item.flavor, "flavor")
+                        if has_flavor_flavor:
+                            item_flavor = item.flavor.flavor
+                        elif has_flavor_type:
+                            has_flavor = False
                     else:
                         has_flavor_type = False
                     if (type_or_adding and has_flavor_type and type_or_adding == item.flavor.type) or not type_or_adding or not has_flavor_type:
-                        if (flavor and has_flavor and flavor == item.flavor) or not flavor or not has_flavor:
+                        if (flavor and has_flavor and flavor == item_flavor) or not flavor or not has_flavor:
                             has_size = hasattr(item, "size")
                             if (size and has_size and size == item.size) or not size or not has_size:
                                 if not size in type_or_adding_sizes:
@@ -408,18 +425,25 @@ def get_type_or_adding_flavors(type_or_adding, dish_flavors, items, type_or_addi
                 if item:
                     has_flavor = hasattr(item, "flavor")
                     if has_flavor:
+                        item_flavor = item.flavor
                         has_flavor_type = hasattr(item.flavor, "type")
+                        has_flavor_flavor = hasattr(item.flavor, "flavor")
+                        if has_flavor_flavor:
+                            item_flavor = item.flavor.flavor
+                        elif has_flavor_type:
+                            has_flavor = False
                     else:
                         has_flavor_type = False
                     if (type_or_adding and has_flavor_type and type_or_adding == item.flavor.type) or not type_or_adding or not has_flavor_type:
-                        if (flavor and has_flavor and flavor == item.flavor) or not flavor or not has_flavor:
+                        if (flavor and has_flavor and flavor == item_flavor) or not flavor or not has_flavor:
                             has_size = hasattr(item, "size")
                             if (size and has_size and size == item.size) or not size or not has_size:
-                                size_and_price = {
-                                    "size": size,
-                                    "price": item.price,
-                                }
-                                break
+                                if hasattr(item, "price"):
+                                    size_and_price = {
+                                        "size": size,
+                                        "price": item.price,
+                                    }
+                                    break
             flavor_sizes_and_prices.append(size_and_price)
 
         if flavor_sizes_and_prices:
@@ -431,10 +455,11 @@ def get_type_or_adding_flavors(type_or_adding, dish_flavors, items, type_or_addi
                     })
                     break
         else:
-            type_or_adding_flavors.append({
-                "self": flavor,
-                "sizes_and_prices": flavor_sizes_and_prices,
-            })
+            if items is None:
+                type_or_adding_flavors.append({
+                    "self": flavor,
+                    "sizes_and_prices": flavor_sizes_and_prices,
+                })
     return type_or_adding_flavors
 
 

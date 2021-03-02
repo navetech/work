@@ -30,12 +30,6 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-MEDIA_ROOT = 'media'
-
-STATICFILES_DIRS = [
-    f"{MEDIA_ROOT}",
-]
-
 INSTALLED_APPS = [
     'orders.apps.OrdersConfig',
     'django.contrib.admin',

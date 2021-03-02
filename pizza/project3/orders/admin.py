@@ -1,8 +1,9 @@
 from django.contrib import admin
 
+
 from .models import Dish, Adding
 from .models import Size
-from .models import Topping, SpecialPizza, PizzaType, PizzaFlavor, Pizza
+from .models import Topping, SpecialPizza, PizzaType, PizzaFlavor, PizzaTypeFlavor, Pizza
 from .models import SubFlavor, Sub, ExtraFlavor, Extra
 from .models import PastaFlavor, Pasta
 from .models import SaladFlavor, Salad
@@ -18,6 +19,7 @@ admin.site.register(Topping)
 admin.site.register(SpecialPizza)
 admin.site.register(PizzaType)
 admin.site.register(PizzaFlavor)
+admin.site.register(PizzaTypeFlavor)
 admin.site.register(Pizza)
 admin.site.register(SubFlavor)
 admin.site.register(Sub)

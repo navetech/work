@@ -31,10 +31,17 @@
                                     {% for flavor in type.flavors %}
                                         <tr>
                                             <td>
-                                                <figure>
-                                                    <img src="{% static flavor.self.img.name %}" alt="{{ flavor.self.name }} Image">
-                                                    <figcaption>{{ type.self.name }} {{ flavor.self.name }} {{ dish.self.name }}</figcaption>
-                                                </figure>
+                                                {% if type.self is None %}
+                                                    <figure>
+                                                        <img src="{% static flavor.self.img.name %}" alt="{{ flavor.self.name }} Image">
+                                                        <figcaption>{{ flavor.self.name }} {{ dish.self.name }}</figcaption>
+                                                    </figure>
+                                                {% else %}
+                                                    <figure>
+                                                        <img src="{% static flavor.self.img.name %}" alt="{{ flavor.self.flavor.name }} Image">
+                                                        <figcaption>{{ type.self.name }} {{ flavor.self.flavor.name }} {{ dish.self.name }}</figcaption>
+                                                    </figure>
+                                                {% endif %}
                                             </td>
                                             {% for size_and_price in flavor.sizes_and_prices %}
                                                 <td>{{ size_and_price.price }}</td>

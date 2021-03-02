@@ -58,7 +58,7 @@ class SizePriceCommonInfo(PriceCommonInfo):
 
 
 class FlavorCommonInfo(CommonInfo):
-    img = models.ImageField(upload_to='orders/images/dishes/')
+    img = models.ImageField(upload_to='orders/static/orders/images/flavors/', default=None)
 
     class Meta:
         abstract = True
@@ -82,19 +82,27 @@ class PizzaType(CommonInfo):
     pass
         
 
-class PizzaFlavor(FlavorCommonInfo):
+class PizzaFlavor(CommonInfo):
     code = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{CommonInfo.__str__(self)} - {self.code}"
-        
 
-class Pizza(SizePriceCommonInfo):
-    type = models.ForeignKey(PizzaType, on_delete=models.CASCADE, related_name="type_pizzas")
-    flavor = models.ForeignKey(PizzaFlavor, on_delete=models.CASCADE, related_name="flavor_pizzas")
+
+class PizzaTypeFlavor(models.Model):
+    type = models.ForeignKey(PizzaType, on_delete=models.CASCADE, related_name="type_pizzatypeflavors")
+    flavor = models.ForeignKey(PizzaFlavor, on_delete=models.CASCADE, related_name="flavor_pizzatypeflavors")
+    img = models.ImageField(upload_to='orders/static/orders/images/flavors/', default=None)
 
     def __str__(self):
-        return f"type: {self.type}, flavor: {self.flavor}, {SizePriceCommonInfo.__str__(self)}"
+        return f"{self.type} - {self.flavor} - {self.img}"
+
+
+class Pizza(SizePriceCommonInfo):
+    flavor = models.ForeignKey(PizzaTypeFlavor, on_delete=models.CASCADE, related_name="flavor_pizzas")
+
+    def __str__(self):
+        return f"{self.flavor} - {SizePriceCommonInfo.__str__(self)}"
 
 
 class SubFlavor(FlavorCommonInfo):
@@ -105,7 +113,7 @@ class Sub(SizePriceCommonInfo):
     flavor = models.ForeignKey(SubFlavor, on_delete=models.CASCADE, related_name="flavor_subs")
 
     def __str__(self):
-        return f"flavor: {self.flavor}, {SizePriceCommonInfo.__str__(self)}"
+        return f"{self.flavor} - {SizePriceCommonInfo.__str__(self)}"
 
 
 class ExtraFlavor(FlavorCommonInfo):
@@ -116,7 +124,7 @@ class Extra(PriceCommonInfo):
     flavor = models.ForeignKey(ExtraFlavor, on_delete=models.CASCADE, related_name="flavor_extras")
 
     def __str__(self):
-        return f"flavor: {self.flavor}, {PriceCommonInfo.__str__(self)}"
+        return f"{self.flavor} - {PriceCommonInfo.__str__(self)}"
 
 
 class PastaFlavor(FlavorCommonInfo):
@@ -127,7 +135,7 @@ class Pasta(PriceCommonInfo):
     flavor = models.ForeignKey(PastaFlavor, on_delete=models.CASCADE, related_name="flavor_pastas")
 
     def __str__(self):
-        return f"flavor: {self.flavor}, {PriceCommonInfo.__str__(self)}"
+        return f"{self.flavor} - {PriceCommonInfo.__str__(self)}"
 
 
 class SaladFlavor(FlavorCommonInfo):
@@ -138,7 +146,7 @@ class Salad(PriceCommonInfo):
     flavor = models.ForeignKey(SaladFlavor, on_delete=models.CASCADE, related_name="flavor_salads")
 
     def __str__(self):
-        return f"flavor: {self.flavor}, {PriceCommonInfo.__str__(self)}"
+        return f"{self.flavor} - {PriceCommonInfo.__str__(self)}"
 
 
 class DinnerPlatterFlavor(FlavorCommonInfo):
@@ -150,7 +158,7 @@ class DinnerPlatter(SizePriceCommonInfo):
         related_name="flavor_dinnerplatters")
 
     def __str__(self):
-        return f"flavor: {self.flavor}, {SizePriceCommonInfo.__str__(self)}"
+        return f"{self.flavor} - {SizePriceCommonInfo.__str__(self)}"
 
 
 class OrderStatus(CommonInfo):
@@ -162,7 +170,7 @@ class Order(models.Model):
     status = models.ForeignKey(OrderStatus, on_delete=models.CASCADE, related_name="status_orders")
 
     def __str__(self):
-        return f"{self.order_user} - {self.order_status}"
+        return f"{self.user} - {self.status}"
 
 
 class DishOrderCommonInfo(models.Model):
