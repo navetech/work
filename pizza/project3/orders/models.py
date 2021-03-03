@@ -58,7 +58,7 @@ class SizePriceCommonInfo(PriceCommonInfo):
 
 
 class FlavorCommonInfo(CommonInfo):
-    img = models.ImageField(upload_to='orders/static/orders/images/flavors/', default=None)
+    img = models.ImageField(upload_to='orders/static/orders/images/flavors/', default=None, blank=True)
 
     class Meta:
         abstract = True
@@ -92,7 +92,7 @@ class PizzaFlavor(CommonInfo):
 class PizzaTypeFlavor(models.Model):
     type = models.ForeignKey(PizzaType, on_delete=models.CASCADE, related_name="type_pizzatypeflavors")
     flavor = models.ForeignKey(PizzaFlavor, on_delete=models.CASCADE, related_name="flavor_pizzatypeflavors")
-    img = models.ImageField(upload_to='orders/static/orders/images/flavors/', default=None)
+    img = models.ImageField(upload_to='orders/static/orders/images/flavors/', default=None, blank=True)
 
     def __str__(self):
         return f"{self.type} - {self.flavor} - {self.img}"

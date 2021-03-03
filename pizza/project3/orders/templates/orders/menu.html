@@ -29,7 +29,7 @@
                                             {% if type.self is None %}
                                                 <td><a href="{% url 'flavor' dish.self.id None flavor.self.id %}">{{ flavor.self.name }}</a></td>
                                             {% else %}
-                                                <td><a href="{% url 'flavor' dish.self.id type.self.id flavor.self.flavor.id %}">{{ flavor.self.flavor.name }}</a></td>
+                                                <td><a href="{% url 'flavor' dish.self.id type.self.id flavor.self.id %}">{{ flavor.self.flavor.name }}</a></td>
                                             {% endif %}
                                             {% for size_and_price in flavor.sizes_and_prices %}
                                                 <td>{{ size_and_price.price }}</td>
@@ -69,6 +69,8 @@
                 </ul>
             </li>
         </ul>
+        {% empty %}
+            <h2>No dishes</h2>
         {% endfor %}
     </ul>
 {% endblock %}

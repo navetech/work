@@ -39,6 +39,9 @@ def index(request):
 
 
 def menu(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("login"))
+
     dishes_ids = ALL_DISHES
 
     types_ids = ALL_TYPES
@@ -60,6 +63,9 @@ def menu(request):
 
 
 def flavor_view(request, dish_id, type_id, flavor_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("login"))
+
     dishes_ids = [dish_id]
 
     types_ids = [type_id]
@@ -193,7 +199,7 @@ def build_pizzas_view(types_ids=ALL_TYPES, type_flavors_ids=ALL_FLAVORS, type_fl
 
             addings_view = build_types_or_addings_view(addings, flavors, items, sizes)
 
-    if types_view and addings_view:
+    if types_view or addings_view:
         return {
             "types": types_view,
             "addings": addings_view,
@@ -261,7 +267,7 @@ def build_subs_view(flavors_ids=ALL_FLAVORS, flavor_sizes_ids=ALL_SIZES,
 
             addings_view = build_types_or_addings_view(addings, flavors, items, sizes)
 
-    if types_view and addings_view:
+    if types_view or addings_view:
         return {
             "types": types_view,
             "addings": addings_view,
@@ -291,7 +297,7 @@ def build_pastas_view(flavors_ids=ALL_FLAVORS):
 
     addings_view = []
 
-    if types_view and addings_view:
+    if types_view or addings_view:
         return {
             "types": types_view,
             "addings": addings_view,
@@ -321,7 +327,7 @@ def build_salads_view(flavors_ids=ALL_FLAVORS):
         
     addings_view = []
 
-    if types_view and addings_view:
+    if types_view or addings_view:
         return {
             "types": types_view,
             "addings": addings_view,
@@ -362,7 +368,7 @@ def build_dinnerplatters_view(flavors_ids=ALL_FLAVORS, flavor_sizes_ids=ALL_SIZE
 
     addings_view = []
 
-    if types_view and addings_view:
+    if types_view or addings_view:
         return {
             "types": types_view,
             "addings": addings_view,
@@ -387,28 +393,13 @@ def build_types_or_addings_view(types_or_addings, dish_flavors, items, dish_size
 
 def get_type_or_adding_sizes(type_or_adding, dish_flavors, items, dish_sizes):
     type_or_adding_sizes = []
-    for size in dish_sizes:
-        for flavor in dish_flavors:
+    for flavor in dish_flavors:
+        for size in dish_sizes:
             for item in items:
-                if item:
-                    has_flavor = hasattr(item, "flavor")
-                    if has_flavor:
-                        item_flavor = item.flavor
-                        has_flavor_type = hasattr(item.flavor, "type")
-                        has_flavor_flavor = hasattr(item.flavor, "flavor")
-                        if has_flavor_flavor:
-                            item_flavor = item.flavor.flavor
-                        elif has_flavor_type:
-                            has_flavor = False
-                    else:
-                        has_flavor_type = False
-                    if (type_or_adding and has_flavor_type and type_or_adding == item.flavor.type) or not type_or_adding or not has_flavor_type:
-                        if (flavor and has_flavor and flavor == item_flavor) or not flavor or not has_flavor:
-                            has_size = hasattr(item, "size")
-                            if (size and has_size and size == item.size) or not size or not has_size:
-                                if not size in type_or_adding_sizes:
-                                    type_or_adding_sizes.append(size)
-                                break
+                if match(type_or_adding, flavor, size, item):
+                    if not size in type_or_adding_sizes:
+                        type_or_adding_sizes.append(size)
+                    break
     return type_or_adding_sizes
 
 
@@ -422,28 +413,13 @@ def get_type_or_adding_flavors(type_or_adding, dish_flavors, items, type_or_addi
                 "price": None,
             }
             for item in items:
-                if item:
-                    has_flavor = hasattr(item, "flavor")
-                    if has_flavor:
-                        item_flavor = item.flavor
-                        has_flavor_type = hasattr(item.flavor, "type")
-                        has_flavor_flavor = hasattr(item.flavor, "flavor")
-                        if has_flavor_flavor:
-                            item_flavor = item.flavor.flavor
-                        elif has_flavor_type:
-                            has_flavor = False
-                    else:
-                        has_flavor_type = False
-                    if (type_or_adding and has_flavor_type and type_or_adding == item.flavor.type) or not type_or_adding or not has_flavor_type:
-                        if (flavor and has_flavor and flavor == item_flavor) or not flavor or not has_flavor:
-                            has_size = hasattr(item, "size")
-                            if (size and has_size and size == item.size) or not size or not has_size:
-                                if hasattr(item, "price"):
-                                    size_and_price = {
-                                        "size": size,
-                                        "price": item.price,
-                                    }
-                                    break
+                if match(type_or_adding, flavor, size, item):
+                    if hasattr(item, "price"):
+                        size_and_price = {
+                            "size": size,
+                            "price": item.price,
+                        }
+                    break
             flavor_sizes_and_prices.append(size_and_price)
 
         if flavor_sizes_and_prices:
@@ -463,9 +439,40 @@ def get_type_or_adding_flavors(type_or_adding, dish_flavors, items, type_or_addi
     return type_or_adding_flavors
 
 
+def match(type, flavor, size, item):
+    if not item:
+        return False
+
+    has_type = hasattr(item, "type")
+    if has_type:
+        item_type = item.type
+
+    has_flavor = hasattr(item, "flavor")
+    if has_flavor:
+        item_flavor = item.flavor
+        has_flavor_type = hasattr(item.flavor, "type")
+        has_flavor_flavor = hasattr(item.flavor, "flavor")
+
+        if has_flavor_type:
+            has_type = True
+            item_type = item.flavor.type
+            if not has_flavor_flavor:
+                has_flavor = False
+
+    if (type and has_type and type == item_type) or not type or not has_type:
+        if (flavor and has_flavor and flavor == item_flavor) or not flavor or not has_flavor:
+            has_size = hasattr(item, "size")
+            if (size and has_size and size == item.size) or not size or not has_size:
+                return True
+    return False
+
+
 
 def login_view(request):
     if request.method == "GET":
+        if request.user.is_authenticated:
+            return HttpResponseRedirect(reverse("index"))
+
         return render(request, "orders/login.html", {"message": None})
     
     username = request.POST["username"]
@@ -485,6 +492,9 @@ def logout_view(request):
 
 def register_view(request):
     if request.method == "GET":
+        if request.user.is_authenticated:
+            return HttpResponseRedirect(reverse("index"))
+
         return render(request, "orders/register.html", {"message": None})
 
     username = request.POST["username"]
@@ -506,6 +516,8 @@ def register_view(request):
 
 def unregister_view(request):
     if request.method == "GET":
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(reverse("index"))
         return render(request, "orders/unregister.html")
 
     if request.POST["confirm-cancel"] == "confirm":
