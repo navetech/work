@@ -392,14 +392,29 @@ def build_types_or_addings_view(types_or_addings, dish_flavors, items, dish_size
 
 
 def get_type_or_adding_sizes(type_or_adding, dish_flavors, items, dish_sizes):
-    type_or_adding_sizes = []
+    if not dish_sizes:
+        return []
+
+    inside_sizes = []
+    for size in dish_sizes:
+        inside_size = {
+            "size": size,
+            "inside": False,
+        }
+        inside_sizes.append(inside_size)
+
     for flavor in dish_flavors:
-        for size in dish_sizes:
+        for inside_size in inside_sizes:
             for item in items:
-                if match(type_or_adding, flavor, size, item):
-                    if not size in type_or_adding_sizes:
-                        type_or_adding_sizes.append(size)
+                if match(type_or_adding, flavor, inside_size["size"], item):
+                    inside_size["inside"] = True
                     break
+
+    type_or_adding_sizes = []
+    for inside_size in inside_sizes:
+        if inside_size["inside"]:
+            type_or_adding_sizes.append(inside_size["size"])
+
     return type_or_adding_sizes
 
 
