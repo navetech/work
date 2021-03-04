@@ -4,12 +4,6 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.models import User
 
-
-def index(request):
-    return HttpResponse("Project 3: TODO")
-
-
-"""
 from .models import Dish, Adding
 from .models import Size
 from .models import Topping, SpecialPizza, PizzaType, PizzaFlavor, PizzaTypeFlavor, Pizza
@@ -544,4 +538,3 @@ def unregister_view(request):
         logout(request)
 
     return HttpResponseRedirect(reverse("index"))
-"""

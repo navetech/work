@@ -1,0 +1,86 @@
+{% extends "orders/base.html" %}
+
+
+{% load static %}
+
+
+{% block title %}
+    Flavor
+{% endblock %}
+
+{% block main %}
+    <h1>Flavor</h1>
+
+    <ul class="list-group pt-4">
+        {% for dish in dishes %}
+        <ul class="list-group pt-4">
+            <li class="list-group-item ln-container01">
+                <h2>{{ dish.self.name }}</h2>
+                    <ul class="list-group pt-4">
+                        {% for type in dish.types %}
+                        <ul class="list-group pt-4">
+                            <li class="list-group-item ln-container02">
+                                <h3>{{ type.self.name }}</h3>
+                                <table style="width:100%">
+                                    <tr>
+                                        <th></th>
+                                        {% for size in type.sizes %}
+                                            <th>{{ size.name }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                    {% for flavor in type.flavors %}
+                                        <tr>
+                                            <td>
+                                                {% if type.self is None %}
+                                                    <figure>
+                                                        <img src="{% static flavor.self.img.name %}" alt="{{ flavor.self.name }} Image">
+                                                        <figcaption>{{ flavor.self.name }} {{ dish.self.name }}</figcaption>
+                                                    </figure>
+                                                {% else %}
+                                                    <figure>
+                                                        <img src="{% static flavor.self.img.name %}" alt="{{ flavor.self.flavor.name }} Image">
+                                                        <figcaption>{{ type.self.name }} {{ flavor.self.flavor.name }} {{ dish.self.name }}</figcaption>
+                                                    </figure>
+                                                {% endif %}
+                                            </td>
+                                            {% for size_and_price in flavor.sizes_and_prices %}
+                                                <td>{{ size_and_price.price }}</td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </li>
+                        </ul>
+                        {% endfor %}
+                    </ul>
+
+                    <ul class="list-group pt-4">
+                        {% for adding in dish.addings %}
+                        <ul class="list-group pt-4">
+                            <li class="list-group-item ln-container02">
+                                <h3>{{ adding.self.name }}</h3>
+                                <table style="width:100%">
+                                    <tr>
+                                        <th></th>
+                                        {% for size in adding.sizes %}
+                                        <th>{{ size.name }}</th>
+                                    {% endfor %}
+                                </tr>
+                                {% for flavor in adding.flavors %}
+                                    <tr>
+                                        <td>{{ flavor.self.name }}</td>
+                                        {% for size_and_price in flavor.sizes_and_prices %}
+                                            <td>{{ size_and_price.price }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </li>
+                    </ul>
+                    {% endfor %}
+                </ul>
+            </li>
+        </ul>
+        {% endfor %}
+    </ul>
+{% endblock %}
