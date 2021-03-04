@@ -17,7 +17,7 @@
             <li class="list-group-item ln-container01">
                 <h2>{{ dish.self.name }}</h2>
                     <ul class="list-group pt-4">
-                        {% for type in dish.view.types %}
+                        {% for type in dish.types %}
                         <ul class="list-group pt-4">
                             <li class="list-group-item ln-container02">
                                 <h3>{{ type.self.name }}</h3>
@@ -55,7 +55,7 @@
                     </ul>
 
                     <ul class="list-group pt-4">
-                        {% for adding in dish.view.addings %}
+                        {% for adding in dish.addings %}
                         <ul class="list-group pt-4">
                             <li class="list-group-item ln-container02">
                                 <h3>{{ adding.self.name }}</h3>

@@ -4,8 +4,6 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.models import User
 
-from django.conf import settings
-
 from .models import Dish, Adding
 from .models import Size
 from .models import Topping, SpecialPizza, PizzaType, PizzaFlavor, PizzaTypeFlavor, Pizza
@@ -57,7 +55,6 @@ def menu(request):
 
     context = {
         "dishes": dishes_view,
-        "settings": settings,
     }
     return render(request, "orders/menu.html", context)
 
@@ -81,7 +78,6 @@ def flavor_view(request, dish_id, type_id, flavor_id):
 
     context = {
         "dishes": dishes_view,
-        "settings": settings,
     }
     return render(request, "orders/flavor.html", context)
 
@@ -121,7 +117,8 @@ def build_dishes_view(dishes_ids=ALL_DISHES,
         if view is not None:
             dishes_view.append({
                 "self": dish,
-                "view": view,
+                "types": view["types"],
+                "addings": view["addings"],
             })
 
     return dishes_view
