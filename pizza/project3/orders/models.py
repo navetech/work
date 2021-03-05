@@ -54,19 +54,12 @@ class TypeOrAddingFlavor(CommonInfo):
         return f"{CommonInfo.__str__(self)}, {self.type_or_adding}, {self.img}, {self.code}, {self.sizes_and_prices}"
 
     
-class FoodFlavor(models.Model):
-    flavor = models.ForeignKey(TypeOrAddingFlavor, on_delete=models.CASCADE, related_name="flavor_foodflavors")
-    addings = models.ManyToManyField(TypeOrAddingFlavor, blank=True, related_name="addings_foodflavors")
+class Plate(models.Model):
+    flavor = models.ForeignKey(TypeOrAddingFlavor, on_delete=models.CASCADE, related_name="flavor_plates")
+    addings = models.ManyToManyField(TypeOrAddingFlavor, blank=True, related_name="addings_plates")
 
     def __str__(self):
         return f"{self.flavor}, {self.addings}"
-
-
-class Food(models.Model):
-    taste = models.ForeignKey(FoodFlavor, default=None, on_delete=models.CASCADE, related_name="taste_foods")
-
-    def __str__(self):
-        return f"{self.taste}"
 
 
 class OrderStatus(CommonInfo):
@@ -81,10 +74,10 @@ class Order(models.Model):
         return f"{self.user}, {self.status}"
 
 
-class FoodOrder(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_foodorders")
-    food = models.ForeignKey(Food, on_delete=models.CASCADE, related_name="food_foodorders")
-    addings = models.ManyToManyField(TypeOrAddingFlavor, blank=True, related_name="addings_foodorders")
+class PlateOrder(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_plateorders")
+    plate = models.ForeignKey(Plate, on_delete=models.CASCADE, related_name="plate_plateorders")
+    addings = models.ManyToManyField(TypeOrAddingFlavor, blank=True, related_name="addings_plateorders")
 
     def __str__(self):
         return f"{self.order}, {self.food}, {self.addings}"
