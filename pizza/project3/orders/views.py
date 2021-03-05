@@ -5,9 +5,9 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 
 from .models import Size, SizeAndPrice
-from .models import Dish, DishTypeOrAdding, TypeOrAddingFlavor, Plate
-from .models import OrderStatus, Order, PlateOrder
-
+from .models import Dish, DishAdding, DishType
+from .models import AddingFlavor, TypeFlavor
+from .models import OrderStatus, Order, DishOrder
 
 
 # Create your views here.
@@ -45,7 +45,8 @@ def menu(request):
     adding_flavors_ids = ALL_FLAVORS
     adding_flavor_sizes_ids = ALL_SIZES
 
-    dishes_view = build_dishes_view(dishes_ids, types_ids, type_flavors_ids, type_flavor_sizes_ids,
+    dishes_view = build_dishes_view(dishes_ids,
+        types_ids, type_flavors_ids, type_flavor_sizes_ids,
         addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
 
     context = {
@@ -72,12 +73,9 @@ def build_dishes_view(dishes_ids=ALL_DISHES,
 
     dishes_view = []
     for dish in dishes:
-        types_view = build_types_view(dish, types_ids, type_flavors_ids, type_flavor_sizes_ids,
-            addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
-
-        addings_view = build_addings_view(dish, types_ids, type_flavors_ids, type_flavor_sizes_ids,
-            addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
-
+        addings_view = []
+        types_view = build_types_view(dish, types_ids, type_flavors_ids, type_flavor_sizes_ids)
+        addings_view = build_addings_view(dish, addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
         dishes_view.append({
             "self": dish,
             "types": types_view,
@@ -87,11 +85,7 @@ def build_dishes_view(dishes_ids=ALL_DISHES,
     return dishes_view
 
 
-def build_types_view(dish, types_ids=ALL_TYPES, type_flavors_ids=ALL_FLAVORS, type_flavor_sizes_ids=ALL_SIZES,
-    addings_ids=ALL_ADDINGS, adding_flavors_ids=ALL_FLAVORS, adding_flavor_sizes_ids=ALL_SIZES):
-
-    types_view = []
-
+def build_types_view(dish, types_ids, type_flavors_ids, type_flavor_sizes_ids):
     types = []
     if types_ids is ALL_TYPES:
         types = DishType.objects.filter(dish=dish).order_by("sort_number")
@@ -100,18 +94,14 @@ def build_types_view(dish, types_ids=ALL_TYPES, type_flavors_ids=ALL_FLAVORS, ty
             type = DishType.objects.filter(pk=id)[0]
             if type:
                 types.append(type)
-    if types:
-        if len(types) > 1:
-            type_flavors_ids = ALL_FLAVORS
+    if len(types) > 1:
+        type_flavors_ids = ALL_FLAVORS
 
     types_view = []
     for type in types:
-        type_sizes = get_type_or_adding_sizes(type, type_flavors_ids, type_flavor_sizes_ids,
-            addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
-
-        flavors_view = build_flavors_view(type, type_flavors_ids, type_flavor_sizes_ids,
-            addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
-
+        flavors_view = []
+        type_sizes = get_type_sizes(type, type_flavors_ids, type_flavor_sizes_ids)
+#        flavors_view = build_type_flavors_view(type, type_flavors_ids, type_flavor_sizes_ids)
         types_view.append({
             "self": type,
             "sizes": type_sizes,
@@ -121,36 +111,99 @@ def build_types_view(dish, types_ids=ALL_TYPES, type_flavors_ids=ALL_FLAVORS, ty
     return types_view
 
 
-        view = None
-        view = build_flavors_view(type, type_flavors_ids, type_flavor_sizes_ids,
-            addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
-        if view is not None:
-            dishes_view.append({
-                "self": dish,
-                "types": view["types"],
-                "addings": view["addings"],
-            })
+def build_addings_view(dish, addings_ids, adding_flavors_ids, adding_flavor_sizes_ids):
+    addings = []
+    if addings_ids is ALL_TYPES:
+        addings = DishAdding.objects.filter(dish=dish).order_by("sort_number")
+    else:
+        for id in addings_ids:
+            adding = DishAdding.objects.filter(pk=id)[0]
+            if adding:
+                types.append(adding)
+    if len(addings) > 1:
+        adding_flavors_ids = ALL_FLAVORS
 
-    return dishes_view
+    addings_view = []
+    for adding in addings:
+        adding_sizes = []
+        flavors_view = []
+#        type_sizes = get_type_sizes(type, type_flavors_ids, type_flavor_sizes_ids)
+#        flavors_view = build_type_flavors_view(type, type_flavors_ids, type_flavor_sizes_ids)
+        addings_view.append({
+            "self": adding,
+            "sizes": adding_sizes,
+            "flavors": flavors_view,
+        })
+
+    return addings_view
 
 
-        flavors = []
-        if type_flavors_ids is ALL_FLAVORS:
-            flavors = TypeFlavor.objects.filter(type=dish).order_by("type__sort_number", "flavor__sort_number")
-        else:
-            for id in type_flavors_ids:
-                flavor = TypeFlavor.objects.filter(pk=id)[0]
-                if flavor:
-                    flavors.append(flavor)
-        if flavors:
-            items = Pizza.objects.all()
+def get_type_sizes(type, type_flavors_ids, type_flavor_sizes_ids):
+    flavors = []
+    if type_flavors_ids is ALL_FLAVORS:
+        flavors = TypeFlavor.objects.filter(type=type).order_by("sort_number")
+    else:
+        for id in type_flavors_ids:
+            flavor = TypeFlavor.objects.filter(pk=id)[0]
+            if flavor:
+                flavors.append(flavor)
+    if len(flavors) > 1:
+        type_flavor_sizes_ids = ALL_SIZES
 
-            if len(flavors) > 1:
-                type_flavor_sizes_ids = ALL_SIZES
+def get_type_or_adding_sizes(type_or_adding, dish_flavors, items, dish_sizes):
+    if not dish_sizes:
+        return []
 
-            sizes = []
-            if type_flavor_sizes_ids is ALL_SIZES:
-                sizes = Size.objects.all().order_by("sort_number")
+    inside_sizes = []
+    for size in dish_sizes:
+        inside_size = {
+            "size": size,
+            "inside": False,
+        }
+        inside_sizes.append(inside_size)
+
+    for flavor in dish_flavors:
+        for inside_size in inside_sizes:
+            for item in items:
+                if match(type_or_adding, flavor, inside_size["size"], item):
+                    inside_size["inside"] = True
+                    break
+
+    type_or_adding_sizes = []
+    for inside_size in inside_sizes:
+        if inside_size["inside"]:
+            type_or_adding_sizes.append(inside_size["size"])
+
+    return type_or_adding_sizes
+
+
+def build_flavors_view(type, type_flavors_ids=ALL_FLAVORS, type_flavor_sizes_ids=ALL_SIZES):
+    flavors = []
+    if type_flavors_ids is ALL_FLAVORS:
+        flavors = TypeFlavor.objects.filter(type=type).order_by("sort_number")
+    else:
+        for id in type_flavors_ids:
+            flavor = TypeFlavor.objects.filter(pk=id)[0]
+            if flavor:
+                flavors.append(flavor)
+    if len(flavors) > 1:
+        type_flavor_sizes_ids = ALL_SIZES
+
+    flavors_view = []
+    for flavor in flavors:
+        sizes_and_prices_view = build_sizes_and_prices_view(flavor, type_flavor_sizes_ids)
+        flavors_view.append({
+            "self": flavor,
+            "sizes_and_prices": sizes_and_prices_view,
+        })
+
+    return flavors_view
+
+
+"""
+        sizes = []
+        if type_flavor_sizes_ids is ALL_SIZES:
+            sizes = Size.objects.all().order_by("sort_number")
             else:
                 for id in type_flavor_sizes_ids:
                     size = Size.objects.filter(pk=id)[0]
@@ -159,6 +212,8 @@ def build_types_view(dish, types_ids=ALL_TYPES, type_flavors_ids=ALL_FLAVORS, ty
 
             if sizes:
                 types_view = build_types_or_addings_view(types, flavors, items, sizes)
+    flavors_view = []
+
 
     addings_view = []
 
@@ -303,6 +358,7 @@ def match(type, flavor, size, item):
             if (size and has_size and size == item.size) or not size or not has_size:
                 return True
     return False
+"""
 
 
 def login_view(request):
