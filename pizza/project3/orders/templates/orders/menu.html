@@ -20,29 +20,29 @@
                                     {% if type.flavors %}
                                         <table style="width:100%">
                                             <tr>
-                                            <th></th>
-                                            {% for size in type.sizes %}
-                                                <th>{{ size.name }}</th>
-                                            {% endfor %}
-                                        </tr>
-                                        {% for flavor in type.flavors %}
-                                            <tr>
-                                                {% if type.self is None %}
-                                                    <td><a href="{% url 'flavor' dish.self.id None flavor.self.id %}">{{ flavor.self.name }}</a></td>
-                                                {% else %}
-                                                    <td><a href="{% url 'flavor' dish.self.id type.self.id flavor.self.id %}">{{ flavor.self.flavor.name }}</a></td>
-                                                {% endif %}
-                                                {% for size_and_price in flavor.sizes_and_prices %}
-                                                    <td>{{ size_and_price.price }}</td>
+                                                <th></th>
+                                                {% for size in type.sizes %}
+                                                    <th>{{ size.name }}</th>
                                                 {% endfor %}
                                             </tr>
-                                        {% endfor %}
-                                    </table>
-                                {% else %}
-                                    <h4>No flavors</h4>
-                                {% endif %}
-                            </li>
-                        </ul>
+                                            {% for flavor in type.flavors %}
+                                                <tr>
+                                                    {% if type.self is None %}
+                                                        <td><a href="{% url 'flavor' dish.self.id None flavor.self.id %}">{{ flavor.self.name }}</a></td>
+                                                    {% else %}
+                                                        <td><a href="{% url 'flavor' dish.self.id type.self.id flavor.self.id %}">{{ flavor.self.name }}</a></td>
+                                                    {% endif %}
+                                                    {% for size_and_price in flavor.sizes_and_prices %}
+                                                        <td>{{ size_and_price.price }}</td>
+                                                    {% endfor %}
+                                                </tr>
+                                            {% endfor %}
+                                        </table>
+                                    {% else %}
+                                        <h4>No flavors</h4>
+                                    {% endif %}
+                                </li>
+                            </ul>
                         {% empty %}
                             <h3>No types</h3>
                         {% endfor %}

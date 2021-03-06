@@ -36,14 +36,14 @@ class Dish(CommonInfo):
 
 
 class TypeOrAddingCommonInfo(CommonInfo):
-    dish = models.ForeignKey(Dish, on_delete=models.CASCADE,
+    super = models.ForeignKey(Dish, on_delete=models.CASCADE,
         related_name="dish_%(app_label)s_%(class)s")
 
     class Meta:
         abstract = True
 
     def __str__(self):
-        return f"{CommonInfo.__str__(self)}, {self.dish}"
+        return f"{CommonInfo.__str__(self)}, {self.super}"
 
 
 class DishType(TypeOrAddingCommonInfo):
@@ -68,18 +68,18 @@ class FlavorCommonInfo(CommonInfo):
 
 
 class AddingFlavor(FlavorCommonInfo):
-    adding = models.ForeignKey(DishAdding, on_delete=models.CASCADE, related_name="adding_addingflavors")
+    super = models.ForeignKey(DishAdding, on_delete=models.CASCADE, related_name="adding_addingflavors")
 
     def __str__(self):
-        return f"{FlavorCommonInfo.__str__(self)}, {self.adding}"
+        return f"{FlavorCommonInfo.__str__(self)}, {self.super}"
 
 
 class TypeFlavor(FlavorCommonInfo):
-    type = models.ForeignKey(DishType, on_delete=models.CASCADE, related_name="type_typeflavors")
+    super = models.ForeignKey(DishType, on_delete=models.CASCADE, related_name="type_typeflavors")
     addings = models.ManyToManyField(AddingFlavor, blank=True, related_name="addings_typeflavors")
 
     def __str__(self):
-        return f"{FlavorCommonInfo.__str__(self)}, {self.type}, {self.addings}"
+        return f"{FlavorCommonInfo.__str__(self)}, {self.super}, {self.addings}"
 
 
 class OrderStatus(CommonInfo):

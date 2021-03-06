@@ -12,6 +12,9 @@ from .models import OrderStatus, Order, DishOrder
 
 # Create your views here.
 
+NO_ELEMENT = None
+
+ALL_ELEMENTS = None
 ALL_DISHES = None
 ALL_TYPES = None
 ALL_ADDINGS = None
@@ -55,7 +58,78 @@ def menu(request):
     return render(request, "orders/menu.html", context)
 
 
-def build_dishes_view(dishes_ids=ALL_DISHES,
+def flavor_view(request, dish_id, type_id, flavor_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("login"))
+
+    dishes_ids = [dish_id]
+
+    types_ids = [type_id]
+    type_flavors_ids = [flavor_id]
+    type_flavor_sizes_ids = ALL_SIZES
+
+    addings_ids = ALL_ADDINGS
+    adding_flavors_ids = ALL_FLAVORS
+    adding_flavor_sizes_ids = ALL_SIZES
+
+    dishes_view = build_dishes_view(dishes_ids,
+        types_ids, type_flavors_ids, type_flavor_sizes_ids,
+        addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
+
+    context = {
+        "dishes": dishes_view,
+    }
+    return render(request, "orders/flavor.html", context)
+
+
+def build_dishes_view(dishes_ids,
+        types_ids, type_flavors_ids, type_flavor_sizes_ids,
+        addings_ids, adding_flavors_ids, adding_flavor_sizes_ids):
+
+    dishes =  get_elements(element_table=Dish.objects,
+        super_element=NO_ELEMENT, elements_ids=dishes_ids)
+
+    if len(dishes) > 1:
+        types_ids = ALL_ELEMENTS
+        addings_ids = ALL_ELEMENTS
+
+    dishes_view = []
+    for dish in dishes:
+        type_or_adding_table = DishType.objects
+        flavor_table = TypeFlavor.objects
+        types_view = build_types_or_addings_view(type_or_adding_table, flavor_table, dish,
+            types_ids, type_flavors_ids, type_flavor_sizes_ids)
+
+        type_or_adding_table = DishAdding.objects
+        flavor_table = AddingFlavor.objects
+        addings_view = build_types_or_addings_view(type_or_adding_table, flavor_table, dish,
+            addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
+
+        dishes_view.append({
+        "self": dish,
+        "types": types_view,
+        "addings": addings_view,
+        })
+
+    return dishes_view
+
+
+def get_elements(element_table, super_element, elements_ids):
+    elements = []
+    if elements_ids is ALL_ELEMENTS:
+        if super_element is NO_ELEMENT:
+            elements = element_table.all().order_by("sort_number")
+        else:
+            elements = element_table.filter(super=super_element).order_by("sort_number")
+    else:
+        for id in elements_ids:
+            element = element_table.filter(pk=id)[0]
+            if element:
+                elements.append(element)
+    return elements
+
+
+def build_dishes_view_old(dishes_ids=ALL_DISHES,
         types_ids=ALL_TYPES, type_flavors_ids=ALL_FLAVORS, type_flavor_sizes_ids=ALL_SIZES,
         addings_ids=ALL_ADDINGS, adding_flavors_ids=ALL_FLAVORS, adding_flavor_sizes_ids=ALL_SIZES):
 
@@ -97,22 +171,19 @@ def build_dishes_view(dishes_ids=ALL_DISHES,
 def build_types_or_addings_view(type_or_adding_table, flavor_table, dish,
         types_or_addings_ids, flavors_ids, flavor_sizes_ids):
 
-    types_or_addings = []
-    if types_or_addings_ids is ALL_TYPES:
-        types_or_addings = type_or_adding_table.filter(dish=dish).order_by("sort_number")
-    else:
-        for id in types_or_addings_ids:
-            type_or_adding = type_or_adding_table.filter(pk=id)[0]
-            if type_or_adding:
-                types_or_addings.append(type_or_adding)
+    types_or_addings =  get_elements(element_table=type_or_adding_table,
+        super_element=dish, elements_ids=types_or_addings_ids)
 
     if len(types_or_addings) > 1:
-        flavors_ids = ALL_FLAVORS
+        flavors_ids = ALL_ELEMENTS
 
     types_or_addings_view = []
     for type_or_adding in types_or_addings:
-        type_or_adding_sizes = get_type_or_adding_sizes(flavor_table, type_or_adding, flavors_ids, flavor_sizes_ids)
-        flavors_view = build_flavors_view(flavor_table, type_or_adding, flavors_ids, flavor_sizes_ids)
+        flavors =  get_elements(element_table=flavor_table,
+            super_element=type_or_adding, elements_ids=flavors_ids)
+
+        type_or_adding_sizes = get_type_or_adding_sizes(flavors, flavor_sizes_ids)
+        flavors_view = build_flavors_view(flavors, flavor_sizes_ids, type_or_adding_sizes)
 
         types_or_addings_view.append({
             "self": type_or_adding,
@@ -123,17 +194,9 @@ def build_types_or_addings_view(type_or_adding_table, flavor_table, dish,
     return types_or_addings_view
 
 
-def get_type_or_adding_sizes(flavor_table, type_or_adding, flavors_ids, flavor_sizes_ids):
-    flavors = []
-    if flavors_ids is ALL_FLAVORS:
-        flavors = flavor_table.filter(type_or_adding=type_or_adding).order_by("sort_number")
-    else:
-        for id in flavors_ids:
-            flavor = flavor_table.filter(pk=id)[0]
-            if flavor:
-                flavors.append(flavor)
+def get_type_or_adding_sizes(flavors, flavor_sizes_ids):
     if len(flavors) > 1:
-        flavor_sizes_ids = ALL_SIZES
+        flavor_sizes_ids = ALL_ELEMENTS
 
     all_sizes = Size.objects.all().order_by("sort_number")
     inside_sizes = []
@@ -145,9 +208,10 @@ def get_type_or_adding_sizes(flavor_table, type_or_adding, flavors_ids, flavor_s
         inside_sizes.append(inside_size)
 
     for flavor in flavors:
-        for flavor_size_price in flavor.sizes_and_prices:
+        flavor_sizes = get_flavor_sizes(flavor, flavor_sizes_ids)
+        for flavor_size in flavor_sizes:
             for inside_size in inside_sizes:
-                if flavor_size_price.size == inside_size["size"]:
+                if flavor_size == inside_size["size"]:
                     inside_size["inside"] = True
                     break
 
@@ -159,19 +223,63 @@ def get_type_or_adding_sizes(flavor_table, type_or_adding, flavors_ids, flavor_s
     return type_or_adding_sizes
 
 
-def build_flavors_view(flavor_table, type_or_adding, flavors_ids, flavor_sizes_ids):
-    flavors = []
-    if flavors_ids is ALL_FLAVORS:
-        flavors = flavor_table.filter(type_or_adding=type_or_adding).order_by("sort_number")
+def get_flavor_sizes(flavor, flavor_sizes_ids):
+    flavor_sizes = []
+    sizes_and_prices = flavor.sizes_and_prices.all()
+    if flavor_sizes_ids is ALL_ELEMENTS:
+        for size_and_price in sizes_and_prices:
+            flavor_sizes.append(size_and_price.size)
     else:
-        for id in flavors_ids:
-            flavor = flavor_table.filter(pk=id)[0]
-            if flavor:
-                flavors.append(flavor)
-    if len(flavors) > 1:
-        flavor_sizes_ids = ALL_SIZES
+        for id in flavor_sizes_ids:
+            size = Size.objects.filter(pk=id)[0]
+            if size:
+                for size_and_price in sizes_and_prices:
+                    if size == size_and_price.size:
+                        flavor_sizes.append(size_and_price.size)
+    return flavor_sizes
 
-PAREI AQUI
+
+def build_flavors_view(flavors, flavor_sizes_ids, type_or_adding_sizes):
+    view_initial_sizes_and_prices = []
+    for size in type_or_adding_sizes:
+        view_size_and_price = {
+            "size": size,
+            "price": None,
+        }
+        view_initial_sizes_and_prices.append(view_size_and_price)
+
+    flavors_view = []
+    for flavor in flavors:
+        view_sizes_and_prices = view_initial_sizes_and_prices
+        flavor_sizes_and_prices = get_flavor_sizes_and_prices(flavor, flavor_sizes_ids)
+        for flavor_size_and_price in flavor_sizes_and_prices:
+            for view_size_and_price in view_sizes_and_prices:
+                if flavor_size_and_price.size == view_size_and_price["size"]:
+                    view_size_and_price["price"] = flavor_size_and_price.price
+                    break
+
+        flavors_view.append({
+            "self": flavor,
+            "sizes_and_prices": view_sizes_and_prices,
+        })
+
+    return flavors_view
+
+
+def get_flavor_sizes_and_prices(flavor, flavor_sizes_ids):
+    flavor_sizes_and_prices = []
+    sizes_and_prices = flavor.sizes_and_prices.all()
+    if flavor_sizes_ids is ALL_ELEMENTS:
+        for size_and_price in sizes_and_prices:
+            flavor_sizes_and_prices.append(size_and_price)
+    else:
+        for id in flavor_sizes_ids:
+            size = Size.objects.filter(pk=id)[0]
+            if size:
+                for size_and_price in sizes_and_prices:
+                    if size == size_and_price.size:
+                        flavor_sizes_and_prices.append(size_and_price)
+    return flavor_sizes_and_prices
 
 
 
@@ -269,7 +377,6 @@ def get_type_or_adding_sizes(type_or_adding, dish_flavors, items, dish_sizes):
             type_or_adding_sizes.append(inside_size["size"])
 
     return type_or_adding_sizes
-"""
 
 
 def build_flavors_view(type, type_flavors_ids=ALL_FLAVORS, type_flavor_sizes_ids=ALL_SIZES):
@@ -293,6 +400,7 @@ def build_flavors_view(type, type_flavors_ids=ALL_FLAVORS, type_flavor_sizes_ids
         })
 
     return flavors_view
+"""
 
 
 """
@@ -517,29 +625,6 @@ def unregister_view(request):
 
 
 """
-
-
-def flavor_view(request, dish_id, type_id, flavor_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-
-    dishes_ids = [dish_id]
-
-    types_ids = [type_id]
-    type_flavors_ids = [flavor_id]
-    type_flavor_sizes_ids = ALL_SIZES
-
-    addings_ids = ALL_ADDINGS
-    adding_flavors_ids = ALL_FLAVORS
-    adding_flavor_sizes_ids = ALL_SIZES
-
-    dishes_view = build_dishes_view(dishes_ids, types_ids, type_flavors_ids, type_flavor_sizes_ids,
-        addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
-
-    context = {
-        "dishes": dishes_view,
-    }
-    return render(request, "orders/flavor.html", context)
 
 
 
