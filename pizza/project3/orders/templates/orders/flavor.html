@@ -12,75 +12,101 @@
     <h1>Flavor</h1>
 
     <ul class="list-group pt-4">
-        {% for dish in dishes %}
-        <ul class="list-group pt-4">
-            <li class="list-group-item ln-container01">
-                <h2>{{ dish.self.name }}</h2>
-                    <ul class="list-group pt-4">
-                        {% for type in dish.types %}
+        <li class="list-group-item ln-container01">
+            <h2>{{ dish.name }}</h2>
+            <ul class="list-group pt-4">
+                <li class="list-group-item ln-container02">
+                    <h3>{{ type.name }}</h3>
+                    {% if type is None %}
+                        <figure>
+                            <img src="{% static flavor.img.name %}" alt="{{ flavor.name }} Image">
+                            <figcaption>{{ flavor.name }} {{ dish.name }}</figcaption>
+                        </figure>
+                    {% else %}
+                        <figure>
+                            <img src="{% static flavor.img.name %}" alt="{{ flavor.name }} Image">
+                            <figcaption>{{ flavor.name }} {{ type.name }} {{ dish.name }}</figcaption>
+                        </figure>
+                    {% endif %}
+                    <table style="width:100%">
+                        <tr>
+                            {% for size in type_sizes %}
+                                <th>{{ size.name }}</th>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            {% for size_and_price in flavor_sizes_and_prices %}
+                                <td>
+                                    {{ size_and_price.price }}
+                                    <div>
+                                        <button type="button">-</button>
+                                        <input type="number" value="0" min="0" max="99">                                                        <button type="button">+</button>
+                                    </div>
+                                    <div>
+                                        <button type="button">Clear</button>
+                                    </div>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    </table>
+                    <div>
                         <ul class="list-group pt-4">
-                            <li class="list-group-item ln-container02">
-                                <h3>{{ type.self.name }}</h3>
-                                <table style="width:100%">
-                                    <tr>
-                                        <th></th>
-                                        {% for size in type.sizes %}
-                                            <th>{{ size.name }}</th>
-                                        {% endfor %}
-                                    </tr>
-                                    {% for flavor in type.flavors %}
-                                        <tr>
-                                            <td>
-                                                {% if type.self is None %}
-                                                    <figure>
-                                                        <img src="{% static flavor.self.img.name %}" alt="{{ flavor.self.name }} Image">
-                                                        <figcaption>{{ flavor.self.name }} {{ dish.self.name }}</figcaption>
-                                                    </figure>
+                            {% if flavor_addings %}
+                                Show flavor fixed addings
+                            {% elif flavor.code != 0%}
+                                {% for adding in dish_addings %}
+                                    <ul class="list-group pt-4">
+                                        <li class="list-group-item ln-container02">
+                                            Choose 
+                                            <span>
+                                                {% if flavor.code < 0 %}
+                                                    up to {{ flavor.code|cut:"-" }}
+                                                    {{ adding.self.name }}{{ flavor.code|cut:"-"|pluralize }}
                                                 {% else %}
-                                                    <figure>
-                                                        <img src="{% static flavor.self.img.name %}" alt="{{ flavor.self.flavor.name }} Image">
-                                                        <figcaption>{{ type.self.name }} {{ flavor.self.name }} {{ dish.self.name }}</figcaption>
-                                                    </figure>
+                                                    {{ flavor.code }}
+                                                    {{ adding.self.name }}{{ flavor.code|pluralize }}
                                                 {% endif %}
-                                            </td>
-                                            {% for size_and_price in flavor.sizes_and_prices %}
-                                                <td>{{ size_and_price.price }}</td>
-                                            {% endfor %}
-                                        </tr>
-                                    {% endfor %}
-                                </table>
-                            </li>
-                        </ul>
-                        {% endfor %}
-                    </ul>
-
-                    <ul class="list-group pt-4">
-                        {% for adding in dish.addings %}
-                        <ul class="list-group pt-4">
-                            <li class="list-group-item ln-container02">
-                                <h3>{{ adding.self.name }}</h3>
-                                <table style="width:100%">
-                                    <tr>
-                                        <th></th>
-                                        {% for size in adding.sizes %}
-                                        <th>{{ size.name }}</th>
-                                    {% endfor %}
-                                </tr>
-                                {% for flavor in adding.flavors %}
-                                    <tr>
-                                        <td>{{ flavor.self.name }}</td>
-                                        {% for size_and_price in flavor.sizes_and_prices %}
-                                            <td>{{ size_and_price.price }}</td>
-                                        {% endfor %}
-                                    </tr>
+                                            </span>
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <th></th>
+                                                    {% for size in adding.sizes %}
+                                                        <th>{{ size.name }}</th>
+                                                        <th></th>
+                                                    {% endfor %}
+                                                </tr>
+                                                {% for adding_flavor in adding.flavors %}
+                                                    <tr>
+                                                        {% if adding_flavor.sizes_and_prices %}
+                                                            <td>{{ adding_flavor.self.name }}</td>
+                                                            {% for size_and_price in adding_flavor.sizes_and_prices %}
+                                                                <td>
+                                                                    {{ size_and_price.price }}
+                                                                    <button type="button">-</button>
+                                                                    <input type="number" value="0" min="0" max="99">                                                        <button type="button">+</button>
+                                                                    <button type="button">Clear</button>
+                                                                </td>
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            <td>
+                                                                {{ adding_flavor.self.name }}
+                                                                <button type="button">-</button>
+                                                                <input type="number" value="0" min="0" max="99">                                                        <button type="button">+</button>
+                                                                <button type="button">Clear</button>
+                                                            </td>
+                                                        {% endif %}
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
+                                        </li>
+                                    </ul>
                                 {% endfor %}
-                            </table>
-                        </li>
-                    </ul>
-                    {% endfor %}
-                </ul>
-            </li>
-        </ul>
-        {% endfor %}
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <button type="button">Order</button>
+                </li>
+            </ul>
+        </li>
     </ul>
 {% endblock %}

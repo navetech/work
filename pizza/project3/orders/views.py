@@ -67,8 +67,18 @@ def flavor_view(request, dish_id, type_id, flavor_id):
         types_ids, type_flavors_ids, type_flavor_sizes_ids,
         addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
 
+    dish = view_dishes[0]
+    type_ = dish["types"][0]
+    flavor = type_["flavors"][0] 
+
     context = {
-        "dishes": view_dishes,
+        "dish": dish["self"],
+        "dish_addings": dish["addings"],
+        "type": type_["self"],
+        "type_sizes": type_["sizes"],
+        "flavor": flavor["self"],
+        "flavor_sizes_and_prices": flavor["sizes_and_prices"],
+        "flavor_addings": flavor["addings"],
     }
     return render(request, "orders/flavor.html", context)
 
@@ -199,6 +209,9 @@ def get_view_flavors(flavors, flavor_sizes_ids, type_or_adding_sizes):
 
     view_flavors = []
     for flavor in flavors:
+        flavor_addings = []
+        if hasattr(flavor, "addings"):
+            flavor_addings = flavor.addings.all()
         view_sizes_and_prices = view_initial_sizes_and_prices
         flavor_sizes_and_prices = get_flavor_sizes_and_prices(flavor, flavor_sizes_ids)
         for flavor_size_and_price in flavor_sizes_and_prices:
@@ -210,6 +223,7 @@ def get_view_flavors(flavors, flavor_sizes_ids, type_or_adding_sizes):
         view_flavors.append({
             "self": flavor,
             "sizes_and_prices": view_sizes_and_prices,
+            "addings": flavor_addings,
         })
     return view_flavors
 
