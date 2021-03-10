@@ -27,13 +27,13 @@
                                             </tr>
                                             {% for flavor in type.flavors %}
                                                 <tr>
-                                                    {% if type.self is None %}
-                                                        <td><a href="{% url 'flavor' dish.self.id None flavor.self.id %}">{{ flavor.self.name }}</a></td>
-                                                    {% else %}
-                                                        <td><a href="{% url 'flavor' dish.self.id type.self.id flavor.self.id %}">{{ flavor.self.name }}</a></td>
-                                                    {% endif %}
+                                                    <td>{{ flavor.self.name }}</td>
                                                     {% for size_and_price in flavor.sizes_and_prices %}
-                                                        <td>{{ size_and_price.price }}</td>
+                                                        {% if type.self is None %}
+                                                            <td><a href="{% url 'flavor' dish.self.id None flavor.self.id size_and_price.size.id %}">{{ size_and_price.price }}</a></td>
+                                                        {% else %}
+                                                            <td><a href="{% url 'flavor' dish.self.id type.self.id flavor.self.id size_and_price.size.id %}">{{ size_and_price.price }}</a></td>
+                                                        {% endif %}
                                                     {% endfor %}
                                                 </tr>
                                             {% endfor %}

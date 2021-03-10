@@ -49,7 +49,7 @@ def menu(request):
     return render(request, "orders/menu.html", context)
 
 
-def flavor_view(request, dish_id, type_id, flavor_id):
+def flavor_view(request, dish_id, type_id, flavor_id, size_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("login"))
 
@@ -57,7 +57,7 @@ def flavor_view(request, dish_id, type_id, flavor_id):
 
     types_ids = [type_id]
     type_flavors_ids = [flavor_id]
-    type_flavor_sizes_ids = ALL_ELEMENTS
+    type_flavor_sizes_ids = [size_id]
 
     addings_ids = ALL_ELEMENTS
     adding_flavors_ids = ALL_ELEMENTS
@@ -69,7 +69,7 @@ def flavor_view(request, dish_id, type_id, flavor_id):
 
     dish = view_dishes[0]
     type_ = dish["types"][0]
-    flavor = type_["flavors"][0] 
+    flavor = type_["flavors"][0]
 
     context = {
         "dish": dish["self"],
@@ -199,20 +199,20 @@ def get_flavor_sizes(flavor, flavor_sizes_ids):
 
 
 def get_view_flavors(flavors, flavor_sizes_ids, type_or_adding_sizes):
-    view_initial_sizes_and_prices = []
-    for size in type_or_adding_sizes:
-        view_size_and_price = {
-            "size": size,
-            "price": None,
-        }
-        view_initial_sizes_and_prices.append(view_size_and_price)
-
     view_flavors = []
     for flavor in flavors:
         flavor_addings = []
         if hasattr(flavor, "addings"):
             flavor_addings = flavor.addings.all()
-        view_sizes_and_prices = view_initial_sizes_and_prices
+
+        view_sizes_and_prices = []
+        for size in type_or_adding_sizes:
+            view_size_and_price = {
+                "size": size,
+                "price": None,
+            }
+            view_sizes_and_prices.append(view_size_and_price)
+
         flavor_sizes_and_prices = get_flavor_sizes_and_prices(flavor, flavor_sizes_ids)
         for flavor_size_and_price in flavor_sizes_and_prices:
             for view_size_and_price in view_sizes_and_prices:

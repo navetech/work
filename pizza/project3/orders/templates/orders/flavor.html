@@ -36,23 +36,21 @@
                         </tr>
                         <tr>
                             {% for size_and_price in flavor_sizes_and_prices %}
-                                <td>
-                                    {{ size_and_price.price }}
-                                    <div>
-                                        <button type="button">-</button>
-                                        <input type="number" value="0" min="0" max="99">                                                        <button type="button">+</button>
-                                    </div>
-                                    <div>
-                                        <button type="button">Clear</button>
-                                    </div>
-                                </td>
+                                <td>{{ size_and_price.price }}</td>
                             {% endfor %}
                         </tr>
                     </table>
                     <div>
                         <ul class="list-group pt-4">
                             {% if flavor_addings %}
-                                Show flavor fixed addings
+                                Addings
+                                {% for adding_flavor in flavor_addings %}
+                                    <ul class="list-group pt-4">
+                                        <li class="list-group-item ln-container02">
+                                            {{ adding_flavor.super.name }} {{ adding_flavor.name }}
+                                        </li>
+                                    </ul>
+                                {% endfor %}
                             {% elif flavor.code != 0%}
                                 {% for adding in dish_addings %}
                                     <ul class="list-group pt-4">
