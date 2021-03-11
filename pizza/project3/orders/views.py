@@ -27,7 +27,7 @@ def index(request):
 
 def menu(request):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
+        return HttpResponseRedirect(reverse("index"))
 
     dishes_ids = ALL_ELEMENTS
 
@@ -49,9 +49,19 @@ def menu(request):
     return render(request, "orders/menu.html", context)
 
 
-def flavor_view(request, dish_id, type_id, flavor_id, size_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
+qty_flavor = 1
+def order_view(request, dish_id, type_id, flavor_id, size_id):
+    global qty_flavor
+    if request.method == "GET":
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(reverse("index"))
+        qty_flavor = 1
+    else:
+        if request.POST["send"] == "inc-flavor":
+            qty_flavor += 1
+        elif request.POST["send"] == "dec-flavor":
+            if qty_flavor > 1:
+                qty_flavor -= 1
 
     dishes_ids = [dish_id]
 
@@ -70,15 +80,19 @@ def flavor_view(request, dish_id, type_id, flavor_id, size_id):
     dish = view_dishes[0]
     type_ = dish["types"][0]
     flavor = type_["flavors"][0]
+    flavor_size_and_price = flavor["sizes_and_prices"][0]
+
+    order_subtotal = qty_flavor * flavor_size_and_price["price"]
 
     context = {
         "dish": dish["self"],
         "dish_addings": dish["addings"],
         "type": type_["self"],
-        "type_sizes": type_["sizes"],
         "flavor": flavor["self"],
-        "flavor_sizes_and_prices": flavor["sizes_and_prices"],
+        "flavor_size_and_price": flavor_size_and_price,
+        "qty_flavor": qty_flavor,
         "flavor_addings": flavor["addings"],
+        "order_subtotal": order_subtotal,
     }
     return render(request, "orders/flavor.html", context)
 

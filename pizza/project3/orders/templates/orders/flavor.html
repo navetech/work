@@ -10,7 +10,12 @@
 
 {% block main %}
     <h1>Flavor</h1>
-
+    {% if type is None %}
+        <form action="{% url 'order' dish.id None flavor.id flavor_size_and_price.size.id %}" method="post">
+    {% else %}
+        <form action="{% url 'order' dish.id type.id flavor.id flavor_size_and_price.size.id %}" method="post">
+    {% endif %}
+        {% csrf_token %}
     <ul class="list-group pt-4">
         <li class="list-group-item ln-container01">
             <h2>{{ dish.name }}</h2>
@@ -30,14 +35,16 @@
                     {% endif %}
                     <table style="width:100%">
                         <tr>
-                            {% for size in type_sizes %}
-                                <th>{{ size.name }}</th>
-                            {% endfor %}
+                            <th>{{ flavor_size_and_price.size.name }}</th>
+                            <th>{{ flavor_size_and_price.price }}</th>
+                            <th>
+                                <div class="ln-group-divider"></div>
+                                <button type="submit" name="send" value="dec-flavor">-</button>
+                                <span>{{ qty_flavor }}</span>
+                                <button type="submit" name="send" value="inc-flavor">+</button>
+                            </th>
                         </tr>
                         <tr>
-                            {% for size_and_price in flavor_sizes_and_prices %}
-                                <td>{{ size_and_price.price }}</td>
-                            {% endfor %}
                         </tr>
                     </table>
                     <div>
@@ -75,22 +82,21 @@
                                                 </tr>
                                                 {% for adding_flavor in adding.flavors %}
                                                     <tr>
+                                                        <td>{{ adding_flavor.self.name }}</td>
                                                         {% if adding_flavor.sizes_and_prices %}
-                                                            <td>{{ adding_flavor.self.name }}</td>
                                                             {% for size_and_price in adding_flavor.sizes_and_prices %}
+                                                                <td>{{ size_and_price.price }}</td>
                                                                 <td>
-                                                                    {{ size_and_price.price }}
                                                                     <button type="button">-</button>
-                                                                    <input type="number" value="0" min="0" max="99">                                                        <button type="button">+</button>
-                                                                    <button type="button">Clear</button>
+                                                                    <span>0</span>
+                                                                    <button type="button">+</button>
                                                                 </td>
                                                             {% endfor %}
                                                         {% else %}
                                                             <td>
-                                                                {{ adding_flavor.self.name }}
                                                                 <button type="button">-</button>
-                                                                <input type="number" value="0" min="0" max="99">                                                        <button type="button">+</button>
-                                                                <button type="button">Clear</button>
+                                                                <span>0</span>
+                                                                <button type="button">+</button>
                                                             </td>
                                                         {% endif %}
                                                     </tr>
@@ -102,9 +108,12 @@
                             {% endif %}
                         </ul>
                     </div>
-                    <button type="button">Order</button>
+                    <button type="button">Add to cart</button>
+                    Subtotal <span>{{ order_subtotal }}</span>
+                    Total <span>20</span>
                 </li>
             </ul>
         </li>
     </ul>
+    </form>
 {% endblock %}
