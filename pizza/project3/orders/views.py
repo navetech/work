@@ -50,7 +50,66 @@ def menu(request):
 
 
 qty_flavor = 1
-def order_view(request, dish_id, type_id, flavor_id, size_id):
+qty_addings = 0
+def order_view(request, flavor_id, size_id):
+    global qty_flavor
+    global qty_addings
+    if request.method == "GET":
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(reverse("index"))
+        qty_flavor = 1
+        qty_addings = 0
+    else:
+        if request.POST["send"] == "inc-flavor":
+            qty_flavor += 1
+        elif request.POST["send"] == "dec-flavor":
+            if qty_flavor > 1:
+                qty_flavor -= 1
+
+
+    flavor = TypeFlavor.objects.filter(pk=flavor_id)[0]
+    type_ = flavor.super
+    dish = type_.super
+
+    size = Size.objects.filter(pk=size_id)[0]
+    flavor_size_and_price = flavor.sizes_and_prices.filter(size=size)[0]
+    flavor_addings = flavor.addings.all()
+
+    dish_adding_table = DishAdding.objects
+    dish_adding_flavor_table = AddingFlavor.objects
+    addings_ids = ALL_ELEMENTS
+    adding_flavors_ids = ALL_ELEMENTS
+    adding_flavor_sizes_ids = ALL_ELEMENTS
+    dish_addings = get_view_types_or_addings(dish_adding_table, dish_adding_flavor_table, dish,
+            addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
+
+    if flavor.code < 0:
+        min_addings = 0
+        max_addings = -flavor.code
+    else:
+        min_addings = flavor.code
+        max_addings = flavor.code
+
+    order_subtotal = qty_flavor * flavor_size_and_price.price
+
+    context = {
+        "dish": dish,
+        "dish_addings": dish_addings,
+        "type": type_,
+        "flavor": flavor,
+        "flavor_size_and_price": flavor_size_and_price,
+        "flavor_addings": flavor_addings,
+        "qty_flavor": qty_flavor,
+        "min_addings": min_addings,
+        "max_addings": max_addings,
+        "qty_addings": qty_addings,
+        "order_subtotal": order_subtotal,
+    }
+    return render(request, "orders/flavor.html", context)
+
+
+qty_flavor = 1
+def order_view_save(request, dish_id, type_id, flavor_id, size_id):
     global qty_flavor
     if request.method == "GET":
         if not request.user.is_authenticated:
