@@ -49,63 +49,114 @@ def menu(request):
     return render(request, "orders/menu.html", context)
 
 
-qty_flavor = 1
-qty_addings = 0
 def order_view(request, flavor_id, size_id):
-    global qty_flavor
-    global qty_addings
+    ordering = {}
+    ordering_session = {}
+
     if request.method == "GET":
         if not request.user.is_authenticated:
             return HttpResponseRedirect(reverse("index"))
-        qty_flavor = 1
-        qty_addings = 0
+
+        ordering = build_ordering(flavor_id, size_id)
+
     else:
-        if request.POST["send"] == "inc-flavor":
-            qty_flavor += 1
-        elif request.POST["send"] == "dec-flavor":
-            if qty_flavor > 1:
-                qty_flavor -= 1
+        ordering_session = request.session['ordering']
+        ordering = build_ordering(flavor_id, size_id)
+
+        ordering["flavor"]["qty"] = ordering_session["flavor"]["qty"]
+        if request.POST["submit"] == "inc-flavor-qty":
+            ordering["flavor"]["qty"] += 1
+        elif request.POST["submit"] == "dec-flavor-qty":
+            if ordering["flavor"]["qty"] > 1:
+                ordering["flavor"]["qty"] -= 1
+        ordering_session["flavor"] = {}
+        ordering_session["flavor"]["qty"] = ordering["flavor"]["qty"]
+
+        for (i,adding) in enumerate(ordering["addings"]):
+            adding_session = ordering_session["addings"][i]
+            for (j,flavor) in enumerate(adding["flavors"]):
+                flavor_session = adding_session["flavors"][j]
+                if not flavor["sizes_and_prices"]:
+                    flavor["qty"] = flavor_session["qty"]
+                    if request.POST["submit"] == f"inc-{adding['self']['id']}-{flavor['self']['id']}":
+                        flavor["qty"] += 1
+                    if request.POST["submit"] == f"dec-{adding['self']['id']}-{flavor['self']['id']}":
+                        flavor["qty"] -= 1
+                    flavor_session["qty"] = flavor["qty"]
 
 
+    ordering["subtotal"] = ordering["flavor"]["qty"] * ordering["flavor"]["size_and_price"].price
+
+    request.session['ordering'] = ordering_session
+
+    context = {
+        "dish": ordering["dish"],
+        "type": ordering["type"],
+        "flavor": ordering["flavor"],
+        "min_addings": ordering["min_addings"],
+        "max_addings": ordering["max_addings"],
+        "addings": ordering["addings"],
+        "subtotal": ordering["subtotal"]
+    }
+    return render(request, "orders/ordering.html", context)
+
+
+def build_ordering(flavor_id, size_id):
+    ordering = {}
+
+    ordering_flavor = {}
     flavor = TypeFlavor.objects.filter(pk=flavor_id)[0]
+    ordering_flavor["self"] = flavor
+
+    size = Size.objects.filter(pk=size_id)[0]
+    ordering_flavor["size_and_price"] = flavor.sizes_and_prices.filter(size=size)[0]
+    ordering_flavor["addings"] = flavor.addings.all()
+
+    ordering_flavor["qty"] = 1
+
     type_ = flavor.super
     dish = type_.super
 
-    size = Size.objects.filter(pk=size_id)[0]
-    flavor_size_and_price = flavor.sizes_and_prices.filter(size=size)[0]
-    flavor_addings = flavor.addings.all()
+    ordering["type"] = type_
+    ordering["dish"] = dish
+    ordering["flavor"] = ordering_flavor
+
+    if flavor.code < 0:
+        ordering["min_addings"] = 0
+        ordering["max_addings"] = -flavor.code
+    else:
+        ordering["min_addings"] = flavor.code
+        ordering["max_addings"] = flavor.code
 
     dish_adding_table = DishAdding.objects
     dish_adding_flavor_table = AddingFlavor.objects
     addings_ids = ALL_ELEMENTS
     adding_flavors_ids = ALL_ELEMENTS
     adding_flavor_sizes_ids = ALL_ELEMENTS
-    dish_addings = get_view_types_or_addings(dish_adding_table, dish_adding_flavor_table, dish,
+    addings = get_view_types_or_addings(dish_adding_table, dish_adding_flavor_table, dish,
             addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
 
-    if flavor.code < 0:
-        min_addings = 0
-        max_addings = -flavor.code
-    else:
-        min_addings = flavor.code
-        max_addings = flavor.code
+    ordering["addings"] = []
+    for adding in addings:
+        ordering_adding = adding
 
-    order_subtotal = qty_flavor * flavor_size_and_price.price
+        flavors = []
+        for flavor in adding["flavors"]:
+            ordering_adding_flavor = flavor
+            ordering_adding_flavor["qty"] = 0
 
-    context = {
-        "dish": dish,
-        "dish_addings": dish_addings,
-        "type": type_,
-        "flavor": flavor,
-        "flavor_size_and_price": flavor_size_and_price,
-        "flavor_addings": flavor_addings,
-        "qty_flavor": qty_flavor,
-        "min_addings": min_addings,
-        "max_addings": max_addings,
-        "qty_addings": qty_addings,
-        "order_subtotal": order_subtotal,
-    }
-    return render(request, "orders/flavor.html", context)
+            sizes_and_prices = []
+            for size_and_price in flavor["sizes_and_prices"]:
+                size_and_price["qty"] = 0
+                sizes_and_prices.append(size_and_price)
+
+            ordering_adding_flavor["sizes_and_prices"] = sizes_and_prices
+            flavors.append(ordering_adding_flavor)
+
+        ordering_adding["flavors"] = flavors
+        ordering["addings"].append(ordering_adding)
+
+    return ordering
 
 
 qty_flavor = 1

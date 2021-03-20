@@ -5,16 +5,12 @@
 
 
 {% block title %}
-    Flavor
+    Ordering
 {% endblock %}
 
 {% block main %}
-    <h1>Flavor</h1>
-    {% if type is None %}
-        <form action="{% url 'order' flavor.id flavor_size_and_price.size.id %}" method="post">
-    {% else %}
-        <form action="{% url 'order' flavor.id flavor_size_and_price.size.id %}" method="post">
-    {% endif %}
+    <h1>Ordering</h1>
+        <form action="{% url 'order' flavor.self.id flavor.size_and_price.size.id %}" method="post">
         {% csrf_token %}
     <ul class="list-group pt-4">
         <li class="list-group-item ln-container01">
@@ -22,26 +18,23 @@
             <ul class="list-group pt-4">
                 <li class="list-group-item ln-container02">
                     <h3>{{ type.name }}</h3>
-                    {% if type is None %}
-                        <figure>
-                            <img src="{% static flavor.img.name %}" alt="{{ flavor.name }} Image">
-                            <figcaption>{{ flavor.name }} {{ dish.name }}</figcaption>
-                        </figure>
-                    {% else %}
-                        <figure>
-                            <img src="{% static flavor.img.name %}" alt="{{ flavor.name }} Image">
-                            <figcaption>{{ flavor.name }} {{ type.name }} {{ dish.name }}</figcaption>
-                        </figure>
-                    {% endif %}
+                    <figure>
+                        <img src="{% static flavor.self.img.name %}" alt="{{ flavor.self.name }} Image">
+                        {% if type is None %}
+                            <figcaption>{{ flavor.self.name }} {{ dish.name }}</figcaption>
+                        {% else %}
+                            <figcaption>{{ flavor.self.name }} {{ type.name }} {{ dish.name }}</figcaption>
+                        {% endif %}
+                    </figure>
                     <table style="width:100%">
                         <tr>
-                            <th>{{ flavor_size_and_price.size.name }}</th>
-                            <th>{{ flavor_size_and_price.price }}</th>
+                            <th>{{ flavor.size_and_price.size.name }}</th>
+                            <th>{{ flavor.size_and_price.price }}</th>
                             <th>
                                 <div class="ln-group-divider"></div>
-                                <button type="submit" name="send" value="dec-{{ flavor.id }}-{{ flavor_size_and_price.id }}">-</button>
-                                <span>{{ flavor_size_and_price.qty }}</span>
-                                <button type="submit" name="send" value="inc-{{ flavor.id }}-{{ flavor_size_and_price.id }}">+</button>
+                                <button type="submit" name="submit" value="dec-flavor-qty">-</button>
+                                <span>{{ flavor.qty }}</span>
+                                <button type="submit" name="submit" value="inc-flavor-qty">+</button>
                             </th>
                         </tr>
                         <tr>
@@ -49,17 +42,17 @@
                     </table>
                     <div>
                         <ul class="list-group pt-4">
-                            {% if flavor_addings %}
+                            {% if flavor.addings %}
                                 Addings
-                                {% for adding_flavor in flavor_addings %}
+                                {% for adding in flavor.addings %}
                                     <ul class="list-group pt-4">
                                         <li class="list-group-item ln-container02">
-                                            {{ adding_flavor.super.name }} {{ adding_flavor.name }}
+                                            {{ adding.super.name }} {{ adding.name }}
                                         </li>
                                     </ul>
                                 {% endfor %}
                             {% elif max_addings > 0 %}
-                                {% for adding in dish_addings %}
+                                {% for adding in addings %}
                                     <ul class="list-group pt-4">
                                         <li class="list-group-item ln-container02">
                                             Choose 
@@ -78,25 +71,26 @@
                                                         <th></th>
                                                     {% endfor %}
                                                 </tr>
-                                                {% for adding_flavor in adding.flavors %}
+                                                {% for flavor in adding.flavors %}
                                                     <tr>
-                                                        <td>{{ adding_flavor.self.name }}</td>
-                                                        {% if adding_flavor.sizes_and_prices %}
-                                                            {% for size_and_price in adding_flavor.sizes_and_prices %}
+                                                        <td>{{ flavor.self.name }}</td>
+                                                        {% if flavor.sizes_and_prices %}
+                                                            {% for size_and_price in flavor.sizes_and_prices %}
                                                                 <td>{{ size_and_price.price }}</td>
                                                                 <td>
                                                                     <div class="ln-group-divider"></div>
-                                                                    <button type="submit" name="send" value="dec-{{ adding_flavor.id }}-{{ size_and_price.id }}">-</button>
+                                                                    <button type="submit" name="submit" value="dec-{{ adding.self.id }}-{{ flavor.self.id }}-{{ size_and_price.id }}">-</button>
                                                                     <span>{{ size_and_price.qty }}</span>
-                                                                    <button type="submit" name="send" value="inc-{{ adding_flavor.id }}-{{ size_and_price.id }}">+</button>
+                                                                    <button type="submit" name="submit" value="inc-{{ adding.self.id }}-{{ flavor.self.id }}-{{ size_and_price.id }}">+</button>
                                                                 </td>
                                                             {% endfor %}
                                                         {% else %}
                                                             <td>
-                                                                <button type="button">-</button>
-                                                                <span>0</span>
-                                                                <button type="button">+</button>
-                                                            </td>
+                                                                <div class="ln-group-divider"></div>
+                                                                <button type="submit" name="submit" value="dec-{{ adding.self.id }}-{{ flavor.self.id }}">-</button>
+                                                                <span>{{ flavor.qty }}</span>
+                                                                <button type="submit" name="submit" value="inc-{{ adding.self.id }}-{{ flavor.self.id }}">+</button>
+                                                        </td>
                                                         {% endif %}
                                                     </tr>
                                                 {% endfor %}
@@ -108,7 +102,7 @@
                         </ul>
                     </div>
                     <button type="button">Add to cart</button>
-                    Subtotal <span>{{ order_subtotal }}</span>
+                    Subtotal <span>{{ subtotal }}</span>
                     Total <span>20</span>
                 </li>
             </ul>
