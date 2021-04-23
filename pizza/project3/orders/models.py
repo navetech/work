@@ -82,6 +82,41 @@ class TypeFlavor(FlavorCommonInfo):
         return f"{FlavorCommonInfo.__str__(self)}, {self.super}, {self.addings}"
 
 
+class OrderingAddingFlavorSizeAndPrice(models.Model):
+    size_and_price = models.ForeignKey(SizeAndPrice, on_delete=models.CASCADE, related_name="sizeandprice_orderingaddingflavorsizesandpricess")
+    qty = models.IntegerField(default= 1, blank=True)
+
+    def __str__(self):
+        return f"{self.size_and_price}, {self.qty}"
+
+
+class OrderingAddingFlavor(models.Model):
+    flavor = models.ForeignKey(AddingFlavor, on_delete=models.CASCADE, related_name="flavor_orderingaddingflavors")
+    qty = models.IntegerField(default= 1, blank=True)
+    sizes_and_prices = models.ManyToManyField(OrderingAddingFlavorSizeAndPrice, blank=True, related_name="sizesandprices_orderingaddingflavors")
+
+    def __str__(self):
+        return f"{self.flavor}, {self.qty}, {self.sizes_and_prices}"
+
+
+class OrderingAdding(models.Model):
+    adding = models.ForeignKey(DishAdding, on_delete=models.CASCADE, related_name="adding_orderingaddings")
+    flavors = models.ManyToManyField(OrderingAddingFlavor, blank=True, related_name="flavors_orderingaddings")
+
+    def __str__(self):
+        return f"{self.adding}, {self.flavors}"
+
+
+class Ordering(models.Model):
+    flavor = models.ForeignKey(TypeFlavor, on_delete=models.CASCADE, related_name="flavor_orderings")
+    size = models.ForeignKey(Size, on_delete=models.CASCADE, related_name="size_orderings")
+    qty = models.IntegerField(default= 1, blank=True)
+    addings = models.ManyToManyField(OrderingAdding, blank=True, related_name="addings_orderings")
+
+    def __str__(self):
+        return f"{self.flavor}, {self.size}, {self.qty}, {self.addings}"
+
+
 class OrderStatus(CommonInfo):
     pass
 
