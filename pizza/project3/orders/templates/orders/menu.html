@@ -30,9 +30,9 @@
                                                     <td>{{ flavor.self.name }}</td>
                                                     {% for size_and_price in flavor.sizes_and_prices %}
                                                         {% if type.self is None %}
-                                                            <td><a href="{% url 'order' flavor.self.id size_and_price.size.id %}">{{ size_and_price.price }}</a></td>
+                                                            <td><a href="{% url 'ordering' flavor.self.id size_and_price.size.id %}">{{ size_and_price.price }}</a></td>
                                                         {% else %}
-                                                            <td><a href="{% url 'order' flavor.self.id size_and_price.size.id %}">{{ size_and_price.price }}</a></td>
+                                                            <td><a href="{% url 'ordering' flavor.self.id size_and_price.size.id %}">{{ size_and_price.price }}</a></td>
                                                         {% endif %}
                                                     {% endfor %}
                                                 </tr>

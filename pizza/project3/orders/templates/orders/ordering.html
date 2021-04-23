@@ -10,7 +10,7 @@
 
 {% block main %}
     <h1>Ordering</h1>
-        <form action="{% url 'order' flavor.self.id flavor.size_and_price.size.id %}" method="post">
+        <form action="{% url 'ordering' flavor.self.id flavor.size_and_price.size.id %}" method="post">
         {% csrf_token %}
     <ul class="list-group pt-4">
         <li class="list-group-item ln-container01">
