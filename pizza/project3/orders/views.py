@@ -69,19 +69,26 @@ def ordering_view(request, flavor_id, size_id):
                 order_item.qty -= 1
                 order_item.save()
 
-        """
-        for (i,adding) in enumerate(ordering["addings"]):
-            for (j,flavor) in enumerate(adding["flavors"]):
-                if not flavor["sizes_and_prices"]:
-                    if request.POST["submit"] == f"inc-{adding['self']['id']}-{flavor['self']['id']}":
-                        flavor["qty"] += 1
-                    if request.POST["submit"] == f"dec-{adding['self']['id']}-{flavor['self']['id']}":
-                        flavor["qty"] -= 1
-        """
+        addings = order_item.addings.all()
+        for adding in addings:
+            flavors = adding.flavors.all()
+            for flavor in flavors:
+                sizes_and_prices = flavor.sizes_and_prices.all()
+                if not sizes_and_prices:
+                    if request.POST["submit"] == f"inc-{adding.adding.id}-{flavor.flavor.id}":
+                        flavor.qty += 1
+                        flavor.save()
+                    if request.POST["submit"] == f"dec-{adding.adding.id}-{flavor.flavor.id}":
+                        flavor.qty -= 1
+                        flavor.save()
 
     ordering = get_ordering(order_item)
 
     ordering["subtotal"] = ordering["flavor"]["qty"] * ordering["flavor"]["size_and_price"].price
+    for adding in ordering["addings"]:
+        for flavor in adding["flavors"]:
+            for size_and_price in flavor["sizes_and_prices"]:
+                ordering["subtotal"] += size_and_price["qty"] * size_and_price.price               
 
     context = {
         "dish": ordering["dish"],
