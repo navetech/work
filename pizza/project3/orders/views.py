@@ -97,7 +97,6 @@ def ordering_view(request, flavor_id, size_id):
 
 def get_order_item(user, flavor_id, size_id):
     order = Order.objects.filter(user=user).first()
-#    order = None
     if not order:
         order = create_order(user)
 
@@ -121,6 +120,10 @@ def create_order_item(order, flavor, size):
     order_item.save()
 
     order_item.qty = 1
+
+    if flavor.code <= 0:
+        order_item.save()
+        return order_item
 
     type_ = flavor.super
     dish = type_.super
@@ -153,7 +156,6 @@ def create_order_item(order, flavor, size):
         order_item.save()
 
     order_item.save()
-
     return order_item
 
 
@@ -182,6 +184,10 @@ def get_ordering(order_item):
         ordering["min_addings"] = flavor.code
         ordering["max_addings"] = flavor.code
 
+    ordering["addings"] = []
+    if flavor.code <= 0:
+        return ordering
+
     dish_adding_table = DishAdding.objects
     dish_adding_flavor_table = AddingFlavor.objects
     addings_ids = ALL_ELEMENTS
@@ -190,7 +196,6 @@ def get_ordering(order_item):
     addings = get_view_types_or_addings(dish_adding_table, dish_adding_flavor_table, dish,
             addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
 
-    ordering["addings"] = []
     for adding in addings:
         order_item_adding = OrderItemAdding.objects.filter(adding=adding['self']).first()
         ordering_adding = adding
