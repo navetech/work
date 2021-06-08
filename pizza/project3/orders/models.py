@@ -91,7 +91,8 @@ class Order(models.Model):
 #    status = models.ForeignKey(OrderStatus, on_delete=models.CASCADE, related_name="status_orders")
 
     def __str__(self):
-        return f"{self.user}, {self.status}"
+        return f"{self.user}"
+#        return f"{self.user}, {self.status}"
 
 
 class OrderItemAddingFlavorSizeAndPrice(models.Model):

@@ -65,30 +65,59 @@ def ordering_view(request, flavor_id, size_id):
             order_item.qty += 1
             order_item.save()
         elif request.POST["submit"] == "dec-flavor-qty":
-            if order_item.qty > 1:
+            if order_item.qty > 0:
                 order_item.qty -= 1
                 order_item.save()
 
+        flavor = order_item.flavor
+        if flavor.code <= 0:
+            min_addings = 0
+            max_addings = -flavor.code
+        else:
+            min_addings = flavor.code
+            max_addings = flavor.code
+
         addings = order_item.addings.all()
-        for adding in addings:
-            flavors = adding.flavors.all()
-            for flavor in flavors:
-                sizes_and_prices = flavor.sizes_and_prices.all()
-                if not sizes_and_prices:
-                    if request.POST["submit"] == f"inc-{adding.adding.id}-{flavor.flavor.id}":
-                        flavor.qty += 1
-                        flavor.save()
-                    if request.POST["submit"] == f"dec-{adding.adding.id}-{flavor.flavor.id}":
-                        flavor.qty -= 1
-                        flavor.save()
+        qty_addings = 0
+        if order_item.qty <= 0:
+            for adding in addings:
+                flavors = adding.flavors.all()
+                for flavor in flavors:
+                    flavor.qty = 0
+                    flavor.save()
+        else:
+            for adding in addings:
+                flavors = adding.flavors.all()
+                for flavor in flavors:
+                    qty_addings += flavor.qty
+
+            for adding in addings:
+                flavors = adding.flavors.all()
+                for flavor in flavors:
+                    sizes_and_prices = flavor.sizes_and_prices.all()
+                    if not sizes_and_prices:
+                        if request.POST["submit"] == f"inc-{adding.adding.id}-{flavor.flavor.id}":
+                            if qty_addings < max_addings:
+                                qty_addings += 1
+                                flavor.qty += 1
+                                flavor.save()
+                        if request.POST["submit"] == f"dec-{adding.adding.id}-{flavor.flavor.id}":
+                            if flavor.qty > 0:
+                                qty_addings -= 1
+                                flavor.qty -= 1
+                                flavor.save()
 
     ordering = get_ordering(order_item)
 
-    ordering["subtotal"] = ordering["flavor"]["qty"] * ordering["flavor"]["size_and_price"].price
-    for adding in ordering["addings"]:
-        for flavor in adding["flavors"]:
-            for size_and_price in flavor["sizes_and_prices"]:
-                ordering["subtotal"] += size_and_price["qty"] * size_and_price.price               
+    ordering["total"] = 0
+    order = Order.objects.filter(user=request.user).first()
+    order_items = OrderItem.objects.filter(order=order).all()
+    for item in order_items:
+        item_ordering = get_ordering(item)
+        subtotal = get_subtotal(item_ordering)
+        ordering["total"] += subtotal
+           
+    ordering["subtotal"] = get_subtotal(ordering)
 
     context = {
         "dish": ordering["dish"],
@@ -97,9 +126,23 @@ def ordering_view(request, flavor_id, size_id):
         "min_addings": ordering["min_addings"],
         "max_addings": ordering["max_addings"],
         "addings": ordering["addings"],
-        "subtotal": ordering["subtotal"]
+        "subtotal": ordering["subtotal"],
+        "total": ordering["total"]
     }
     return render(request, "orders/ordering.html", context)
+
+
+def get_subtotal(ordering):
+    subtotal = 0
+    if ordering["flavor"]["size_and_price"]:
+        subtotal = ordering["flavor"]["qty"] * ordering["flavor"]["size_and_price"].price
+
+    for adding in ordering["addings"]:
+        for flavor in adding["flavors"]:
+            for size_and_price in flavor["sizes_and_prices"]:
+                subtotal += size_and_price["qty"] * size_and_price.price
+
+    return subtotal
 
 
 def get_order_item(user, flavor_id, size_id):
