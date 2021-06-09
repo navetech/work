@@ -140,7 +140,7 @@ def get_subtotal(ordering):
     for adding in ordering["addings"]:
         for flavor in adding["flavors"]:
             for size_and_price in flavor["sizes_and_prices"]:
-                subtotal += size_and_price["qty"] * size_and_price.price
+                subtotal += size_and_price["qty"] * size_and_price["price"]
 
     return subtotal
 
@@ -171,10 +171,6 @@ def create_order_item(order, flavor, size):
 
     order_item.qty = 1
 
-    if flavor.code <= 0:
-        order_item.save()
-        return order_item
-
     type_ = flavor.super
     dish = type_.super
     dish_adding_table = DishAdding.objects
@@ -194,10 +190,11 @@ def create_order_item(order, flavor, size):
             order_item_adding_flavor.save()
 
             for size_and_price in flavor["sizes_and_prices"]:
-                order_item_adding_flavor_size_and_price = OrderItemAddingFlavorSizeAndPrice(size_and_price=size_and_price, qty=0)
-                order_item_adding_flavor_size_and_price.save()
-                order_item_adding_flavor.sizes_and_prices.add(order_item_adding_flavor_size_and_price)
-                order_item_adding_flavor.save()
+                if size_and_price["self"]:
+                    order_item_adding_flavor_size_and_price = OrderItemAddingFlavorSizeAndPrice(size_and_price=size_and_price["self"], qty=0)
+                    order_item_adding_flavor_size_and_price.save()
+                    order_item_adding_flavor.sizes_and_prices.add(order_item_adding_flavor_size_and_price)
+                    order_item_adding_flavor.save()
 
             order_item_adding.flavors.add(order_item_adding_flavor)
             order_item_adding.save()
@@ -235,8 +232,6 @@ def get_ordering(order_item):
         ordering["max_addings"] = flavor.code
 
     ordering["addings"] = []
-    if flavor.code <= 0:
-        return ordering
 
     dish_adding_table = DishAdding.objects
     dish_adding_flavor_table = AddingFlavor.objects
@@ -258,7 +253,7 @@ def get_ordering(order_item):
 
             sizes_and_prices = []
             for size_and_price in flavor["sizes_and_prices"]:
-                order_item_adding_flavor_size_and_price = OrderItemAddingFlavorSizeAndPrice.objects.filter(size_and_price=size_and_price).first()
+                order_item_adding_flavor_size_and_price = OrderItemAddingFlavorSizeAndPrice.objects.filter(size_and_price=size_and_price["self"]).first()
                 size_and_price["qty"] = order_item_adding_flavor_size_and_price.qty
                 sizes_and_prices.append(size_and_price)
 
@@ -577,6 +572,7 @@ def get_view_flavors(flavors, flavor_sizes_ids, type_or_adding_sizes):
             view_size_and_price = {
                 "size": size,
                 "price": None,
+                "self": None
             }
             view_sizes_and_prices.append(view_size_and_price)
 
@@ -585,6 +581,7 @@ def get_view_flavors(flavors, flavor_sizes_ids, type_or_adding_sizes):
             for view_size_and_price in view_sizes_and_prices:
                 if flavor_size_and_price.size == view_size_and_price["size"]:
                     view_size_and_price["price"] = flavor_size_and_price.price
+                    view_size_and_price["self"] = flavor_size_and_price
                     break
 
         view_flavors.append({
