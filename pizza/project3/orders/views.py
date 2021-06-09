@@ -253,8 +253,6 @@ def get_ordering(order_item):
         ordering["min_addings"] = flavor.code
         ordering["max_addings"] = flavor.code
 
-    ordering["addings"] = []
-
     dish_adding_table = DishAdding.objects
     dish_adding_flavor_table = AddingFlavor.objects
     addings_ids = ALL_ELEMENTS
@@ -263,15 +261,42 @@ def get_ordering(order_item):
     addings = get_view_types_or_addings(dish_adding_table, dish_adding_flavor_table, dish,
             addings_ids, adding_flavors_ids, adding_flavor_sizes_ids)
 
+    ordering["addings"] = []
+    addings_from_order = order_item.addings.all()
+    ordering_adding = None
     for adding in addings:
-        order_item_adding = OrderItemAdding.objects.filter(adding=adding['self']).first()
-        ordering_adding = adding
+        for adding_from_order in addings_from_order:
+            if adding == adding_from_order.adding:
+#            order_item_adding = OrderItemAdding.objects.filter(adding=adding['self']).first()
+                ordering_adding = adding
+                break
+        if not ordering_adding:
+            break
 
-        flavors = []
-        for flavor in adding["flavors"]:
-            order_item_adding_flavor = OrderItemAddingFlavor.objects.filter(flavor=flavor['self']).first()
-            ordering_adding_flavor = flavor
-            ordering_adding_flavor["qty"] = order_item_adding_flavor.qty
+        adding_flavors = []
+        adding_flavors_from_order = adding_from_order.flavors.all()
+        ordering_adding_flavor = None
+        for adding_flavor in adding["flavors"]:
+            for adding_flavor_from_order in adding_flavors_from_order:
+                if adding_flavor == adding_flavor_from_order.flavor:
+#            order_item_adding_flavor = OrderItemAddingFlavor.objects.filter(flavor=flavor['self']).first()
+#            ordering_adding_flavor = flavor
+#            ordering_adding_flavor["qty"] = order_item_adding_flavor.qty
+                    ordering_adding_flavor = flavor
+                    ordering_adding_flavor["qty"] = adding_flavor_from_order.qty
+                    break
+            if not ordering_adding_flavor:
+                break
+
+PAREI AQUI
+
+        for adding_from_order in addings_from_order:
+            if adding == adding_from_order.adding:
+#            order_item_adding = OrderItemAdding.objects.filter(adding=adding['self']).first()
+                ordering_adding = adding
+                break
+        if not ordering_adding:
+            break
 
             sizes_and_prices = []
             for size_and_price in flavor["sizes_and_prices"]:
