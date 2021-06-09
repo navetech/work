@@ -76,13 +76,15 @@
                                                         <td>{{ flavor.self.name }}</td>
                                                         {% if flavor.sizes_and_prices %}
                                                             {% for size_and_price in flavor.sizes_and_prices %}
-                                                                <td>{{ size_and_price.price }}</td>
-                                                                <td>
-                                                                    <div class="ln-group-divider"></div>
-                                                                    <button type="submit" name="submit" value="dec-{{ adding.self.id }}-{{ flavor.self.id }}-{{ size_and_price.id }}">-</button>
-                                                                    <span>{{ size_and_price.qty }}</span>
-                                                                    <button type="submit" name="submit" value="inc-{{ adding.self.id }}-{{ flavor.self.id }}-{{ size_and_price.id }}">+</button>
+                                                                {% if size_and_price.self %}
+                                                                    <td>{{ size_and_price.self.price }}</td>
+                                                                    <td>
+                                                                        <div class="ln-group-divider"></div>
+                                                                        <button type="submit" name="submit" value="dec-{{ adding.self.id }}-{{ flavor.self.id }}-{{ size_and_price.self.id }}">-</button>
+                                                                        <span>{{ size_and_price.qty }} {{adding.self.name }} {{ flavor.self.name }} {{ size_and_price.self.size.name}} {{ size_and_price.self.id }}</span>
+                                                                        <button type="submit" name="submit" value="inc-{{ adding.self.id }}-{{ flavor.self.id }}-{{ size_and_price.self.id }}">+</button>
                                                                 </td>
+                                                                {% endif %}
                                                             {% endfor %}
                                                         {% else %}
                                                             <td>
