@@ -31,12 +31,12 @@
                                                     {% for size_and_price in flavor.sizes_and_prices %}
                                                         {% if size_and_price.self %}
                                                             {% if type.self is None %}
-                                                                <td>{{ size_and_price.self.price }}</td>
+                                                                <td><a href="{% url 'ordering' flavor.self.id size_and_price.self.size.id %}">{{ size_and_price.self.price }}</a></td>
                                                             {% else %}
-                                                                <td>{{ size_and_price.self.price }}</td>
+                                                                <td><a href="{% url 'ordering' flavor.self.id size_and_price.self.size.id %}">{{ size_and_price.self.price }}</a></td>
                                                             {% endif %}
                                                         {% else %}
-                                                        <td>Not available</td>
+                                                            <td>Not available</td>
                                                         {% endif %}
                                                     {% endfor %}
                                                 </tr>

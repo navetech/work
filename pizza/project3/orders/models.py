@@ -126,7 +126,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_orderitems")
     flavor = models.ForeignKey(TypeFlavor, on_delete=models.CASCADE, related_name="flavor_orderitems")
     size = models.ForeignKey(Size, on_delete=models.CASCADE, related_name="size_orderitems")
-    qty = models.IntegerField(default= 1, blank=True)
+    qty = models.IntegerField(default= 0, blank=True)
     addings = models.ManyToManyField(OrderItemAdding, blank=True, related_name="addings_orderitems")
 
     def __str__(self):
