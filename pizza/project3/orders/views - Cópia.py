@@ -395,65 +395,92 @@ def get_type_or_adding_sizes(flavors, flavor_sizes_ids):
     if len(flavors) > 1:
         flavor_sizes_ids = ALL_ELEMENTS
 
-    type_or_adding_sizes = []
-
     all_sizes = Size.objects.all().order_by("sort_number")
+    inside_type_or_adding_sizes = []
     for size in all_sizes:
-        found = False
-        for flavor in flavors:
-            flavor_sizes_and_prices = get_flavor_sizes_and_prices(flavor, flavor_sizes_ids)
-            for flavor_size_and_price in flavor_sizes_and_prices:
-                if size == flavor_size_and_price.size:
-                    type_or_adding_sizes.append(size)
-                    found = True
-                    break
-            if found:
-                break
+        inside_size = {
+            "size": size,
+            "inside": False,
+        }
+        inside_type_or_adding_sizes.append(inside_size)
 
+    for flavor in flavors:
+        flavor_sizes = get_flavor_sizes(flavor, flavor_sizes_ids)
+        for flavor_size in flavor_sizes:
+            for inside_size in inside_type_or_adding_sizes:
+                if flavor_size == inside_size["size"]:
+                    inside_size["inside"] = True
+                    break
+
+    type_or_adding_sizes = []
+    for inside_size in inside_type_or_adding_sizes:
+        if inside_size["inside"]:
+            type_or_adding_sizes.append(inside_size["size"])
     return type_or_adding_sizes
 
 
-def get_flavor_sizes_and_prices(flavor, flavor_sizes_ids):
-    flavor_sizes_and_prices = []
-
+def get_flavor_sizes(flavor, flavor_sizes_ids):
+    flavor_sizes = []
+    sizes_and_prices = flavor.sizes_and_prices.all()
     if flavor_sizes_ids is ALL_ELEMENTS:
-        flavor_sizes_and_prices = flavor.sizes_and_prices.all()
+        for size_and_price in sizes_and_prices:
+            flavor_sizes.append(size_and_price.size)
     else:
-        for flavor_size_id in flavor_sizes_ids:
-            size_and_price = flavor.sizes_and_prices.filter(size__id == flavor_size_id)
-            flavor_sizes_and_prices.append(size_and_price)
-
-    return flavor_sizes_and_prices
+        for id in flavor_sizes_ids:
+            size = Size.objects.filter(pk=id).first()
+            if size:
+                for size_and_price in sizes_and_prices:
+                    if size == size_and_price.size:
+                        flavor_sizes.append(size_and_price.size)
+    return flavor_sizes
 
 
 def get_view_flavors(flavors, flavor_sizes_ids, type_or_adding_sizes):
     view_flavors = []
-
-    view_flavor = {}
     for flavor in flavors:
-        view_flavor["self"] = flavor
-
-        view_flavor["addings"] = []
+        flavor_addings = []
         if hasattr(flavor, "addings"):
-            view_flavor["addings"] = flavor.addings.all().order_by("sort_number")
+            flavor_addings = flavor.addings.all()
 
-        view_flavor["sizes_and_prices"] = []
-        for type_or_adding_size in type_or_adding_sizes:
-            view_flavor_size_and_price = {
-                "size": type_or_adding_size,
+        view_sizes_and_prices = []
+        for size in type_or_adding_sizes:
+            view_size_and_price = {
+                "size": size,
+                "price": None,
                 "self": None
             }
+            view_sizes_and_prices.append(view_size_and_price)
 
-            flavor_sizes_and_prices = get_flavor_sizes_and_prices(flavor, flavor_sizes_ids)
-            for flavor_size_and_price in flavor_sizes_and_prices:
-                if type_or_adding_size == flavor_size_and_price.size:
-                    view_flavor_size_and_price["self"] = flavor_size_and_price
+        flavor_sizes_and_prices = get_flavor_sizes_and_prices(flavor, flavor_sizes_ids)
+        for flavor_size_and_price in flavor_sizes_and_prices:
+            for view_size_and_price in view_sizes_and_prices:
+                if flavor_size_and_price.size == view_size_and_price["size"]:
+                    view_size_and_price["price"] = flavor_size_and_price.price
+                    view_size_and_price["self"] = flavor_size_and_price
                     break
-            view_flavor["sizes_and_prices"].append(view_flavor_size_and_price)
 
-        view_flavors.append(view_flavor)
-
+        view_flavors.append({
+            "self": flavor,
+            "sizes_and_prices": view_sizes_and_prices,
+            "addings": flavor_addings,
+        })
     return view_flavors
+
+
+def get_flavor_sizes_and_prices(flavor, flavor_sizes_ids):
+    flavor_sizes_and_prices = []
+    sizes_and_prices = flavor.sizes_and_prices.all()
+    if flavor_sizes_ids is ALL_ELEMENTS:
+        for size_and_price in sizes_and_prices:
+            flavor_sizes_and_prices.append(size_and_price)
+    else:
+        for id in flavor_sizes_ids:
+            size = Size.objects.filter(pk=id).first()
+            if size:
+                for size_and_price in sizes_and_prices:
+                    if size == size_and_price.size:
+                        flavor_sizes_and_prices.append(size_and_price)
+    return flavor_sizes_and_prices
 
 
 def login_view(request):
