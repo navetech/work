@@ -10,5 +10,5 @@ urlpatterns = [
     path("register", views.register_view, name="register"),
     path("unregister", views.unregister_view, name="unregister"),
     path("menu", views.menu, name="menu"),
-    path('order/<flavor_id>/<size_id>', views.ordering_view, name="ordering"),
+#    path('order/<flavor_id>/<size_id>', views.ordering_view, name="ordering"),
 ]

@@ -288,8 +288,6 @@ def get_ordering(order_item):
             if not ordering_adding_flavor:
                 break
 
-PAREI AQUI
-
         for adding_from_order in addings_from_order:
             if adding == adding_from_order.adding:
 #            order_item_adding = OrderItemAdding.objects.filter(adding=adding['self']).first()
@@ -429,8 +427,8 @@ def get_flavor_sizes_and_prices(flavor, flavor_sizes_ids):
 def get_view_flavors(flavors, flavor_sizes_ids, type_or_adding_sizes):
     view_flavors = []
 
-    view_flavor = {}
     for flavor in flavors:
+        view_flavor = {}
         view_flavor["self"] = flavor
 
         view_flavor["addings"] = []
