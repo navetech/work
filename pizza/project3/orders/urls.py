@@ -10,5 +10,5 @@ urlpatterns = [
     path("register", views.register_view, name="register"),
     path("unregister", views.unregister_view, name="unregister"),
     path("menu", views.menu, name="menu"),
-    path('order/<flavor_id>/<size_id>', views.order_item_view, name="order_item"),
+    path('item_order/<flavor_id>/<size_id>', views.item_order, name="item_order"),
 ]
