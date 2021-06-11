@@ -62,7 +62,7 @@
                                                 {% endif %}
                                                 {{ max_addings }}
                                                 {{ adding.self.name }}{{ max_addings|pluralize }}
-                                        </span>
+                                            </span>
                                             <table style="width:100%">
                                                 <tr>
                                                     <th></th>
@@ -103,9 +103,16 @@
                             {% endif %}
                         </ul>
                     </div>
-                    <button type="button">Add to cart</button>
-                    Subtotal <span>{{ subtotal }}</span>
-                    Total <span>{{ total }}</span>
+                    <button type="button"><a href="{% url 'shopping_cart' %}">Show Cart</a></button>
+                    <br>
+                    Subtotals:
+                    price: <span>{{ subtotals.price }}  </span>
+                    products_qty: <span>{{ subtotals.products_qty }}  </span>
+                    <br>
+                    Totals:
+                    price: <span>{{ totals.price }}  </span>
+                    items_qty: <span>{{ totals.items_qty }}  </span>
+                    products_qty: <span>{{ totals.products_qty }}  </span>
                 </li>
             </ul>
         </li>

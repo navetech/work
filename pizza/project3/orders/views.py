@@ -12,6 +12,7 @@ from .models import OrderItemAddingFlavorSizeAndPrice, OrderItemAddingFlavor
 from .models import OrderItemAdding, OrderItem
 
 
+
 # Create your views here.
 
 NO_ELEMENT = None
@@ -129,15 +130,12 @@ def item_order(request, flavor_id, size_id):
                                     size_and_price.save()
 
     view_order_item = get_view_order_item(order_item)
-           
-    order_item_subtotal = get_order_item_subtotal(order_item)
 
-    order_total = 0
     order = Order.objects.filter(user=request.user).first()
-    order_items = OrderItem.objects.filter(order=order).all()
-    for item in order_items:
-        item_subtotal = get_order_item_subtotal(item)
-        order_total += item_subtotal
+    order_totals = get_order_totals(order)
+
+    if order_item.qty <= 0:
+        delete_order_item(order_item)
 
     context = {
         "dish": view_order_item["dish"],
@@ -147,14 +145,98 @@ def item_order(request, flavor_id, size_id):
         "min_addings": view_order_item["min_addings"],
         "max_addings": view_order_item["max_addings"],
         "addings": view_order_item["addings"],
-        "subtotal": order_item_subtotal,
-        "total": order_total,
+        "subtotals": view_order_item["subtotals"],
+        "totals": order_totals,
     }
+
     return render(request, "orders/item-order.html", context)
 
 
-def get_order_item_subtotal(order_item):
-    subtotal = 0
+def shopping_cart(request):
+    if request.method == "GET":
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(reverse("index"))
+
+        order = Order.objects.filter(user=request.user).first()
+        order_items = get_order_items(order)
+
+    else:
+        order = Order.objects.filter(user=request.user).first()
+        order_items = get_order_items(order)
+
+
+    view_order = get_view_order(order)
+
+    context = {
+        "order": view_order,
+        }
+
+    return render(request, "orders/shopping-cart.html", context)
+
+
+def get_view_order(order):
+    view_order_items = []
+
+    total_price = 0
+    items_qty = 0
+    total_products_qty = 0
+
+    order_items = OrderItem.objects.filter(order=order).all()
+    for order_item in order_items:
+        view_order_item = get_view_order_item(order_item)
+
+        view_order_items.append(view_order_item)
+
+        total_price += view_order_item["subtotals"]["price"]
+    
+        if view_order_item["subtotals"]["products_qty"] > 0:
+            items_qty += 1
+            total_products_qty += view_order_item["subtotals"]["products_qty"]
+
+    order_totals = {
+        "price": total_price,
+        "items_qty": items_qty,
+        "products_qty": total_products_qty,
+    }
+
+    view_order = {
+        "items": view_order_items,
+        "totals": order_totals,
+    }
+
+    return view_order
+
+
+def get_order_items(order):
+    order_items = OrderItem.objects.filter(order=order).all()
+
+    return order_items
+
+
+def get_order_totals(order):
+    total_price = 0
+    items_qty = 0
+    total_products_qty = 0
+
+    order_items = OrderItem.objects.filter(order=order).all()
+    for item in order_items:
+        item_subtotals = get_order_item_subtotals(item)
+        total_price += item_subtotals["price"]
+    
+        if item_subtotals["products_qty"] > 0:
+            items_qty += 1
+            total_products_qty += item_subtotals["products_qty"]
+
+    order_totals = {
+        "price": total_price,
+        "items_qty": items_qty,
+        "products_qty": total_products_qty,
+    }
+    return order_totals
+
+
+def get_order_item_subtotals(order_item):
+    price = 0
 
     addings = order_item.addings.all()
     for adding in addings:
@@ -162,7 +244,7 @@ def get_order_item_subtotal(order_item):
         for adding_flavor in adding_flavors:
             sizes_and_prices = adding_flavor.sizes_and_prices.all()
             for size_and_price in sizes_and_prices:
-                subtotal += size_and_price.qty * size_and_price.size_and_price.price
+                price += size_and_price.qty * size_and_price.size_and_price.price
 
     flavor = order_item.flavor
     size = order_item.size
@@ -170,9 +252,26 @@ def get_order_item_subtotal(order_item):
 
     flavor_size_and_price = flavor.sizes_and_prices.filter(size=size).first()
     if flavor_size_and_price:
-        subtotal = qty * (subtotal + flavor_size_and_price.price)
+        price = qty * (price + flavor_size_and_price.price)
 
-    return subtotal
+    products_qty = qty
+
+    order_item_subtotals = {
+        "price": price,
+        "products_qty": products_qty
+    }
+    return order_item_subtotals
+
+
+
+def delete_order_item(order_item):
+    order = order_item.order
+
+    order_item.delete()
+
+    order_items = OrderItem.objects.filter(order=order).all()
+    if not order_items:
+        order.delete()
 
 
 def get_order_item(user, flavor_id, size_id):
@@ -321,6 +420,9 @@ def get_view_order_item(order_item):
         view_addings.append(view_adding)
 
     view_order_item["addings"] = view_addings
+
+    subtotals = get_order_item_subtotals(order_item)
+    view_order_item["subtotals"] = subtotals
 
     return view_order_item
 
