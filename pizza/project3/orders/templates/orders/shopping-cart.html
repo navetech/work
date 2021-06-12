@@ -32,9 +32,8 @@
                 <tr>
                     <th>Price</th>
                     <th>Item Qty</th>
-                    <th>Products Qty</th>
                     <th>Dish</th>
-                    <th>Addings</th>
+                    <th> Addings</th>
                 </tr>
                 {% for item in order.items %}
                     {% if item.addings %}
@@ -42,23 +41,22 @@
                         <td></td>
                         <td></td>
                         <td></td>
-                        <td></td>
                         <td>
                             {% for adding in item.addings %}
-                                <table style="width:100%">
-                                    <tr>
-                                        <th>{{ adding.self.name }}</th>
-                                    </tr>
-                                </table>
+                                {% if adding.qty > 0 %}
+                                    <table style="width:100%">
+                                        <tr>
+                                            <th>{{ adding.self.name }} ({{ adding.qty }})</th>
+                                        </tr>
+                                    </table>
+                                {% endif %}
                             {% endfor %}
                         </td>
                     </tr>
-                    {% else %}
                     {% endif %}
                     <tr>
                         <td>{{ item.subtotals.price }}</td>
                         <td>{{ item.qty }}</td>
-                        <td>{{ item.subtotals.products_qty}}</td>
                         <td>
                             {{ item.flavor.self.name }}
                             {{ item.type.name }}
@@ -67,46 +65,31 @@
                         </td>
                         <td>
                             {% for adding in item.addings %}
-                                <table style="width:100%">
-                                    <tr>
-                                        {% for adding_flavor in adding.flavors %}
-                                            <td>{{ adding_flavor.self.name }}</td>
-                                            {% if adding_flavor.sizes_and_prices %}
-                                            {% else %}
-                                                <td>{{ adding_flavor.qty }}</td>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </tr>
-                                </table>
-                            {% endfor %}
-                        </td>
-                    <tr>
-                {% endfor %}
-            </table>
-        </li>
-        <li class="list-group-item ln-container01">
-            {% for item in order.items %}
-                <ul class="list-group pt-4">
-                    <li class="list-group-item ln-container02">
-                        Addings:
-                        {% for adding in item.addings %}
-                            {% for adding_flavor in adding.flavors %}
-                                {{ adding_flavor.self.name }}
-                                {% if adding_flavor.sizes_and_prices %}
-                                    {% for size_and_price in adding_flavor.sizes_and_prices %}
-                                        {% if size_and_price.self %}
-                                            {{ size_and_price.self.price }}
-                                            {{ size_and_price.qty }}
-                                        {% endif %}
-                                    {% endfor %}
-                                {% else %}
-                                    {{ adding_flavor.qty }}
+                                {% if adding.qty > 0 %}
+                                    <table style="width:100%">
+                                        <tr>
+                                            <td>
+                                                <table style="width:100%">
+                                                    <tr>
+                                                        {% for adding_flavor in adding.flavors %}
+                                                            {% if adding_flavor.qty > 0 %}
+                                                                <td>{{ adding_flavor.self.name }} ({{ adding_flavor.qty }})</td>
+                                                            {% endif %}
+                                                            {% if adding_flavor.sizes_and_prices %}
+                                                            {% else %}
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </tr>
+                                                </table>
+                                            </td>                                        </tr>
+                                        </tr>
+                                    </table>
                                 {% endif %}
                             {% endfor %}
-                        {% endfor %}
-                    </li>
-                </ul>
-            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
         </li>
     </ul>
 {% endblock %}

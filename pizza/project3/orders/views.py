@@ -84,12 +84,13 @@ def item_order(request, flavor_id, size_id):
             for adding in addings:
                 flavors = adding.flavors.all()
                 for flavor in flavors:
-                    flavor.qty = 0
-                    flavor.save()
                     sizes_and_prices = flavor.sizes_and_prices.all()
                     for size_and_price in sizes_and_prices:
                         size_and_price.qty = 0
-                        size_and_price.save()                    
+                        size_and_price.save()
+
+                    flavor.qty = 0
+                    flavor.save()
         else:
             for adding in addings:
                 flavors = adding.flavors.all()
@@ -123,11 +124,15 @@ def item_order(request, flavor_id, size_id):
                                     qty_addings += 1
                                     size_and_price.qty += 1
                                     size_and_price.save()
+                                    flavor.qty += 1
+                                    flavor.save()
                             if request.POST["submit"] == f"dec-{adding.adding.id}-{flavor.flavor.id}-{size_and_price.size_and_price.id}":
                                 if size_and_price.qty > 0:
                                     qty_addings -= 1
                                     size_and_price.qty -= 1
                                     size_and_price.save()
+                                    flavor.qty -= 1
+                                    flavor.save()
 
     view_order_item = get_view_order_item(order_item)
 
@@ -383,6 +388,7 @@ def get_view_order_item(order_item):
 
         view_adding["self"] = item_adding.adding
         view_adding["sizes"] = adding["sizes"]
+        view_adding["qty"] = 0
         view_adding["flavors"] = []
 
         adding_flavors = adding["flavors"]
@@ -415,6 +421,7 @@ def get_view_order_item(order_item):
 
                 view_adding_flavor["sizes_and_prices"].append(view_size_and_price)
 
+            view_adding["qty"] += view_adding_flavor["qty"]
             view_adding["flavors"].append(view_adding_flavor)
 
         view_addings.append(view_adding)
