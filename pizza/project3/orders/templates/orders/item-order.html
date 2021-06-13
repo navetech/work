@@ -10,30 +10,30 @@
 
 {% block main %}
     <h1>Item Order</h1>
-        <form action="{% url 'item_order' flavor.self.id flavor.size_and_price.size.id %}" method="post">
+        <form action="{% url 'item_order' item.flavor.self.id item.flavor.size_and_price.size.id %}" method="post">
         {% csrf_token %}
     <ul class="list-group pt-4">
         <li class="list-group-item ln-container01">
-            <h2>{{ dish.name }}</h2>
+            <h2>{{ item.dish.name }}</h2>
             <ul class="list-group pt-4">
                 <li class="list-group-item ln-container02">
-                    <h3>{{ type.name }}</h3>
+                    <h3>{{ item.type.name }}</h3>
                     <figure>
                         <img src="{% static flavor.self.img.name %}" alt="{{ flavor.self.name }} Image">
-                        {% if type is None %}
-                            <figcaption>{{ flavor.self.name }} {{ dish.name }}</figcaption>
+                        {% if item.type is None %}
+                            <figcaption>{{ item.flavor.self.name }} {{ item.dish.name }}</figcaption>
                         {% else %}
-                            <figcaption>{{ flavor.self.name }} {{ type.name }} {{ dish.name }}</figcaption>
+                            <figcaption>{{ item.flavor.self.name }} {{ item.type.name }} {{ item.dish.name }}</figcaption>
                         {% endif %}
                     </figure>
                     <table style="width:100%">
                         <tr>
-                            <th>{{ flavor.size_and_price.size.name }}</th>
-                            <th>{{ flavor.size_and_price.price }}</th>
+                            <th>{{ item.flavor.size_and_price.size.name }}</th>
+                            <th>{{ item.flavor.size_and_price.price }}</th>
                             <th>
                                 <div class="ln-group-divider"></div>
                                 <button type="submit" name="submit" value="dec-qty">-</button>
-                                <span>{{ qty }}</span>
+                                <span>{{ item.qty }}</span>
                                 <button type="submit" name="submit" value="inc-qty">+</button>
                             </th>
                         </tr>
@@ -42,26 +42,26 @@
                     </table>
                     <div>
                         <ul class="list-group pt-4">
-                            {% if flavor.addings %}
+                            {% if item.flavor.addings %}
                                 Addings
-                                {% for flavor_adding in flavor.addings %}
+                                {% for flavor_adding in item.flavor.addings %}
                                     <ul class="list-group pt-4">
                                         <li class="list-group-item ln-container02">
                                             {{ flavor_adding.super.name }} {{ flavor_adding.name }}
                                         </li>
                                     </ul>
                                 {% endfor %}
-                            {% elif max_addings > 0 %}
-                                {% for adding in addings %}
+                            {% elif item.max_addings > 0 %}
+                                {% for adding in item.addings %}
                                     <ul class="list-group pt-4">
                                         <li class="list-group-item ln-container02">
                                             Choose 
                                             <span>
-                                                {% if min_addings == 0 %}
+                                                {% if item.min_addings == 0 %}
                                                     up to
                                                 {% endif %}
-                                                {{ max_addings }}
-                                                {{ adding.self.name }}{{ max_addings|pluralize }}
+                                                {{ item.max_addings }}
+                                                {{ adding.self.name }}{{ item.max_addings|pluralize }}
                                             </span>
                                             <table style="width:100%">
                                                 <tr>
@@ -106,8 +106,8 @@
                     <button type="button"><a href="{% url 'shopping_cart' %}">Show Cart</a></button>
                     <br>
                     Subtotals:
-                    price: <span>{{ subtotals.price }}  </span>
-                    products_qty: <span>{{ subtotals.products_qty }}  </span>
+                    price: <span>{{ item.subtotals.price }}  </span>
+                    products_qty: <span>{{ item.subtotals.products_qty }}  </span>
                     <br>
                     Totals:
                     price: <span>{{ totals.price }}  </span>

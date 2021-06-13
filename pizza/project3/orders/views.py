@@ -143,14 +143,7 @@ def item_order(request, flavor_id, size_id):
         delete_order_item(order_item)
 
     context = {
-        "dish": view_order_item["dish"],
-        "type": view_order_item["type"],
-        "flavor": view_order_item["flavor"],
-        "qty": view_order_item["qty"],
-        "min_addings": view_order_item["min_addings"],
-        "max_addings": view_order_item["max_addings"],
-        "addings": view_order_item["addings"],
-        "subtotals": view_order_item["subtotals"],
+        "item": view_order_item,
         "totals": order_totals,
     }
 
@@ -368,6 +361,7 @@ def get_view_order_item(order_item):
 
     view_order_item["flavor"] = view_flavor
 
+    view_order_item["addings_qty"] = 0
     view_addings = []
 
     dish_adding_table = DishAdding.objects
@@ -388,7 +382,7 @@ def get_view_order_item(order_item):
 
         view_adding["self"] = item_adding.adding
         view_adding["sizes"] = adding["sizes"]
-        view_adding["qty"] = 0
+        view_adding["flavors_qty"] = 0
         view_adding["flavors"] = []
 
         adding_flavors = adding["flavors"]
@@ -421,10 +415,12 @@ def get_view_order_item(order_item):
 
                 view_adding_flavor["sizes_and_prices"].append(view_size_and_price)
 
-            view_adding["qty"] += view_adding_flavor["qty"]
+            view_adding["flavors_qty"] += view_adding_flavor["qty"]
             view_adding["flavors"].append(view_adding_flavor)
 
         view_addings.append(view_adding)
+        if view_adding["flavors_qty"] > 0:
+            view_order_item["addings_qty"] += 1
 
     view_order_item["addings"] = view_addings
 
