@@ -13,25 +13,28 @@
     {% if order.totals.items_qty <= 0 %}
         <h2>Empty</h2>
     {% else %}
-        <table style="width:100%" class="table">
-            <tr>
-                <th>Total Price</th>
-                <th>Items Qty</th>
-                <th>Dishes Qty</th>
-            <tr>
-            <tr>
-                <td>{{ order.totals.price}}</td>
-                <td>{{ order.totals.items_qty}}</td>
-                <td>{{ order.totals.products_qty}}</td>
-            <tr>
-        </table>
         <ul class="list-group pt-4">
             <li class="list-group-item ln-container01">
+                <h2>Totals</h2>
+                <table style="width:100%">
+                    <tr>
+                        <th>Price</th>
+                        <th>Items Qty</th>
+                        <th>Dishes Qty</th>
+                    <tr>
+                    <tr>
+                        <td>{{ order.totals.price}}</td>
+                        <td>{{ order.totals.items_qty}}</td>
+                        <td>{{ order.totals.products_qty}}</td>
+                    <tr>
+                </table>
+            </li>
+            <li class="list-group-item ln-container01">
                 <h2>Items</h2>
-                <table style="width:100%" class="table table-striped table-hover table-bordered">
+                <table style="width:100%" class="table table-striped">
                     <tr>
                         <td>
-                            <table style="width:100%" class="table">
+                            <table style="width:100%"">
                                 <tr>
                                     <th>Price</th>
                                     <th>Dish</th>
@@ -44,7 +47,7 @@
                     {% for item in order.items %}
                     <tr>
                     <td>
-                    <table style="width:100%" class="table">
+                    <table style="width:100%"">
                         <tr>
                             <td>{{ item.subtotals.price }}</td>
                             <td>
@@ -58,7 +61,7 @@
                                 <td></td>
                             {% else %}
                                 <td>
-                                    <table style="width:100%" class="table">
+                                    <table style="width:100%">
                                         <tr>
                                             {% for adding in item.addings %}
                                                 {% if adding.flavors_qty > 0 %}
@@ -77,12 +80,12 @@
                                 <td></td>
                                 <td></td>
                                 <td>
-                                    <table style="width:100%" class="table">
+                                    <table style="width:100%">
                                         <tr>
                                             {% for adding in item.addings %}
                                                 {% if adding.flavors_qty > 0 %}
                                                     <td>
-                                                        <table style="width:100%" class="table">
+                                                        <table style="width:100%">
                                                             <tr>
                                                                 {% for adding_flavor in adding.flavors %}
                                                                     {% if adding_flavor.qty > 0 %}
@@ -110,18 +113,18 @@
                                 <td></td>
                                 <td></td>
                                 <td>
-                                    <table style="width:100%" class="table">
+                                    <table style="width:100%">
                                         <tr>
                                             {% for adding in item.addings %}
                                                 {% if adding.flavors_qty > 0 %}
                                                     <td>
-                                                        <table style="width:100%" class="table">
+                                                        <table style="width:100%">
                                                             <tr>
                                                                 {% for adding_flavor in adding.flavors %}
                                                                     {% if adding_flavor.qty > 0 %}
                                                                         {% if adding_flavor.sizes_and_prices %}
                                                                             <td>
-                                                                                <table style="width:100%" class="table">
+                                                                                <table style="width:100%">
                                                                                     <tr>
                                                                                         {% for size_and_price in adding_flavor.sizes_and_prices %}
                                                                                             {% if size_and_price.self %}
