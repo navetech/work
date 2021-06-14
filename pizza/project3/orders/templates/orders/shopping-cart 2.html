@@ -28,7 +28,7 @@
         <ul class="list-group pt-4">
             <li class="list-group-item ln-container01">
                 <h2>Items</h2>
-                <table style="width:100%" class="table table-striped table-hover">
+                <table style="width:100%" class="table table-striped table-hover table-bordered">
                     <tr>
                         <td>
                             <table style="width:100%" class="table">
@@ -70,14 +70,8 @@
                             <tr>
                                 <td></td>
                                 <td></td>
-                                <td>
-                                    <table style="width:100%" class="table">
-                                        <tr>
                                             {% for adding in item.addings %}
                                                 {% if adding.flavors_qty > 0 %}
-                                                    <td>
-                                                        <table style="width:100%" class="table">
-                                                            <tr>
                                                                 {% for adding_flavor in adding.flavors %}
                                                                     {% if adding_flavor.qty > 0 %}
                                                                         {% if adding_flavor.sizes_and_prices %}
@@ -91,14 +85,8 @@
                                                                         {% endif %}
                                                                     {% endif %}
                                                                 {% endfor %}
-                                                            </tr>
-                                                        </table>
-                                                    </td>
                                                 {% endif %}
                                             {% endfor %}
-                                        </tr>
-                                    </table>
-                                </td>
                             </tr>
                             <tr>
                                 <td></td>
