@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 
-from basic.languages.models import Iso_639_LanguageCode
+from .languages import Iso_639_LanguageCode
 
 class Text(models.Model):
     words = models.CharField(max_length=256, blank=True)

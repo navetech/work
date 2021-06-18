@@ -31,6 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+   # 'languages.apps.LanguagesConfig',
+
     'texts.apps.TextsConfig',
 
     'django.contrib.admin',
