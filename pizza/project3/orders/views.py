@@ -640,12 +640,24 @@ def checkout(request):
     return HttpResponseRedirect(reverse("index"))
 
 
+def success(request):
+    context = {}
+    return render(request, 'orders/success.html', context)
+
+
+def cancel(request):
+    context = {}
+    return render(request, 'orders/cancel.html', context)
+
 
 from django.http import JsonResponse
+
+import os
 
 import stripe
 # This is a sample test API key. Sign in to see examples pre-filled with your key.
 stripe.api_key = 'sk_test_4eC39HqLyjWDarjtT1zdp7dc'
+
 
 YOUR_DOMAIN = 'http://localhost:4242'
 
@@ -657,7 +669,8 @@ def create_checkout_session(request):
                 {
                     'price_data': {
                         'currency': 'usd',
-                        'unit_amount': 2000,
+#                        'unit_amount': 2000,
+                        'unit_amount': int(float(request.read()) * 100),
                         'product_data': {
                             'name': 'Stubborn Attachments',
                             'images': ['https://i.imgur.com/EHyR2nP.png'],
@@ -667,12 +680,9 @@ def create_checkout_session(request):
                 },
             ],
             mode='payment',
-            success_url=YOUR_DOMAIN + '/success.html',
-            cancel_url=YOUR_DOMAIN + '/cancel.html',
+            success_url=YOUR_DOMAIN + '/success',
+            cancel_url=YOUR_DOMAIN + '/cancel',
         )
-        print(JsonResponse({'id': checkout_session.id}).content)
         return JsonResponse({'id': checkout_session.id})
     except Exception as e:
-        print(JsonResponse(error=str(e)))
-        return JsonResponse(error=str(e)), 403
-
+        return JsonResponse(error=str(e))
