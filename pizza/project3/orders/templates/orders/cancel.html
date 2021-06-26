@@ -1,11 +1,11 @@
-<html>
-<head>
-  <title>Checkout canceled</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <section>
-    <p>Forgot to add something to your cart? Shop around then come back to pay!</p>
-  </section>
-</body>
-</html>
+{% extends "orders/base.html" %}
+
+
+{% block title %}
+Checkout Canceled
+{% endblock %}
+
+{% block main %}
+    <h1>Checkout Canceled</h1>
+    <h2>Forgot to add something to your cart? Shop around then come back to pay!</h2>
+{% endblock %}

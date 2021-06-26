@@ -15,10 +15,10 @@
         <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
 
         <script src="/static/scripts/layout.js"></script>
-    {% endif %}
 
-    {% block scripts %}
-    {% endblock %}
+        {% block scripts %}
+        {% endblock %}
+    {% endif %}
 
     <title>
         Pizza: {% block title %}{% endblock %}
@@ -27,28 +27,37 @@
 
 
 {% block product_navbar %}
-    <div class="collapse navbar-collapse" id="navbar">
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+            </li>
+        </ul>
+
         {% if user.is_authenticated %}
-            <ul class="navbar-nav ml-auto mt-2">
-                <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">LogOut</a></li>
+            <div class="dropstart me-2">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    {{ user.username }}
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <li><a class="dropdown-item" href="{% url 'unregister' %}">Unregister</a></li>
+                    <li><a class="dropdown-item" href="{% url 'logout' %}">Log Out</a></li>
+                </ul>
+            </div>
 
-                <!-- Default dropleft button -->
-                <div class="btn-group dropleft">
-                    <button type="button" class="btn btn-dark dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ user.username }}</button>
-
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="{% url 'unregister' %}">Unregister</a>
-
-                        <div class="dropdown-divider"></div>
-
-                        <a class="dropdown-item" href="{% url 'logout' %}">Log Out</a>
-                    </div>
-                </div>
+            <ul class="navbar-nav mb-2">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{% url 'logout' %}">LogOut</a>
+                </li>
             </ul>
         {% else %}
-            <ul class="navbar-nav ml-auto mt-2">
-                <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Log In</a></li>
+            <ul class="navbar-nav mb-2">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{% url 'register' %}">Register</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{% url 'login' %}">Log In</a>
+                </li>
             </ul>
         {% endif %}
     </div>

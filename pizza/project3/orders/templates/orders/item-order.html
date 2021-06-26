@@ -103,7 +103,7 @@
                             {% endif %}
                         </ul>
                     </div>
-                    <button type="button"><a href="{% url 'shopping_cart' %}">Show Cart</a></button>
+                    <a class="btn btn-secondary" role="button" href="{% url 'shopping_cart' %}">Show Cart</a>
                     <br>
                     Subtotals:
                     price: <span>{{ item.subtotals.price }}  </span>
