@@ -15,23 +15,65 @@ class CommonInfo(models.Model):
         return f"{self.sort_number}, {self.name}"
 
 
-class Size(CommonInfo):
+class HistoryCommonInfo(CommonInfo):
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{CommonInfo.__str__(self)}"
+
+
+class SizeCommonInfo(CommonInfo):
     code = models.CharField(max_length=2, blank=True)
+
+    class Meta:
+        abstract = True
 
     def __str__(self):
         return f"{CommonInfo.__str__(self)}, {self.code}"
 
 
-class SizeAndPrice(models.Model):
-    size = models.ForeignKey(Size, blank=True, null=True, on_delete=models.CASCADE,
-        related_name="size_sizesandprices")
+class Size(SizeCommonInfo):
+    def __str__(self):
+        return f"{SizeCommonInfo.__str__(self)}"
+
+
+class HistorySize(SizeCommonInfo):
+    def __str__(self):
+        return f"{SizeCommonInfo.__str__(self)}"
+
+
+class SizeAndPriceCommonInfo(models.Model):
     price = models.DecimalField(max_digits=5, decimal_places=2)
 
+    class Meta:
+        abstract = True
+
     def __str__(self):
-        return f"{self.size}, {self.price}"
+        return f"{self.price}"
+
+
+class SizeAndPrice(SizeAndPriceCommonInfo):
+    size = models.ForeignKey(Size, blank=True, null=True, on_delete=models.CASCADE,
+        related_name="size_sizesandprices")
+
+    def __str__(self):
+        return f"{self.size}, {SizeAndPriceCommonInfo.__str__(self)}"
+
+
+class HistorySizeAndPrice(SizeAndPriceCommonInfo):
+    size = models.ForeignKey(HistorySize, blank=True, null=True, on_delete=models.CASCADE,
+        related_name="size_historysizesandprices")
+
+    def __str__(self):
+        return f"{self.size}, {SizeAndPriceCommonInfo.__str__(self)}"
 
 
 class Dish(CommonInfo):
+    pass
+
+
+class HistoryDish(HistoryCommonInfo):
     pass
 
 
@@ -46,7 +88,22 @@ class TypeOrAddingCommonInfo(CommonInfo):
         return f"{CommonInfo.__str__(self)}, {self.super}"
 
 
+class HistoryTypeOrAddingCommonInfo(HistoryCommonInfo):
+    super = models.ForeignKey(HistoryDish, verbose_name="dish", on_delete=models.CASCADE,
+        related_name="dish_%(app_label)s_%(class)s")
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{HistoryCommonInfo.__str__(self)}, {self.super}"
+
+
 class DishType(TypeOrAddingCommonInfo):
+    pass
+
+
+class HistoryDishType(HistoryTypeOrAddingCommonInfo):
     pass
 
 
@@ -54,9 +111,22 @@ class DishAdding(TypeOrAddingCommonInfo):
     pass
 
 
-class FlavorCommonInfo(CommonInfo):
+class HistoryDishAdding(HistoryTypeOrAddingCommonInfo):
+    pass
+
+
+class FlavorCommonCommonInfo(CommonInfo):
     img = models.ImageField(upload_to='orders/static/orders/images/flavors/', default=None, blank=True)
     code = models.IntegerField(default= 0, blank=True)
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{CommonInfo.__str__(self)}, {self.img}, {self.code}"
+
+
+class FlavorCommonInfo(FlavorCommonCommonInfo):
     sizes_and_prices = models.ManyToManyField(SizeAndPrice, blank=True,
         related_name="sizesandprices_%(app_label)s_%(class)s")
 
@@ -64,7 +134,18 @@ class FlavorCommonInfo(CommonInfo):
         abstract = True
 
     def __str__(self):
-        return f"{CommonInfo.__str__(self)}, {self.img}, {self.code}, {self.sizes_and_prices}"
+        return f"{FlavorCommonCommonInfo.__str__(self)}, {self.sizes_and_prices}"
+
+
+class HistoryFlavorCommonInfo(FlavorCommonCommonInfo):
+    sizes_and_prices = models.ManyToManyField(HistorySizeAndPrice, blank=True,
+        related_name="sizesandprices_%(app_label)s_%(class)s")
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{FlavorCommonCommonInfo.__str__(self)}, {self.sizes_and_prices}"
 
 
 class AddingFlavor(FlavorCommonInfo):
@@ -72,6 +153,14 @@ class AddingFlavor(FlavorCommonInfo):
 
     def __str__(self):
         return f"{FlavorCommonInfo.__str__(self)}, {self.super}"
+
+
+class HistoryAddingFlavor(HistoryFlavorCommonInfo):
+    super = models.ForeignKey(HistoryDishAdding, verbose_name="adding", on_delete=models.CASCADE,
+        related_name="adding_historyaddingflavors")
+
+    def __str__(self):
+        return f"{HistoryFlavorCommonInfo.__str__(self)}, {self.super}"
 
 
 class TypeFlavor(FlavorCommonInfo):
@@ -82,36 +171,91 @@ class TypeFlavor(FlavorCommonInfo):
         return f"{FlavorCommonInfo.__str__(self)}, {self.super}, {self.addings}"
 
 
+class HistoryTypeFlavor(HistoryFlavorCommonInfo):
+    super = models.ForeignKey(HistoryDishType, verbose_name="type", on_delete=models.CASCADE, related_name="type_historytypeflavors")
+    addings = models.ManyToManyField(HistoryAddingFlavor, blank=True, related_name="addings_historytypeflavors")
+
+    def __str__(self):
+        return f"{HistoryFlavorCommonInfo.__str__(self)}, {self.super}, {self.addings}"
+
+
+class OrderCommonInfo(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+        related_name="user_%(app_label)s_%(class)s")
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{self.user}"
+
+
 class OrderStatus(CommonInfo):
     pass
 
 
-class Order(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_orders")
+class HistoryOrderStatus(HistoryCommonInfo):
+    pass
+
+
+class Order(OrderCommonInfo):
 #    status = models.ForeignKey(OrderStatus, on_delete=models.CASCADE, related_name="status_orders")
 
     def __str__(self):
-        return f"{self.user}"
-#        return f"{self.user}, {self.status}"
+        return f"{OrderCommonInfo.__str__(self)}"
+#        return f"{OrderCommonInfo.__str__(self)}, {self.status}"
 
 
-class OrderItemAddingFlavorSizeAndPrice(models.Model):
-    size_and_price = models.ForeignKey(SizeAndPrice, on_delete=models.CASCADE,
-        related_name="sizeandprice_orderitemaddingflavorsizesandprices")
-    qty = models.IntegerField(default= 0, blank=True)
+class HistoryOrder(OrderCommonInfo):
+#    status = models.ForeignKey(HistoryOrderStatus, on_delete=models.CASCADE, related_name="status_historyorders")
 
     def __str__(self):
-        return f"{self.size_and_price}, {self.qty}"
+        return f"{OrderCommonInfo.__str__(self)}"
+#        return f"{OrderCommonInfo.__str__(self)}, {self.status}"
 
 
-class OrderItemAddingFlavor(models.Model):
-    flavor = models.ForeignKey(AddingFlavor, on_delete=models.CASCADE, related_name="flavor_orderitemaddingflavors")
+class Quantity(models.Model):
     qty = models.IntegerField(default= 0, blank=True)
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{self.qty}"
+
+
+class OrderItemAddingFlavorSizeAndPrice(Quantity):
+    size_and_price = models.ForeignKey(SizeAndPrice, on_delete=models.CASCADE,
+        related_name="sizeandprice_orderitemaddingflavorsizesandprices")
+
+    def __str__(self):
+        return f"{self.size_and_price}, {Quantity.__str__(self)}"
+
+
+class HistoryOrderItemAddingFlavorSizeAndPrice(Quantity):
+    size_and_price = models.ForeignKey(HistorySizeAndPrice, on_delete=models.CASCADE,
+        related_name="sizeandprice_historyorderitemaddingflavorsizesandprices")
+
+    def __str__(self):
+        return f"{self.size_and_price}, {Quantity.__str__(self)}"
+
+
+class OrderItemAddingFlavor(Quantity):
+    flavor = models.ForeignKey(AddingFlavor, on_delete=models.CASCADE, related_name="flavor_orderitemaddingflavors")
     sizes_and_prices = models.ManyToManyField(OrderItemAddingFlavorSizeAndPrice, blank=True,
         related_name="sizesandprices_orderitemaddingflavors")
 
     def __str__(self):
-        return f"{self.flavor}, {self.qty}, {self.sizes_and_prices}"
+        return f"{self.flavor}, {Quantity.__str__(self)}, {self.sizes_and_prices}"
+
+
+class HistoryOrderItemAddingFlavor(Quantity):
+    flavor = models.ForeignKey(HistoryAddingFlavor, on_delete=models.CASCADE, related_name="flavor_historyorderitemaddingflavors")
+    sizes_and_prices = models.ManyToManyField(HistoryOrderItemAddingFlavorSizeAndPrice, blank=True,
+        related_name="sizesandprices_historyorderitemaddingflavors")
+
+    def __str__(self):
+        return f"{self.flavor}, {Quantity.__str__(self)}, {self.sizes_and_prices}"
 
 
 class OrderItemAdding(models.Model):
@@ -122,12 +266,29 @@ class OrderItemAdding(models.Model):
         return f"{self.adding}, {self.flavors}"
 
 
-class OrderItem(models.Model):
+class HistoryOrderItemAdding(models.Model):
+    adding = models.ForeignKey(HistoryDishAdding, on_delete=models.CASCADE, related_name="adding_historyorderitemaddings")
+    flavors = models.ManyToManyField(HistoryOrderItemAddingFlavor, blank=True, related_name="flavors_historyorderitemaddings")
+
+    def __str__(self):
+        return f"{self.adding}, {self.flavors}"
+
+
+class OrderItem(Quantity):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_orderitems")
     flavor = models.ForeignKey(TypeFlavor, on_delete=models.CASCADE, related_name="flavor_orderitems")
     size = models.ForeignKey(Size, on_delete=models.CASCADE, related_name="size_orderitems")
-    qty = models.IntegerField(default= 0, blank=True)
     addings = models.ManyToManyField(OrderItemAdding, blank=True, related_name="addings_orderitems")
 
     def __str__(self):
-        return f"{self.order}, {self.flavor}, {self.size}, {self.qty}, {self.addings}"
+        return f"{self.order}, {self.flavor}, {self.size}, {Quantity.__str__(self)}, {self.addings}"
+
+
+class HistoryOrderItem(Quantity):
+    order = models.ForeignKey(HistoryOrder, on_delete=models.CASCADE, related_name="order_historyorderitems")
+    flavor = models.ForeignKey(HistoryTypeFlavor, on_delete=models.CASCADE, related_name="flavor_historyorderitems")
+    size = models.ForeignKey(HistorySize, on_delete=models.CASCADE, related_name="size_historyorderitems")
+    addings = models.ManyToManyField(HistoryOrderItemAdding, blank=True, related_name="addings_historyorderitems")
+
+    def __str__(self):
+        return f"{self.order}, {self.flavor}, {self.size}, {Quantity.__str__(self)}, {self.addings}"
