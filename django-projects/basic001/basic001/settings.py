@@ -32,8 +32,10 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
    # 'languages.apps.LanguagesConfig',
+    'currencies.apps.CurrenciesConfig',
 
     'texts.apps.TextsConfig',
+    'quantities.apps.QuantitiesConfig',
 
     'django.contrib.admin',
     'django.contrib.auth',
