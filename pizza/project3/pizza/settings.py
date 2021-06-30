@@ -38,8 +38,8 @@ INSTALLED_APPS = [
     'quantities',
 
     'traits',
-    
-    
+
+
     'orders.apps.OrdersConfig',
     'django.contrib.admin',
     'django.contrib.auth',

@@ -6,4 +6,3 @@ from .models import Text
 
 
 admin.site.register(Text)
-

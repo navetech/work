@@ -6,4 +6,3 @@ from .models import Trait
 
 
 admin.site.register(Trait)
-

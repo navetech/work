@@ -6,4 +6,3 @@ from .models import Iso_639_LanguageCode
 
 
 admin.site.register(Iso_639_LanguageCode)
-
