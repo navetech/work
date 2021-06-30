@@ -39,6 +39,8 @@ INSTALLED_APPS = [
 
     'traits',
 
+    'things',
+
 
     'orders.apps.OrdersConfig',
     'django.contrib.admin',

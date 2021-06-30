@@ -10,8 +10,8 @@ class Quantity(models.Model):
     unit = models.CharField(max_length=64, blank=True)
     money = models.ForeignKey(
         Iso_4217_CurrencyCode, blank=True, null=True, on_delete=models.CASCADE,
-        related_name="money_quantity_related"
+        related_name='money_quantity_related'
     )
 
     def __str__(self):
-        return f"{self.value}, {self.unit}, {self.money}"
+        return f'{self.value}, {self.unit}, {self.money}'
