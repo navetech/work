@@ -10,19 +10,20 @@ from things.models import PickedThing
 
 class Order(models.Model):
     dishes = models.ManyToManyField(
-        PickedThing, blank=True, related_name='dishes_order_related'
+        PickedThing, blank=True,
+        related_name='dishes_Order_related'
     )
-    dishes_count = models.IntegerField(default=0)
+    dishes_count = models.IntegerField(default=0, blank=True)
 
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE,
-        related_name='user_order_related'
+        User, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='user_Order_related'
     )
     date_time = models.DateTimeField(auto_now=True)
 
     trait = models.ForeignKey(
         Trait, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='trait_order_related'
+        related_name='trait_Order_related'
     )
 
     def __str__(self):

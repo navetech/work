@@ -16,6 +16,8 @@ class Iso_4217_CurrencyCode(models.Model):
 
     def __str__(self):
         return (
-            f'{self.entity}, {self.currency}, {self.alphabetic_code}, '
-            f'{self.numeric_code}, {self.minor_unit}, {self.sort_number}'
+            f'{self.entity}, {self.currency}, '
+            f'{self.alphabetic_code}, {self.numeric_code}, '
+            f'{self.minor_unit}, '
+            f'{self.sort_number}'
         )

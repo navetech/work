@@ -16,5 +16,6 @@ class Iso_639_LanguageCode(models.Model):
         return (
             f'{self.iso_639_2_code}, {self.iso_639_1_code}, '
             f'{self.english_name}, {self.french_name}, '
-            f'{self.german_name}, {self.sort_number}'
+            f'{self.german_name}, '
+            f'{self.sort_number}'
         )

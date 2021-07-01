@@ -3,9 +3,9 @@ from django.contrib import admin
 # Register your models here.
 
 
-from .models import PickableThing
+from .models import Thing
 from .models import PickedThing
 
 
-admin.site.register(PickableThing)
+admin.site.register(Thing)
 admin.site.register(PickedThing)
