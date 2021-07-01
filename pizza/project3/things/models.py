@@ -15,14 +15,14 @@ class Thing(models.Model):
         'self', blank=True,
         related_name='basics_%(app_label)s_%(class)s_related'
     )
-    basics_min_count = models.IntegerField(default=0)
-    basics_max_count = models.IntegerField(blank=True)
+    basics_min_count = models.IntegerField(default=0, blank=True)
+    basics_max_count = models.IntegerField(default=0, blank=True)
 
     adds = models.ManyToManyField(
         'self', blank=True, related_name='adds_%(app_label)s_%(class)s_related'
     )
-    adds_min_count = models.IntegerField(default=0)
-    adds_max_count = models.IntegerField(blank=True)
+    adds_min_count = models.IntegerField(default=0, blank=True)
+    adds_max_count = models.IntegerField(default=0, blank=True)
 
     sort_number = models.FloatField(default=0)
 
