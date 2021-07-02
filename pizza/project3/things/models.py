@@ -11,10 +11,17 @@ class Thing(models.Model):
         related_name='trait_Thing_related'
     )
 
+    parent = models.ForeignKey(
+        'self', blank=True, null=True, on_delete=models.CASCADE,
+        related_name='parent_Thing_related'
+    )
+    """
     parents = models.ManyToManyField(
         'self', blank=True,
+#        related_name='+'
         related_name='parents_Thing_related'
     )
+    """
 
     basics = models.ManyToManyField(
         'self', blank=True,
@@ -30,12 +37,19 @@ class Thing(models.Model):
     adds_min_count = models.IntegerField(default=0, blank=True)
     adds_max_count = models.IntegerField(default=0, blank=True)
 
-    sort_number = models.FloatField(default=0)
+    sort_number = models.FloatField(default=0, blank=True)
 
     def __str__(self):
-        return (
-            f'{self.trait}, {self.parents}'
-        )
+        ret = ''
+        if self.trait:
+            ret += f'{self.trait}'
+        if self.parent:
+            ret += f', {self.parent}'
+#        ret += f', {self.parents.count()}, {self.parents}'
+#        for parent in self.parents.all():
+#            ret += ', ' + parent.trait.__str__()
+
+        return ret
 
 
 class PickedThing(models.Model):

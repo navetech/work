@@ -10,7 +10,7 @@ class Iso_639_LanguageCode(models.Model):
     french_name = models.CharField(max_length=64)
     german_name = models.CharField(max_length=64)
 
-    sort_number = models.FloatField(default=0)
+    sort_number = models.FloatField(default=0, blank=True)
 
     def __str__(self):
         return (

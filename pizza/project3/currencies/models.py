@@ -12,7 +12,7 @@ class Iso_4217_CurrencyCode(models.Model):
     )
     minor_unit = models.IntegerField(default=2, blank=True)
 
-    sort_number = models.FloatField(default=0)
+    sort_number = models.FloatField(default=0, blank=True)
 
     def __str__(self):
         return (
