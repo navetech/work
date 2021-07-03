@@ -6,16 +6,14 @@ from languages.models import Iso_639_LanguageCode
 
 
 class PhraseSetting(models.Model):
-    default_language = models.ForeignKey(
-        Iso_639_LanguageCode, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='default_language_PhraseSetting_related'
-    )
-
     target_language = models.ForeignKey(
         Iso_639_LanguageCode, blank=True, null=True, on_delete=models.CASCADE,
         related_name='target_language_PhraseSetting_related'
     )
 
+
+    def __str__(self):
+        return f'{self.target_language}'
 
 
 class Phrase(models.Model):
@@ -31,42 +29,15 @@ class Phrase(models.Model):
         related_name='translation_of_Phrase_related'
     )
 
+
     def __str__(self):
-        
         return self.words
-
-        origins = self.languages.all().order_by('sort_number')
-
-        if setting.target_language:
-            target = setting.target_language
-        elif setting.default_language:
-            target = setting.default_language
-        else:
-            target = Iso_639_LanguageCode.objects.order_by('sort_number').first()
-
-        translated_words = None
-        for origin in origins:
-            if target == origin:
-                translated_words = self.words
-                break
-
-        if not translated_words and self.translation_of:
-            phrases = Phrase.objects.all()
-            for phrase in phrases:
-                if phrase != self and target in phrase.languages.all():
-                    if phrase.translation_of == self.translation_of:
-                        translated_words = phrase.words
-                        break
-        
-        return translated_words
 
 
     def translate(self):
         setting = PhraseSetting.objects.first()
         if setting.target_language:
             target = setting.target_language
-        elif setting.default_language:
-            target = setting.default_language
         else:
             target = Iso_639_LanguageCode.objects.order_by('sort_number').first()
 
