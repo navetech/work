@@ -40,7 +40,7 @@ class Quantity(models.Model):
 
     def convert_currency(self):
         setting = QuantitySetting.objects.first()
-        if setting.target_currency:
+        if setting and setting.target_currency:
             target = setting.target_currency
         else:
             target = Iso_4217_CurrencyCode.objects.filter(alphabetic_code='USD').first()

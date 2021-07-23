@@ -2,6 +2,8 @@ from django.db import models
 
 # Create your models here.
 
+"""
+
 from traits.models import Trait
 
 
@@ -15,14 +17,12 @@ class Thing(models.Model):
         'self', blank=True, null=True, on_delete=models.CASCADE,
         related_name='parent_Thing_related'
     )
-    """
-    parents = models.ManyToManyField(
-        'self', blank=True,
+#    parents = models.ManyToManyField(
+#        'self', blank=True,
 #        related_name='+'
-        related_name='parents_Thing_related'
-    )
-    """
-
+#        related_name='parents_Thing_related'
+#    )
+ 
     basics = models.ManyToManyField(
         'self', blank=True,
         related_name='basics_Thing_related'
@@ -63,3 +63,5 @@ class PickedThing(models.Model):
 
     def __str__(self):
         return f'{self.thing}, {self.count}, {self.date_time}'
+
+"""

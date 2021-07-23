@@ -36,7 +36,7 @@ class Phrase(models.Model):
 
     def translate(self):
         setting = PhraseSetting.objects.first()
-        if setting.target_language:
+        if setting and setting.target_language:
             target = setting.target_language
         else:
             target = Iso_639_LanguageCode.objects.order_by('sort_number').first()
