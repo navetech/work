@@ -1,0 +1,88 @@
+{% extends "orders/base.html" %}
+
+
+{% block title %}
+    Menu
+{% endblock %}
+
+{% block main %}
+    <h1>Menu</h1>
+    <ul class="list-group pt-4">
+        {% for dish in dishes %}
+            <ul class="list-group pt-4">
+                <li class="list-group-item ln-container01">
+                    <h2>{{ dish.fields.trait }}</h2>
+                    <ul class="list-group pt-4">
+                        {% for type in dish.fields.types %}
+                            <ul class="list-group pt-4">
+                                <li class="list-group-item ln-container02">
+                                    <h3>{{ type.trait }}</h3>
+                                    {% comment %}
+                                    {% if type.flavors %}
+                                        <table style="width:100%">
+                                            <tr>
+                                                <th></th>
+                                                {% for size in type.sizes %}
+                                                    <th>{{ size.id }}</th>
+                                                {% endfor %}
+                                            </tr>
+                                            {% for flavor in type.flavors %}
+                                                <tr>
+                                                    <td>{{ flavor.id }}</td>
+                                                    {% for size in flavor.sizes %}
+                                                        <td>{{ size.id }}</td>
+                                                    {% endfor %}
+                                                </tr>
+                                            {% endfor %}
+                                        </table>
+                                    {% else %}
+                                        <h4>No flavors</h4>
+                                    {% endif %}
+                                    {% endcomment %}
+                                </li>
+                            </ul>
+                        {% empty %}
+                            <h3>No types</h3>
+                        {% endfor %}
+                    </ul>
+
+                    {% comment %}
+                    <ul class="list-group pt-4">
+                        {% for adding in dish.addings %}
+                            <ul class="list-group pt-4">
+                                <li class="list-group-item ln-container02">
+                                    <h3>{{ adding.id }}</h3>
+                                    {% if adding.flavors %}
+                                        <table style="width:100%">
+                                            <tr>
+                                                <th></th>
+                                                {% for size in adding.sizes %}
+                                                    <th>{{ size.id }}</th>
+                                                {% endfor %}
+                                            </tr>
+                                            {% for flavor in adding.flavors %}
+                                                <tr>
+                                                    <td>{{ flavor.id }}</td>
+                                                    {% for size in flavor.sizes %}
+                                                        <td>{{ size.id }}</td>
+                                                    {% endfor %}
+                                                </tr>
+                                            {% endfor %}
+                                        </table>
+                                    {% else %}
+                                        <h4>No flavors</h4>
+                                    {% endif %}
+                                </li>
+                            </ul>
+                        {% empty %}
+                            <h3>No addings</h3>
+                        {% endfor %}
+                    </ul>
+                    {% endcomment %}
+                </li>
+            </ul>
+        {% empty %}
+            <h2>No dishes</h2>
+        {% endfor %}
+    </ul>
+{% endblock %}

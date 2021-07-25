@@ -1,0 +1,179 @@
+{% extends "orders/base.html" %}
+
+
+{% load static %}
+
+
+{% block scripts %}
+    <script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+{% endblock %}
+
+
+{% block title %}
+    Shopping Cart
+{% endblock %}
+
+
+{% block main %}
+    <h1>Shopping Cart</h1>
+
+    {% if order.totals.items_qty <= 0 %}
+        <h2>Empty</h2>
+    {% else %}
+        <table style="width:100%" class="table">
+            <tr>
+                <th>Total Price</th>
+                <th>Items Qty</th>
+                <th>Dishes Qty</th>
+            <tr>
+            <tr>
+                <td id="total-price">{{ order.totals.price}}</td>
+                <td>{{ order.totals.items_qty}}</td>
+                <td>{{ order.totals.products_qty}}</td>
+            <tr>
+        </table>
+
+        <button type="button" id="checkout-button" class="btn btn-secondary">Checkout</button>
+
+        <ul class="list-group pt-4">
+            <li class="list-group-item ln-container01">
+                <h2>Items</h2>
+
+                <table style="width:100%" class="table table-striped table-hover">
+                    <tr>
+                        <td>
+                            <table style="width:100%" class="table">
+                                <tr>
+                                    <th>Price</th>
+                                    <th>Dish</th>
+                                    <th>Addings</th>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    {% for item in order.items %}
+                    <tr>
+                        <td>
+                            <table style="width:100%" class="table">
+                                <tr>
+                                    <td>{{ item.subtotals.price }}</td>
+                                    <td>
+                                        {{ item.flavor.self.name }}
+                                        {{ item.type.name }}
+                                        {{ item.dish.name }}
+                                        {{ item.flavor.size_and_price.size.name }}
+                                        ({{ item.qty }})
+                                    </td>
+                                    {% if item.addings_qty <= 0 %}
+                                    <td></td>
+                                    {% else %}
+                                    {% for adding in item.addings %}
+                                    {% if adding.flavors_qty > 0 %}
+                                    <th>
+                                        {{ adding.self.name }}{{ adding.flavors_qty|pluralize }} ({{ adding.flavors_qty }})
+                                    </th>
+                                    {% endif %}
+                                    {% endfor %}
+                                    {% endif %}
+                                </tr>
+
+                                {% if item.addings_qty > 0 %}
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td>
+                                        <table style="width:100%" class="table">
+                                            <tr>
+                                                {% for adding in item.addings %}
+                                                {% if adding.flavors_qty > 0 %}
+                                                <td>
+                                                    <table style="width:100%" class="table">
+                                                        <tr>
+                                                            {% for adding_flavor in adding.flavors %}
+                                                            {% if adding_flavor.qty > 0 %}
+                                                            <td>
+                                                                {{ adding_flavor.self.name }} ({{ adding_flavor.qty }})
+                                                            </td>
+                                                            {% endif %}
+                                                            {% endfor %}
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                                {% endif %}
+                            </table>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </li>
+        </ul>
+    {% endif %}
+{% endblock %}
+
+
+{% block tail %}
+    <script type="text/javascript">
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+
+        // Create an instance of the Stripe object with your publishable API key
+        var stripe = Stripe("pk_test_TYooMQauvdEDq54NiTphI7jx");
+        var checkoutButton = document.getElementById("checkout-button");
+
+        checkoutButton.addEventListener("click", function () {
+            total_price = document.getElementById("total-price").innerHTML
+            const request = new Request(
+                "/create-checkout-session",
+                {headers: {'X-CSRFToken': csrftoken}}
+            );
+            fetch(request, {
+                method: 'POST',
+                mode: 'same-origin',  // Do not send CSRF token to another domain.
+                body: total_price
+            })
+            .then(function (response) {
+            return response.json();
+            })
+            .then(function (session) {
+            return stripe.redirectToCheckout({ sessionId: session.id });
+            })
+            .then(function (result) {
+            // If redirectToCheckout fails due to a browser or network
+            // error, you should display the localized error message to your
+            // customer using error.message.
+            if (result.error) {
+                alert(result.error.message);
+            }
+            })
+            .catch(function (error) {
+            console.error("Error:", error);
+            });
+        });
+    </script>
+{% endblock %}
+

@@ -1,0 +1,41 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- documentation at http://getbootstrap.com/docs/4.1/, alternative themes at https://bootswatch.com/ -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+            
+        <!-- LN brand stylesheet -->
+        <link href="{% static 'orders/styles/ln/ln-style.css' %}" rel="stylesheet">
+        
+        {% block product_head %}
+        {% endblock %}
+    </head>
+
+    <body>
+        <nav class="navbar navbar-expand-md navbar-light ln-navbar border">
+            <a class="navbar-brand" href="/"><span class="ln-brand-name">LN</span></a>
+            <a class="navbar-brand" href="/"><span class="ln-product-name ln-brand-color">{% block product_name %}{% endblock %}</span></a>
+
+            <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbar" data-toggle="collapse" type="button"><span class="navbar-toggler-icon"></span></button>
+
+            {% block product_navbar %}
+            {% endblock %}
+       </nav>
+
+       {% block product_main %}
+       {% endblock %}
+    </body>
+
+    {% block product_tail %}
+    {% endblock %}
+    
+</html>
