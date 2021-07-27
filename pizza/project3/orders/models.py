@@ -103,6 +103,21 @@ class Adding(MenuCommonFields):
             f'{MenuCommonFields.__str__(self)}'
         )
 
+    def to_dict(self, dict):
+        MenuCommonFields.to_dict(self, dict)
+
+        dict['flavors'] = to_dict_list(self.flavors, 'sort_number')
+        dict['flavors_count'] = {}
+        if self.flavors_count:
+            self.flavors_count.to_dict(dict['flavors_count'])
+
+        dict['sizes'] = to_dict_list(self.sizes, 'sort_number')
+        dict['sizes_count'] = {}
+        if self.sizes_count:
+            self.sizes_count.to_dict(dict['sizes_count'])
+
+        return
+
 
 class Flavor(MenuCommonFields):
     addings = models.ManyToManyField(
@@ -133,7 +148,15 @@ class Flavor(MenuCommonFields):
     def to_dict(self, dict):
         MenuCommonFields.to_dict(self, dict)
 
+        dict['addings'] = to_dict_list(self.addings, 'sort_number')
+        dict['addings_count'] = {}
+        if self.addings_count:
+            self.addings_count.to_dict(dict['addings_count'])
+
         dict['sizes'] = to_dict_list(self.sizes, 'sort_number')
+        dict['sizes_count'] = {}
+        if self.sizes_count:
+            self.sizes_count.to_dict(dict['sizes_count'])
 
         return
 
@@ -178,6 +201,19 @@ class Type(MenuCommonFields):
         MenuCommonFields.to_dict(self, dict)
 
         dict['flavors'] = to_dict_list(self.flavors, 'sort_number')
+        dict['flavors_count'] = {}
+        if self.flavors_count:
+            self.flavors_count.to_dict(dict['flavors_count'])
+
+        dict['addings'] = to_dict_list(self.addings, 'sort_number')
+        dict['addings_count'] = {}
+        if self.addings_count:
+            self.addings_count.to_dict(dict['addings_count'])
+
+        dict['sizes'] = to_dict_list(self.sizes, 'sort_number')
+        dict['sizes_count'] = {}
+        if self.sizes_count:
+            self.sizes_count.to_dict(dict['sizes_count'])
 
         return
 
@@ -235,6 +271,21 @@ class Dish(MenuCommonFields):
         dict['types_count'] = {}
         if self.types_count:
             self.types_count.to_dict(dict['types_count'])
+
+        dict['flavors'] = to_dict_list(self.flavors, 'sort_number')
+        dict['flavors_count'] = {}
+        if self.flavors_count:
+            self.flavors_count.to_dict(dict['flavors_count'])
+
+        dict['addings'] = to_dict_list(self.addings, 'sort_number')
+        dict['addings_count'] = {}
+        if self.addings_count:
+            self.addings_count.to_dict(dict['addings_count'])
+
+        dict['sizes'] = to_dict_list(self.sizes, 'sort_number')
+        dict['sizes_count'] = {}
+        if self.sizes_count:
+            self.sizes_count.to_dict(dict['sizes_count'])
 
         return
 
