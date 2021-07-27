@@ -17,6 +17,7 @@ import json
 
 
 from .models import Dish
+from .models import to_dict_list
 
 
 def index(request):
@@ -91,7 +92,7 @@ def menu(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("index"))
 
-    dishes = get_dishes()
+    dishes = to_dict_list(Dish.objects, 'sort_number')
 
     context = {
         "dishes": dishes,

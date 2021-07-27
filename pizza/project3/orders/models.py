@@ -7,10 +7,10 @@ from django.contrib.auth.models import User
 from traits.models import Trait
 
 
-class CommonInfo(models.Model):
+class CommonFields(models.Model):
     trait = models.ForeignKey(
         Trait, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='trait_CommonInfo_related_%(app_label)s_%(class)s'
+        related_name='trait_CommonFields_related_%(app_label)s_%(class)s'
     )
 
     class Meta:
@@ -21,8 +21,13 @@ class CommonInfo(models.Model):
             f'{self.trait}'
         )
 
+    def to_dict(self, dict):
+        dict['trait'] = self.trait
 
-class MenuCommonInfo(CommonInfo):
+        return
+
+
+class MenuCommonFields(CommonFields):
     sort_number = models.FloatField(default=0)
 
     class Meta:
@@ -31,8 +36,14 @@ class MenuCommonInfo(CommonInfo):
     def __str__(self):
         return (
             f'{self.sort_number}, '
-            f'{CommonInfo.__str__(self)}'
+            f'{CommonFields.__str__(self)}'
         )
+
+    def to_dict(self, dict):
+        CommonFields.to_dict(self,dict)
+        dict['sort_number'] = self.sort_number
+
+        return
 
 
 class CountLimit(models.Model):
@@ -45,17 +56,28 @@ class CountLimit(models.Model):
             f'{self.max}'
         )
 
+    def to_dict(self, dict):
+        dict['min'] = self.min
+        dict['max'] = self.max
 
-class Size(MenuCommonInfo):
+        return
+
+
+class Size(MenuCommonFields):
     pass
 
     def __str__(self):
         return (
-            f'{MenuCommonInfo.__str__(self)}'
+            f'{MenuCommonFields.__str__(self)}'
         )
 
+    def to_dict(self, dict):
+        MenuCommonFields.to_dict(self, dict)
 
-class Adding(MenuCommonInfo):
+        return
+
+
+class Adding(MenuCommonFields):
     flavors = models.ManyToManyField(
         'Flavor', blank=True,
         related_name='flavors_Adding_related'
@@ -78,11 +100,11 @@ class Adding(MenuCommonInfo):
         return (
             f'{self.flavors}, {self.flavors_count}, '
             f'{self.sizes}, {self.sizes_count}, '
-            f'{MenuCommonInfo.__str__(self)}'
+            f'{MenuCommonFields.__str__(self)}'
         )
 
 
-class Flavor(MenuCommonInfo):
+class Flavor(MenuCommonFields):
     addings = models.ManyToManyField(
         'Adding', blank=True,
         related_name='addings_Flavor_related'
@@ -105,11 +127,18 @@ class Flavor(MenuCommonInfo):
         return (
             f'{self.addings}, {self.addings_count}, '
             f'{self.sizes}, {self.sizes_count}, '
-            f'{MenuCommonInfo.__str__(self)}'
+            f'{MenuCommonFields.__str__(self)}'
         )
 
+    def to_dict(self, dict):
+        MenuCommonFields.to_dict(self, dict)
 
-class Type(MenuCommonInfo):
+        dict['sizes'] = to_dict_list(self.sizes, 'sort_number')
+
+        return
+
+
+class Type(MenuCommonFields):
     flavors = models.ManyToManyField(
         Flavor, blank=True,
         related_name='flavors_Type_related'
@@ -142,11 +171,18 @@ class Type(MenuCommonInfo):
             f'{self.flavors}, {self.flavors_count}, '
             f'{self.addings}, {self.addings_count}, '
             f'{self.sizes}, {self.sizes_count}, '
-            f'{MenuCommonInfo.__str__(self)}'
+            f'{MenuCommonFields.__str__(self)}'
         )
 
+    def to_dict(self, dict):
+        MenuCommonFields.to_dict(self, dict)
 
-class Dish(MenuCommonInfo):
+        dict['flavors'] = to_dict_list(self.flavors, 'sort_number')
+
+        return
+
+
+class Dish(MenuCommonFields):
     types = models.ManyToManyField(
         Type, blank=True,
         related_name='types_Dish_related'
@@ -189,11 +225,21 @@ class Dish(MenuCommonInfo):
             f'{self.flavors}, {self.flavors_count}, '
             f'{self.addings}, {self.addings_count}, '
             f'{self.sizes}, {self.sizes_count}, '
-            f'{MenuCommonInfo.__str__(self)}'
+            f'{MenuCommonFields.__str__(self)}'
         )
 
+    def to_dict(self, dict):
+        MenuCommonFields.to_dict(self, dict)
 
-class PickedSize(CommonInfo):
+        dict['types'] = to_dict_list(self.types, 'sort_number')
+        dict['types_count'] = {}
+        if self.types_count:
+            self.types_count.to_dict(dict['types_count'])
+
+        return
+
+
+class PickedSize(CommonFields):
     menu = models.ForeignKey(
         Size, blank=True, null=True, on_delete=models.CASCADE,
         related_name='menu_PickedSize_related'
@@ -201,12 +247,12 @@ class PickedSize(CommonInfo):
 
     def __str__(self):
         return (
-            f'{menu}, '
-            f'{CommonInfo.__str__(self)}'
+            f'{self.menu}, '
+            f'{CommonFields.__str__(self)}'
         )
 
 
-class PickedAdding(CommonInfo):
+class PickedAdding(CommonFields):
     flavors = models.ManyToManyField(
         'PickedFlavor', blank=True,
         related_name='flavors_PickedAdding_related'
@@ -226,12 +272,12 @@ class PickedAdding(CommonInfo):
         return (
             f'{self.flavors}, '
             f'{self.sizes}, '
-            f'{menu}, '
-            f'{CommonInfo.__str__(self)}'
+            f'{self.menu}, '
+            f'{CommonFields.__str__(self)}'
         )
 
 
-class PickedFlavor(CommonInfo):
+class PickedFlavor(CommonFields):
     addings = models.ManyToManyField(
         'PickedAdding', blank=True,
         related_name='addings_PickedFlavor_related'
@@ -251,12 +297,12 @@ class PickedFlavor(CommonInfo):
         return (
             f'{self.addings}, '
             f'{self.sizes}, '
-            f'{menu}, '
-            f'{CommonInfo.__str__(self)}'
+            f'{self.menu}, '
+            f'{CommonFields.__str__(self)}'
         )
 
 
-class PickedType(CommonInfo):
+class PickedType(CommonFields):
     flavors = models.ManyToManyField(
         PickedFlavor, blank=True,
         related_name='flavors_PickedType_related'
@@ -282,12 +328,12 @@ class PickedType(CommonInfo):
             f'{self.flavors}, '
             f'{self.addings}, '
             f'{self.sizes}, '
-            f'{menu}, '
-            f'{CommonInfo.__str__(self)}'
+            f'{self.menu}, '
+            f'{CommonFields.__str__(self)}'
         )
 
 
-class PickedDish(CommonInfo):
+class PickedDish(CommonFields):
     types = models.ManyToManyField(
         PickedType, blank=True,
         related_name='types_PickedDish_related'
@@ -319,12 +365,12 @@ class PickedDish(CommonInfo):
             f'{self.flavors}, '
             f'{self.addings}, '
             f'{self.sizes}, '
-            f'{menu}, '
-            f'{CommonInfo.__str__(self)}'
+            f'{self.menu}, '
+            f'{CommonFields.__str__(self)}'
         )
 
 
-class Order(CommonInfo):
+class Order(CommonFields):
     dishes = models.ManyToManyField(
         PickedDish, blank=True,
         related_name='dishes_Order_related'
@@ -341,9 +387,23 @@ class Order(CommonInfo):
         return (
             f'{self.dishes}, '
             f'{self.user}, {self.date_time}, '
-            f'{CommonInfo.__str__(self)}'
+            f'{CommonFields.__str__(self)}'
         )
 
 
 class HistoricOrder(models.Model):
     order = models.TextField(blank=True)
+
+
+def to_dict_list(manager, *order_by_field_names):
+    dict_list = []
+
+    objects = manager.all().order_by(*order_by_field_names)
+    for object in objects:
+        dict = {}
+        object.to_dict(dict)
+        dict_list.append(dict)
+
+    return dict_list
+
+
