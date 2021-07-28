@@ -43,31 +43,34 @@
                 {% endfor %}
 
                 {% if dish.flavors %}
-                <ul class="list-group pt-4">
-                    <li class="list-group-item ln-container02">
-                        {% if dish.flavors %}
-                            <table style="width:100%">
-                                <tr>
-                                    <th></th>
-                                    {% for size in dish.flavors_columns.sizes %}
-                                        <th>{{ size.trait.short_name }}</th>
-                                    {% endfor %}
-                                </tr>
-                                {% for flavor in dish.flavors %}
+                    <ul class="list-group pt-4">
+                        <li class="list-group-item ln-container02">
+                            {% if dish.flavors %}
+                                <table style="width:100%">
                                     <tr>
-                                        <td>{{ flavor.trait.short_name }}</td>
-                                        <td>{{ flavor.trait.long_name }}</td>
-                                        {% for size in flavor.sizes %}
-                                        <td>{{ size.trait.quantity }}</td>
-                                        <td>{{ size.trait.short_name }}</td>
-                                        <td>{{ size.trait.long_name }}</td>
-                                        {% endfor %}
+                                        <th></th>
+                                        <th></th>
+                                        {% for size in dish.flavors_columns.sizes %}
+                                            <th>{{ size.trait.short_name }}</th>
+                                            <th></th>
+                                            <th></th>
+                                            {% endfor %}
                                     </tr>
-                                {% endfor %}
-                            </table>
-                        {% endif %}
-                    </li>
-                </ul>
+                                    {% for flavor in dish.flavors %}
+                                        <tr>
+                                            <td>{{ flavor.trait.short_name }}</td>
+                                            <td>{{ flavor.trait.long_name }}</td>
+                                            {% for size in flavor.sizes %}
+                                            <td>{{ size.trait.quantity }}</td>
+                                            <td>{{ size.trait.short_name }}</td>
+                                            <td>{{ size.trait.long_name }}</td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            {% endif %}
+                        </li>
+                    </ul>
                 {% endif %}
 
                 {% for adding in dish.addings %}
@@ -80,16 +83,22 @@
                                     {% comment %}
                                     <tr>
                                         <th></th>
-                                        {% for size in adding.sizes %}
-                                            <th>{{ size.id }}</th>
-                                        {% endfor %}
+                                        <th></th>
+                                        {% for size in adding.flavors_columns.sizes %}
+                                            <th>{{ size.trait.short_name }}</th>
+                                            <th></th>
+                                            <th></th>
+                                            {% endfor %}
                                     </tr>
                                     {% endcomment %}
                                     {% for flavor in adding.flavors %}
                                         <tr>
-                                            <td>{{ flavor.trait }}</td>
+                                            <td>{{ flavor.trait.short_name }}</td>
+                                            <td>{{ flavor.trait.long_name }}</td>
                                             {% for size in flavor.sizes %}
-                                                <td>{{ size.trait }}</td>
+                                            <td>{{ size.trait.quantity }}</td>
+                                            <td>{{ size.trait.short_name }}</td>
+                                            <td>{{ size.trait.long_name }}</td>
                                             {% endfor %}
                                         </tr>
                                     {% endfor %}

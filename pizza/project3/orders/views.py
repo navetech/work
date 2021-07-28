@@ -129,7 +129,8 @@ def put_flavors(columns, table):
 #        put_addings_columns(flavor)
 
         put_sizes(sizes, flavor)
-    
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)    
     columns['sizes'] = sizes
 
 
