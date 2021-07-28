@@ -31,7 +31,8 @@ class Phrase(models.Model):
 
 
     def __str__(self):
-        return self.words
+#        return self.words
+        return self.translate()
 
 
     def translate(self):

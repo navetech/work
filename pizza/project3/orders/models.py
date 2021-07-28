@@ -22,7 +22,11 @@ class CommonFields(models.Model):
         )
 
     def to_dict(self, dict):
-        dict['trait'] = self.trait
+        dict['id'] = self.id
+
+        dict['trait'] = {}
+        if self.trait:
+            self.trait.to_dict(dict['trait'])
 
         return
 
@@ -57,6 +61,8 @@ class CountLimit(models.Model):
         )
 
     def to_dict(self, dict):
+        dict['id'] = self.id
+
         dict['min'] = self.min
         dict['max'] = self.max
 
