@@ -47,14 +47,12 @@
                     <li class="list-group-item ln-container02">
                         {% if dish.flavors %}
                             <table style="width:100%">
-                                {% comment %}
                                 <tr>
                                     <th></th>
-                                    {% for size in dish.sizes %}
-                                        <th>{{ size.id }}</th>
+                                    {% for size in dish.flavors_columns.sizes %}
+                                        <th>{{ size.trait.short_name }}</th>
                                     {% endfor %}
                                 </tr>
-                                {% endcomment %}
                                 {% for flavor in dish.flavors %}
                                     <tr>
                                         <td>{{ flavor.trait.short_name }}</td>

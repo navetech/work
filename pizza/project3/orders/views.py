@@ -94,12 +94,65 @@ def menu(request):
 
     dishes = to_dict_list(Dish.objects, 'sort_number')
 
+    put_columns_to_dishes(dishes)
+
     context = {
         "dishes": dishes,
     }
     return render(request, "orders/menu.html", context)
 
 
+def put_columns_to_dishes(dishes):
+    for dish in dishes:
+#        put_types_columns(dish)
+
+        flavors_columns = {}
+        put_flavors(flavors_columns, dish)
+        dish['flavors_columns'] = flavors_columns
+
+#        put_addings_columns(dish)
+#        put_sizes_columns(dish)
+
+
+
+"""
+def put_types_columns(table):
+    for type in table.types:
+#        put_flavors_columns(type)
+#        put_addings_columns(type)
+#        put_sizes_columns(type)
+"""
+
+def put_flavors(columns, table):
+    sizes = []
+    for flavor in table['flavors']:
+#        put_addings_columns(flavor)
+
+        put_sizes(sizes, flavor)
+    
+    columns['sizes'] = sizes
+
+
+"""
+def put_addings_columns(table):
+    for adding in table.addings:
+#        put_flavors(adding)
+#        put_sizes_columns(adding)
+"""
+
+def put_sizes(columns, table):
+    for size in table['sizes']:
+        inserted = False
+        for column in columns:
+            if column['trait']['short_name'] == size['trait']['short_name']:
+                inserted = True
+                break
+        
+        if not inserted:
+            columns.append(size)
+
+
+"""
 def get_dishes():
     items_db = Dish.objects.all().order_by('sort_number')
     items = json.loads(serializers.serialize("json", items_db))
@@ -115,3 +168,4 @@ def get_dish_types(dish):
     types = dish.types.all().order_by('sort_number')
         
     return types
+"""
