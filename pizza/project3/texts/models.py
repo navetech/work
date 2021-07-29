@@ -5,10 +5,10 @@ from django.db import models
 from languages.models import Iso_639_LanguageCode
 
 
-class PhraseSetting(models.Model):
+class TextSetting(models.Model):
     target_language = models.ForeignKey(
         Iso_639_LanguageCode, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='target_language_PhraseSetting_related'
+        related_name='target_language_TextSetting_related'
     )
 
 
@@ -36,7 +36,7 @@ class Phrase(models.Model):
 
 
     def translate(self):
-        setting = PhraseSetting.objects.first()
+        setting = TextSetting.objects.first()
         if setting and setting.target_language:
             target = setting.target_language
         else:
@@ -59,16 +59,3 @@ class Phrase(models.Model):
                         return phrase.words
         
         return self.words
-
-
-class TextSegment(models.Model):
-    phrase = models.ForeignKey(
-        Phrase, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='phrase_TextSegment_related'
-    )
-    phrase_sort_number = models.FloatField(default=0, blank=True)
-
-    def __str__(self):
-        phrase_translated = self.phrase.translate()
-
-        return f'{phrase_translated}, {self.phrase_sort_number}'

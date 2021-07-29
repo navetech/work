@@ -4,7 +4,26 @@ from django.db import models
 
 from django.contrib.auth.models import User
 
+from texts.models import Phrase
 from traits.models import Trait
+
+
+class OrderSetting(models.Model):
+    menu_page_title = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='menu_page_title_OrderSetting_related'
+    )
+
+    menu_page_header = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='menu_page_header_OrderSetting_related'
+    )
+
+    def __str__(self):
+        return (
+            f'{self.menu_page_title}, '
+            f'{self.menu_page_header}, '
+        )
 
 
 class CommonFields(models.Model):
@@ -462,5 +481,3 @@ def to_dict_list(manager, *order_by_field_names):
         dict_list.append(dict)
 
     return dict_list
-
-

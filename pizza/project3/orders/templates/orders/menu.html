@@ -2,11 +2,12 @@
 
 
 {% block title %}
-    Menu
+    {{ settings.menu_page_title }}
 {% endblock %}
 
 {% block main %}
-    <h1>Menu</h1>
+    <h1>{{ settings.menu_page_header }}</h1>
+
     {% for dish in dishes %}
         <ul class="list-group pt-4">
             <li class="list-group-item ln-container01">
