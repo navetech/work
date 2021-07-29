@@ -5,6 +5,8 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from texts.models import Phrase
+from texts.models import Language
+from quantities.models import Currency
 from traits.models import Trait
 
 
@@ -17,11 +19,6 @@ class OrderSetting(models.Model):
     product_name = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.CASCADE,
         related_name='product_name_OrderSetting_related'
-    )
-
-    language_selection_label = models.ForeignKey(
-        Phrase, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='language_selection_label_OrderSetting_related'
     )
 
     menu_page_title = models.ForeignKey(
@@ -38,6 +35,30 @@ class OrderSetting(models.Model):
         return (
             f'{self.menu_page_title}, '
             f'{self.menu_page_header}, '
+        )
+
+
+class UserSetting(models.Model):
+    user = models.ForeignKey(
+        User, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='user_UserSetting_related'
+    )
+
+    language = models.ForeignKey(
+        Language, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='language_UserSetting_related'
+    )
+
+    currency = models.ForeignKey(
+        Currency, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='currency_UserSetting_related'
+    )
+
+    def __str__(self):
+        return (
+            f'{self.user}, '
+            f'{self.language}, '
+            f'{self.currency}, '
         )
 
 

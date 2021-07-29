@@ -35,10 +35,10 @@
 
         {% if user.is_authenticated %}
         <div class="dropstart me-2">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
-                {{ settings.language_selection_label }}
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ user_language.name }}
             </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                 {% for language in languages %}
                     <li><a class="dropdown-item" href="{% url 'select_language' language.id %}">{{ language.name }}</a></li>
                 {% endfor %}
@@ -46,10 +46,21 @@
         </div>
 
         <div class="dropstart me-2">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ user_currency.name }}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+                {% for currency in currencies %}
+                    <li><a class="dropdown-item" href="{% url 'select_currency' currency.id %}">{{ currency.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="dropstart me-2">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false">
                     {{ user.username }}
                 </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
                     <li><a class="dropdown-item" href="{% url 'unregister' %}">Unregister</a></li>
                     <li><a class="dropdown-item" href="{% url 'logout' %}">Log Out</a></li>
                 </ul>

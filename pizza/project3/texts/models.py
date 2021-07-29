@@ -7,15 +7,6 @@ from django.contrib.auth.models import User
 from languages.models import Iso_639_LanguageCode
 
 
-class TextSetting(models.Model):
-    target_language = models.ForeignKey(
-        Iso_639_LanguageCode, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='target_language_TextSetting_related'
-    )
-
-    def __str__(self):
-        return f'{self.target_language}'
-
 
 class Phrase(models.Model):
     words = models.CharField(max_length=256, blank=True)
@@ -36,30 +27,39 @@ class Phrase(models.Model):
         return self.translate()
 
 
-    def translate(self):
-        setting = TextSetting.objects.first()
-        if setting and setting.target_language:
-            target = setting.target_language
-        else:
-            target = Iso_639_LanguageCode.objects.order_by('sort_number').first()
-
+    def translate_to(self, language):
         origins = self.languages.all().order_by('sort_number')
 
         for origin in origins:
-            if target == origin:
+            if language == origin:
                 return self.words
 
         phrases = Phrase.objects.all()
         for phrase in phrases:
-            if phrase != self and target in phrase.languages.all():
-                if phrase.translation_of:
-                    if (
-                        phrase.translation_of == self or
-                        phrase.translation_of == self.translation_of
-                    ):
+            if phrase != self and phrase.translation_of:
+                if (
+                    phrase.translation_of == self or
+                    phrase.translation_of == self.translation_of
+                ):
+                    if language in phrase.languages.all():
                         return phrase.words
         
         return self.words
+
+
+    def translate(self):
+        settings = TextSetting.objects.first()
+        if settings:
+            if settings.user_language:
+                language = settings.user_language.code
+            elif settings.admin_language:
+                language = settings.admin_language
+            else:
+                language = Iso_639_LanguageCode.objects.order_by('sort_number').first()
+        else:
+            language = Iso_639_LanguageCode.objects.order_by('sort_number').first()
+
+        return self.translate_to(language)
 
 
 class Language(models.Model):
@@ -80,19 +80,17 @@ class Language(models.Model):
         )
 
 
-class UserLanguage(models.Model):
-    language = models.ForeignKey(
-        Language, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='language_UserLanguage_related'
+class TextSetting(models.Model):
+    admin_language = models.ForeignKey(
+        Iso_639_LanguageCode, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='admin_language_TextSetting_related'
     )
 
-    user = models.ForeignKey(
-        User, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='user_UserLanguage_related'
+    user_language = models.ForeignKey(
+        Language, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='user_language_TextSetting_related'
     )
+
 
     def __str__(self):
-        return (
-            f'{self.language}, '
-            f'{self.user}, '
-        )
+        return f'{self.target_language}'

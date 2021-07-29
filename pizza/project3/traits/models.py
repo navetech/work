@@ -41,5 +41,3 @@ class Trait(models.Model):
         dict['quantity'] = self.quantity
 
         return
-
-        return ret

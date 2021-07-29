@@ -12,11 +12,14 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render
 from django.contrib.auth.models import User
 
-from languages.models import Iso_639_LanguageCode
 from texts.models import Language
-from texts.models import UserLanguage
+from texts.models import TextSetting
+
+from quantities.models import Currency
+from quantities.models import QuantitySetting
 
 from .models import OrderSetting
+from .models import UserSetting
 from .models import Dish
 from .models import to_dict_list
 
@@ -97,6 +100,19 @@ def menu(request):
 
     languages = Language.objects.all().order_by('code__sort_number')
 
+    user_settings = UserSetting.objects.filter(user=request.user).first()
+    if user_settings and user_settings.language:
+        user_language = user_settings.language
+    else:
+        user_language = languages[0]
+
+    currencies = Currency.objects.all().order_by('code__sort_number')
+
+    if user_settings and user_settings.currency:
+        user_currency = user_settings.currency
+    else:
+        user_currency = currencies[0]
+
     dishes = to_dict_list(Dish.objects, 'sort_number')
 
     put_columns_to_dishes(dishes)
@@ -104,8 +120,20 @@ def menu(request):
     context = {
         'settings': settings,
         'languages': languages,
+        'user_language': user_language,
+        'currencies': currencies,
+        'user_currency': user_currency,
         'dishes': dishes,
     }
+
+    text_settings = TextSetting.objects.first()
+    text_settings.user_language = user_language
+    text_settings.save()
+
+    quantity_settings = QuantitySetting.objects.first()
+    quantity_settings.user_currency = user_currency
+    quantity_settings.save()
+
     return render(request, 'orders/menu.html', context)
 
 
@@ -115,13 +143,13 @@ def select_language(request, language_id):
 
     language = Language.objects.filter(id=language_id).first()
 
-    user_language = UserLanguage.objects.filter(user=request.user).first()
-    if not user_language:
-        user_language = UserLanguage(user=request.user, language=language)
+    user_settings = UserSetting.objects.filter(user=request.user).first()
+    if not user_settings:
+        user_settings = UserSetting(user=request.user, language=language)
     else:
-        user_language.language = language
+        user_settings.language = language
 
-    user_language.save()
+    user_settings.save()
 
     return HttpResponseRedirect(reverse("index"))
 
