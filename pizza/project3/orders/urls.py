@@ -10,4 +10,5 @@ urlpatterns = [
     path("unregister", views.unregister_view, name="unregister"),
     path("menu", views.menu, name="menu"),
     path("select-language/<language_id>", views.select_language, name="select_language"),
+    path("select-currency/<currency_id>", views.select_currency, name="select_currency"),
 ]

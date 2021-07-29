@@ -154,6 +154,23 @@ def select_language(request, language_id):
     return HttpResponseRedirect(reverse("index"))
 
 
+def select_currency(request, currency_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("index"))
+
+    currency = Currency.objects.filter(id=currency_id).first()
+
+    user_settings = UserSetting.objects.filter(user=request.user).first()
+    if not user_settings:
+        user_settings = UserSetting(user=request.user, language=currency)
+    else:
+        user_settings.currency = currency
+
+    user_settings.save()
+
+    return HttpResponseRedirect(reverse("index"))
+
+
 def put_columns_to_dishes(dishes):
     for dish in dishes:
         types_columns = {}
