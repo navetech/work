@@ -21,7 +21,7 @@
     {% endif %}
 
     <title>
-        Pizza: {% block title %}{% endblock %}
+        {{ settings.product_title }}: {% block title %}{% endblock %}
     </title>
 {% endblock %}
 
@@ -34,7 +34,18 @@
         </ul>
 
         {% if user.is_authenticated %}
-            <div class="dropstart me-2">
+        <div class="dropstart me-2">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ settings.language_selection_label }}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+                {% for language in languages %}
+                    <li><a class="dropdown-item" href="{% url 'select_language' language.id %}">{{ language.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="dropstart me-2">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                     {{ user.username }}
                 </button>
@@ -65,7 +76,7 @@
 
 
 {% block product_name %}
-    Pizza
+{{ settings.product_name }}
 {% endblock %}
 
 

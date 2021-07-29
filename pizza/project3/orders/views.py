@@ -12,6 +12,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render
 from django.contrib.auth.models import User
 
+from languages.models import Iso_639_LanguageCode
+from texts.models import Language
+from texts.models import UserLanguage
 
 from .models import OrderSetting
 from .models import Dish
@@ -92,15 +95,35 @@ def menu(request):
 
     settings = OrderSetting.objects.first()
 
+    languages = Language.objects.all().order_by('code__sort_number')
+
     dishes = to_dict_list(Dish.objects, 'sort_number')
 
     put_columns_to_dishes(dishes)
 
     context = {
         'settings': settings,
+        'languages': languages,
         'dishes': dishes,
     }
     return render(request, 'orders/menu.html', context)
+
+
+def select_language(request, language_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("index"))
+
+    language = Language.objects.filter(id=language_id).first()
+
+    user_language = UserLanguage.objects.filter(user=request.user).first()
+    if not user_language:
+        user_language = UserLanguage(user=request.user, language=language)
+    else:
+        user_language.language = language
+
+    user_language.save()
+
+    return HttpResponseRedirect(reverse("index"))
 
 
 def put_columns_to_dishes(dishes):

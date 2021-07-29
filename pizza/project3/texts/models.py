@@ -2,6 +2,8 @@ from django.db import models
 
 # Create your models here.
 
+from django.contrib.auth.models import User
+
 from languages.models import Iso_639_LanguageCode
 
 
@@ -10,7 +12,6 @@ class TextSetting(models.Model):
         Iso_639_LanguageCode, blank=True, null=True, on_delete=models.CASCADE,
         related_name='target_language_TextSetting_related'
     )
-
 
     def __str__(self):
         return f'{self.target_language}'
@@ -59,3 +60,39 @@ class Phrase(models.Model):
                         return phrase.words
         
         return self.words
+
+
+class Language(models.Model):
+    code = models.ForeignKey(
+        Iso_639_LanguageCode, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='code_Language_related'
+    )
+
+    name = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='name_Language_related'
+    )
+
+    def __str__(self):
+        return (
+            f'{self.code}, '
+            f'{self.name}, '
+        )
+
+
+class UserLanguage(models.Model):
+    language = models.ForeignKey(
+        Language, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='language_UserLanguage_related'
+    )
+
+    user = models.ForeignKey(
+        User, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='user_UserLanguage_related'
+    )
+
+    def __str__(self):
+        return (
+            f'{self.language}, '
+            f'{self.user}, '
+        )

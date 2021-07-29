@@ -9,6 +9,21 @@ from traits.models import Trait
 
 
 class OrderSetting(models.Model):
+    product_title = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='product_title_OrderSetting_related'
+    )
+
+    product_name = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='product_name_OrderSetting_related'
+    )
+
+    language_selection_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='language_selection_label_OrderSetting_related'
+    )
+
     menu_page_title = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.CASCADE,
         related_name='menu_page_title_OrderSetting_related'
