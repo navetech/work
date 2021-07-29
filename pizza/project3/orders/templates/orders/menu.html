@@ -20,19 +20,23 @@
                             <h3>{{ type.trait.long_name }}</h3>
                             {% if type.flavors %}
                                 <table style="width:100%">
-                                    {% comment %}
                                     <tr>
                                         <th></th>
-                                        {% for size in type.sizes %}
-                                            <th>{{ size.id }}</th>
+                                        <th></th>
+                                        {% for size in type.flavors_columns.sizes %}
+                                            <th>{{ size.trait.short_name }}</th>
+                                            <th></th>
+                                            <th></th>
                                         {% endfor %}
                                     </tr>
-                                    {% endcomment %}
                                     {% for flavor in type.flavors %}
                                         <tr>
-                                            <td>{{ flavor.trait }}</td>
+                                            <td>{{ flavor.trait.short_name }}</td>
+                                            <td>{{ flavor.trait.long_name }}</td>
                                             {% for size in flavor.sizes %}
-                                                <td>{{ size.trait }}</td>
+                                            <td>{{ size.trait.quantity }}</td>
+                                            <td>{{ size.trait.short_name }}</td>
+                                            <td>{{ size.trait.long_name }}</td>
                                             {% endfor %}
                                         </tr>
                                     {% endfor %}
@@ -80,7 +84,6 @@
                             <h3>{{ adding.trait.long_name }}</h3>
                             {% if adding.flavors %}
                                 <table style="width:100%">
-                                    {% comment %}
                                     <tr>
                                         <th></th>
                                         <th></th>
@@ -88,9 +91,8 @@
                                             <th>{{ size.trait.short_name }}</th>
                                             <th></th>
                                             <th></th>
-                                            {% endfor %}
+                                        {% endfor %}
                                     </tr>
-                                    {% endcomment %}
                                     {% for flavor in adding.flavors %}
                                         <tr>
                                             <td>{{ flavor.trait.short_name }}</td>

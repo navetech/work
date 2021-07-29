@@ -16,7 +16,7 @@ from django.core import serializers
 import json
 
 
-from .models import Dish
+from .models import Adding, Dish
 from .models import to_dict_list
 
 
@@ -104,29 +104,42 @@ def menu(request):
 
 def put_columns_to_dishes(dishes):
     for dish in dishes:
-#        put_types_columns(dish)
+        types_columns = {}
+        put_types(types_columns, dish)
+        dish['types_columns'] = types_columns
 
         flavors_columns = {}
         put_flavors(flavors_columns, dish)
         dish['flavors_columns'] = flavors_columns
 
-#        put_addings_columns(dish)
-#        put_sizes_columns(dish)
+        addings_columns = {}
+        put_addings(addings_columns, dish)
+        dish['addings_columns'] = addings_columns
 
 
+def put_types(columns, table):
+    sizes = []
+    for type in table['types']:
+        flavors_columns = {}
+        put_flavors(flavors_columns, type)
+        type['flavors_columns'] = flavors_columns
 
-"""
-def put_types_columns(table):
-    for type in table.types:
-#        put_flavors_columns(type)
-#        put_addings_columns(type)
-#        put_sizes_columns(type)
-"""
+        addings_columns = {}
+        put_addings(addings_columns, type)
+        type['addings_columns'] = addings_columns
+
+        put_sizes(sizes, type)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)    
+    columns['sizes'] = sizes
+
 
 def put_flavors(columns, table):
     sizes = []
     for flavor in table['flavors']:
-#        put_addings_columns(flavor)
+        addings_columns = {}
+        put_addings(addings_columns, flavor)
+        flavor['addings_columns'] = addings_columns
 
         put_sizes(sizes, flavor)
 
@@ -134,12 +147,18 @@ def put_flavors(columns, table):
     columns['sizes'] = sizes
 
 
-"""
-def put_addings_columns(table):
-    for adding in table.addings:
-#        put_flavors(adding)
-#        put_sizes_columns(adding)
-"""
+def put_addings(columns, table):
+    sizes = []
+    for adding in table['addings']:
+        flavors_columns = {}
+        put_flavors(flavors_columns, adding)
+        adding['flavors_columns'] = flavors_columns
+
+        put_sizes(sizes, adding)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)    
+    columns['sizes'] = sizes
+
 
 def put_sizes(columns, table):
     for size in table['sizes']:
