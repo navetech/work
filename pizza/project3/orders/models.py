@@ -6,33 +6,39 @@ from django.contrib.auth.models import User
 
 from texts.models import Phrase
 from texts.models import Language
+from texts.models import Setting as TextSetting
+
 from quantities.models import Currency
+from quantities.models import Setting as QuantitySetting
+
 from traits.models import Trait
 
 
-class OrderSetting(models.Model):
+class Setting(models.Model):
     product_title = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='product_title_OrderSetting_related'
+        related_name='product_title_Setting_related'
     )
 
     product_name = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='product_name_OrderSetting_related'
+        related_name='product_name_Setting_related'
     )
 
     menu_page_title = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='menu_page_title_OrderSetting_related'
+        related_name='menu_page_title_Setting_related'
     )
 
     menu_page_header = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='menu_page_header_OrderSetting_related'
+        related_name='menu_page_header_Setting_related'
     )
 
     def __str__(self):
         return (
+            f'{self.product_title}, '
+            f'{self.product_name}, '
             f'{self.menu_page_title}, '
             f'{self.menu_page_header}, '
         )
@@ -60,6 +66,36 @@ class UserSetting(models.Model):
             f'{self.language}, '
             f'{self.currency}, '
         )
+
+    @classmethod
+    def get_first(cls, user):
+        settings = cls.objects.filter(user=user).first()
+        if not settings:
+            language = TextSetting.get_first_language()
+            currency = QuantitySetting.get_first_currency()
+
+            if language and currency:
+                settings = cls(user=user, language=language, currency=currency)
+                settings.save()
+            elif language:
+                settings = cls(user=user, language=language)
+                settings.save()
+            elif currency:
+                settings = cls(user=user, currency=currency)
+                settings.save()
+        else:
+            if not settings.language or not settings.currency:
+                if not settings.language:
+                    language = TextSetting.get_first_language()
+                    settings.language = language
+
+                if not settings.currency:
+                    currency = QuantitySetting.get_first_currency()
+                    settings.currency = currency
+
+                settings.save()
+
+        return settings
 
 
 class CommonFields(models.Model):
@@ -99,7 +135,7 @@ class MenuCommonFields(CommonFields):
         )
 
     def to_dict(self, dict):
-        CommonFields.to_dict(self,dict)
+        CommonFields.to_dict(self, dict)
         dict['sort_number'] = self.sort_number
 
         return

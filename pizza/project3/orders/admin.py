@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import OrderSetting
+from .models import Setting
 
 from .models import CountLimit
 
@@ -12,11 +12,11 @@ from .models import Flavor
 from .models import Type
 from .models import Dish
 
-#from .models import Order
-#from .models import HistoricOrder
+# from .models import Order
+# from .models import HistoricOrder
 
 
-admin.site.register(OrderSetting)
+admin.site.register(Setting)
 
 admin.site.register(CountLimit)
 
@@ -26,5 +26,5 @@ admin.site.register(Flavor)
 admin.site.register(Type)
 admin.site.register(Dish)
 
-#admin.site.register(Order)
-#admin.site.register(HistoricOrder)
+# admin.site.register(Order)
+# admin.site.register(HistoricOrder)

@@ -1,9 +1,9 @@
-#from django.http import HttpResponse
-#from django.shortcuts import render
+# from django.http import HttpResponse
+# from django.shortcuts import render
 
 # Create your views here.
-#def index(request):
-#    return HttpResponse('Project 3: TODO')
+# def index(request):
+#   return HttpResponse('Project 3: TODO')
 
 
 from django.http import HttpResponseRedirect
@@ -13,12 +13,12 @@ from django.shortcuts import render
 from django.contrib.auth.models import User
 
 from texts.models import Language
-from texts.models import TextSetting
+from texts.models import Setting as TextSetting
 
 from quantities.models import Currency
-from quantities.models import QuantitySetting
+from quantities.models import Setting as QuantitySetting
 
-from .models import OrderSetting
+from .models import Setting
 from .models import UserSetting
 from .models import Dish
 from .models import to_dict_list
@@ -37,7 +37,7 @@ def login_view(request):
             return HttpResponseRedirect(reverse('index'))
 
         return render(request, 'orders/login.html', {'message': None})
-    
+
     username = request.POST['username']
     password = request.POST['password']
     user = authenticate(request, username=username, password=password)
@@ -45,7 +45,10 @@ def login_view(request):
         login(request, user)
         return HttpResponseRedirect(reverse('index'))
     else:
-        return render(request, 'orders/login.html', {'message': 'Invalid credentials.'})
+        return render(
+            request, 'orders/login.html',
+            {'message': 'Invalid credentials.'}
+        )
 
 
 def logout_view(request):
@@ -58,7 +61,10 @@ def register_view(request):
         if request.user.is_authenticated:
             return HttpResponseRedirect(reverse('index'))
 
-        return render(request, 'orders/register.html', {'message': None})
+        return render(
+            request, 'orders/register.html',
+            {'message': None}
+        )
 
     username = request.POST['username']
     password = request.POST['password']
@@ -66,7 +72,10 @@ def register_view(request):
     if len(user) < 1:
         user = User.objects.create_user(username=username, password=password)
         if user is None:
-            return render(request, 'orders/register.html', {'message': 'Invalid credentials.'})
+            return render(
+                request, 'orders/register.html',
+                {'message': 'Invalid credentials.'}
+            )
     else:
         user = user[0]
         user.is_active = True
@@ -74,7 +83,7 @@ def register_view(request):
         user.save()
 
     login(request, user)
-    
+
     return HttpResponseRedirect(reverse('index'))
 
 
@@ -96,22 +105,11 @@ def menu(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
 
-    settings = OrderSetting.objects.first()
+    settings = Setting.objects.first()
+    user_settings = UserSetting.get_first(user=request.user)
 
     languages = Language.objects.all().order_by('code__sort_number')
-
-    user_settings = UserSetting.objects.filter(user=request.user).first()
-    if user_settings and user_settings.language:
-        user_language = user_settings.language
-    else:
-        user_language = languages[0]
-
     currencies = Currency.objects.all().order_by('code__sort_number')
-
-    if user_settings and user_settings.currency:
-        user_currency = user_settings.currency
-    else:
-        user_currency = currencies[0]
 
     dishes = to_dict_list(Dish.objects, 'sort_number')
 
@@ -119,19 +117,18 @@ def menu(request):
 
     context = {
         'settings': settings,
+        'user_settings': user_settings,
         'languages': languages,
-        'user_language': user_language,
         'currencies': currencies,
-        'user_currency': user_currency,
         'dishes': dishes,
     }
 
     text_settings = TextSetting.objects.first()
-    text_settings.user_language = user_language
+    text_settings.language = user_settings.language
     text_settings.save()
 
     quantity_settings = QuantitySetting.objects.first()
-    quantity_settings.user_currency = user_currency
+    quantity_settings.currency = user_settings.currency
     quantity_settings.save()
 
     return render(request, 'orders/menu.html', context)
@@ -199,7 +196,7 @@ def put_types(columns, table):
 
         put_sizes(sizes, type)
 
-    sizes.sort(key=lambda size: size['sort_number'], reverse=False)    
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
     columns['sizes'] = sizes
 
 
@@ -212,7 +209,7 @@ def put_flavors(columns, table):
 
         put_sizes(sizes, flavor)
 
-    sizes.sort(key=lambda size: size['sort_number'], reverse=False)    
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
     columns['sizes'] = sizes
 
 
@@ -225,7 +222,7 @@ def put_addings(columns, table):
 
         put_sizes(sizes, adding)
 
-    sizes.sort(key=lambda size: size['sort_number'], reverse=False)    
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
     columns['sizes'] = sizes
 
 
@@ -236,6 +233,6 @@ def put_sizes(columns, table):
             if column['trait']['short_name'] == size['trait']['short_name']:
                 inserted = True
                 break
-        
+
         if not inserted:
             columns.append(size)
