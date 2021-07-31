@@ -18,19 +18,39 @@ class Phrase(models.Model):
         related_name='translation_of_Phrase_related'
     )
 
-
     def __str__(self):
-        return self.translate()
+        languages = self.languages.all().order_by('sort_number')
+        languages_names = []
+        for language in languages:
+            languages_names.append(language.english_name)
 
+        return (
+            f'{self.words} '
+            f'in '
+            f'{languages_names}, '
+            f'translation of '
+            f'{self.translation_of}, '
+        )
 
     def translate_to(self, language):
-        if not language:
-            return self.words
+        origin_languages = self.languages.all().order_by('sort_number')
 
-        origins = self.languages.all().order_by('sort_number')
-        for origin in origins:
-            if language.code == origin:
-                return self.words
+        if origin_languages and  len(origin_languages) > 0:
+            origin_language = origin_languages[0].english_name
+        else:
+            origin_language = None
+
+        translated = {
+            'words': self.words,
+            'language': origin_language,
+        }
+
+        if not language:
+            return translated
+        else:
+            for origin_language in origin_languages:
+                if language.code == origin_language:
+                    return translated
 
         phrases = Phrase.objects.all()
         for phrase in phrases:
@@ -40,10 +60,34 @@ class Phrase(models.Model):
                     phrase.translation_of == self.translation_of
                 ):
                     if language.code in phrase.languages.all():
-                        return phrase.words
-        
-        return self.words
+                        translated = {
+                            'words': phrase.words,
+                            'language': language.code.english_name,
+                        }
+                        return translated
+        return translated
 
+    def to_dict(self, dict, **settings):
+        dict['id'] = self.id
+
+        dict['words'] = self.words
+
+        dict['languages'] = []
+        languages = self.languages.all().order_by('sort_number')
+        for language in languages:
+            dict['languages'].append(language.english_name)
+
+        dict['translation_of'] = {}
+        if self.translation_of:
+            self.translation_of.to_dict(dict['translation_of'], **settings)
+
+        if settings and settings['language']:
+            language = settings['language']
+        else:
+            language = None
+        dict['translated'] = self.translate_to(language)
+
+        return
 
     def translate(self):
         language = Setting.get_first_language()
@@ -68,6 +112,19 @@ class Language(models.Model):
             f'{self.code}, '
             f'{self.name}, '
         )
+
+    def to_dict(self, dict, **settings):
+        dict['id'] = self.id
+
+        dict['code'] = {}
+        if self.code:
+            dict['code'] = self.code.english_name
+
+        dict['name'] = {}
+        if self.name:
+            self.name.to_dict(dict['name'], **settings)
+
+        return
 
 
 class Setting(models.Model):

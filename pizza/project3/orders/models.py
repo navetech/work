@@ -112,12 +112,12 @@ class CommonFields(models.Model):
             f'{self.trait}'
         )
 
-    def to_dict(self, dict):
+    def to_dict(self, dict, **settings):
         dict['id'] = self.id
 
         dict['trait'] = {}
         if self.trait:
-            self.trait.to_dict(dict['trait'])
+            self.trait.to_dict(dict['trait'], **settings)
 
         return
 
@@ -134,8 +134,8 @@ class MenuCommonFields(CommonFields):
             f'{CommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict):
-        CommonFields.to_dict(self, dict)
+    def to_dict(self, dict, **settings):
+        CommonFields.to_dict(self, dict, **settings)
         dict['sort_number'] = self.sort_number
 
         return
@@ -151,7 +151,7 @@ class CountLimit(models.Model):
             f'{self.max}'
         )
 
-    def to_dict(self, dict):
+    def to_dict(self, dict, **settings):
         dict['id'] = self.id
 
         dict['min'] = self.min
@@ -168,8 +168,8 @@ class Size(MenuCommonFields):
             f'{MenuCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict):
-        MenuCommonFields.to_dict(self, dict)
+    def to_dict(self, dict, **settings):
+        MenuCommonFields.to_dict(self, dict, **settings)
 
         return
 
@@ -200,18 +200,18 @@ class Adding(MenuCommonFields):
             f'{MenuCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict):
-        MenuCommonFields.to_dict(self, dict)
+    def to_dict(self, dict, **settings):
+        MenuCommonFields.to_dict(self, dict, **settings)
 
-        dict['flavors'] = to_dict_list(self.flavors, 'sort_number')
+        dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
         dict['flavors_count'] = {}
         if self.flavors_count:
-            self.flavors_count.to_dict(dict['flavors_count'])
+            self.flavors_count.to_dict(dict['flavors_count'], **settings)
 
-        dict['sizes'] = to_dict_list(self.sizes, 'sort_number')
+        dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
         dict['sizes_count'] = {}
         if self.sizes_count:
-            self.sizes_count.to_dict(dict['sizes_count'])
+            self.sizes_count.to_dict(dict['sizes_count'], **settings)
 
         return
 
@@ -242,18 +242,18 @@ class Flavor(MenuCommonFields):
             f'{MenuCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict):
-        MenuCommonFields.to_dict(self, dict)
+    def to_dict(self, dict, **settings):
+        MenuCommonFields.to_dict(self, dict, **settings)
 
-        dict['addings'] = to_dict_list(self.addings, 'sort_number')
+        dict['addings'] = to_dict_list(self.addings, 'sort_number', **settings)
         dict['addings_count'] = {}
         if self.addings_count:
-            self.addings_count.to_dict(dict['addings_count'])
+            self.addings_count.to_dict(dict['addings_count'], **settings)
 
-        dict['sizes'] = to_dict_list(self.sizes, 'sort_number')
+        dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
         dict['sizes_count'] = {}
         if self.sizes_count:
-            self.sizes_count.to_dict(dict['sizes_count'])
+            self.sizes_count.to_dict(dict['sizes_count'], **settings)
 
         return
 
@@ -294,23 +294,23 @@ class Type(MenuCommonFields):
             f'{MenuCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict):
-        MenuCommonFields.to_dict(self, dict)
+    def to_dict(self, dict, **settings):
+        MenuCommonFields.to_dict(self, dict, **settings)
 
-        dict['flavors'] = to_dict_list(self.flavors, 'sort_number')
+        dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
         dict['flavors_count'] = {}
         if self.flavors_count:
-            self.flavors_count.to_dict(dict['flavors_count'])
+            self.flavors_count.to_dict(dict['flavors_count'], **settings)
 
-        dict['addings'] = to_dict_list(self.addings, 'sort_number')
+        dict['addings'] = to_dict_list(self.addings, 'sort_number', **settings)
         dict['addings_count'] = {}
         if self.addings_count:
-            self.addings_count.to_dict(dict['addings_count'])
+            self.addings_count.to_dict(dict['addings_count'], **settings)
 
-        dict['sizes'] = to_dict_list(self.sizes, 'sort_number')
+        dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
         dict['sizes_count'] = {}
         if self.sizes_count:
-            self.sizes_count.to_dict(dict['sizes_count'])
+            self.sizes_count.to_dict(dict['sizes_count'], **settings)
 
         return
 
@@ -361,28 +361,28 @@ class Dish(MenuCommonFields):
             f'{MenuCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict):
-        MenuCommonFields.to_dict(self, dict)
+    def to_dict(self, dict, **settings):
+        MenuCommonFields.to_dict(self, dict, **settings)
 
-        dict['types'] = to_dict_list(self.types, 'sort_number')
+        dict['types'] = to_dict_list(self.types, 'sort_number', **settings)
         dict['types_count'] = {}
         if self.types_count:
-            self.types_count.to_dict(dict['types_count'])
+            self.types_count.to_dict(dict['types_count'], **settings)
 
-        dict['flavors'] = to_dict_list(self.flavors, 'sort_number')
+        dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
         dict['flavors_count'] = {}
         if self.flavors_count:
-            self.flavors_count.to_dict(dict['flavors_count'])
+            self.flavors_count.to_dict(dict['flavors_count'], **settings)
 
-        dict['addings'] = to_dict_list(self.addings, 'sort_number')
+        dict['addings'] = to_dict_list(self.addings, 'sort_number', **settings)
         dict['addings_count'] = {}
         if self.addings_count:
-            self.addings_count.to_dict(dict['addings_count'])
+            self.addings_count.to_dict(dict['addings_count'], **settings)
 
-        dict['sizes'] = to_dict_list(self.sizes, 'sort_number')
+        dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
         dict['sizes_count'] = {}
         if self.sizes_count:
-            self.sizes_count.to_dict(dict['sizes_count'])
+            self.sizes_count.to_dict(dict['sizes_count'], **settings)
 
         return
 
@@ -541,15 +541,15 @@ class Order(CommonFields):
 
 class HistoricOrder(models.Model):
     order = models.TextField(blank=True)
+    
 
-
-def to_dict_list(manager, *order_by_field_names):
+def to_dict_list(manager, *order_by_field_names, **settings):
     dict_list = []
 
     objects = manager.all().order_by(*order_by_field_names)
     for object in objects:
         dict = {}
-        object.to_dict(dict)
+        object.to_dict(dict, **settings)
         dict_list.append(dict)
 
     return dict_list

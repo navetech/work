@@ -19,12 +19,14 @@ class Quantity(models.Model):
     )
 
     def __str__(self):
+        """
         if self.unit:
             convertion = self.convert_currency()
             if convertion:
                 return convertion
+        """
 
-        return self.value
+        return f'{self.value:.2f} {self.unit.alphabetic_code}'
 
     def convert_currency(self):
         currency = Setting.get_first_currency()

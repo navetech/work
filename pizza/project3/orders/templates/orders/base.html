@@ -40,7 +40,7 @@
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                 {% for language in languages %}
-                    <li><a class="dropdown-item" href="{% url 'select_language' language.id %}">{{ language.name }}</a></li>
+                    <li><a class="dropdown-item" href="{% url 'select_language' language.id %}">{{ language.name.words }}</a></li>
                 {% endfor %}
             </ul>
         </div>

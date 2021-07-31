@@ -33,11 +33,19 @@ class Trait(models.Model):
 
         return ret
 
-    def to_dict(self, dict):
+    def to_dict(self, dict, **settings):
         dict['id'] = self.id
 
-        dict['short_name'] = self.short_name
-        dict['long_name'] = self.long_name
-        dict['quantity'] = self.quantity
+        dict['short_name'] = {}
+        if self.short_name:
+            self.short_name.to_dict(dict['short_name'], **settings)
+
+        dict['long_name'] = {}
+        if self.long_name:
+            self.long_name.to_dict(dict['long_name'], **settings)
+
+        dict['quantity'] = {}
+#        if self.quantity:
+#            self.quantity.to_dict(dict['quantity'], **settings)
 
         return

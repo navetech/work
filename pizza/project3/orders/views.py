@@ -108,10 +108,12 @@ def menu(request):
     settings = Setting.objects.first()
     user_settings = UserSetting.get_first(user=request.user)
 
-    languages = Language.objects.all().order_by('code__sort_number')
+#    languages = Language.objects.all().order_by('code__sort_number')
+    languages = to_dict_list(Language.objects, 'code__sort_number')
+
     currencies = Currency.objects.all().order_by('code__sort_number')
 
-    dishes = to_dict_list(Dish.objects, 'sort_number')
+    dishes = to_dict_list(Dish.objects, 'sort_number', language=user_settings.language)
 
     put_columns_to_dishes(dishes)
 
@@ -166,7 +168,6 @@ def select_currency(request, currency_id):
     user_settings.save()
 
     return HttpResponseRedirect(reverse("index"))
-
 
 def put_columns_to_dishes(dishes):
     for dish in dishes:
