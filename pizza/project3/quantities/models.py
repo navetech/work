@@ -5,7 +5,9 @@ from django.db import models
 from currency_converter import CurrencyConverter
 
 from currencies.models import Iso_4217_CurrencyCode
+
 from texts.models import Phrase
+from texts.models import to_dict
 
 
 c = CurrencyConverter()
@@ -25,8 +27,25 @@ class Quantity(models.Model):
             if convertion:
                 return convertion
         """
+        return (
+            f'{self.value:.2f} '
+            f'{self.unit.alphabetic_code}'
+        )
 
-        return f'{self.value:.2f} {self.unit.alphabetic_code}'
+    def to_dict(self, dict, **settings):
+        dict['id'] = self.id
+
+        dict['value'] = self.value
+        dict['unit'] = self.unit.alphabetic_code
+
+        if settings and settings['currency']:
+            currency = settings['currency']
+        else:
+            currency = None
+
+        dict['converted'] = self.convert_currency_to(currency)
+
+        return
 
     def convert_currency(self):
         currency = Setting.get_first_currency()
@@ -34,19 +53,31 @@ class Quantity(models.Model):
         return self.convert_currency_to(currency)
 
     def convert_currency_to(self, currency):
-        if not currency:
-            return f'{self.value:.2f} {self.unit.alphabetic_code}'
-        elif currency == self.unit:
-            return f'{self.value:.2f} {self.unit.alphabetic_code}'
-        else:
-            converted_value = c.convert(
-                self.value, self.unit.alphabetic_code, currency.code.alphabetic_code
-            )
+        converted = {
+            'value': self.value,
+            'unit': '',
+        }
 
-            if not converted_value and converted_value != 0:
-                return f'{self.value:.2f} {self.unit.alphabetic_code}'
+        if not (self.unit and self.unit.alphabetic_code):
+            return converted
+        else:
+            if not (currency and currency.code and currency.code.alphabetic_code):
+                return converted
+            elif currency.code.alphabetic_code == self.unit.alphabetic_code:
+                return converted
             else:
-                return f'{converted_value:.2f} {currency.code.alphabetic_code}'
+                converted_value = c.convert(
+                    self.value, self.unit.alphabetic_code, currency.code.alphabetic_code
+                )
+
+                if not converted_value and converted_value != 0:
+                    return converted
+                else:
+                    converted = {
+                        'value': converted_value,
+                        'unit': currency.code.alphabetic_code,
+                    }
+                    return converted
 
 
 class Currency(models.Model):
@@ -65,6 +96,15 @@ class Currency(models.Model):
             f'{self.code}, '
             f'{self.name}, '
         )
+
+    def to_dict(self, dict, **settings):
+        dict['id'] = self.id
+
+        dict['code'] = self.code.alphabetic_code
+
+        to_dict(self.name, dict, key='name', **settings)
+
+        return
 
 
 class Setting(models.Model):

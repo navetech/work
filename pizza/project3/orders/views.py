@@ -105,24 +105,36 @@ def menu(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
 
-    settings = Setting.objects.first()
     user_settings = UserSetting.get_first(user=request.user)
+    language = None
+    currency = None
+    user_settings_dict = {}
+    if user_settings:
+        if user_settings.language:
+            language = user_settings.language
 
-#    languages = Language.objects.all().order_by('code__sort_number')
-    languages = to_dict_list(Language.objects, 'code__sort_number')
+        if user_settings.currency:
+            currency = user_settings.currency
 
-    currencies = Currency.objects.all().order_by('code__sort_number')
+        user_settings.to_dict(user_settings_dict, language=language)
 
-    dishes = to_dict_list(Dish.objects, 'sort_number', language=user_settings.language)
+    settings = Setting.objects.first()
+    settings_dict = {}
+    if settings:
+        settings.to_dict(settings_dict, language=language)
 
-    put_columns_to_dishes(dishes)
+    languages_dict_list = to_dict_list(Language.objects, 'code__sort_number')
+    currencies_dict_list = to_dict_list(Currency.objects, 'code__sort_number', language=language)
+    dishes_dict_list = to_dict_list(Dish.objects, 'sort_number', language=language, currency=currency)
+
+    put_columns_to_dishes(dishes_dict_list)
 
     context = {
-        'settings': settings,
-        'user_settings': user_settings,
-        'languages': languages,
-        'currencies': currencies,
-        'dishes': dishes,
+        'settings': settings_dict,
+        'user_settings': user_settings_dict,
+        'languages': languages_dict_list,
+        'currencies': currencies_dict_list,
+        'dishes': dishes_dict_list,
     }
 
     text_settings = TextSetting.objects.first()

@@ -3,6 +3,8 @@ from django.db import models
 # Create your models here.
 
 from texts.models import Phrase
+from texts.models import to_dict
+
 from quantities.models import Quantity
 
 
@@ -23,29 +25,17 @@ class Trait(models.Model):
     )
 
     def __str__(self):
-        ret = ''
-        if self.short_name:
-            ret += '*****, ' + self.short_name.__str__()
-        if self.long_name:
-            ret += ', ' + self.long_name.__str__()
-        if self.quantity:
-            ret += ', ' + self.quantity.__str__()
-
-        return ret
+        return (
+            f'{self.short_name}, '
+            f'{self.long_name}, '
+            f'{self.quantity}, '
+        )
 
     def to_dict(self, dict, **settings):
         dict['id'] = self.id
 
-        dict['short_name'] = {}
-        if self.short_name:
-            self.short_name.to_dict(dict['short_name'], **settings)
-
-        dict['long_name'] = {}
-        if self.long_name:
-            self.long_name.to_dict(dict['long_name'], **settings)
-
-        dict['quantity'] = {}
-#        if self.quantity:
-#            self.quantity.to_dict(dict['quantity'], **settings)
+        to_dict(self.short_name, dict, key='short_name', **settings)
+        to_dict(self.long_name, dict, key='long_name', **settings)
+        to_dict(self.quantity, dict, key='quantity', **settings)
 
         return

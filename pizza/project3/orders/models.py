@@ -7,11 +7,24 @@ from django.contrib.auth.models import User
 from texts.models import Phrase
 from texts.models import Language
 from texts.models import Setting as TextSetting
+from texts.models import to_dict
 
 from quantities.models import Currency
 from quantities.models import Setting as QuantitySetting
 
 from traits.models import Trait
+    
+
+def to_dict_list(manager, *order_by_field_names, **settings):
+    dict_list = []
+
+    objects = manager.all().order_by(*order_by_field_names)
+    for object in objects:
+        dict = {}
+        object.to_dict(dict, **settings)
+        dict_list.append(dict)
+
+    return dict_list
 
 
 class Setting(models.Model):
@@ -43,6 +56,16 @@ class Setting(models.Model):
             f'{self.menu_page_header}, '
         )
 
+    def to_dict(self, dict, **settings):
+        dict['id'] = self.id
+
+        to_dict(self.product_title, dict, key='product_title', **settings)
+        to_dict(self.product_name, dict, key='product_name', **settings)
+        to_dict(self.menu_page_title, dict, key='menu_page_title', **settings)
+        to_dict(self.menu_page_header, dict, key='menu_page_header', **settings)
+
+        return
+
 
 class UserSetting(models.Model):
     user = models.ForeignKey(
@@ -66,6 +89,15 @@ class UserSetting(models.Model):
             f'{self.language}, '
             f'{self.currency}, '
         )
+
+
+    def to_dict(self, dict, **settings):
+        dict['id'] = self.id
+
+        to_dict(self.language, dict, key='language', **settings)
+        to_dict(self.currency, dict, key='currency', **settings)
+
+        return
 
     @classmethod
     def get_first(cls, user):
@@ -115,9 +147,7 @@ class CommonFields(models.Model):
     def to_dict(self, dict, **settings):
         dict['id'] = self.id
 
-        dict['trait'] = {}
-        if self.trait:
-            self.trait.to_dict(dict['trait'], **settings)
+        to_dict(self.trait, dict, key='trait', **settings)
 
         return
 
@@ -204,14 +234,10 @@ class Adding(MenuCommonFields):
         MenuCommonFields.to_dict(self, dict, **settings)
 
         dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
-        dict['flavors_count'] = {}
-        if self.flavors_count:
-            self.flavors_count.to_dict(dict['flavors_count'], **settings)
+        to_dict(self.flavors_count, dict, key='flavors_count', **settings)
 
         dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
-        dict['sizes_count'] = {}
-        if self.sizes_count:
-            self.sizes_count.to_dict(dict['sizes_count'], **settings)
+        to_dict(self.sizes_count, dict, key='sizes_count', **settings)
 
         return
 
@@ -246,14 +272,10 @@ class Flavor(MenuCommonFields):
         MenuCommonFields.to_dict(self, dict, **settings)
 
         dict['addings'] = to_dict_list(self.addings, 'sort_number', **settings)
-        dict['addings_count'] = {}
-        if self.addings_count:
-            self.addings_count.to_dict(dict['addings_count'], **settings)
+        to_dict(self.addings_count, dict, key='addings_count', **settings)
 
         dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
-        dict['sizes_count'] = {}
-        if self.sizes_count:
-            self.sizes_count.to_dict(dict['sizes_count'], **settings)
+        to_dict(self.sizes_count, dict, key='sizes_count', **settings)
 
         return
 
@@ -298,19 +320,13 @@ class Type(MenuCommonFields):
         MenuCommonFields.to_dict(self, dict, **settings)
 
         dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
-        dict['flavors_count'] = {}
-        if self.flavors_count:
-            self.flavors_count.to_dict(dict['flavors_count'], **settings)
+        to_dict(self.flavors_count, dict, key='flavors_count', **settings)
 
         dict['addings'] = to_dict_list(self.addings, 'sort_number', **settings)
-        dict['addings_count'] = {}
-        if self.addings_count:
-            self.addings_count.to_dict(dict['addings_count'], **settings)
+        to_dict(self.addings_count, dict, key='addings_count', **settings)
 
         dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
-        dict['sizes_count'] = {}
-        if self.sizes_count:
-            self.sizes_count.to_dict(dict['sizes_count'], **settings)
+        to_dict(self.sizes_count, dict, key='sizes_count', **settings)
 
         return
 
@@ -365,24 +381,16 @@ class Dish(MenuCommonFields):
         MenuCommonFields.to_dict(self, dict, **settings)
 
         dict['types'] = to_dict_list(self.types, 'sort_number', **settings)
-        dict['types_count'] = {}
-        if self.types_count:
-            self.types_count.to_dict(dict['types_count'], **settings)
+        to_dict(self.types_count, dict, key='types_count', **settings)
 
         dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
-        dict['flavors_count'] = {}
-        if self.flavors_count:
-            self.flavors_count.to_dict(dict['flavors_count'], **settings)
+        to_dict(self.flavors_count, dict, key='flavors_count', **settings)
 
         dict['addings'] = to_dict_list(self.addings, 'sort_number', **settings)
-        dict['addings_count'] = {}
-        if self.addings_count:
-            self.addings_count.to_dict(dict['addings_count'], **settings)
+        to_dict(self.addings_count, dict, key='addings_count', **settings)
 
         dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
-        dict['sizes_count'] = {}
-        if self.sizes_count:
-            self.sizes_count.to_dict(dict['sizes_count'], **settings)
+        to_dict(self.sizes_count, dict, key='sizes_count', **settings)
 
         return
 
@@ -541,15 +549,3 @@ class Order(CommonFields):
 
 class HistoricOrder(models.Model):
     order = models.TextField(blank=True)
-    
-
-def to_dict_list(manager, *order_by_field_names, **settings):
-    dict_list = []
-
-    objects = manager.all().order_by(*order_by_field_names)
-    for object in objects:
-        dict = {}
-        object.to_dict(dict, **settings)
-        dict_list.append(dict)
-
-    return dict_list

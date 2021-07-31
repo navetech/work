@@ -21,7 +21,7 @@
     {% endif %}
 
     <title>
-        {{ settings.product_title }}: {% block title %}{% endblock %}
+        {{ settings.product_title.translated.words }}: {% block title %}{% endblock %}
     </title>
 {% endblock %}
 
@@ -36,7 +36,7 @@
         {% if user.is_authenticated %}
         <div class="dropstart me-2">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                {{ user_settings.language.name }}
+                {{ user_settings.language.name.words }}
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                 {% for language in languages %}
@@ -47,11 +47,11 @@
 
         <div class="dropstart me-2">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
-                {{ user_settings.currency.name }}
+                {{ user_settings.currency.name.translated.words }}
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
                 {% for currency in currencies %}
-                    <li><a class="dropdown-item" href="{% url 'select_currency' currency.id %}">{{ currency.name }}</a></li>
+                    <li><a class="dropdown-item" href="{% url 'select_currency' currency.id %}">{{ currency.name.translated.words }}</a></li>
                 {% endfor %}
             </ul>
         </div>
@@ -87,7 +87,7 @@
 
 
 {% block product_name %}
-    {{ settings.product_name }}
+    {{ settings.product_name.translated.words }}
 {% endblock %}
 
 

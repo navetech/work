@@ -5,6 +5,14 @@ from django.db import models
 from languages.models import Iso_639_LanguageCode
 
 
+def to_dict(object, dict, key, **settings):
+    dict[key] = {}
+    if object:
+        object.to_dict(dict[key], **settings)
+
+    return
+
+
 class Phrase(models.Model):
     words = models.CharField(max_length=256, blank=True)
 
@@ -77,14 +85,13 @@ class Phrase(models.Model):
         for language in languages:
             dict['languages'].append(language.english_name)
 
-        dict['translation_of'] = {}
-        if self.translation_of:
-            self.translation_of.to_dict(dict['translation_of'], **settings)
+        to_dict(self.translation_of, dict, key='translation_of', **settings)
 
         if settings and settings['language']:
             language = settings['language']
         else:
             language = None
+            
         dict['translated'] = self.translate_to(language)
 
         return
@@ -120,9 +127,7 @@ class Language(models.Model):
         if self.code:
             dict['code'] = self.code.english_name
 
-        dict['name'] = {}
-        if self.name:
-            self.name.to_dict(dict['name'], **settings)
+        to_dict(self.name, dict, key='name', **settings)
 
         return
 

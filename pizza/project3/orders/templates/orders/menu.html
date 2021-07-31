@@ -2,11 +2,11 @@
 
 
 {% block title %}
-    {{ settings.menu_page_title }}
+    {{ settings.menu_page_title.translated.words }}
 {% endblock %}
 
 {% block main %}
-    <h1>{{ settings.menu_page_header }}</h1>
+    <h1>{{ settings.menu_page_header.translated.words }}</h1>
 
     {% for dish in dishes %}
         <ul class="list-group pt-4">
@@ -35,7 +35,7 @@
                                             <td>{{ flavor.trait.short_name.translated.words }}</td>
                                             <td>{{ flavor.trait.long_name.translated.words }}</td>
                                             {% for size in flavor.sizes %}
-                                            <td>{{ size.trait.quantity }}</td>
+                                            <td>{{ size.trait.quantity.converted.value|floatformat:2 }} {{ size.trait.quantity.converted.unit }}</td>
                                             <td>{{ size.trait.short_name.translated.words }}</td>
                                             <td>{{ size.trait.long_name.translated.words }}</td>
                                             {% endfor %}
@@ -66,7 +66,7 @@
                                             <td>{{ flavor.trait.short_name.translated.words }}</td>
                                             <td>{{ flavor.trait.long_name.translated.words }}</td>
                                             {% for size in flavor.sizes %}
-                                            <td>{{ size.trait.quantity }}</td>
+                                            <td>{{ size.trait.quantity.converted.value|floatformat:2 }} {{ size.trait.quantity.converted.unit }}</td>
                                             <td>{{ size.trait.short_name.translated.words }}</td>
                                             <td>{{ size.trait.long_name.translated.words }}</td>
                                             {% endfor %}
@@ -99,7 +99,7 @@
                                             <td>{{ flavor.trait.short_name.translated.words }}</td>
                                             <td>{{ flavor.trait.long_name.translated.words }}</td>
                                             {% for size in flavor.sizes %}
-                                            <td>{{ size.trait.quantity }}</td>
+                                            <td>{{ size.trait.quantity.converted.value|floatformat:2 }} {{ size.trait.quantity.converted.unit }}</td>
                                             <td>{{ size.trait.short_name.translated.words }}</td>
                                             <td>{{ size.trait.long_name.translated.words }}</td>
                                             {% endfor %}
