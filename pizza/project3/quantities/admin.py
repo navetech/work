@@ -4,9 +4,9 @@ from django.contrib import admin
 
 from .models import Quantity
 from .models import Currency
-from .models import QuantitySetting
+from .models import Setting
 
 
 admin.site.register(Quantity)
 admin.site.register(Currency)
-admin.site.register(QuantitySetting)
+admin.site.register(Setting)
