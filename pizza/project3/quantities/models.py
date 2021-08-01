@@ -61,13 +61,19 @@ class Quantity(models.Model):
         if not (self.unit and self.unit.alphabetic_code):
             return converted
         else:
-            if not (currency and currency.code and currency.code.alphabetic_code):
+            converted['unit'] = self.unit.alphabetic_code
+
+            if not (
+                currency and currency.code and
+                currency.code.alphabetic_code
+            ):
                 return converted
             elif currency.code.alphabetic_code == self.unit.alphabetic_code:
                 return converted
             else:
                 converted_value = c.convert(
-                    self.value, self.unit.alphabetic_code, currency.code.alphabetic_code
+                    self.value, self.unit.alphabetic_code,
+                    currency.code.alphabetic_code
                 )
 
                 if not converted_value and converted_value != 0:
@@ -94,7 +100,7 @@ class Currency(models.Model):
     def __str__(self):
         return (
             f'{self.code}, '
-            f'{self.name}, '
+            f'{self.name}'
         )
 
     def to_dict(self, dict, **settings):
@@ -115,7 +121,7 @@ class Setting(models.Model):
 
     def __str__(self):
         return (
-            f'{self.currency}, '
+            f'{self.currency}'
         )
 
     @classmethod

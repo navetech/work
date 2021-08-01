@@ -28,7 +28,7 @@ class Trait(models.Model):
         return (
             f'{self.short_name}, '
             f'{self.long_name}, '
-            f'{self.quantity}, '
+            f'{self.quantity}'
         )
 
     def to_dict(self, dict, **settings):

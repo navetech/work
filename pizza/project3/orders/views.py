@@ -13,15 +13,14 @@ from django.shortcuts import render
 from django.contrib.auth.models import User
 
 from texts.models import Language
-from texts.models import Setting as TextSetting
+from texts.models import to_dict_list
 
 from quantities.models import Currency
-from quantities.models import Setting as QuantitySetting
 
 from .models import Setting
 from .models import UserSetting
+
 from .models import Dish
-from .models import to_dict_list
 
 
 def index(request):
@@ -123,9 +122,15 @@ def menu(request):
     if settings:
         settings.to_dict(settings_dict, language=language)
 
-    languages_dict_list = to_dict_list(Language.objects, 'code__sort_number')
-    currencies_dict_list = to_dict_list(Currency.objects, 'code__sort_number', language=language)
-    dishes_dict_list = to_dict_list(Dish.objects, 'sort_number', language=language, currency=currency)
+    languages_dict_list = to_dict_list(
+        Language.objects, 'code__sort_number'
+    )
+    currencies_dict_list = to_dict_list(
+        Currency.objects, 'code__sort_number', language=language
+    )
+    dishes_dict_list = to_dict_list(
+        Dish.objects, 'sort_number', language=language, currency=currency
+    )
 
     put_columns_to_dishes(dishes_dict_list)
 
@@ -136,14 +141,6 @@ def menu(request):
         'currencies': currencies_dict_list,
         'dishes': dishes_dict_list,
     }
-
-    text_settings = TextSetting.objects.first()
-    text_settings.language = user_settings.language
-    text_settings.save()
-
-    quantity_settings = QuantitySetting.objects.first()
-    quantity_settings.currency = user_settings.currency
-    quantity_settings.save()
 
     return render(request, 'orders/menu.html', context)
 
@@ -173,13 +170,14 @@ def select_currency(request, currency_id):
 
     user_settings = UserSetting.objects.filter(user=request.user).first()
     if not user_settings:
-        user_settings = UserSetting(user=request.user, language=currency)
+        user_settings = UserSetting(user=request.user, currency=currency)
     else:
         user_settings.currency = currency
 
     user_settings.save()
 
     return HttpResponseRedirect(reverse("index"))
+
 
 def put_columns_to_dishes(dishes):
     for dish in dishes:

@@ -7,24 +7,13 @@ from django.contrib.auth.models import User
 from texts.models import Phrase
 from texts.models import Language
 from texts.models import Setting as TextSetting
+from texts.models import to_dict_list
 from texts.models import to_dict
 
 from quantities.models import Currency
 from quantities.models import Setting as QuantitySetting
 
 from traits.models import Trait
-    
-
-def to_dict_list(manager, *order_by_field_names, **settings):
-    dict_list = []
-
-    objects = manager.all().order_by(*order_by_field_names)
-    for object in objects:
-        dict = {}
-        object.to_dict(dict, **settings)
-        dict_list.append(dict)
-
-    return dict_list
 
 
 class Setting(models.Model):
@@ -53,7 +42,7 @@ class Setting(models.Model):
             f'{self.product_title}, '
             f'{self.product_name}, '
             f'{self.menu_page_title}, '
-            f'{self.menu_page_header}, '
+            f'{self.menu_page_header}'
         )
 
     def to_dict(self, dict, **settings):
@@ -61,8 +50,12 @@ class Setting(models.Model):
 
         to_dict(self.product_title, dict, key='product_title', **settings)
         to_dict(self.product_name, dict, key='product_name', **settings)
-        to_dict(self.menu_page_title, dict, key='menu_page_title', **settings)
-        to_dict(self.menu_page_header, dict, key='menu_page_header', **settings)
+        to_dict(
+            self.menu_page_title, dict, key='menu_page_title', **settings
+        )
+        to_dict(
+            self.menu_page_header, dict, key='menu_page_header', **settings
+        )
 
         return
 
@@ -87,9 +80,8 @@ class UserSetting(models.Model):
         return (
             f'{self.user}, '
             f'{self.language}, '
-            f'{self.currency}, '
+            f'{self.currency}'
         )
-
 
     def to_dict(self, dict, **settings):
         dict['id'] = self.id
@@ -225,8 +217,10 @@ class Adding(MenuCommonFields):
 
     def __str__(self):
         return (
-            f'{self.flavors}, {self.flavors_count}, '
-            f'{self.sizes}, {self.sizes_count}, '
+            f'{self.flavors}, '
+            f'{self.flavors_count}, '
+            f'{self.sizes}, '
+            f'{self.sizes_count}, '
             f'{MenuCommonFields.__str__(self)}'
         )
 
@@ -263,8 +257,10 @@ class Flavor(MenuCommonFields):
 
     def __str__(self):
         return (
-            f'{self.addings}, {self.addings_count}, '
-            f'{self.sizes}, {self.sizes_count}, '
+            f'{self.addings}, '
+            f'{self.addings_count}, '
+            f'{self.sizes}, '
+            f'{self.sizes_count}, '
             f'{MenuCommonFields.__str__(self)}'
         )
 
@@ -310,9 +306,12 @@ class Type(MenuCommonFields):
 
     def __str__(self):
         return (
-            f'{self.flavors}, {self.flavors_count}, '
-            f'{self.addings}, {self.addings_count}, '
-            f'{self.sizes}, {self.sizes_count}, '
+            f'{self.flavors}, '
+            f'{self.flavors_count}, '
+            f'{self.addings}, '
+            f'{self.addings_count}, '
+            f'{self.sizes}, '
+            f'{self.sizes_count}, '
             f'{MenuCommonFields.__str__(self)}'
         )
 
@@ -370,10 +369,14 @@ class Dish(MenuCommonFields):
 
     def __str__(self):
         return (
-            f'{self.types}, {self.types_count}, '
-            f'{self.flavors}, {self.flavors_count}, '
-            f'{self.addings}, {self.addings_count}, '
-            f'{self.sizes}, {self.sizes_count}, '
+            f'{self.types}, '
+            f'{self.types_count}, '
+            f'{self.flavors}, '
+            f'{self.flavors_count}, '
+            f'{self.addings}, '
+            f'{self.addings_count}, '
+            f'{self.sizes}, '
+            f'{self.sizes_count}, '
             f'{MenuCommonFields.__str__(self)}'
         )
 
@@ -542,7 +545,8 @@ class Order(CommonFields):
     def __str__(self):
         return (
             f'{self.dishes}, '
-            f'{self.user}, {self.date_time}, '
+            f'{self.user}, '
+            f'{self.date_time}, '
             f'{CommonFields.__str__(self)}'
         )
 

@@ -22,7 +22,7 @@ class Thing(models.Model):
 #        related_name='+'
 #        related_name='parents_Thing_related'
 #    )
- 
+
     basics = models.ManyToManyField(
         'self', blank=True,
         related_name='basics_Thing_related'
@@ -63,5 +63,4 @@ class PickedThing(models.Model):
 
     def __str__(self):
         return f'{self.thing}, {self.count}, {self.date_time}'
-
 """
