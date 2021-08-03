@@ -1,4 +1,4 @@
-# from django.http import HttpResponse
+from django.http import HttpResponse
 # from django.shortcuts import render
 
 # Create your views here.
@@ -179,6 +179,56 @@ def select_currency(request, currency_id):
     return HttpResponseRedirect(reverse("index"))
 
 
+def order(request, dish_id, type_id, flavor_id, size_id):
+    """
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("index"))
+    return HttpResponse(f'{dish_id}/{type_id}/{flavor_id}/{size_id}')
+    """
+
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('index'))
+
+    user_settings = UserSetting.get_first(user=request.user)
+    language = None
+    currency = None
+    user_settings_dict = {}
+    if user_settings:
+        if user_settings.language:
+            language = user_settings.language
+
+        if user_settings.currency:
+            currency = user_settings.currency
+
+        user_settings.to_dict(user_settings_dict, language=language)
+
+    settings = Setting.objects.first()
+    settings_dict = {}
+    if settings:
+        settings.to_dict(settings_dict, language=language)
+
+    languages_dict_list = to_dict_list(
+        Language.objects, 'code__sort_number'
+    )
+    currencies_dict_list = to_dict_list(
+        Currency.objects, 'code__sort_number', language=language
+    )
+
+    order_dish = get_order_dish(request.user, dish_id, type_id, flavor_id, size_id)
+    order_dish_dict = {}
+    order_dish.to_dict(order_dish_dict, language=language, currency=currency)
+
+    context = {
+        'settings': settings_dict,
+        'user_settings': user_settings_dict,
+        'languages': languages_dict_list,
+        'currencies': currencies_dict_list,
+        'dish': order_dish_dict,
+    }
+
+    return render(request, 'orders/order.html', context)
+
+
 def put_columns_to_dishes(dishes):
     for dish in dishes:
         types_columns = {}
@@ -247,3 +297,6 @@ def put_sizes(columns, table):
 
         if not inserted:
             columns.append(size)
+
+
+def get_order_dish(user, dish_id, type_id, flavor_id, size_id):

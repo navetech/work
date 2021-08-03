@@ -6,19 +6,19 @@
 {% endblock %}
 
 {% block main %}
-    <h1>{{ settings.menu_page_header.translated.words }}</h1>
+    <h3>{{ settings.menu_page_header.translated.words }}</h3>
 
     {% for dish in dishes %}
         <ul class="list-group pt-4">
             <li class="list-group-item ln-container01">
-                <h2>{{ dish.trait.short_name.translated.words }}</h2>
-                <h2>{{ dish.trait.long_name.translated.words }}</h2>
+                <h4>{{ dish.trait.short_name.translated.words }}</h4>
+                <h4>{{ dish.trait.long_name.translated.words }}</h4>
 
                 {% for type in dish.types %}
                     <ul class="list-group pt-4">
                         <li class="list-group-item ln-container02">
-                            <h3>{{ type.trait.short_name.translated.words }}</h3>
-                            <h3>{{ type.trait.long_name.translated.words }}</h3>
+                            <h5>{{ type.trait.short_name.translated.words }}</h5>
+                            <h5>{{ type.trait.long_name.translated.words }}</h5>
                             {% if type.flavors %}
                                 <table style="width:100%">
                                     <tr>
@@ -35,7 +35,11 @@
                                             <td>{{ flavor.trait.short_name.translated.words }}</td>
                                             <td>{{ flavor.trait.long_name.translated.words }}</td>
                                             {% for size in flavor.sizes %}
-                                            <td>{{ size.trait.quantity.converted.value|floatformat:2 }} {{ size.trait.quantity.converted.unit }}</td>
+                                            <td>
+                                                <a href="{% url 'order' dish.id type.id flavor.id size.id %}">
+                                                    {{ size.trait.quantity.converted.value|floatformat:2 }} {{ size.trait.quantity.converted.unit }}
+                                                </a>
+                                            </td>
                                             <td>{{ size.trait.short_name.translated.words }}</td>
                                             <td>{{ size.trait.long_name.translated.words }}</td>
                                             {% endfor %}
@@ -59,16 +63,26 @@
                                             <th>{{ size.trait.short_name.translated.words }}</th>
                                             <th></th>
                                             <th></th>
-                                            {% endfor %}
+                                        {% endfor %}
                                     </tr>
                                     {% for flavor in dish.flavors %}
                                         <tr>
                                             <td>{{ flavor.trait.short_name.translated.words }}</td>
                                             <td>{{ flavor.trait.long_name.translated.words }}</td>
                                             {% for size in flavor.sizes %}
-                                            <td>{{ size.trait.quantity.converted.value|floatformat:2 }} {{ size.trait.quantity.converted.unit }}</td>
-                                            <td>{{ size.trait.short_name.translated.words }}</td>
-                                            <td>{{ size.trait.long_name.translated.words }}</td>
+                                                <td>
+                                                    <a href="{% url 'order' dish.id None flavor.id size.id %}">
+                                                        {{ size.trait.quantity.converted.value|floatformat:2 }} {{ size.trait.quantity.converted.unit }}
+                                                    </a>
+                                                </td>
+                                                <td>{{ size.trait.short_name.translated.words }}</td>
+                                                <td>{{ size.trait.long_name.translated.words }}</td>
+                                            {% empty %}
+                                            <td>
+                                                <a href="{% url 'order' dish.id None flavor.id None %}">
+                                                    {{ flavor.trait.quantity.converted.value|floatformat:2 }} {{ flavor.trait.quantity.converted.unit }}
+                                                </a>
+                                            </td>
                                             {% endfor %}
                                         </tr>
                                     {% endfor %}
@@ -81,8 +95,8 @@
                 {% for adding in dish.addings %}
                     <ul class="list-group pt-4">
                         <li class="list-group-item ln-container02">
-                            <h3>{{ adding.trait.short_name.translated.words }}</h3>
-                            <h3>{{ adding.trait.long_name.translated.words }}</h3>
+                            <h5>{{ adding.trait.short_name.translated.words }}</h5>
+                            <h5>{{ adding.trait.long_name.translated.words }}</h5>
                             {% if adding.flavors %}
                                 <table style="width:100%">
                                     <tr>
@@ -114,6 +128,6 @@
             </li>
         </ul>
     {% empty %}
-        <h2>No dishes</h2>
+        <h4>No dishes</h4>
     {% endfor %}
 {% endblock %}

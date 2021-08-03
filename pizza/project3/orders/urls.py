@@ -17,4 +17,8 @@ urlpatterns = [
         "select-currency/<currency_id>", views.select_currency,
         name="select_currency"
     ),
+    path(
+        "order/<dish_id>/<type_id>/<flavor_id>/<size_id>", views.order,
+        name="order"
+    ),
 ]
