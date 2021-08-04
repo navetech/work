@@ -12,7 +12,12 @@ from .models import Flavor
 from .models import Type
 from .models import Dish
 
-# from .models import Order
+from .models import OrderSize
+from .models import OrderAdding
+from .models import OrderFlavor
+from .models import OrderType
+from .models import OrderDish
+from .models import Order
 # from .models import HistoricOrder
 
 
@@ -26,5 +31,10 @@ admin.site.register(Flavor)
 admin.site.register(Type)
 admin.site.register(Dish)
 
-# admin.site.register(Order)
+admin.site.register(OrderSize)
+admin.site.register(OrderAdding)
+admin.site.register(OrderFlavor)
+admin.site.register(OrderType)
+admin.site.register(OrderDish)
+admin.site.register(Order)
 # admin.site.register(HistoricOrder)

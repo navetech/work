@@ -21,6 +21,9 @@ from .models import Setting
 from .models import UserSetting
 
 from .models import Dish
+from .models import get_order
+from .models import get_order_dish
+
 
 
 def index(request):
@@ -217,6 +220,7 @@ def order(request, dish_id, type_id, flavor_id, size_id):
     order = get_order(user=request.user)
 
     order_dish = get_order_dish(order, dish_id, type_id, flavor_id, size_id)
+#    print(order_dish)
 #    order_dish_dict = {}
 #    order_dish.to_dict(order_dish_dict, language=language, currency=currency)
 
@@ -228,7 +232,9 @@ def order(request, dish_id, type_id, flavor_id, size_id):
 #        'dish': order_dish_dict,
     }
 
-    return render(request, 'orders/order.html', context)
+    return HttpResponse(f'{dish_id}/{type_id}/{flavor_id}/{size_id}')
+
+#    return render(request, 'orders/order.html', context)
 
 
 def put_columns_to_dishes(dishes):
