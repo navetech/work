@@ -397,10 +397,11 @@ class Dish(MenuCommonFields):
 
         return
 
-class OrderSize(CommonFields):
+
+class PickedSize(CommonFields):
     menu = models.ForeignKey(
         Size, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='menu_OrderSize_related'
+        related_name='menu_PickedSize_related'
     )
 
     def __str__(self):
@@ -410,20 +411,20 @@ class OrderSize(CommonFields):
         )
 
 
-class OrderAdding(CommonFields):
+class PickedAdding(CommonFields):
     flavors = models.ManyToManyField(
-        'OrderFlavor', blank=True,
-        related_name='flavors_OrderAdding_related'
+        'PickedFlavor', blank=True,
+        related_name='flavors_PickedAdding_related'
     )
 
     sizes = models.ManyToManyField(
-        OrderSize, blank=True,
-        related_name='sizes_OrderAdding_related'
+        PickedSize, blank=True,
+        related_name='sizes_PickedAdding_related'
     )
 
     menu = models.ForeignKey(
         Adding, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='menu_OrderAdding_related'
+        related_name='menu_PickedAdding_related'
     )
 
     def __str__(self):
@@ -435,20 +436,20 @@ class OrderAdding(CommonFields):
         )
 
 
-class OrderFlavor(CommonFields):
+class PickedFlavor(CommonFields):
     addings = models.ManyToManyField(
-        'OrderAdding', blank=True,
-        related_name='addings_OrderFlavor_related'
+        'PickedAdding', blank=True,
+        related_name='addings_PickedFlavor_related'
     )
 
     sizes = models.ManyToManyField(
-        OrderSize, blank=True,
-        related_name='sizes_OrderFlavor_related'
+        PickedSize, blank=True,
+        related_name='sizes_PickedFlavor_related'
     )
 
     menu = models.ForeignKey(
         Flavor, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='menu_OrderFlavor_related'
+        related_name='menu_PickedFlavor_related'
     )
 
     def __str__(self):
@@ -460,25 +461,25 @@ class OrderFlavor(CommonFields):
         )
 
 
-class OrderType(CommonFields):
+class PickedType(CommonFields):
     flavors = models.ManyToManyField(
-        OrderFlavor, blank=True,
-        related_name='flavors_OrderType_related'
+        PickedFlavor, blank=True,
+        related_name='flavors_PickedType_related'
     )
 
     addings = models.ManyToManyField(
-        OrderAdding, blank=True,
-        related_name='addings_OrderType_related'
+        PickedAdding, blank=True,
+        related_name='addings_PickedType_related'
     )
 
     sizes = models.ManyToManyField(
-        OrderSize, blank=True,
-        related_name='sizes_OrderType_related'
+        PickedSize, blank=True,
+        related_name='sizes_PickedType_related'
     )
 
     menu = models.ForeignKey(
         Type, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='menu_OrderType_related'
+        related_name='menu_PickedType_related'
     )
 
     def __str__(self):
@@ -491,30 +492,30 @@ class OrderType(CommonFields):
         )
 
 
-class OrderDish(CommonFields):
+class PickedDish(CommonFields):
     types = models.ManyToManyField(
-        OrderType, blank=True,
-        related_name='types_OrderDish_related'
+        PickedType, blank=True,
+        related_name='types_PickedDish_related'
     )
 
     flavors = models.ManyToManyField(
-        OrderFlavor, blank=True,
-        related_name='flavors_OrderDish_related'
+        PickedFlavor, blank=True,
+        related_name='flavors_PickedDish_related'
     )
 
     addings = models.ManyToManyField(
-        OrderAdding, blank=True,
-        related_name='addings_OrderDish_related'
+        PickedAdding, blank=True,
+        related_name='addings_PickedDish_related'
     )
 
     sizes = models.ManyToManyField(
-        OrderSize, blank=True,
-        related_name='sizes_OrderDish_related'
+        PickedSize, blank=True,
+        related_name='sizes_PickedDish_related'
     )
 
     menu = models.ForeignKey(
         Dish, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='menu_OrderDish_related'
+        related_name='menu_PickedDish_related'
     )
 
     def __str__(self):
@@ -528,51 +529,9 @@ class OrderDish(CommonFields):
         )
 
 
-def get_order_dish(order, dish_id, type_id, flavor_id, size_id):
-    if not order:
-        return None
-
-    if not dish_id and dish_id != 0:
-        return None
-
-    for order_dish in order.dishes:
-        menu_dish = order_dish.menu
-        no_components = True
-
-        if dish_id == menu_dish.id:
-            if menu_dish.types:
-                no_components = False
-
-                order_type = get_order_type(order_dish, type_id, flavor_id, size_id)
-                if order_type:
-                    return order_dish
-
-            if menu_dish.flavors:
-                no_components = False
-
-                order_flavor = get_order_flavor(order_dish, flavor_id, size_id)
-                if order_flavor:
-                    return order_dish
-
-            if menu_dish.sizes:
-                no_components = False
-
-                order_size = get_order_size(order_dish, size_id)
-                if order_size:
-                    return order_dish
-
-            if no_components:
-                return order_dish
-
-    order_dish = create_order_dish(order, menu_dish, type_id, flavor_id, size_id)
-
-    return order_dish
-
-
-
 class Order(CommonFields):
     dishes = models.ManyToManyField(
-        OrderDish, blank=True,
+        PickedDish, blank=True,
         related_name='dishes_Order_related'
     )
 
@@ -590,21 +549,6 @@ class Order(CommonFields):
             f'{self.date_time}, '
             f'{CommonFields.__str__(self)}'
         )
-
-
-def create_order(user):
-    order = Order(user=user)
-    order.save()
-
-    return order
-
-
-def get_order(user):
-    order = Order.objects.filter(user=user).first()
-    if not order:
-        order = create_order(user=user)
-    
-    return order
 
 
 class HistoricOrder(models.Model):

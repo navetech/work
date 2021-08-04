@@ -214,16 +214,18 @@ def order(request, dish_id, type_id, flavor_id, size_id):
         Currency.objects, 'code__sort_number', language=language
     )
 
-    order_dish = get_order_dish(request.user, dish_id, type_id, flavor_id, size_id)
-    order_dish_dict = {}
-    order_dish.to_dict(order_dish_dict, language=language, currency=currency)
+    order = get_order(user=request.user)
+
+    order_dish = get_order_dish(order, dish_id, type_id, flavor_id, size_id)
+#    order_dish_dict = {}
+#    order_dish.to_dict(order_dish_dict, language=language, currency=currency)
 
     context = {
         'settings': settings_dict,
         'user_settings': user_settings_dict,
         'languages': languages_dict_list,
         'currencies': currencies_dict_list,
-        'dish': order_dish_dict,
+#        'dish': order_dish_dict,
     }
 
     return render(request, 'orders/order.html', context)
@@ -298,5 +300,7 @@ def put_sizes(columns, table):
         if not inserted:
             columns.append(size)
 
-
+"""
 def get_order_dish(user, dish_id, type_id, flavor_id, size_id):
+    pass
+"""
