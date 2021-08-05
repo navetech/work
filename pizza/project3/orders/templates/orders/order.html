@@ -47,6 +47,7 @@
                                 </tr>
                                 {% endfor %}
 
+                                {% if order_flavor.menu.addings_count.max != 0 %}
                                 {% for adding in order_flavor.menu.addings %}
                                 <tr>
                                     <td>
@@ -80,106 +81,193 @@
                                                     </td>
                                                 </tr>
                                                 {% endfor %}
-                
                                             </table>
-                                        </tr>
-                                        {% empty %}
-                                        <tr>
                                         </tr>
                                         {% endfor %}
                                     </table>
                                 </tr>
-                                {% empty %}
-                                <tr>
-                                </tr>
                                 {% endfor %}
+                                {% endif %}
                             </table>
                         </tr>
-                        {% empty %}
+                        {% endfor %}
+
+                        {% for order_size in order_type.sizes %}
                         <tr>
+                            <td>
+                                {{ order_size.menu.trait.short_name.translated.words }}
+                                {{ order_size.menu.trait.long_name.translated.words }}
+                            </td>
+                            <td>
+                                {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
+                                {{ order_size.menu.trait.quantity.converted.unit }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                        {% if order_type.menu.addings_count.max != 0 %}
+                        {% for adding in order_type.menu.addings %}
+                        <tr>
+                            <td>
+                                {{ adding.trait.short_name.translated.words }}
+                                {{ adding.trait.long_name.translated.words }}
+                            </td>
                             <table style="width:100%">
-                                {% for order_size in order_type.sizes %}
+                                {% for flavor in adding.flavors %}
                                 <tr>
-                                    <td>
-                                        {{ order_size.menu.trait.short_name.translated.words }}
-                                        {{ order_size.menu.trait.long_name.translated.words }}
-                                    </td>
-                                    <td>
-                                        {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
-                                        {{ order_size.menu.trait.quantity.converted.unit }}
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td>
-                                        {{ order_type.menu.trait.short_name.translated.words }}
-                                        {{ order_type.menu.trait.long_name.translated.words }}
-                                    </td>
-                                    <td>
-                                        {{ order_type.menu.trait.quantity.converted.value|floatformat:2 }}
-                                        {{ order_type.menu.trait.quantity.converted.unit }}
-                                    </td>
+                                    <table style="width:100%">
+                                        {% for size in flavor.sizes %}
+                                        <tr>
+                                            <td>
+                                                {{ size.trait.short_name.translated.words }}
+                                                {{ size.trait.long_name.translated.words }}
+                                            </td>
+                                            <td>
+                                                {{ size.trait.quantity.converted.value|floatformat:2 }}
+                                                {{ size.trait.quantity.converted.unit }}
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td>
+                                                {{ flavor.trait.short_name.translated.words }}
+                                                {{ flavor.trait.long_name.translated.words }}
+                                            </td>
+                                            <td>
+                                                {{ flavor.trait.quantity.converted.value|floatformat:2 }}
+                                                {{ flavor.trait.quantity.converted.unit }}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </table>
                                 </tr>
                                 {% endfor %}
                             </table>
                         </tr>
                         {% endfor %}
+                        {% endif %}
+
                     </table>
                 </tr>
-                {% empty %}
+                {% endfor %}
+
+                {% for order_flavor in order_dish.flavors %}
                 <tr>
                     <table style="width:100%">
-                        {% for order_flavor in order_dish.flavors %}
+                        {% for order_size in order_flavor.sizes %}
                         <tr>
+                            <td>
+                                {{ order_size.menu.trait.short_name.translated.words }}
+                                {{ order_size.menu.trait.long_name.translated.words }}
+                            </td>
+                            <td>
+                                {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
+                                {{ order_size.menu.trait.quantity.converted.unit }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td>
+                                {{ order_flavor.menu.trait.short_name.translated.words }}
+                                {{ order_flavor.menu.trait.long_name.translated.words }}
+                            </td>
+                            <td>
+                                {{ order_flavor.menu.trait.quantity.converted.value|floatformat:2 }}
+                                {{ order_flavor.menu.trait.quantity.converted.unit }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                        {% if order_flavor.menu.addings_count.max != 0 %}
+                        {% for adding in order_flavor.menu.addings %}
+                        <tr>
+                            <td>
+                                {{ adding.trait.short_name.translated.words }}
+                                {{ adding.trait.long_name.translated.words }}
+                            </td>
                             <table style="width:100%">
-                                {% for order_size in order_flavor.sizes %}
+                                {% for flavor in adding.flavors %}
                                 <tr>
-                                    <td>
-                                        {{ order_size.menu.trait.short_name.translated.words }}
-                                        {{ order_size.menu.trait.long_name.translated.words }}
-                                    </td>
-                                    <td>
-                                        {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
-                                        {{ order_size.menu.trait.quantity.converted.unit }}
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td>
-                                        {{ order_flavor.menu.trait.short_name.translated.words }}
-                                        {{ order_flavor.menu.trait.long_name.translated.words }}
-                                    </td>
-                                    <td>
-                                        {{ order_flavor.menu.trait.quantity.converted.value|floatformat:2 }}
-                                        {{ order_flavor.menu.trait.quantity.converted.unit }}
-                                    </td>
+                                    <table style="width:100%">
+                                        {% for size in flavor.sizes %}
+                                        <tr>
+                                            <td>
+                                                {{ size.trait.short_name.translated.words }}
+                                                {{ size.trait.long_name.translated.words }}
+                                            </td>
+                                            <td>
+                                                {{ size.trait.quantity.converted.value|floatformat:2 }}
+                                                {{ size.trait.quantity.converted.unit }}
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td>
+                                                {{ flavor.trait.short_name.translated.words }}
+                                                {{ flavor.trait.long_name.translated.words }}
+                                            </td>
+                                            <td>
+                                                {{ flavor.trait.quantity.converted.value|floatformat:2 }}
+                                                {{ flavor.trait.quantity.converted.unit }}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </table>
                                 </tr>
                                 {% endfor %}
                             </table>
                         </tr>
-                        {% empty %}
+                        {% endfor %}
+                        {% endif %}
+
+                    </table>
+                </tr>
+                {% endfor %}
+
+                {% for order_size in order_dish.sizes %}
+                <tr>
+                    <td>
+                        {{ order_size.menu.trait.short_name.translated.words }}
+                        {{ order_size.menu.trait.long_name.translated.words }}
+                    </td>
+                    <td>
+                        {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
+                        {{ order_size.menu.trait.quantity.converted.unit }}
+                    </td>
+                </tr>
+                {% endfor %}
+
+                {% if order_dish.menu.addings_count.max != 0 %}
+                {% for adding in order_dish.menu.addings %}
+                <tr>
+                    <td>
+                        {{ adding.trait.short_name.translated.words }}
+                        {{ adding.trait.long_name.translated.words }}
+                    </td>
+                    <table style="width:100%">
+                        {% for flavor in adding.flavors %}
                         <tr>
                             <table style="width:100%">
-                                {% for order_size in order_flavor.sizes %}
+                                {% for size in flavor.sizes %}
                                 <tr>
                                     <td>
-                                        {{ order_size.menu.trait.short_name.translated.words }}
-                                        {{ order_size.menu.trait.long_name.translated.words }}
+                                        {{ size.trait.short_name.translated.words }}
+                                        {{ size.trait.long_name.translated.words }}
                                     </td>
                                     <td>
-                                        {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
-                                        {{ order_size.menu.trait.quantity.converted.unit }}
+                                        {{ size.trait.quantity.converted.value|floatformat:2 }}
+                                        {{ size.trait.quantity.converted.unit }}
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
                                     <td>
-                                        {{ order_dish.menu.trait.short_name.translated.words }}
-                                        {{ order_dish.menu.trait.long_name.translated.words }}
+                                        {{ flavor.trait.short_name.translated.words }}
+                                        {{ flavor.trait.long_name.translated.words }}
                                     </td>
                                     <td>
-                                        {{ order_dish.menu.trait.quantity.converted.value|floatformat:2 }}
-                                        {{ order_dish.menu.trait.quantity.converted.unit }}
+                                        {{ flavor.trait.quantity.converted.value|floatformat:2 }}
+                                        {{ flavor.trait.quantity.converted.unit }}
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -189,6 +277,8 @@
                     </table>
                 </tr>
                 {% endfor %}
+                {% endif %}
+
             </table>
             </li>
         </ul>
