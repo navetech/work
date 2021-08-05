@@ -416,19 +416,17 @@ def get_order_size(order_object, size_id):
     if not order_object:
         return None
 
-    if not size_id and size_id != 0:
+    if size_id is None:
         return None
 
-    size = Type.objects.filter(id=size_id).first()
+    size = Size.objects.filter(id=size_id).first()
     if not size:
         return None
 
     for order_size in order_object.sizes.all():
         menu_size = order_size.menu
-        print('befor if')
 
         if size == menu_size:
-            print('inside if')
             return order_size
 
     return None
@@ -489,10 +487,10 @@ def get_order_flavor(order_object, flavor_id, size_id):
     if not order_object:
         return None
 
-    if not flavor_id and flavor_id != 0:
+    if flavor_id is None:
         return None
 
-    flavor = Type.objects.filter(id=flavor_id).first()
+    flavor = Flavor.objects.filter(id=flavor_id).first()
     if not flavor:
         return None
 
@@ -501,13 +499,11 @@ def get_order_flavor(order_object, flavor_id, size_id):
 
         if flavor == menu_flavor:
             no_components = True
-            if menu_flavor.sizes:
+
+            if menu_flavor.sizes.count() > 0:
                 no_components = False
 
                 order_size = get_order_size(order_flavor, size_id)
-                print('order_size')
-                print(order_size.id)
-                print(order_size)
                 if order_size:
                     return order_flavor
 
@@ -553,7 +549,7 @@ def get_order_type(order_object, type_id, flavor_id, size_id):
     if not order_object:
         return None
 
-    if not type_id and type_id != 0:
+    if type_id is None:
         return None
 
     type = Type.objects.filter(id=type_id).first()
@@ -566,14 +562,14 @@ def get_order_type(order_object, type_id, flavor_id, size_id):
         if type == menu_type:
             no_components = True
 
-            if menu_type.flavors:
+            if menu_type.flavors.count() > 0:
                 no_components = False
 
                 order_flavor = get_order_flavor(order_type, flavor_id, size_id)
                 if order_flavor:
                     return order_type
 
-            if menu_type.sizes:
+            if menu_type.sizes.count() > 0:
                 no_components = False
 
                 order_size = get_order_size(order_type, size_id)
@@ -623,12 +619,19 @@ class OrderDish(CommonFields):
         )
 
 
-def create_order_size(order_object, size_id):
+def create_order_size(order_object, menu_object, size_id):
+    print('create_order_size')
+    if not order_object:
+        return None
+    if not menu_object:
+        return None
     if size_id is None:
         return None
 
     size = Size.objects.filter(id=size_id).first()
     if not size:
+        return None
+    if size not in menu_object.sizes.all():
         return None
 
     order_size = OrderSize(menu=size)
@@ -637,25 +640,29 @@ def create_order_size(order_object, size_id):
     order_object.sizes.add(order_size)
     order_object.save()
 
-#    print(order_size)
-#    print(order_size.id)
-
     return order_size
 
 
-def create_order_flavor(order_object, flavor_id, size_id):
+def create_order_flavor(order_object, menu_object, flavor_id, size_id):
+    print('create_order_flavor')
+    if not order_object:
+        return None
+    if not menu_object:
+        return None
     if flavor_id is None:
         return None
 
     flavor = Flavor.objects.filter(id=flavor_id).first()
     if not flavor:
         return None
+    if flavor not in menu_object.flavors.all():
+        return None
 
     order_flavor = OrderFlavor(menu=flavor)
     order_flavor.save()
 
     if size_id is not None:
-        create_order_size(order_flavor, size_id)
+        create_order_size(order_flavor, flavor, size_id)
 
     order_object.flavors.add(order_flavor)
     order_object.save()
@@ -663,21 +670,28 @@ def create_order_flavor(order_object, flavor_id, size_id):
     return order_flavor
 
 
-def create_order_type(order_object, type_id, flavor_id, size_id):
+def create_order_type(order_object, menu_object, type_id, flavor_id, size_id):
+    print('create_order_type')
+    if not order_object:
+        return None
+    if not menu_object:
+        return None
     if type_id is None:
         return None
 
     type = Type.objects.filter(id=type_id).first()
     if not type:
         return None
+    if type not in menu_object.types.all():
+        return None
 
     order_type = OrderType(menu=type)
     order_type.save()
 
     if flavor_id is not None:
-        create_order_flavor(order_type, flavor_id, size_id)
+        create_order_flavor(order_type, type, flavor_id, size_id)
     elif size_id is not None:
-        create_order_size(order_type, size_id)
+        create_order_size(order_type, type, size_id)
 
     order_object.types.add(order_type)
     order_object.save()
@@ -686,7 +700,8 @@ def create_order_type(order_object, type_id, flavor_id, size_id):
 
 
 def create_order_dish(order, dish_id, type_id, flavor_id, size_id):
-    print('create_order_dish')
+    if not order:
+        return None
     if dish_id is None:
         return None
 
@@ -698,11 +713,11 @@ def create_order_dish(order, dish_id, type_id, flavor_id, size_id):
     order_dish.save()
 
     if type_id is not None:
-        create_order_type(order_dish, type_id, flavor_id, size_id)
+        create_order_type(order_dish, dish, type_id, flavor_id, size_id)
     elif flavor_id is not None:
-        create_order_flavor(order_dish, flavor_id, size_id)
+        create_order_flavor(order_dish, dish, flavor_id, size_id)
     elif size_id is not None:
-        create_order_size(order_dish, size_id)
+        create_order_size(order_dish, dish, size_id)
 
     order.dishes.add(order_dish)
     order.save()
@@ -724,14 +739,11 @@ def get_order_dish(order, dish_id, type_id, flavor_id, size_id):
 
     for order_dish in order.dishes.all():
         menu_dish = order_dish.menu
-        print('dishId')
-        print(dish.id, menu_dish.id)
-        return order_dish
 
         if dish == menu_dish:
             no_components = True
 
-            if menu_dish.types:
+            if menu_dish.types.count() > 0:
                 no_components = False
 
                 order_type = get_order_type(
@@ -740,14 +752,14 @@ def get_order_dish(order, dish_id, type_id, flavor_id, size_id):
                 if order_type:
                     return order_dish
 
-            if menu_dish.flavors:
+            if menu_dish.flavors.count() > 0:
                 no_components = False
 
                 order_flavor = get_order_flavor(order_dish, flavor_id, size_id)
                 if order_flavor:
                     return order_dish
 
-            if menu_dish.sizes:
+            if menu_dish.sizes.count() > 0:
                 no_components = False
 
                 order_size = get_order_size(order_dish, size_id)

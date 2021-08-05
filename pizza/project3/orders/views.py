@@ -25,7 +25,6 @@ from .models import get_order
 from .models import get_order_dish
 
 
-
 def index(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
@@ -192,6 +191,11 @@ def order(request, dish_id, type_id, flavor_id, size_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
 
+    dish_id = None if dish_id == 'None' else dish_id
+    type_id = None if type_id == 'None' else type_id
+    flavor_id = None if flavor_id == 'None' else flavor_id
+    size_id = None if size_id == 'None' else size_id
+
     user_settings = UserSetting.get_first(user=request.user)
     language = None
     currency = None
@@ -305,6 +309,7 @@ def put_sizes(columns, table):
 
         if not inserted:
             columns.append(size)
+
 
 """
 def get_order_dish(user, dish_id, type_id, flavor_id, size_id):
