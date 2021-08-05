@@ -46,53 +46,6 @@
                                     </td>
                                 </tr>
                                 {% endfor %}
-
-                                {% for adding in order_flavor.menu.addings %}
-                                <tr>
-                                    <td>
-                                        {{ adding.trait.short_name.translated.words }}
-                                        {{ adding.trait.long_name.translated.words }}
-                                    </td>
-                                    <table style="width:100%">
-                                        {% for flavor in adding.flavors %}
-                                        <tr>
-                                            <table style="width:100%">
-                                                {% for size in flavor.sizes %}
-                                                <tr>
-                                                    <td>
-                                                        {{ size.trait.short_name.translated.words }}
-                                                        {{ size.trait.long_name.translated.words }}
-                                                    </td>
-                                                    <td>
-                                                        {{ size.trait.quantity.converted.value|floatformat:2 }}
-                                                        {{ size.trait.quantity.converted.unit }}
-                                                    </td>
-                                                </tr>
-                                                {% empty %}
-                                                <tr>
-                                                    <td>
-                                                        {{ flavor.trait.short_name.translated.words }}
-                                                        {{ flavor.trait.long_name.translated.words }}
-                                                    </td>
-                                                    <td>
-                                                        {{ flavor.trait.quantity.converted.value|floatformat:2 }}
-                                                        {{ flavor.trait.quantity.converted.unit }}
-                                                    </td>
-                                                </tr>
-                                                {% endfor %}
-                
-                                            </table>
-                                        </tr>
-                                        {% empty %}
-                                        <tr>
-                                        </tr>
-                                        {% endfor %}
-                                    </table>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                </tr>
-                                {% endfor %}
                             </table>
                         </tr>
                         {% empty %}
