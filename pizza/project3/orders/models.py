@@ -410,6 +410,13 @@ class OrderSize(CommonFields):
             f'{CommonFields.__str__(self)}'
         )
 
+    def to_dict(self, dict, **settings):
+        CommonFields.to_dict(self, dict, **settings)
+
+        to_dict(self.menu, dict, key='menu', **settings)
+
+        return
+
 
 def get_order_size(order_object, size_id):
     print('get_order_size')
@@ -456,6 +463,16 @@ class OrderAdding(CommonFields):
             f'{CommonFields.__str__(self)}'
         )
 
+    def to_dict(self, dict, **settings):
+        CommonFields.to_dict(self, dict, **settings)
+
+        dict['flavors'] = to_dict_list(self.flavors, **settings)
+        dict['sizes'] = to_dict_list(self.sizes, **settings)
+
+        to_dict(self.menu, dict, key='menu', **settings)
+
+        return
+
 
 class OrderFlavor(CommonFields):
     addings = models.ManyToManyField(
@@ -480,6 +497,16 @@ class OrderFlavor(CommonFields):
             f'{self.menu}, '
             f'{CommonFields.__str__(self)}'
         )
+
+    def to_dict(self, dict, **settings):
+        CommonFields.to_dict(self, dict, **settings)
+
+        dict['addings'] = to_dict_list(self.addings, **settings)
+        dict['sizes'] = to_dict_list(self.sizes, **settings)
+
+        to_dict(self.menu, dict, key='menu', **settings)
+
+        return
 
 
 def get_order_flavor(order_object, flavor_id, size_id):
@@ -542,6 +569,17 @@ class OrderType(CommonFields):
             f'{self.menu}, '
             f'{CommonFields.__str__(self)}'
         )
+
+    def to_dict(self, dict, **settings):
+        CommonFields.to_dict(self, dict, **settings)
+
+        dict['flavors'] = to_dict_list(self.flavors, **settings)
+        dict['addings'] = to_dict_list(self.addings, **settings)
+        dict['sizes'] = to_dict_list(self.sizes, **settings)
+
+        to_dict(self.menu, dict, key='menu', **settings)
+
+        return
 
 
 def get_order_type(order_object, type_id, flavor_id, size_id):
@@ -617,6 +655,18 @@ class OrderDish(CommonFields):
             f'{self.menu}, '
             f'{CommonFields.__str__(self)}'
         )
+
+    def to_dict(self, dict, **settings):
+        CommonFields.to_dict(self, dict, **settings)
+
+        dict['types'] = to_dict_list(self.types, **settings)
+        dict['flavors'] = to_dict_list(self.flavors, **settings)
+        dict['addings'] = to_dict_list(self.addings, **settings)
+        dict['sizes'] = to_dict_list(self.sizes, **settings)
+
+        to_dict(self.menu, dict, key='menu', **settings)
+
+        return
 
 
 def create_order_size(order_object, menu_object, size_id):

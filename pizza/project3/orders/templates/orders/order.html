@@ -5,117 +5,150 @@
 
 
 {% block title %}
-    Item Order
+    Order
 {% endblock %}
 
 {% block main %}
-    <h1>Item Order</h1>
-        <form action="{% url 'item_order' item.flavor.self.id item.flavor.size_and_price.size.id %}" method="post">
+    <h3>Order</h3>
+
+    <form action="{% url 'order' order_dish.id None None None %}" method="post">
         {% csrf_token %}
-    <ul class="list-group pt-4">
-        <li class="list-group-item ln-container01">
-            <h2>{{ item.dish.name }}</h2>
-            <ul class="list-group pt-4">
-                <li class="list-group-item ln-container02">
-                    <h3>{{ item.type.name }}</h3>
-                    <figure>
-                        <img src="{% static flavor.self.img.name %}" alt="{{ flavor.self.name }} Image">
-                        {% if item.type is None %}
-                            <figcaption>{{ item.flavor.self.name }} {{ item.dish.name }}</figcaption>
-                        {% else %}
-                            <figcaption>{{ item.flavor.self.name }} {{ item.type.name }} {{ item.dish.name }}</figcaption>
-                        {% endif %}
-                    </figure>
-                    <table style="width:100%">
-                        <tr>
-                            <th>{{ item.flavor.size_and_price.size.name }}</th>
-                            <th>{{ item.flavor.size_and_price.price }}</th>
-                            <th>
-                                <div class="ln-group-divider"></div>
-                                <button type="submit" name="submit" value="dec-qty">-</button>
-                                <span>{{ item.qty }}</span>
-                                <button type="submit" name="submit" value="inc-qty">+</button>
-                            </th>
-                        </tr>
-                        <tr>
-                        </tr>
-                    </table>
-                    <div>
-                        <ul class="list-group pt-4">
-                            {% if item.flavor.addings %}
-                                Addings
-                                {% for flavor_adding in item.flavor.addings %}
-                                    <ul class="list-group pt-4">
-                                        <li class="list-group-item ln-container02">
-                                            {{ flavor_adding.super.name }} {{ flavor_adding.name }}
-                                        </li>
-                                    </ul>
-                                {% endfor %}
-                            {% elif item.max_addings > 0 %}
-                                {% for adding in item.addings %}
-                                    <ul class="list-group pt-4">
-                                        <li class="list-group-item ln-container02">
-                                            Choose 
-                                            <span>
-                                                {% if item.min_addings == 0 %}
-                                                    up to
-                                                {% endif %}
-                                                {{ item.max_addings }}
-                                                {{ adding.self.name }}{{ item.max_addings|pluralize }}
-                                            </span>
-                                            <table style="width:100%">
+
+        <ul class="list-group pt-4">
+            <li class="list-group-item ln-container01">
+                <h4>{{ order_dish.menu.trait.short_name.translated.words }}</h4>
+                <h4>{{ order_dish.menu.trait.long_name.translated.words }}</h4>
+
+                {% for order_type in order_dish.types %}
+                    <ul class="list-group pt-4">
+                        <li class="list-group-item ln-container02">
+                            <h5>{{ order_type.menu.trait.short_name.translated.words }}</h5>
+                            <h5>{{ order_type.menu.trait.long_name.translated.words }}</h5>
+
+                            {% comment %}
+                            <figure>
+                                <img src="{% static flavor.self.img.name %}" alt="{{ flavor.self.name }} Image">
+                                {% if item.type is None %}
+                                    <figcaption>{{ item.flavor.self.name }} {{ item.dish.name }}</figcaption>
+                                {% else %}
+                                    <figcaption>{{ item.flavor.self.name }} {{ item.type.name }} {{ item.dish.name }}</figcaption>
+                                {% endif %}
+                            </figure>
+                            {% endcomment %}
+                            {% for order_flavor in order_type.flavors %}
+                                <ul class="list-group pt-4">
+                                    <li class="list-group-item ln-container03">
+                                        <h6>{{ order_flavor.menu.trait.short_name.translated.words }}</h6>
+                                        <h6>{{ order_flavor.menu.trait.long_name.translated.words }}</h6>
+                                        <table style="width:100%">
+                                            {% for order_size in order_flavor.sizes %}
                                                 <tr>
-                                                    <th></th>
-                                                    {% for size in adding.sizes %}
-                                                        <th>{{ size.name }}</th>
-                                                        <th></th>
-                                                    {% endfor %}
+                                                    <td>
+                                                        {{ order_size.menu.trait.short_name.translated.words }}
+                                                    </td>
+                                                    <td>
+                                                        {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
+                                                        {{ order_size.menu.trait.quantity.converted.unit }}
+                                                    </td>
                                                 </tr>
-                                                {% for adding_flavor in adding.flavors %}
-                                                    <tr>
-                                                        <td>{{ adding_flavor.self.name }}</td>
-                                                        {% if adding_flavor.sizes_and_prices %}
-                                                            {% for size_and_price in adding_flavor.sizes_and_prices %}
-                                                                {% if size_and_price.self %}
-                                                                    <td>{{ size_and_price.self.price }}</td>
+                                            {% endfor %}
+                                        </table>
+                                        {% comment %}
+                                            <th>{{ item.flavor.size_and_price.size.name }}</th>
+                                            <th>{{ item.flavor.size_and_price.price }}</th>
+                                            <th>
+                                            <div class="ln-group-divider"></div>
+                                            <button type="submit" name="submit" value="dec-qty">-</button>
+                                            <span>{{ item.qty }}</span>
+                                            <button type="submit" name="submit" value="inc-qty">+</button>
+                                            </th>
+                                            </tr>
+                                            <tr>
+                                            </tr>
+                                        </table>
+                                        {% endcomment %}
+                                    </li>
+                                </ul>
+                            {% endfor %}
+                            {% comment %}
+                            <div>
+                                <ul class="list-group pt-4">
+                                    {% if item.flavor.addings %}
+                                        Addings
+                                        {% for flavor_adding in item.flavor.addings %}
+                                            <ul class="list-group pt-4">
+                                                <li class="list-group-item ln-container02">
+                                                    {{ flavor_adding.super.name }} {{ flavor_adding.name }}
+                                                </li>
+                                            </ul>
+                                        {% endfor %}
+                                    {% elif item.max_addings > 0 %}
+                                        {% for adding in item.addings %}
+                                            <ul class="list-group pt-4">
+                                                <li class="list-group-item ln-container02">
+                                                    Choose 
+                                                    <span>
+                                                        {% if item.min_addings == 0 %}
+                                                            up to
+                                                        {% endif %}
+                                                        {{ item.max_addings }}
+                                                        {{ adding.self.name }}{{ item.max_addings|pluralize }}
+                                                    </span>
+                                                    <table style="width:100%">
+                                                        <tr>
+                                                            <th></th>
+                                                            {% for size in adding.sizes %}
+                                                                <th>{{ size.name }}</th>
+                                                                <th></th>
+                                                            {% endfor %}
+                                                        </tr>
+                                                        {% for adding_flavor in adding.flavors %}
+                                                            <tr>
+                                                                <td>{{ adding_flavor.self.name }}</td>
+                                                                {% if adding_flavor.sizes_and_prices %}
+                                                                    {% for size_and_price in adding_flavor.sizes_and_prices %}
+                                                                        {% if size_and_price.self %}
+                                                                            <td>{{ size_and_price.self.price }}</td>
+                                                                            <td>
+                                                                                <div class="ln-group-divider"></div>
+                                                                                <button type="submit" name="submit" value="dec-{{ adding.self.id }}-{{ adding_flavor.self.id }}-{{ size_and_price.self.id }}">-</button>
+                                                                                <span>{{ size_and_price.qty }}</span>
+                                                                                <button type="submit" name="submit" value="inc-{{ adding.self.id }}-{{ adding_flavor.self.id }}-{{ size_and_price.self.id }}">+</button>
+                                                                            </td>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                {% else %}
                                                                     <td>
                                                                         <div class="ln-group-divider"></div>
-                                                                        <button type="submit" name="submit" value="dec-{{ adding.self.id }}-{{ adding_flavor.self.id }}-{{ size_and_price.self.id }}">-</button>
-                                                                        <span>{{ size_and_price.qty }}</span>
-                                                                        <button type="submit" name="submit" value="inc-{{ adding.self.id }}-{{ adding_flavor.self.id }}-{{ size_and_price.self.id }}">+</button>
-                                                                </td>
+                                                                        <button type="submit" name="submit" value="dec-{{ adding.self.id }}-{{ adding_flavor.self.id }}">-</button>
+                                                                        <span>{{ adding_flavor.qty }}</span>
+                                                                        <button type="submit" name="submit" value="inc-{{ adding.self.id }}-{{ adding_flavor.self.id }}">+</button>
+                                                                    </td>
                                                                 {% endif %}
-                                                            {% endfor %}
-                                                        {% else %}
-                                                            <td>
-                                                                <div class="ln-group-divider"></div>
-                                                                <button type="submit" name="submit" value="dec-{{ adding.self.id }}-{{ adding_flavor.self.id }}">-</button>
-                                                                <span>{{ adding_flavor.qty }}</span>
-                                                                <button type="submit" name="submit" value="inc-{{ adding.self.id }}-{{ adding_flavor.self.id }}">+</button>
-                                                        </td>
-                                                        {% endif %}
-                                                    </tr>
-                                                {% endfor %}
-                                            </table>
-                                        </li>
-                                    </ul>
-                                {% endfor %}
-                            {% endif %}
-                        </ul>
-                    </div>
-                    <a class="btn btn-secondary" role="button" href="{% url 'shopping_cart' %}">Show Cart</a>
-                    <br>
-                    Subtotals:
-                    price: <span>{{ item.subtotals.price }}  </span>
-                    products_qty: <span>{{ item.subtotals.products_qty }}  </span>
-                    <br>
-                    Totals:
-                    price: <span>{{ totals.price }}  </span>
-                    items_qty: <span>{{ totals.items_qty }}  </span>
-                    products_qty: <span>{{ totals.products_qty }}  </span>
-                </li>
-            </ul>
-        </li>
-    </ul>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    </table>
+                                                </li>
+                                            </ul>
+                                        {% endfor %}
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            <a class="btn btn-secondary" role="button" href="{% url 'shopping_cart' %}">Show Cart</a>
+                            <br>
+                            Subtotals:
+                            price: <span>{{ item.subtotals.price }}  </span>
+                            products_qty: <span>{{ item.subtotals.products_qty }}  </span>
+                            <br>
+                            Totals:
+                            price: <span>{{ totals.price }}  </span>
+                            items_qty: <span>{{ totals.items_qty }}  </span>
+                            products_qty: <span>{{ totals.products_qty }}  </span>
+                            {% endcomment %}
+                        </li>
+                    </ul>
+                {% endfor %}
+            </li>
+        </ul>
     </form>
 {% endblock %}

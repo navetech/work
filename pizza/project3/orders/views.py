@@ -224,21 +224,20 @@ def order(request, dish_id, type_id, flavor_id, size_id):
     order = get_order(user=request.user)
 
     order_dish = get_order_dish(order, dish_id, type_id, flavor_id, size_id)
-#    print(order_dish)
-#    order_dish_dict = {}
-#    order_dish.to_dict(order_dish_dict, language=language, currency=currency)
+    order_dish_dict = {}
+    order_dish.to_dict(order_dish_dict, language=language, currency=currency)
 
     context = {
         'settings': settings_dict,
         'user_settings': user_settings_dict,
         'languages': languages_dict_list,
         'currencies': currencies_dict_list,
-#        'dish': order_dish_dict,
+        'order_dish': order_dish_dict,
     }
 
-    return HttpResponse(f'{dish_id}/{type_id}/{flavor_id}/{size_id}')
+#    return HttpResponse(f'{dish_id}/{type_id}/{flavor_id}/{size_id}')
 
-#    return render(request, 'orders/order.html', context)
+    return render(request, 'orders/order.html', context)
 
 
 def put_columns_to_dishes(dishes):
