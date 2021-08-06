@@ -1,0 +1,52 @@
+{% if order_adding.flavors %}
+    <h6>{{ order_adding.menu.trait.short_name.translated.words }}</h6>
+    <h6>{{ order_adding.menu.trait.long_name.translated.words }}</h6>
+
+    <table style="width:100%">
+        <tr>
+            {% for order_size in order_adding.flavors_columns.sizes %}
+                <th></th>
+                <th></th>
+                <th>{{ order_size.menu.trait.short_name.translated.words }}</th>
+            {% endfor %}
+        </tr>
+
+        {% for order_flavor in order_adding.flavors %}
+            <tr>
+                <td>{{ order_flavor.menu.trait.short_name.translated.words }}</td>
+                <td>{{ order_flavor.menu.trait.long_name.translated.words }}</td>
+
+                {% for order_size in order_flavor.sizes %}
+                    <td>
+                        {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
+                        {{ order_size.menu.trait.quantity.converted.unit }}
+                    </td>
+
+                    <td>
+                        <div class="ln-group-divider"></div>
+                        <button type="submit" name="submit" value="dec-count">-</button>
+                        <span>{{ order_size.count }}</span>
+                        <button type="submit" name="submit" value="inc-coun">+</button>
+                    </td>
+
+                    <td>
+                        {{ order_size.menu.trait.short_name.translated.words }}
+                        {{ order_size.menu.trait.long_name.translated.words }}
+                    </td>
+                {% empty %}
+                    <td>
+                        {{ order_flavor.menu.trait.quantity.converted.value|floatformat:2 }}
+                        {{ order_flavor.menu.trait.quantity.converted.unit }}
+                    </td>
+
+                    <td>
+                        <div class="ln-group-divider"></div>
+                        <button type="submit" name="submit" value="dec-count">-</button>
+                        <span>{{ order_flavor.count }}</span>
+                        <button type="submit" name="submit" value="inc-coun">+</button>
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+{% endif %}

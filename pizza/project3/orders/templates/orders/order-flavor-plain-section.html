@@ -1,0 +1,18 @@
+<table>
+    <tr>
+        <td>
+            {{ order_flavor.menu.trait.short_name.translated.words }}
+            {{ order_flavor.menu.trait.long_name.translated.words }}
+        </td>
+        <td>
+            {{ order_flavor.menu.trait.quantity.converted.value|floatformat:2 }}
+            {{ order_flavor.menu.trait.quantity.converted.unit }}
+        </td>
+        <td>
+            <div class="ln-group-divider"></div>
+            <button type="submit" name="submit" value="dec-count">-</button>
+            <span>{{ order_flavor.count }}</span>
+            <button type="submit" name="submit" value="inc-coun">+</button>
+        </td>
+    </tr>
+</table>
