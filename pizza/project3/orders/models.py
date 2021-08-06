@@ -398,7 +398,45 @@ class Dish(MenuCommonFields):
         return
 
 
-class OrderSize(CommonFields):
+class OrderBasicCommonFields(CommonFields):
+    count = models.IntegerField(default=0)
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return (
+            f'{self.count}, '
+            f'{CommonFields.__str__(self)}'
+        )
+
+    def to_dict(self, dict, **settings):
+        CommonFields.to_dict(self, dict, **settings)
+        dict['count'] = self.count
+
+        return
+
+
+class OrderCommonFields(OrderBasicCommonFields):
+    plain = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return (
+            f'{self.plain}, '
+            f'{OrderBasicCommonFields.__str__(self)}'
+        )
+
+    def to_dict(self, dict, **settings):
+        OrderBasicCommonFields.to_dict(self, dict, **settings)
+        dict['plain'] = self.plain
+
+        return
+
+
+class OrderSize(OrderBasicCommonFields):
     menu = models.ForeignKey(
         Size, blank=True, null=True, on_delete=models.CASCADE,
         related_name='menu_OrderSize_related'
@@ -407,11 +445,11 @@ class OrderSize(CommonFields):
     def __str__(self):
         return (
             f'{self.menu}, '
-            f'{CommonFields.__str__(self)}'
+            f'{OrderBasicCommonFields.__str__(self)}'
         )
 
     def to_dict(self, dict, **settings):
-        CommonFields.to_dict(self, dict, **settings)
+        OrderBasicCommonFields.to_dict(self, dict, **settings)
 
         to_dict(self.menu, dict, key='menu', **settings)
 
@@ -439,7 +477,7 @@ def get_order_size(order_object, size_id):
     return None
 
 
-class OrderAdding(CommonFields):
+class OrderAdding(OrderCommonFields):
     flavors = models.ManyToManyField(
         'OrderFlavor', blank=True,
         related_name='flavors_OrderAdding_related'
@@ -460,11 +498,11 @@ class OrderAdding(CommonFields):
             f'{self.flavors}, '
             f'{self.sizes}, '
             f'{self.menu}, '
-            f'{CommonFields.__str__(self)}'
+            f'{OrderCommonFields.__str__(self)}'
         )
 
     def to_dict(self, dict, **settings):
-        CommonFields.to_dict(self, dict, **settings)
+        OrderCommonFields.to_dict(self, dict, **settings)
 
         dict['flavors'] = to_dict_list(self.flavors, **settings)
         dict['sizes'] = to_dict_list(self.sizes, **settings)
@@ -474,7 +512,7 @@ class OrderAdding(CommonFields):
         return
 
 
-class OrderFlavor(CommonFields):
+class OrderFlavor(OrderCommonFields):
     addings = models.ManyToManyField(
         'OrderAdding', blank=True,
         related_name='addings_OrderFlavor_related'
@@ -495,11 +533,11 @@ class OrderFlavor(CommonFields):
             f'{self.addings}, '
             f'{self.sizes}, '
             f'{self.menu}, '
-            f'{CommonFields.__str__(self)}'
+            f'{OrderCommonFields.__str__(self)}'
         )
 
     def to_dict(self, dict, **settings):
-        CommonFields.to_dict(self, dict, **settings)
+        OrderCommonFields.to_dict(self, dict, **settings)
 
         dict['addings'] = to_dict_list(self.addings, **settings)
         dict['sizes'] = to_dict_list(self.sizes, **settings)
@@ -540,7 +578,7 @@ def get_order_flavor(order_object, flavor_id, size_id):
     return None
 
 
-class OrderType(CommonFields):
+class OrderType(OrderCommonFields):
     flavors = models.ManyToManyField(
         OrderFlavor, blank=True,
         related_name='flavors_OrderType_related'
@@ -567,11 +605,11 @@ class OrderType(CommonFields):
             f'{self.addings}, '
             f'{self.sizes}, '
             f'{self.menu}, '
-            f'{CommonFields.__str__(self)}'
+            f'{OrderCommonFields.__str__(self)}'
         )
 
     def to_dict(self, dict, **settings):
-        CommonFields.to_dict(self, dict, **settings)
+        OrderCommonFields.to_dict(self, dict, **settings)
 
         dict['flavors'] = to_dict_list(self.flavors, **settings)
         dict['addings'] = to_dict_list(self.addings, **settings)
@@ -620,7 +658,7 @@ def get_order_type(order_object, type_id, flavor_id, size_id):
     return None
 
 
-class OrderDish(CommonFields):
+class OrderDish(OrderCommonFields):
     types = models.ManyToManyField(
         OrderType, blank=True,
         related_name='types_OrderDish_related'
@@ -653,11 +691,11 @@ class OrderDish(CommonFields):
             f'{self.addings}, '
             f'{self.sizes}, '
             f'{self.menu}, '
-            f'{CommonFields.__str__(self)}'
+            f'{OrderCommonFields.__str__(self)}'
         )
 
     def to_dict(self, dict, **settings):
-        CommonFields.to_dict(self, dict, **settings)
+        OrderCommonFields.to_dict(self, dict, **settings)
 
         dict['types'] = to_dict_list(self.types, **settings)
         dict['flavors'] = to_dict_list(self.flavors, **settings)
@@ -667,6 +705,23 @@ class OrderDish(CommonFields):
         to_dict(self.menu, dict, key='menu', **settings)
 
         return
+
+
+def create_order_sizes(order_object, menu_object):
+    print('create_order_sizes')
+    if not order_object:
+        return False
+    if not menu_object:
+        return False
+
+    for size in menu_object.sizes.all():
+        order_size = OrderSize(menu=size, count=0)
+        order_size.save()
+
+        order_object.sizes.add(order_size)
+        order_object.save()
+
+    return True
 
 
 def create_order_size(order_object, menu_object, size_id):
@@ -684,13 +739,59 @@ def create_order_size(order_object, menu_object, size_id):
     if size not in menu_object.sizes.all():
         return None
 
-    order_size = OrderSize(menu=size)
+    order_size = OrderSize(menu=size, count=1)
     order_size.save()
 
     order_object.sizes.add(order_size)
     order_object.save()
 
     return order_size
+
+
+def create_order_flavors(order_object, menu_object):
+    print('create_order_flavors')
+    if not order_object:
+        return False
+    if not menu_object:
+        return False
+
+    for flavor in menu_object.flavors.all():
+        order_flavor = OrderFlavor(menu=flavor, count=0, plain=False)
+        order_flavor.save()
+
+        create_order_addings(order_flavor, flavor)
+        order_flavor.save()
+
+        create_order_sizes(order_flavor, flavor)
+        order_flavor.save()
+
+        order_object.flavors.add(order_flavor)
+        order_object.save()
+
+    return True
+
+
+def create_order_addings(order_object, menu_object):
+    print('create_order_addings')
+    if not order_object:
+        return False
+    if not menu_object:
+        return False
+
+    for adding in menu_object.addings.all():
+        order_adding = OrderAdding(menu=adding, count=0, plain=False)
+        order_adding.save()
+
+        create_order_flavors(order_adding, adding)
+        order_adding.save()
+
+        create_order_sizes(order_adding, adding)
+        order_adding.save()
+
+        order_object.addings.add(order_adding)
+        order_object.save()
+
+    return True
 
 
 def create_order_flavor(order_object, menu_object, flavor_id, size_id):
@@ -708,11 +809,19 @@ def create_order_flavor(order_object, menu_object, flavor_id, size_id):
     if flavor not in menu_object.flavors.all():
         return None
 
-    order_flavor = OrderFlavor(menu=flavor)
+    order_flavor = OrderFlavor(menu=flavor, count=1, plain=False)
     order_flavor.save()
 
     if size_id is not None:
         create_order_size(order_flavor, flavor, size_id)
+    else:
+        order_flavor.plain = True
+
+    order_flavor.save()
+
+#    if flavor.addings_count.max != 0:
+    create_order_addings(order_flavor, flavor)
+    order_flavor.save()
 
     order_object.flavors.add(order_flavor)
     order_object.save()
@@ -735,13 +844,21 @@ def create_order_type(order_object, menu_object, type_id, flavor_id, size_id):
     if type not in menu_object.types.all():
         return None
 
-    order_type = OrderType(menu=type)
+    order_type = OrderType(menu=type, count=1, plain=False)
     order_type.save()
 
     if flavor_id is not None:
         create_order_flavor(order_type, type, flavor_id, size_id)
     elif size_id is not None:
         create_order_size(order_type, type, size_id)
+    else:
+        order_type.plain = True
+
+    order_type.save()
+
+#    if type.addings_count.max != 0:
+    create_order_addings(order_type, type)
+    order_type.save()
 
     order_object.types.add(order_type)
     order_object.save()
@@ -759,7 +876,7 @@ def create_order_dish(order, dish_id, type_id, flavor_id, size_id):
     if not dish:
         return None
 
-    order_dish = OrderDish(menu=dish)
+    order_dish = OrderDish(menu=dish, count=1, plain=False)
     order_dish.save()
 
     if type_id is not None:
@@ -768,6 +885,14 @@ def create_order_dish(order, dish_id, type_id, flavor_id, size_id):
         create_order_flavor(order_dish, dish, flavor_id, size_id)
     elif size_id is not None:
         create_order_size(order_dish, dish, size_id)
+    else:
+        order_dish.plain = True
+
+    order_dish.save()
+
+    if dish.addings_count and dish.addings_count.max:
+        create_order_addings(order_dish, dish)
+        order_dish.save()
 
     order.dishes.add(order_dish)
     order.save()
