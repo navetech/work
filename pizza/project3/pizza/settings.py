@@ -30,6 +30,12 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+MEDIA_ROOT = ''
+
+STATICFILES_DIRS = [
+    MEDIA_ROOT + "uploads/static/",
+]
+
 INSTALLED_APPS = [
     'languages',
     'currencies',

@@ -1,6 +1,15 @@
+{% load static %}
+
 <li class="list-group-item ln-container01">
     <table style="width:100%">
         <tr>
+            <td>
+                <figure>
+                    <img src="{% static order_size.menu.trait.img.path %}" alt="{{ order_size.menu.trait.long_name.translated.words }} Image">
+                    <figcaption>{{ order_size.menu.trait.long_name.translated.words }}</figcaption>
+                </figure>
+            </td>
+
             <td>
                 {{ order_size.menu.trait.short_name.translated.words }}
                 {{ order_size.menu.trait.long_name.translated.words }}

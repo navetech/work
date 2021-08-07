@@ -24,11 +24,17 @@ class Trait(models.Model):
         related_name='quantity_Trait_related'
     )
 
+    img = models.ImageField(
+        upload_to='uploads/static/images',
+        default=None, blank=True, null=True
+    )
+
     def __str__(self):
         return (
             f'{self.short_name}, '
             f'{self.long_name}, '
-            f'{self.quantity}'
+            f'{self.quantity}, '
+            f'{self.img}'
         )
 
     def to_dict(self, dict, **settings):
@@ -37,5 +43,13 @@ class Trait(models.Model):
         to_dict(self.short_name, dict, key='short_name', **settings)
         to_dict(self.long_name, dict, key='long_name', **settings)
         to_dict(self.quantity, dict, key='quantity', **settings)
+
+        dict['img'] = {}
+        if self.img:
+            dict['img']['name'] = self.img.name
+            dict['img']['path'] = self.img.path
+            dict['img']['url'] = self.img.url
+            dict['img']['height'] = self.img.height
+            dict['img']['width'] = self.img.width
 
         return
