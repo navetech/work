@@ -5,11 +5,11 @@
 
 
 {% block title %}
-    Order
+    {{ settings.order_page_title.translated.words }}
 {% endblock %}
 
 {% block main %}
-    <h3>Order</h3>
+    <h3>{{ settings.order_page_header.translated.words }}</h3>
 
     <form action="{% url 'order' order_dish.id None None None %}" method="post">
         {% csrf_token %}
@@ -36,6 +36,11 @@
                     {% include "orders/order-adding-section.html" %}
                 {% endfor %}
             {% endif %}
+
+            <li class="list-group-item ln-container01">
+                <a class="btn btn-secondary" role="button" href="{% url 'shopping_cart' %}">Show Cart</a>
+            </li>
+
         </ul>
     </form>
 {% endblock %}

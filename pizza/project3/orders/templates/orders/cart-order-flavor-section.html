@@ -1,0 +1,15 @@
+{% for order_size in order_flavor.sizes %}
+    {% include "orders/cart-order-size-section.html" %}
+{% endfor %}
+
+{% if order_flavor.plain %}
+    {% include "orders/cart-order-flavor-plain-section.html" %}
+{% endif %}
+
+{% comment %}
+{% if order_flavor.menu.addings_count.max != 0 %}
+    {% for order_adding in order_flavor.addings %}
+        {% include "orders/order-adding-section.html" %}
+    {% endfor %}
+{% endif %}
+{% endcomment %}

@@ -21,4 +21,12 @@ urlpatterns = [
         "order/<dish_id>/<type_id>/<flavor_id>/<size_id>", views.order,
         name="order"
     ),
+    path("shopping-cart", views.shopping_cart, name="shopping_cart"),
+    path('checkout', views.checkout, name='checkout'),
+    path(
+        'create-checkout-session',
+        views.create_checkout_session, name='create_checkout_session'
+    ),
+    path('success', views.success, name='success'),
+    path('cancel', views.cancel, name='cancel'),
 ]

@@ -37,12 +37,42 @@ class Setting(models.Model):
         related_name='menu_page_header_Setting_related'
     )
 
+    order_page_title = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='order_page_title_Setting_related'
+    )
+
+    order_page_header = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='order_page_header_Setting_related'
+    )
+
+    cart_page_title = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='cart_page_title_Setting_related'
+    )
+
+    cart_page_header = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='cart_page_header_Setting_related'
+    )
+
+    cart_page_items_header = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='cart_page_items_header_Setting_related'
+    )
+
     def __str__(self):
         return (
             f'{self.product_title}, '
             f'{self.product_name}, '
             f'{self.menu_page_title}, '
-            f'{self.menu_page_header}'
+            f'{self.menu_page_header}, '
+            f'{self.order_page_title}, '
+            f'{self.order_page_header}, '
+            f'{self.cart_page_title}, '
+            f'{self.cart_page_header}, '
+            f'{self.cart_page_items_header}'
         )
 
     def to_dict(self, dict, **settings):
@@ -55,6 +85,22 @@ class Setting(models.Model):
         )
         to_dict(
             self.menu_page_header, dict, key='menu_page_header', **settings
+        )
+        to_dict(
+            self.order_page_title, dict, key='order_page_title', **settings
+        )
+        to_dict(
+            self.order_page_header, dict, key='order_page_header', **settings
+        )
+        to_dict(
+            self.cart_page_title, dict, key='cart_page_title', **settings
+        )
+        to_dict(
+            self.cart_page_header, dict, key='cart_page_header', **settings
+        )
+        to_dict(
+            self.cart_page_items_header, dict,
+            key='cart_page_items_header', **settings
         )
 
         return
@@ -900,8 +946,14 @@ def create_order_dish(order, dish_id, type_id, flavor_id, size_id):
     return order_dish
 
 
+def get_order_dishes(order):
+    if not order:
+        return []
+
+    return order.dishes.all()
+
+
 def get_order_dish(order, dish_id, type_id, flavor_id, size_id):
-    print('get_order_dish')
     if not order:
         return None
 

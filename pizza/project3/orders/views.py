@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+# from django.http import HttpResponse
 # from django.shortcuts import render
 
 # Create your views here.
@@ -23,6 +23,10 @@ from .models import UserSetting
 from .models import Dish
 from .models import get_order
 from .models import get_order_dish
+
+from django.http import JsonResponse
+
+import stripe
 
 
 def index(request):
@@ -237,9 +241,115 @@ def order(request, dish_id, type_id, flavor_id, size_id):
         'order_dish': order_dish_dict,
     }
 
-#    return HttpResponse(f'{dish_id}/{type_id}/{flavor_id}/{size_id}')
-
     return render(request, 'orders/order.html', context)
+
+
+def shopping_cart(request):
+    """
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("index"))
+    return HttpResponse(f'Shopping Cart')
+    """
+
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('index'))
+
+    user_settings = UserSetting.get_first(user=request.user)
+    language = None
+    currency = None
+    user_settings_dict = {}
+    if user_settings:
+        if user_settings.language:
+            language = user_settings.language
+
+        if user_settings.currency:
+            currency = user_settings.currency
+
+        user_settings.to_dict(user_settings_dict, language=language)
+
+    settings = Setting.objects.first()
+    settings_dict = {}
+    if settings:
+        settings.to_dict(settings_dict, language=language)
+
+    languages_dict_list = to_dict_list(
+        Language.objects, 'code__sort_number'
+    )
+    currencies_dict_list = to_dict_list(
+        Currency.objects, 'code__sort_number', language=language
+    )
+
+    order = get_order(user=request.user)
+
+    order_dishes_dict_list = to_dict_list(
+        order.dishes, language=language, currency=currency
+    )
+
+#    put_columns_to_order_dishes(order_dishes_dict_list)
+
+    context = {
+        'settings': settings_dict,
+        'user_settings': user_settings_dict,
+        'languages': languages_dict_list,
+        'currencies': currencies_dict_list,
+        'order_dishes': order_dishes_dict_list,
+    }
+
+    return render(request, 'orders/cart.html', context)
+
+
+def checkout(request):
+    if request.method == "GET":
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(reverse("index"))
+        return render(request, "orders/checkout.html")
+
+    return HttpResponseRedirect(reverse("index"))
+
+
+def success(request):
+    context = {}
+    return render(request, 'orders/success.html', context)
+
+
+def cancel(request):
+    context = {}
+    return render(request, 'orders/cancel.html', context)
+
+
+# This is a sample test API key.
+# Sign in to see examples pre-filled with your key.
+stripe.api_key = 'sk_test_4eC39HqLyjWDarjtT1zdp7dc'
+
+
+YOUR_DOMAIN = 'http://localhost:4242'
+
+
+def create_checkout_session(request):
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[
+                {
+                    'price_data': {
+                        'currency': 'usd',
+                        # 'unit_amount': 2000,
+                        'unit_amount': int(float(request.read()) * 100),
+                        'product_data': {
+                            'name': 'Stubborn Attachments',
+                            'images': ['https://i.imgur.com/EHyR2nP.png'],
+                        },
+                    },
+                    'quantity': 1,
+                },
+            ],
+            mode='payment',
+            success_url=YOUR_DOMAIN + '/success',
+            cancel_url=YOUR_DOMAIN + '/cancel',
+        )
+        return JsonResponse({'id': checkout_session.id})
+    except Exception as e:
+        return JsonResponse(error=str(e))
 
 
 def put_columns_to_dishes(dishes):
@@ -381,9 +491,3 @@ def put_order_sizes(columns, order_table):
 
         if not inserted:
             columns.append(size)
-
-
-"""
-def get_order_dish(user, dish_id, type_id, flavor_id, size_id):
-    pass
-"""
