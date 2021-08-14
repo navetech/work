@@ -298,22 +298,86 @@ def shopping_cart(request):
     return render(request, 'orders/cart.html', context)
 
 
-def checkout(request):
-    if request.method == "GET":
-        if not request.user.is_authenticated:
-            return HttpResponseRedirect(reverse("index"))
-        return render(request, "orders/checkout.html")
+def get_pages_basic_data(
+        request, language, currency,
+        settings_dict, user_settings_dict
+        ):
 
-    return HttpResponseRedirect(reverse("index"))
+    user_settings = UserSetting.get_first(user=request.user)
+    if user_settings:
+        if user_settings.language:
+            language = user_settings.language
+
+        if user_settings.currency:
+            currency = currency
+            currency = user_settings.currency
+
+        user_settings.to_dict(user_settings_dict, language=language)
+
+    settings = Setting.objects.first()
+    if settings:
+        settings.to_dict(settings_dict, language=language)
 
 
 def success(request):
-    context = {}
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('index'))
+
+    language = None
+    currency = None
+    settings_dict = {}
+    user_settings_dict = {}
+    get_pages_basic_data(
+        request, language, currency,
+        settings_dict, user_settings_dict
+    )
+
+    languages_dict_list = to_dict_list(
+        Language.objects, 'code__sort_number'
+    )
+
+    currencies_dict_list = to_dict_list(
+        Currency.objects, 'code__sort_number', language=language
+    )
+
+    context = {
+        'settings': settings_dict,
+        'user_settings': user_settings_dict,
+        'languages': languages_dict_list,
+        'currencies': currencies_dict_list,
+    }
+
     return render(request, 'orders/success.html', context)
 
 
 def cancel(request):
-    context = {}
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('index'))
+
+    language = None
+    currency = None
+    settings_dict = {}
+    user_settings_dict = {}
+    get_pages_basic_data(
+        request, language, currency,
+        settings_dict, user_settings_dict
+    )
+
+    languages_dict_list = to_dict_list(
+        Language.objects, 'code__sort_number'
+    )
+
+    currencies_dict_list = to_dict_list(
+        Currency.objects, 'code__sort_number', language=language
+    )
+
+    context = {
+        'settings': settings_dict,
+        'user_settings': user_settings_dict,
+        'languages': languages_dict_list,
+        'currencies': currencies_dict_list,
+    }
+
     return render(request, 'orders/cancel.html', context)
 
 

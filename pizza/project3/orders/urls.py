@@ -22,7 +22,6 @@ urlpatterns = [
         name="order"
     ),
     path("shopping-cart", views.shopping_cart, name="shopping_cart"),
-    path('checkout', views.checkout, name='checkout'),
     path(
         'create-checkout-session',
         views.create_checkout_session, name='create_checkout_session'
