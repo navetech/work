@@ -148,6 +148,8 @@ def menu(request):
         'dishes': dishes_dict_list,
     }
 
+    request.session['page'] = reverse('menu')
+
     return render(request, 'orders/menu.html', context)
 
 
@@ -165,7 +167,7 @@ def select_language(request, language_id):
 
     user_settings.save()
 
-    return HttpResponseRedirect(reverse("index"))
+    return HttpResponseRedirect(request.session['page'])
 
 
 def select_currency(request, currency_id):
@@ -182,7 +184,7 @@ def select_currency(request, currency_id):
 
     user_settings.save()
 
-    return HttpResponseRedirect(reverse("index"))
+    return HttpResponseRedirect(request.session['page'])
 
 
 def order(request, dish_id, type_id, flavor_id, size_id):
@@ -241,6 +243,11 @@ def order(request, dish_id, type_id, flavor_id, size_id):
         'order_dish': order_dish_dict,
     }
 
+    request.session['page'] = reverse(
+        'order',
+        args=[dish_id, type_id, flavor_id, size_id]
+    )
+
     return render(request, 'orders/order.html', context)
 
 
@@ -295,6 +302,8 @@ def shopping_cart(request):
         'order_dishes': order_dishes_dict_list,
     }
 
+    request.session['page'] = reverse('shopping_cart')
+
     return render(request, 'orders/cart.html', context)
 
 
@@ -347,6 +356,8 @@ def success(request):
         'currencies': currencies_dict_list,
     }
 
+    request.session['page'] = reverse('success')
+
     return render(request, 'orders/success.html', context)
 
 
@@ -377,6 +388,8 @@ def cancel(request):
         'languages': languages_dict_list,
         'currencies': currencies_dict_list,
     }
+
+    request.session['page'] = reverse('cancel')
 
     return render(request, 'orders/cancel.html', context)
 
