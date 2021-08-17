@@ -26,7 +26,7 @@ def to_dict(object, dict, key, **settings):
 
 
 class Phrase(models.Model):
-    words = models.CharField(max_length=256, blank=True)
+    words = models.TextField(blank=True)
 
     languages = models.ManyToManyField(
         Iso_639_LanguageCode, blank=True,

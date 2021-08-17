@@ -2,10 +2,10 @@
 
 
 {% block title %}
-Checkout Canceled
+    {{ settings.cancel_page_title.translated.words }}
 {% endblock %}
 
 {% block main %}
-    <h1>Checkout Canceled</h1>
-    <h2>Forgot to add something to your cart? Shop around then come back to pay!</h2>
+    <h3>{{ settings.cancel_page_header.translated.words }}</h3>
+    <h5>{{ settings.cancel_page_contents.translated.words }}</h5>
 {% endblock %}

@@ -62,6 +62,41 @@ class Setting(models.Model):
         related_name='cart_page_items_header_Setting_related'
     )
 
+    success_page_title = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='success_page_title_Setting_related'
+    )
+
+    success_page_header = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='success_page_header_Setting_related'
+    )
+
+    success_page_contents_01 = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='success_page_contents_01_Setting_related'
+    )
+
+    success_page_contents_02 = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='success_page_contents_02_Setting_related'
+    )
+
+    cancel_page_title = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='cancel_page_title_Setting_related'
+    )
+
+    cancel_page_header = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='cancel_page_header_Setting_related'
+    )
+
+    cancel_page_contents = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='cancel_page_contents_Setting_related'
+    )
+
     def __str__(self):
         return (
             f'{self.product_title}, '
@@ -72,7 +107,14 @@ class Setting(models.Model):
             f'{self.order_page_header}, '
             f'{self.cart_page_title}, '
             f'{self.cart_page_header}, '
-            f'{self.cart_page_items_header}'
+            f'{self.cart_page_items_header}, '
+            f'{self.success_page_title}, '
+            f'{self.success_page_header}, '
+            f'{self.success_page_contents_01}, '
+            f'{self.success_page_contents_02}, '
+            f'{self.cancel_page_title}, '
+            f'{self.cancel_page_header}, '
+            f'{self.cancel_page_contents}'
         )
 
     def to_dict(self, dict, **settings):
@@ -101,6 +143,32 @@ class Setting(models.Model):
         to_dict(
             self.cart_page_items_header, dict,
             key='cart_page_items_header', **settings
+        )
+        to_dict(
+            self.success_page_title,
+            dict, key='success_page_title', **settings
+        )
+        to_dict(
+            self.success_page_header,
+            dict, key='success_page_header', **settings
+        )
+        to_dict(
+            self.success_page_contents_01, dict,
+            key='success_page_contents_01', **settings
+        )
+        to_dict(
+            self.success_page_contents_02, dict,
+            key='success_page_contents_02', **settings
+        )
+        to_dict(
+            self.cancel_page_title, dict, key='cancel_page_title', **settings
+        )
+        to_dict(
+            self.cancel_page_header, dict, key='cancel_page_header', **settings
+        )
+        to_dict(
+            self.cancel_page_contents, dict,
+            key='cancel_page_contents', **settings
         )
 
         return
