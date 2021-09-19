@@ -556,6 +556,9 @@ class OrderSize(OrderBasicCommonFields):
         related_name='menu_OrderSize_related'
     )
 
+    def cancel(self):
+        self.delete()
+
     def __str__(self):
         return (
             f'{self.menu}, '
@@ -607,6 +610,12 @@ class OrderAdding(OrderCommonFields):
         related_name='menu_OrderAdding_related'
     )
 
+    def cancel(self):
+        cancel_order_flavors(self)
+        cancel_order_sizes(self)
+
+        self.delete()
+
     def __str__(self):
         return (
             f'{self.flavors}, '
@@ -641,6 +650,12 @@ class OrderFlavor(OrderCommonFields):
         Flavor, blank=True, null=True, on_delete=models.CASCADE,
         related_name='menu_OrderFlavor_related'
     )
+
+    def cancel(self):
+        cancel_order_addings(self)
+        cancel_order_sizes(self)
+
+        self.delete()
 
     def __str__(self):
         return (
@@ -712,6 +727,13 @@ class OrderType(OrderCommonFields):
         Type, blank=True, null=True, on_delete=models.CASCADE,
         related_name='menu_OrderType_related'
     )
+
+    def cancel(self):
+        cancel_order_flavors(self)
+        cancel_order_addings(self)
+        cancel_order_sizes(self)
+
+        self.delete()
 
     def __str__(self):
         return (
@@ -798,6 +820,14 @@ class OrderDish(OrderCommonFields):
         related_name='menu_OrderDish_related'
     )
 
+    def cancel(self):
+        cancel_order_types(self)
+        cancel_order_flavors(self)
+        cancel_order_addings(self)
+        cancel_order_sizes(self)
+
+        self.delete()
+
     def __str__(self):
         return (
             f'{self.types}, '
@@ -819,6 +849,36 @@ class OrderDish(OrderCommonFields):
         to_dict(self.menu, dict, key='menu', **settings)
 
         return
+
+
+def cancel_order_sizes(order_object):
+    if order_object:
+        for order_size in order_object.sizes.all():
+            order_size.cancel()
+
+
+def cancel_order_addings(order_object):
+    if order_object:
+        for order_adding in order_object.addings.all():
+            order_adding.cancel()
+
+
+def cancel_order_flavors(order_object):
+    if order_object:
+        for order_flavor in order_object.flavors.all():
+            order_flavor.cancel()
+
+
+def cancel_order_types(order_object):
+    if order_object:
+        for order_type in order_object.types.all():
+            order_type.cancel()
+
+
+def cancel_order_dishes(order_object):
+    if order_object:
+        for order_dish in order_object.dishes.all():
+            order_dish.cancel()
 
 
 def create_order_sizes(order_object, menu_object):
@@ -1081,6 +1141,11 @@ class Order(CommonFields):
     )
 
     date_time = models.DateTimeField(auto_now=True)
+
+    def cancel(self):
+        cancel_order_dishes(self)
+
+        self.delete()
 
     def __str__(self):
         return (

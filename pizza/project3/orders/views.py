@@ -21,6 +21,7 @@ from .models import Setting
 from .models import UserSetting
 
 from .models import Dish
+from .models import Order
 from .models import get_order
 from .models import get_order_dish
 
@@ -305,6 +306,23 @@ def shopping_cart(request):
     request.session['page'] = reverse('shopping_cart')
 
     return render(request, 'orders/cart.html', context)
+
+
+def clear_shopping_cart(request):
+    """
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("index"))
+    return HttpResponse(f'Shopping Cart')
+    """
+
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('index'))
+
+    order = Order.objects.filter(user=request.user).first()
+    if order:
+        order.cancel()
+
+    return HttpResponseRedirect(reverse('menu'))
 
 
 def get_pages_basic_data(

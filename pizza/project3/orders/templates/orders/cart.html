@@ -33,7 +33,7 @@
 
     <button type="button" id="checkout-button" class="btn btn-secondary">Checkout</button>
 
-    <button type="button" id="clear-cart-button" class="btn btn-secondary">Clear Cart</button>
+    <a class="btn btn-secondary" href="{% url 'clear_shopping_cart' %}" role="button">Clear Cart</a>
 
     <h4>{{ settings.cart_page_items_header.translated.words }}</h4>
 

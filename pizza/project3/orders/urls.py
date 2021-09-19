@@ -23,6 +23,10 @@ urlpatterns = [
     ),
     path("shopping-cart", views.shopping_cart, name="shopping_cart"),
     path(
+        'clear-shopping-cart',
+        views.clear_shopping_cart, name='clear_shopping_cart'
+    ),
+    path(
         'create-checkout-session',
         views.create_checkout_session, name='create_checkout_session'
     ),
