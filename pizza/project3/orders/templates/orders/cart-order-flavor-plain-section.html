@@ -3,7 +3,11 @@
         <tr>
             <td>
                 {{ order_flavor.menu.trait.short_name.translated.words }}
-                {{ order_flavor.menu.trait.long_name.translated.words }}
+
+                {% include "orders/cart-order-section.html" %}
+
+                    {{ order_flavor.menu.trait.long_name.translated.words }}
+                </a>
             </td>
 
             <td>

@@ -1,11 +1,13 @@
-{% load static %}
-
 <li class="list-group-item ln-container01">
     <table style="width:100%">
         <tr>
             <td>
                 {{ order_size.menu.trait.short_name.translated.words }}
-                {{ order_size.menu.trait.long_name.translated.words }}
+
+                {% include "orders/cart-order-section.html" %}
+
+                    {{ order_size.menu.trait.long_name.translated.words }}
+                </a>
             </td>
 
             <td>
