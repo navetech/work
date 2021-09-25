@@ -15,30 +15,30 @@
 {% block main %}
     <h3>{{ settings.cart_page_header.translated.words }}</h3>
 
-    <table style="width:100%" class="table">
-        <tr>
-            <th>Total Price</th>
-            <th>Items Qty</th>
-            <th>Dishes Qty</th>
-        <tr>
-        <tr>
-            <td>
-                <span id="total-price">{{order_price.value|floatformat:2 }}</span>
-                {{order_price.unit }}
-            </td>
-            <td>{{ order.totals.items_qty}}</td>
-            <td>{{ order.totals.products_qty}}</td>
-        <tr>
-    </table>
+    {% if order.dishes %}
+        <table style="width:100%" class="table">
+            <tr>
+                <th>Total Price</th>
+            <tr>
+            <tr>
+                <td>
+                    <span id="total-price">{{order.price.value|floatformat:2 }}</span>
+                    {{ order.price.unit }}
+                </td>
+            <tr>
+        </table>
 
-    <button type="button" id="checkout-button" class="btn btn-secondary">Checkout</button>
+        <button type="button" id="checkout-button" class="btn btn-secondary">Checkout</button>
 
-    <a class="btn btn-secondary" href="{% url 'clear_shopping_cart' %}" role="button">Clear Cart</a>
+        <a class="btn btn-secondary" href="{% url 'clear_shopping_cart' %}" role="button">Clear Cart</a>
 
-    <h4>{{ settings.cart_page_items_header.translated.words }}</h4>
+        <h4>{{ settings.cart_page_items_header.translated.words }}</h4>
+    {% else %}
+        <h4>{{ settings.cart_page_no_items_header.translated.words }}</h4>
+    {% endif %}
 
     <ul class="list-group pt-4">
-        {% for order_dish in order_dishes %}
+        {% for order_dish in order.dishes %}
             {% for order_type in order_dish.types %}
                 {% include "orders/cart-order-type-section.html" %}
             {% endfor %}

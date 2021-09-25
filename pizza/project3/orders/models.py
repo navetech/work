@@ -62,6 +62,11 @@ class Setting(models.Model):
         related_name='cart_page_items_header_Setting_related'
     )
 
+    cart_page_no_items_header = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='cart_page_no_items_header_Setting_related'
+    )
+
     success_page_title = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.CASCADE,
         related_name='success_page_title_Setting_related'
@@ -108,6 +113,7 @@ class Setting(models.Model):
             f'{self.cart_page_title}, '
             f'{self.cart_page_header}, '
             f'{self.cart_page_items_header}, '
+            f'{self.cart_page_no_items_header}, '
             f'{self.success_page_title}, '
             f'{self.success_page_header}, '
             f'{self.success_page_contents_01}, '
@@ -143,6 +149,10 @@ class Setting(models.Model):
         to_dict(
             self.cart_page_items_header, dict,
             key='cart_page_items_header', **settings
+        )
+        to_dict(
+            self.cart_page_no_items_header, dict,
+            key='cart_page_no_items_header', **settings
         )
         to_dict(
             self.success_page_title,
@@ -851,6 +861,40 @@ class OrderDish(OrderCommonFields):
         return
 
 
+class Order(CommonFields):
+    dishes = models.ManyToManyField(
+        OrderDish, blank=True,
+        related_name='dishes_Order_related'
+    )
+
+    user = models.ForeignKey(
+        User, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='user_Order_related'
+    )
+
+    date_time = models.DateTimeField(auto_now=True)
+
+    def cancel(self):
+        cancel_order_dishes(self)
+
+        self.delete()
+
+    def __str__(self):
+        return (
+            f'{self.dishes}, '
+            f'{self.user}, '
+            f'{self.date_time}, '
+            f'{CommonFields.__str__(self)}'
+        )
+
+    def to_dict(self, dict, **settings):
+        CommonFields.to_dict(self, dict, **settings)
+
+        dict['dishes'] = to_dict_list(self.dishes, **settings)
+
+        return
+
+
 def cancel_order_sizes(order_object):
     if order_object:
         for order_size in order_object.sizes.all():
@@ -1127,33 +1171,6 @@ def get_order_dish(order, dish_id, type_id, flavor_id, size_id):
     order_dish = create_order_dish(order, dish_id, type_id, flavor_id, size_id)
 
     return order_dish
-
-
-class Order(CommonFields):
-    dishes = models.ManyToManyField(
-        OrderDish, blank=True,
-        related_name='dishes_Order_related'
-    )
-
-    user = models.ForeignKey(
-        User, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='user_Order_related'
-    )
-
-    date_time = models.DateTimeField(auto_now=True)
-
-    def cancel(self):
-        cancel_order_dishes(self)
-
-        self.delete()
-
-    def __str__(self):
-        return (
-            f'{self.dishes}, '
-            f'{self.user}, '
-            f'{self.date_time}, '
-            f'{CommonFields.__str__(self)}'
-        )
 
 
 def create_order(user):
