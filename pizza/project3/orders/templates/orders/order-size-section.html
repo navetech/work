@@ -22,9 +22,12 @@
 
             <td>
                 <div class="ln-group-divider"></div>
-                <button type="submit" name="submit" value="dec-count">-</button>
-                <span>{{ order_size.count }}</span>
-                <button type="submit" name="submit" value="inc-coun">+</button>
+                <form action="{% url 'order' order_dish.menu.id|default:None order_type.menu.id|default:None order_flavor.menu.id|default:None order_size.menu.id|default:None %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="submit" value="dec-size-count">-</button>
+                    <span>{{ order_size.count }}</span>
+                    <button type="submit" name="submit" value="inc-size-count">+</button>
+                </form>
             </td>
         </tr>
     </table>

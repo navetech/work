@@ -766,44 +766,6 @@ class OrderType(OrderCommonFields):
         return
 
 
-def get_order_type(order_object, type_id, flavor_id, size_id):
-    print('get_order_type')
-    if not order_object:
-        return None
-
-    if type_id is None:
-        return None
-
-    type = Type.objects.filter(id=type_id).first()
-    if not type:
-        return None
-
-    for order_type in order_object.types.all():
-        menu_type = order_type.menu
-
-        if type == menu_type:
-            no_components = True
-
-            if menu_type.flavors.count() > 0:
-                no_components = False
-
-                order_flavor = get_order_flavor(order_type, flavor_id, size_id)
-                if order_flavor:
-                    return order_type
-
-            if menu_type.sizes.count() > 0:
-                no_components = False
-
-                order_size = get_order_size(order_type, size_id)
-                if order_size:
-                    return order_type
-
-            if no_components:
-                return order_type
-
-    return None
-
-
 class OrderDish(OrderCommonFields):
     types = models.ManyToManyField(
         OrderType, blank=True,
@@ -893,6 +855,10 @@ class Order(CommonFields):
         dict['dishes'] = to_dict_list(self.dishes, **settings)
 
         return
+
+
+class HistoricOrder(models.Model):
+    order = models.TextField(blank=True)
 
 
 def cancel_order_sizes(order_object):
@@ -1188,5 +1154,61 @@ def get_order(user):
     return order
 
 
-class HistoricOrder(models.Model):
-    order = models.TextField(blank=True)
+def get_order_type(order_object, type_id, flavor_id, size_id):
+    print('get_order_type')
+    if not order_object:
+        return None
+
+    if type_id is None:
+        return None
+
+    type = Type.objects.filter(id=type_id).first()
+    if not type:
+        return None
+
+    for order_type in order_object.types.all():
+        menu_type = order_type.menu
+
+        if type == menu_type:
+            no_components = True
+
+            if menu_type.flavors.count() > 0:
+                no_components = False
+
+                order_flavor = get_order_flavor(order_type, flavor_id, size_id)
+                if order_flavor:
+                    return order_type
+
+            if menu_type.sizes.count() > 0:
+                no_components = False
+
+                order_size = get_order_size(order_type, size_id)
+                if order_size:
+                    return order_type
+
+            if no_components:
+                return order_type
+
+    return None
+
+
+def get_order_objects(order, dish_id, type_id, flavor_id, size_id):
+    order_objects = []
+    if not order:
+        return order_objects
+
+    order_dish = get_order_dish(order, dish_id, type_id, flavor_id, size_id)
+    order_objects.append(order_dish)
+
+    order_type = get_order_type(
+        order_dish, type_id, flavor_id, size_id
+    )
+    order_objects.append(order_type)
+
+    order_flavor = get_order_flavor(order_dish, flavor_id, size_id)
+    order_objects.append(order_flavor)
+
+    order_size = get_order_size(order_dish, size_id)
+    order_objects.append(order_size)
+
+    return order_objects

@@ -42,6 +42,12 @@
                                             </td>
                                             <td>{{ size.trait.short_name.translated.words }}</td>
                                             <td>{{ size.trait.long_name.translated.words }}</td>
+                                            {% empty %}
+                                            <td>
+                                                <a href="{% url 'order' dish.id type.id flavor.id None %}">
+                                                    {{ flavor.trait.quantity.converted.value|floatformat:2 }} {{ flavor.trait.quantity.converted.unit }}
+                                                </a>
+                                            </td>
                                             {% endfor %}
                                         </tr>
                                     {% endfor %}

@@ -4,8 +4,11 @@
             <td>
                 {{ order_size.menu.trait.short_name.translated.words }}
 
+                {% comment %}
                 {% include "orders/cart-order-section.html" %}
+                {% endcomment %}
 
+                <a href="{% url 'order' order_dish.menu.id|default:None order_type.menu.id|default:None order_flavor.menu.id|default:None order_size.menu.id|default:None %}">
                     {{ order_size.menu.trait.long_name.translated.words }}
                 </a>
             </td>

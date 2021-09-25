@@ -21,9 +21,11 @@ from .models import Setting
 from .models import UserSetting
 
 from .models import Dish
-from .models import Order
+from .models import Order, OrderDish, OrderType
+from .models import OrderFlavor, OrderSize
 from .models import get_order
 from .models import get_order_dish
+from .models import get_order_objects
 
 from django.http import JsonResponse
 
@@ -230,7 +232,42 @@ def order(request, dish_id, type_id, flavor_id, size_id):
 
     order = get_order(user=request.user)
 
+    if request.method == "POST":
+        order_objects = get_order_objects(order, dish_id, type_id, flavor_id, size_id)
+
+        for order_object in order_objects:
+            if isinstance(order_object, OrderDish):
+                inc_object_count = "inc-dish-count"
+                dec_object_count = "dec-dish-count"
+
+            elif isinstance(order_object, OrderType):
+                inc_object_count = "inc-type-count"
+                dec_object_count = "dec-type-count"
+
+            elif isinstance(order_object, OrderFlavor):
+                inc_object_count = "inc-flavor-count"
+                dec_object_count = "dec-flavor-count"
+
+            elif isinstance(order_object, OrderSize):
+                inc_object_count = "inc-size-count"
+                dec_object_count = "dec-size-count"
+            else:
+                inc_object_count = None
+                dec_object_count = None
+
+            print(inc_object_count)
+            print(dec_object_count)
+
+            if request.POST["submit"] == inc_object_count:
+                order_object.count += 1
+                order_object.save()
+            elif request.POST["submit"] == dec_object_count:
+                if order_object.count > 0:
+                    order_object.count -= 1
+                    order_object.save()
+
     order_dish = get_order_dish(order, dish_id, type_id, flavor_id, size_id)
+
     order_dish_dict = {}
     order_dish.to_dict(order_dish_dict, language=language, currency=currency)
 

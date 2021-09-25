@@ -8,9 +8,6 @@
 {% block main %}
     <h3>{{ settings.order_page_header.translated.words }}</h3>
 
-    <form action="{% url 'order' order_dish.id None None None %}" method="post">
-        {% csrf_token %}
-
         <ul class="list-group pt-4">
             {% for order_type in order_dish.types %}
                 {% include "orders/order-type-section.html" %}
@@ -43,5 +40,4 @@
             </li>
 
         </ul>
-    </form>
 {% endblock %}
