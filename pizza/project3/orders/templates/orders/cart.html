@@ -22,7 +22,10 @@
             <th>Dishes Qty</th>
         <tr>
         <tr>
-            <td id="total-price">99.99</td>
+            <td>
+                <span id="total-price">{{order_price.value|floatformat:2 }}</span>
+                {{order_price.unit }}
+            </td>
             <td>{{ order.totals.items_qty}}</td>
             <td>{{ order.totals.products_qty}}</td>
         <tr>

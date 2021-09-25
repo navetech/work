@@ -234,6 +234,8 @@ def order(request, dish_id, type_id, flavor_id, size_id):
     order_dish_dict = {}
     order_dish.to_dict(order_dish_dict, language=language, currency=currency)
 
+    order_dish_price = calc_order_dish_price(order_dish_dict)
+
     put_columns_to_order_dish(order_dish_dict)
 
     context = {
@@ -242,6 +244,7 @@ def order(request, dish_id, type_id, flavor_id, size_id):
         'languages': languages_dict_list,
         'currencies': currencies_dict_list,
         'order_dish': order_dish_dict,
+        'order_dish_price': order_dish_price,
     }
 
     request.session['page'] = reverse(
@@ -293,6 +296,8 @@ def shopping_cart(request):
         order.dishes, language=language, currency=currency
     )
 
+    order_price = calc_order_price(order_dishes_dict_list)
+
 #    put_columns_to_order_dishes(order_dishes_dict_list)
 
     context = {
@@ -301,6 +306,7 @@ def shopping_cart(request):
         'languages': languages_dict_list,
         'currencies': currencies_dict_list,
         'order_dishes': order_dishes_dict_list,
+        'order_price': order_price,
     }
 
     request.session['page'] = reverse('shopping_cart')
@@ -323,6 +329,165 @@ def clear_shopping_cart(request):
         order.cancel()
 
     return HttpResponseRedirect(reverse('menu'))
+
+
+def calc_order_price(order_dishes):
+    price = {
+        'value': 0,
+        'unit': None,
+        }
+    value = 0
+
+    for order_dish in order_dishes:
+        price = calc_order_dish_price(order_dish)
+        value += price['value']
+
+    price['value'] = value
+
+    return price
+
+
+def calc_order_dish_price(order_dish):
+    price = {
+        'value': 0,
+        'unit': None,
+        }
+    value = 0
+
+    for order_type in order_dish['types']:
+        price = calc_order_type_price(order_type)
+        value += price['value']
+
+    for order_flavor in order_dish['flavors']:
+        price = calc_order_flavor_price(order_flavor)
+        value += price['value']
+
+    for order_adding in order_dish['addings']:
+        price = calc_order_adding_price(order_adding)
+        value += price['value']
+
+    for order_size in order_dish['sizes']:
+        price = calc_order_size_price(order_size)
+        value += price['value']
+
+    if order_dish['plain']:
+        value += (
+            order_dish['count'] *
+            order_dish['menu']['trait']['quantity']['converted']['value']
+        )
+        price['unit'] = (
+            order_dish['menu']['trait']['quantity']['converted']['unit']
+        )
+
+    price['value'] = value
+
+    return price
+
+
+def calc_order_type_price(order_type):
+    price = {
+        'value': 0,
+        'unit': None,
+        }
+    value = 0
+
+    for order_flavor in order_type['flavors']:
+        price = calc_order_flavor_price(order_flavor)
+        value += price['value']
+
+    for order_adding in order_type['addings']:
+        price = calc_order_adding_price(order_adding)
+        value += price['value']
+
+    for order_size in order_type['sizes']:
+        price = calc_order_size_price(order_size)
+        value += price['value']
+
+    if order_type['plain']:
+        value += (
+            order_type['count'] *
+            order_type['menu']['trait']['quantity']['converted']['value']
+        )
+        price['unit'] = (
+            order_type['menu']['trait']['quantity']['converted']['unit']
+        )
+
+    price['value'] = value
+
+    return price
+
+
+def calc_order_flavor_price(order_flavor):
+    price = {
+        'value': 0,
+        'unit': None,
+        }
+    value = 0
+
+    for order_adding in order_flavor['addings']:
+        price = calc_order_adding_price(order_adding)
+        value += price['value']
+
+    for order_size in order_flavor['sizes']:
+        price = calc_order_size_price(order_size)
+        value += price['value']
+
+    if order_flavor['plain']:
+        value += (
+            order_flavor['count'] *
+            order_flavor['menu']['trait']['quantity']['converted']['value']
+        )
+        price['unit'] = (
+            order_flavor['menu']['trait']['quantity']['converted']['unit']
+        )
+
+    price['value'] = value
+
+    return price
+
+
+def calc_order_adding_price(order_adding):
+    price = {
+        'value': 0,
+        'unit': None,
+        }
+    value = 0
+
+    for order_flavor in order_adding['flavors']:
+        price = calc_order_flavor_price(order_flavor)
+        value += price['value']
+
+    for order_size in order_adding['sizes']:
+        price = calc_order_size_price(order_size)
+        value += price['value']
+
+    if order_adding['plain']:
+        value += (
+            order_adding['count'] *
+            order_adding['menu']['trait']['quantity']['converted']['value']
+        )
+        price['unit'] = (
+            order_adding['menu']['trait']['quantity']['converted']['unit']
+        )
+
+    price['value'] = value
+
+    return price
+
+
+def calc_order_size_price(order_size):
+    value = (
+        order_size['count'] *
+        order_size['menu']['trait']['quantity']['converted']['value']
+    )
+    unit = order_size['menu']['trait']['quantity']['converted']['unit']
+
+    price = {
+        'value': value,
+        'unit': unit,
+        }
+
+    return price
 
 
 def get_pages_basic_data(

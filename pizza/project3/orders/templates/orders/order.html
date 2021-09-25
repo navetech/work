@@ -35,6 +35,10 @@
             {% endif %}
 
             <li class="list-group-item ln-container01">
+                Item Price: {{ order_dish_price.value|floatformat:2 }} {{ order_dish_price.unit }}
+            </li>
+
+            <li class="list-group-item ln-container01">
                 <a class="btn btn-secondary" role="button" href="{% url 'shopping_cart' %}">Show Cart</a>
             </li>
 
