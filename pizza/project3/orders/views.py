@@ -1,4 +1,4 @@
-# from django.http import HttpResponse
+from django.http import HttpResponse
 # from django.shortcuts import render
 
 # Create your views here.
@@ -189,7 +189,38 @@ def select_currency(request, currency_id):
     return HttpResponseRedirect(request.session['page'])
 
 
-def order(request, dish_id, type_id, flavor_id, size_id):
+def menu_order(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("index"))
+
+    if request.method == "GET":
+        return HttpResponseRedirect(reverse("index"))
+
+    elif request.method == "POST":
+        dish_id = request.POST["dish-id"]
+        type_id = request.POST["type-id"]
+        flavor_id = request.POST["flavor-id"]
+        size_id = request.POST["size-id"]
+
+#        return HttpResponse(f'{dish_id}/{type_id}/{flavor_id}/{size_id}')
+
+        dish_id = None if dish_id == 'None' else dish_id
+        type_id = None if type_id == 'None' else type_id
+        flavor_id = None if flavor_id == 'None' else flavor_id
+        size_id = None if size_id == 'None' else size_id
+
+        return HttpResponseRedirect(reverse
+            (
+                'order_item',
+                args=[dish_id, type_id, flavor_id, size_id]
+            )
+        )
+
+    else:
+        return HttpResponseRedirect(reverse("index"))
+
+
+def order_item(request, dish_id, type_id, flavor_id, size_id):
     """
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("index"))
@@ -291,11 +322,11 @@ def order(request, dish_id, type_id, flavor_id, size_id):
     }
 
     request.session['page'] = reverse(
-        'order',
+        'order_item',
         args=[dish_id, type_id, flavor_id, size_id]
     )
 
-    return render(request, 'orders/order.html', context)
+    return render(request, 'orders/order-item.html', context)
 
 
 def shopping_cart(request):

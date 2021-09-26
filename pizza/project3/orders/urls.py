@@ -18,8 +18,12 @@ urlpatterns = [
         name="select_currency"
     ),
     path(
-        "order/<dish_id>/<type_id>/<flavor_id>/<size_id>", views.order,
-        name="order"
+        "order-item/<dish_id>/<type_id>/<flavor_id>/<size_id>", views.order_item,
+        name="order_item"
+    ),
+    path(
+        "menu_order", views.menu_order,
+        name="menu_order"
     ),
     path("shopping-cart", views.shopping_cart, name="shopping_cart"),
     path(
