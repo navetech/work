@@ -584,7 +584,6 @@ class OrderSize(OrderBasicCommonFields):
 
 
 def get_order_size(order_object, size_id):
-    print('get_order_size')
     if not order_object:
         return None
 
@@ -687,7 +686,6 @@ class OrderFlavor(OrderCommonFields):
 
 
 def get_order_flavor(order_object, flavor_id, size_id):
-    print('get_order_flavor')
     if not order_object:
         return None
 
@@ -892,7 +890,6 @@ def cancel_order_dishes(order_object):
 
 
 def create_order_sizes(order_object, menu_object):
-    print('create_order_sizes')
     if not order_object:
         return False
     if not menu_object:
@@ -909,7 +906,6 @@ def create_order_sizes(order_object, menu_object):
 
 
 def create_order_size(order_object, menu_object, size_id):
-    print('create_order_size')
     if not order_object:
         return None
     if not menu_object:
@@ -933,7 +929,6 @@ def create_order_size(order_object, menu_object, size_id):
 
 
 def create_order_flavors(order_object, menu_object):
-    print('create_order_flavors')
     if not order_object:
         return False
     if not menu_object:
@@ -956,7 +951,6 @@ def create_order_flavors(order_object, menu_object):
 
 
 def create_order_addings(order_object, menu_object):
-    print('create_order_addings')
     if not order_object:
         return False
     if not menu_object:
@@ -979,7 +973,6 @@ def create_order_addings(order_object, menu_object):
 
 
 def create_order_flavor(order_object, menu_object, flavor_id, size_id):
-    print('create_order_flavor')
     if not order_object:
         return None
     if not menu_object:
@@ -1014,7 +1007,6 @@ def create_order_flavor(order_object, menu_object, flavor_id, size_id):
 
 
 def create_order_type(order_object, menu_object, type_id, flavor_id, size_id):
-    print('create_order_type')
     if not order_object:
         return None
     if not menu_object:
@@ -1155,7 +1147,6 @@ def get_order(user):
 
 
 def get_order_type(order_object, type_id, flavor_id, size_id):
-    print('get_order_type')
     if not order_object:
         return None
 
@@ -1190,25 +1181,3 @@ def get_order_type(order_object, type_id, flavor_id, size_id):
                 return order_type
 
     return None
-
-
-def get_order_objects(order, dish_id, type_id, flavor_id, size_id):
-    order_objects = []
-    if not order:
-        return order_objects
-
-    order_dish = get_order_dish(order, dish_id, type_id, flavor_id, size_id)
-    order_objects.append(order_dish)
-
-    order_type = get_order_type(
-        order_dish, type_id, flavor_id, size_id
-    )
-    order_objects.append(order_type)
-
-    order_flavor = get_order_flavor(order_dish, flavor_id, size_id)
-    order_objects.append(order_flavor)
-
-    order_size = get_order_size(order_dish, size_id)
-    order_objects.append(order_size)
-
-    return order_objects

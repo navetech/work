@@ -10,15 +10,18 @@
             </td>
 
             <td>
-                {{ order_dish.menu.trait.quantity.converted.value|floatformat:2 }}
-                {{ order_dish.menu.trait.quantity.converted.unit }}
+                {{ order_dish.price.value|floatformat:2 }}
+                {{ order_dish.price.unit }}
             </td>
 
             <td>
                 <div class="ln-group-divider"></div>
-                <button type="submit" name="submit" value="dec-count">-</button>
-                <span>{{ order_dish.count }}</span>
-                <button type="submit" name="submit" value="inc-coun">+</button>
+                <form action="{% url 'order' order_dish.id|default:None order_type.id|default:None order_flavor.id|default:None order_size.id|default:None %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" name="submit" value="dec-dish-count">-</button>
+                    <span>{{ order_dish.count }}</span>
+                    <button type="submit" name="submit" value="inc-dish-count">+</button>
+                </form>
             </td>
         </tr>
     </table>

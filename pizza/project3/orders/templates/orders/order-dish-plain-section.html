@@ -22,7 +22,7 @@
 
             <td>
                 <div class="ln-group-divider"></div>
-                <form action="{% url 'order' order_dish.menu.id|default:None order_type.menu.id|default:None order_flavor.menu.id|default:None order_size.menu.id|default:None %}" method="post">
+                <form action="{% url 'order' order_dish.id|default:None order_type.id|default:None order_flavor.id|default:None order_size.id|default:None %}" method="post">
                     {% csrf_token %}
                     <button type="submit" name="submit" value="dec-dish-count">-</button>
                     <span>{{ order_dish.count }}</span>

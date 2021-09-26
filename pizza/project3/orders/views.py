@@ -25,7 +25,6 @@ from .models import Order, OrderDish, OrderType
 from .models import OrderFlavor, OrderSize
 from .models import get_order
 from .models import get_order_dish
-from .models import get_order_objects
 
 from django.http import JsonResponse
 
@@ -232,41 +231,49 @@ def order(request, dish_id, type_id, flavor_id, size_id):
 
     order = get_order(user=request.user)
 
-    if request.method == "POST":
-        order_objects = get_order_objects(order, dish_id, type_id, flavor_id, size_id)
+    if request.method == "GET":
+        order_dish = get_order_dish(
+            order, dish_id, type_id,
+            flavor_id, size_id
+        )
 
-        for order_object in order_objects:
-            if isinstance(order_object, OrderDish):
-                inc_object_count = "inc-dish-count"
-                dec_object_count = "dec-dish-count"
+    elif request.method == "POST":
+        order_dish = OrderDish.objects.filter(id=dish_id).first()
+        order_type = OrderType.objects.filter(id=type_id).first()
+        order_flavor = OrderFlavor.objects.filter(id=flavor_id).first()
+        order_size = OrderSize.objects.filter(id=size_id).first()
 
-            elif isinstance(order_object, OrderType):
-                inc_object_count = "inc-type-count"
-                dec_object_count = "dec-type-count"
+        if request.POST["submit"] == 'inc-dish-count':
+            order_dish.count += 1
+            order_dish.save()
+        elif request.POST["submit"] == 'dec-dish-count':
+            if order_dish.count > 0:
+                order_dish.count -= 1
+                order_dish.save()
 
-            elif isinstance(order_object, OrderFlavor):
-                inc_object_count = "inc-flavor-count"
-                dec_object_count = "dec-flavor-count"
+        elif request.POST["submit"] == 'inc-type-count':
+            order_type.count += 1
+            order_type.save()
+        elif request.POST["submit"] == 'dec-type-count':
+            if order_type.count > 0:
+                order_type.count -= 1
+                order_type.save()
 
-            elif isinstance(order_object, OrderSize):
-                inc_object_count = "inc-size-count"
-                dec_object_count = "dec-size-count"
-            else:
-                inc_object_count = None
-                dec_object_count = None
+        elif request.POST["submit"] == 'inc-flavor-count':
+            order_flavor.count += 1
+            order_flavor.save()
+        elif request.POST["submit"] == 'dec-flavor-count':
+            if order_flavor.count > 0:
+                order_flavor.count -= 1
+                order_flavor.save()
 
-            print(inc_object_count)
-            print(dec_object_count)
-
-            if request.POST["submit"] == inc_object_count:
-                order_object.count += 1
-                order_object.save()
-            elif request.POST["submit"] == dec_object_count:
-                if order_object.count > 0:
-                    order_object.count -= 1
-                    order_object.save()
-
-    order_dish = get_order_dish(order, dish_id, type_id, flavor_id, size_id)
+        elif request.POST["submit"] == 'inc-size-count':
+            order_size.count += 1
+            order_size.save()
+        elif request.POST["submit"] == 'dec-size-count':
+            if order_size.count > 0:
+                order_size.count -= 1
+                order_size.save()
 
     order_dish_dict = {}
     order_dish.to_dict(order_dish_dict, language=language, currency=currency)
@@ -366,17 +373,18 @@ def clear_shopping_cart(request):
 
 
 def calc_order_price(order):
-    price = {
-        'value': 0,
-        'unit': None,
-        }
     value = 0
+    unit = None
 
     for order_dish in order['dishes']:
-        price = calc_order_dish_price(order_dish)
-        value += price['value']
+        p = calc_order_dish_price(order_dish)
+        value += p['value']
+        unit = p['unit']
 
-    price['value'] = value
+    price = {
+        'value': value,
+        'unit': unit,
+    }
 
     order['price'] = price
 
@@ -384,39 +392,40 @@ def calc_order_price(order):
 
 
 def calc_order_dish_price(order_dish):
-    price = {
-        'value': 0,
-        'unit': None,
-        }
     value = 0
+    unit = None
 
     for order_type in order_dish['types']:
-        price = calc_order_type_price(order_type)
-        value += price['value']
+        p = calc_order_type_price(order_type)
+        value += p['value']
+        unit = p['unit']
 
     for order_flavor in order_dish['flavors']:
-        price = calc_order_flavor_price(order_flavor)
-        value += price['value']
+        p = calc_order_flavor_price(order_flavor)
+        value += p['value']
+        unit = p['unit']
 
     for order_adding in order_dish['addings']:
-        price = calc_order_adding_price(order_adding)
-        value += price['value']
+        p = calc_order_adding_price(order_adding)
+        value += p['value']
+        unit = p['unit']
 
     for order_size in order_dish['sizes']:
-        price = calc_order_size_price(order_size)
-        value += price['value']
+        p = calc_order_size_price(order_size)
+        value += p['value']
+        unit = p['unit']
 
     if order_dish['plain']:
         value += (
+            order_dish['count'] *
             order_dish['menu']['trait']['quantity']['converted']['value']
         )
-        price['unit'] = (
-            order_dish['menu']['trait']['quantity']['converted']['unit']
-        )
+        unit = order_dish['menu']['trait']['quantity']['converted']['unit']
 
-    value *= order_dish['count']
-
-    price['value'] = value
+    price = {
+        'value': value,
+        'unit': unit,
+    }
 
     order_dish['price'] = price
 
@@ -424,35 +433,35 @@ def calc_order_dish_price(order_dish):
 
 
 def calc_order_type_price(order_type):
-    price = {
-        'value': 0,
-        'unit': None,
-        }
     value = 0
+    unit = None
 
     for order_flavor in order_type['flavors']:
-        price = calc_order_flavor_price(order_flavor)
-        value += price['value']
+        p = calc_order_flavor_price(order_flavor)
+        value += p['value']
+        unit = p['unit']
 
     for order_adding in order_type['addings']:
-        price = calc_order_adding_price(order_adding)
-        value += price['value']
+        p = calc_order_adding_price(order_adding)
+        value += p['value']
+        unit = p['unit']
 
     for order_size in order_type['sizes']:
-        price = calc_order_size_price(order_size)
-        value += price['value']
+        p = calc_order_size_price(order_size)
+        value += p['value']
+        unit = p['unit']
 
     if order_type['plain']:
         value += (
+            order_type['count'] *
             order_type['menu']['trait']['quantity']['converted']['value']
         )
-        price['unit'] = (
-            order_type['menu']['trait']['quantity']['converted']['unit']
-        )
+        unit = order_type['menu']['trait']['quantity']['converted']['unit']
 
-    value *= order_type['count']
-
-    price['value'] = value
+    price = {
+        'value': value,
+        'unit': unit,
+    }
 
     order_type['price'] = price
 
@@ -460,31 +469,30 @@ def calc_order_type_price(order_type):
 
 
 def calc_order_flavor_price(order_flavor):
-    price = {
-        'value': 0,
-        'unit': None,
-        }
     value = 0
+    unit = None
 
     for order_adding in order_flavor['addings']:
-        price = calc_order_adding_price(order_adding)
-        value += price['value']
+        p = calc_order_adding_price(order_adding)
+        value += p['value']
+        unit = p['unit']
 
     for order_size in order_flavor['sizes']:
-        price = calc_order_size_price(order_size)
-        value += price['value']
+        p = calc_order_size_price(order_size)
+        value += p['value']
+        unit = p['unit']
 
     if order_flavor['plain']:
         value += (
+            order_flavor['count'] *
             order_flavor['menu']['trait']['quantity']['converted']['value']
         )
-        price['unit'] = (
-            order_flavor['menu']['trait']['quantity']['converted']['unit']
-        )
+        unit = order_flavor['menu']['trait']['quantity']['converted']['unit']
 
-    value *= order_flavor['count']
-
-    price['value'] = value
+    price = {
+        'value': value,
+        'unit': unit,
+    }
 
     order_flavor['price'] = price
 
@@ -492,31 +500,30 @@ def calc_order_flavor_price(order_flavor):
 
 
 def calc_order_adding_price(order_adding):
-    price = {
-        'value': 0,
-        'unit': None,
-        }
     value = 0
+    unit = None
 
     for order_flavor in order_adding['flavors']:
-        price = calc_order_flavor_price(order_flavor)
-        value += price['value']
+        p = calc_order_flavor_price(order_flavor)
+        value += p['value']
+        unit = p['unit']
 
     for order_size in order_adding['sizes']:
-        price = calc_order_size_price(order_size)
-        value += price['value']
+        p = calc_order_size_price(order_size)
+        value += p['value']
+        unit = p['unit']
 
     if order_adding['plain']:
         value += (
+            order_adding['count'] *
             order_adding['menu']['trait']['quantity']['converted']['value']
         )
-        price['unit'] = (
-            order_adding['menu']['trait']['quantity']['converted']['unit']
-        )
+        unit = order_adding['menu']['trait']['quantity']['converted']['unit']
 
-    value *= order_adding['count']
-
-    price['value'] = value
+    price = {
+        'value': value,
+        'unit': unit,
+    }
 
     order_adding['price'] = price
 
@@ -525,11 +532,9 @@ def calc_order_adding_price(order_adding):
 
 def calc_order_size_price(order_size):
     value = (
+        order_size['count'] *
         order_size['menu']['trait']['quantity']['converted']['value']
     )
-
-    value *= order_size['count']
-
     unit = order_size['menu']['trait']['quantity']['converted']['unit']
 
     price = {
