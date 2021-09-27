@@ -3,12 +3,7 @@
         <tr>
             <td>
                 {{ order_size.menu.trait.short_name.translated.words }}
-
-                {% comment %}
-                {% include "orders/cart-order-section.html" %}
-                {% endcomment %}
-
-                <a href="{% url 'order' order_dish.menu.id|default:None order_type.menu.id|default:None order_flavor.menu.id|default:None order_size.menu.id|default:None %}">
+                <a href="{% url 'order_item' order_dish.menu.id|default:None order_type.menu.id|default:None order_flavor.menu.id|default:None order_size.menu.id|default:None %}">
                     {{ order_size.menu.trait.long_name.translated.words }}
                 </a>
             </td>
@@ -20,8 +15,13 @@
 
             <td>
                 <div class="ln-group-divider"></div>
-                <form action="{% url 'order' order_dish.id|default:None order_type.id|default:None order_flavor.id|default:None order_size.id|default:None %}" method="post">
+                <form action="{% url 'alter_order' %}" method="post">
                     {% csrf_token %}
+                    <input type='text' style='display:none' name='order-dish-id' value={{ order_dish.id|default:None }}>
+                    <input type='text' style='display:none' name='order-type-id' value={{ order_type.id|default:None }}>
+                    <input type='text' style='display:none' name='order-flavor-id' value={{ order_flavor.id|default:None }}>
+                    <input type='text' style='display:none' name='order-size-id' value={{ order_size.id|default:None }}>
+                    
                     <button type="submit" name="submit" value="dec-size-count">-</button>
                     <span>{{ order_size.count }}</span>
                     <button type="submit" name="submit" value="inc-size-count">+</button>

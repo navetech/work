@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+# from django.http import HttpResponse
 # from django.shortcuts import render
 
 # Create your views here.
@@ -189,28 +189,91 @@ def select_currency(request, currency_id):
     return HttpResponseRedirect(request.session['page'])
 
 
-def menu_order(request):
+def put_order(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("index"))
 
-    if request.method == "GET":
-        return HttpResponseRedirect(reverse("index"))
-
-    elif request.method == "POST":
+    if request.method == "POST":
         dish_id = request.POST["dish-id"]
         type_id = request.POST["type-id"]
         flavor_id = request.POST["flavor-id"]
         size_id = request.POST["size-id"]
-
-#        return HttpResponse(f'{dish_id}/{type_id}/{flavor_id}/{size_id}')
 
         dish_id = None if dish_id == 'None' else dish_id
         type_id = None if type_id == 'None' else type_id
         flavor_id = None if flavor_id == 'None' else flavor_id
         size_id = None if size_id == 'None' else size_id
 
-        return HttpResponseRedirect(reverse
-            (
+        return HttpResponseRedirect(reverse(
+                'order_item',
+                args=[dish_id, type_id, flavor_id, size_id]
+            )
+        )
+
+    else:
+        return HttpResponseRedirect(reverse("index"))
+
+
+def alter_order(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("index"))
+
+    if request.method == "POST":
+        order_dish_id = request.POST["order-dish-id"]
+        order_type_id = request.POST["order-type-id"]
+        order_flavor_id = request.POST["order-flavor-id"]
+        order_size_id = request.POST["order-size-id"]
+
+        order_dish_id = None if order_dish_id == 'None' else order_dish_id
+        order_type_id = None if order_type_id == 'None' else order_type_id
+        order_flavor_id = (
+            None if order_flavor_id == 'None' else order_flavor_id
+        )
+        order_size_id = None if order_size_id == 'None' else order_size_id
+
+        order_dish = OrderDish.objects.filter(id=order_dish_id).first()
+        order_type = OrderType.objects.filter(id=order_type_id).first()
+        order_flavor = OrderFlavor.objects.filter(id=order_flavor_id).first()
+        order_size = OrderSize.objects.filter(id=order_size_id).first()
+
+        if request.POST["submit"] == 'inc-dish-count':
+            order_dish.count += 1
+            order_dish.save()
+        elif request.POST["submit"] == 'dec-dish-count':
+            if order_dish.count > 0:
+                order_dish.count -= 1
+                order_dish.save()
+
+        elif request.POST["submit"] == 'inc-type-count':
+            order_type.count += 1
+            order_type.save()
+        elif request.POST["submit"] == 'dec-type-count':
+            if order_type.count > 0:
+                order_type.count -= 1
+                order_type.save()
+
+        elif request.POST["submit"] == 'inc-flavor-count':
+            order_flavor.count += 1
+            order_flavor.save()
+        elif request.POST["submit"] == 'dec-flavor-count':
+            if order_flavor.count > 0:
+                order_flavor.count -= 1
+                order_flavor.save()
+
+        elif request.POST["submit"] == 'inc-size-count':
+            order_size.count += 1
+            order_size.save()
+        elif request.POST["submit"] == 'dec-size-count':
+            if order_size.count > 0:
+                order_size.count -= 1
+                order_size.save()
+
+        dish_id = None if not order_dish else order_dish.menu.id
+        type_id = None if not order_type else order_type.menu.id
+        flavor_id = None if not order_flavor else order_flavor.menu.id
+        size_id = None if not order_size else order_size.menu.id
+
+        return HttpResponseRedirect(reverse(
                 'order_item',
                 args=[dish_id, type_id, flavor_id, size_id]
             )
@@ -228,6 +291,9 @@ def order_item(request, dish_id, type_id, flavor_id, size_id):
     """
 
     if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('index'))
+
+    if request.method != "GET":
         return HttpResponseRedirect(reverse('index'))
 
     dish_id = None if dish_id == 'None' else dish_id
@@ -262,49 +328,7 @@ def order_item(request, dish_id, type_id, flavor_id, size_id):
 
     order = get_order(user=request.user)
 
-    if request.method == "GET":
-        order_dish = get_order_dish(
-            order, dish_id, type_id,
-            flavor_id, size_id
-        )
-
-    elif request.method == "POST":
-        order_dish = OrderDish.objects.filter(id=dish_id).first()
-        order_type = OrderType.objects.filter(id=type_id).first()
-        order_flavor = OrderFlavor.objects.filter(id=flavor_id).first()
-        order_size = OrderSize.objects.filter(id=size_id).first()
-
-        if request.POST["submit"] == 'inc-dish-count':
-            order_dish.count += 1
-            order_dish.save()
-        elif request.POST["submit"] == 'dec-dish-count':
-            if order_dish.count > 0:
-                order_dish.count -= 1
-                order_dish.save()
-
-        elif request.POST["submit"] == 'inc-type-count':
-            order_type.count += 1
-            order_type.save()
-        elif request.POST["submit"] == 'dec-type-count':
-            if order_type.count > 0:
-                order_type.count -= 1
-                order_type.save()
-
-        elif request.POST["submit"] == 'inc-flavor-count':
-            order_flavor.count += 1
-            order_flavor.save()
-        elif request.POST["submit"] == 'dec-flavor-count':
-            if order_flavor.count > 0:
-                order_flavor.count -= 1
-                order_flavor.save()
-
-        elif request.POST["submit"] == 'inc-size-count':
-            order_size.count += 1
-            order_size.save()
-        elif request.POST["submit"] == 'dec-size-count':
-            if order_size.count > 0:
-                order_size.count -= 1
-                order_size.save()
+    order_dish = get_order_dish(order, dish_id, type_id, flavor_id, size_id)
 
     order_dish_dict = {}
     order_dish.to_dict(order_dish_dict, language=language, currency=currency)
@@ -329,7 +353,7 @@ def order_item(request, dish_id, type_id, flavor_id, size_id):
     return render(request, 'orders/order-item.html', context)
 
 
-def shopping_cart(request):
+def cart(request):
     """
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("index"))
@@ -381,12 +405,12 @@ def shopping_cart(request):
         'order': order_dict,
     }
 
-    request.session['page'] = reverse('shopping_cart')
+    request.session['page'] = reverse('cart')
 
     return render(request, 'orders/cart.html', context)
 
 
-def clear_shopping_cart(request):
+def clear_cart(request):
     """
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("index"))
@@ -400,7 +424,7 @@ def clear_shopping_cart(request):
     if order:
         order.cancel()
 
-    return HttpResponseRedirect(reverse('shopping_cart'))
+    return HttpResponseRedirect(reverse('cart'))
 
 
 def calc_order_price(order):

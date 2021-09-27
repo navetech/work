@@ -30,7 +30,7 @@
 
         <button type="button" id="checkout-button" class="btn btn-secondary">Checkout</button>
 
-        <a class="btn btn-secondary" href="{% url 'clear_shopping_cart' %}" role="button">Clear Cart</a>
+        <a class="btn btn-secondary" href="{% url 'clear_cart' %}" role="button">Clear Cart</a>
 
         <h4>{{ settings.cart_page_items_header.translated.words }}</h4>
     {% else %}
@@ -40,19 +40,19 @@
     <ul class="list-group pt-4">
         {% for order_dish in order.dishes %}
             {% for order_type in order_dish.types %}
-                {% include "orders/cart-order-type-section.html" %}
+                {% include "orders/cart-order-type.html" %}
             {% endfor %}
 
             {% for order_flavor in order_dish.flavors %}
-                {% include "orders/cart-order-flavor-section.html" %}
+                {% include "orders/cart-order-flavor.html" %}
             {% endfor %}
 
             {% for order_size in order_dish.sizes %}
-                {% include "orders/cart-order-size-section.html" %}
+                {% include "orders/cart-order-size.html" %}
             {% endfor %}
 
             {% if order_dish.plain %}
-                {% include "orders/cart-order-dish-plain-section.html" %}
+                {% include "orders/cart-order-dish-plain.html" %}
             {% endif %}
         {% endfor %}
     </ul>

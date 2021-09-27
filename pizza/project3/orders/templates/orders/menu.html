@@ -36,7 +36,7 @@
                                             <td>{{ flavor.trait.long_name.translated.words }}</td>
                                             {% for size in flavor.sizes %}
                                             <td>
-                                                <form action="{% url 'menu_order' %}" method="post">
+                                                <form action="{% url 'put_order' %}" method="post">
                                                     {% csrf_token %}
                                                     <input type='text' style='display:none' name='dish-id' value={{ dish.id }}>
                                                     <input type='text' style='display:none' name='type-id' value={{ type.id }}>
@@ -52,7 +52,7 @@
                                             <td>{{ size.trait.long_name.translated.words }}</td>
                                             {% empty %}
                                             <td>
-                                                <form action="{% url 'menu_order' %}" method="post">
+                                                <form action="{% url 'put_order' %}" method="post">
                                                     {% csrf_token %}
                                                     <input type='text' style='display:none' name='dish-id' value={{ dish.id }}>
                                                     <input type='text' style='display:none' name='type-id' value={{ type.id }}>
@@ -93,7 +93,7 @@
                                             <td>{{ flavor.trait.long_name.translated.words }}</td>
                                             {% for size in flavor.sizes %}
                                             <td>
-                                                <form action="{% url 'menu_order' %}" method="post">
+                                                <form action="{% url 'put_order' %}" method="post">
                                                     {% csrf_token %}
                                                     <input type='text' style='display:none' name='dish-id' value={{ dish.id }}>
                                                     <input type='text' style='display:none' name='type-id' value=None>
@@ -109,14 +109,14 @@
                                                 <td>{{ size.trait.long_name.translated.words }}</td>
                                             {% empty %}
                                             <td>
-                                                <form action="{% url 'menu_order' %}" method="post">
+                                                <form action="{% url 'put_order' %}" method="post">
                                                     {% csrf_token %}
                                                     <input type='text' style='display:none' name='dish-id' value={{ dish.id }}>
                                                     <input type='text' style='display:none' name='type-id' value=None>
                                                     <input type='text' style='display:none' name='flavor-id' value={{ flavor.id }}>
                                                     <input type='text' style='display:none' name='size-id' value=None }}>
                                                     
-                                                    <button type="submit" name="submit" value="dec-size-count">
+                                                    <button type="submit" name="submit">
                                                         {{ flavor.trait.quantity.converted.value|floatformat:2 }} {{ flavor.trait.quantity.converted.unit }}
                                                     </button>
                                                 </form>

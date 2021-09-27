@@ -18,17 +18,21 @@ urlpatterns = [
         name="select_currency"
     ),
     path(
-        "order-item/<dish_id>/<type_id>/<flavor_id>/<size_id>", views.order_item,
-        name="order_item"
+        "order-item/<dish_id>/<type_id>/<flavor_id>/<size_id>",
+        views.order_item, name="order_item"
     ),
     path(
-        "menu_order", views.menu_order,
-        name="menu_order"
+        "put-order", views.put_order,
+        name="put_order"
     ),
-    path("shopping-cart", views.shopping_cart, name="shopping_cart"),
     path(
-        'clear-shopping-cart',
-        views.clear_shopping_cart, name='clear_shopping_cart'
+        "alter-order", views.alter_order,
+        name="alter_order"
+    ),
+    path("cart", views.cart, name="cart"),
+    path(
+        'clear-cart',
+        views.clear_cart, name='clear_cart'
     ),
     path(
         'create-checkout-session',
