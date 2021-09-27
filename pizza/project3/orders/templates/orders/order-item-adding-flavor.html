@@ -1,0 +1,35 @@
+<tr>
+    <td>{{ order_adding_flavor.menu.trait.short_name.translated.words }}</td>
+    <td>{{ order_adding_flavor.menu.trait.long_name.translated.words }}</td>
+
+    {% for order_size in order_adding_flavor.sizes %}
+        <td>
+            {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
+            {{ order_size.menu.trait.quantity.converted.unit }}
+        </td>
+
+        <td>
+            <div class="ln-group-divider"></div>
+            <button type="submit" name="submit" value="dec-adding-flavor-size-count">-</button>
+            <span>{{ order_size.count }}</span>
+            <button type="submit" name="submit" value="inc-adding-flavor-size-count">+</button>
+        </td>
+
+        <td>
+            {{ order_size.menu.trait.short_name.translated.words }}
+            {{ order_size.menu.trait.long_name.translated.words }}
+        </td>
+    {% empty %}
+        <td>
+            {{ order_adding_flavor.menu.trait.quantity.converted.value|floatformat:2 }}
+            {{ order_adding_flavor.menu.trait.quantity.converted.unit }}
+        </td>
+
+        <td>
+            <div class="ln-group-divider"></div>
+            <button type="submit" name="submit" value="dec-adding-flavor-count">-</button>
+            <span>{{ order_adding_flavor.count }}</span>
+            <button type="submit" name="submit" value="inc-adding-flavor-count">+</button>
+        </td>
+    {% endfor %}
+</tr>
