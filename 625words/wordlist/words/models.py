@@ -12,8 +12,8 @@ class Thema(models.Model):
 
     def __str__(self):
         return (
-            f'{self.name}, '
-            f'{self.sort_number}'
+            f'{self.sort_number}, '
+            f'{self.name}'
         )
 
 
@@ -27,8 +27,9 @@ class Group(models.Model):
 
     def __str__(self):
         return (
-            f'{self.base_word}, '
-            f'{self.grouping_key}'
+            f'{self.grouping_key}, '
+            f'base word: '
+            f'{self.base_word}'
         )
 
 
@@ -52,8 +53,7 @@ class Word(models.Model):
 
     def __str__(self):
         return (
-            f'{self.meaning}, '
-            f'{self.group}, '
-            f'{self.thema}, '
-            f'{self.sort_number}'
+            f'{self.sort_number}, '
+            f'meaning: '
+            f'{self.meaning}'
         )

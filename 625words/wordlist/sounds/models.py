@@ -10,6 +10,6 @@ class Sound(models.Model):
 
     def __str__(self):
         return (
-            f'{self.link}, '
-            f'{self.sort_number}'
+            f'{self.sort_number}, '
+            f'{self.link}'
         )

@@ -25,9 +25,11 @@ class SpellingLanguage(models.Model):
 
     def __str__(self):
         return (
+            f'{self.sort_number}, '
+            f'language: '
             f'{self.language} '
-            f'{self.system} '
-            f'{self.sort_number}'
+            f'system: '
+            f'{self.system}'
         )
 
 
@@ -43,9 +45,10 @@ class Spelling(models.Model):
 
     def __str__(self):
         return (
-            f'{self.text} '
-            f'{self.spelling_language} '
-            f'{self.sort_number}'
+            f'{self.sort_number}, '
+            f'{self.text},  '
+            f'spelling language: '
+            f'{self.spelling_language}'
         )
 
 
@@ -69,11 +72,9 @@ class Pronunciation(models.Model):
             spellings_texts.append(spelling.text)
 
         return (
-            f'spellings '
+            f'{self.sort_number}, '
+            f'spellings:  '
             f'{spellings_texts}, '
-            f'sound '
-            f'{self.sound} '
-            f'{self.sort_number}'
         )
 
 
@@ -94,10 +95,7 @@ class Meaning(models.Model):
             images_links.append(image.link)
 
         return (
-            f'{self.definition} '
-            f'images '
-            f'{images_links}, '
-            f'{self.sort_number}'
+            f'{self.definition}'
         )
 
 
@@ -129,6 +127,8 @@ class Phrase(models.Model):
         related_name='examples_Phrase_related'
     )
 
+    sort_number = models.FloatField(default=0, blank=True)
+
     def __str__(self):
         spellings = self.spellings.all().order_by('sort_number')
         spellings_texts = []
@@ -136,11 +136,12 @@ class Phrase(models.Model):
             spellings_texts.append(spelling.text)
 
         return (
+            f'{self.sort_number}, '
             f'{self.meaning} '
             f'{self.language} '
             f'{self.pronunciation} '
-            f'spellings '
+            f'spellings: '
             f'{spellings_texts}, '
-            f'synonym sort number '
+            f'synonym sort number: '
             f'{self.synonym_sort_number}'
         )

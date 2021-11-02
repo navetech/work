@@ -14,12 +14,10 @@ class Iso_639_LanguageCode(models.Model):
 
     def __str__(self):
         return (
+            f'{self.sort_number}, '
             f'{self.iso_639_2_code}, '
             f'{self.iso_639_1_code}, '
-            f'{self.english_name}, '
-            f'{self.french_name}, '
-            f'{self.german_name}, '
-            f'{self.sort_number}'
+            f'{self.english_name}'
         )
 
 
@@ -30,6 +28,6 @@ class TransliterationSystem(models.Model):
 
     def __str__(self):
         return (
-            f'{self.name}, '
-            f'{self.sort_number}'
+            f'{self.sort_number}, '
+            f'{self.name}'
         )
