@@ -2,87 +2,16 @@ from django.db import models
 
 # Create your models here.
 
-from languages.models import Iso_639_LanguageCode
-from languages.models import TransliterationSystem
-from languages.models import PronunciationForm
-
 from images.models import Image
 
+from languages.models import TranscriptionSystem
+
 from sounds.models import Sound
+from languages.models import PronunciationForm
 
+from languages.models import TransliterationScript
 
-class SpellingLanguage(models.Model):
-    language = models.ForeignKey(
-        Iso_639_LanguageCode, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='language_SpellingLanguage_related'
-    )
-
-    system = models.ForeignKey(
-        TransliterationSystem, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='system_SpellingLanguage_related'
-    )
-
-    sort_number = models.FloatField(default=0, blank=True)
-
-    def __str__(self):
-        return (
-            f'{self.sort_number}, '
-            f'language: '
-            f'{self.language} '
-            f'system: '
-            f'{self.system}'
-        )
-
-
-class Spelling(models.Model):
-    text = models.TextField(blank=True)
-
-    spelling_language = models.ForeignKey(
-        SpellingLanguage, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='spelling_language_Spelling_related'
-    )
-
-    sort_number = models.FloatField(default=0, blank=True)
-
-    def __str__(self):
-        return (
-            f'{self.sort_number}, '
-            f'{self.text},  '
-            f'spelling language: '
-            f'{self.spelling_language}'
-        )
-
-
-class Pronunciation(models.Model):
-    sound = models.ForeignKey(
-        Sound, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='sound_Pronunciation_related'
-    )
-
-    form = models.ForeignKey(
-        PronunciationForm, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='form_Pronunciation_related'
-    )
-
-    spellings = models.ManyToManyField(
-        Spelling, blank=True,
-        related_name='spellings_Pronunciation_related'
-    )
-
-    sort_number = models.FloatField(default=0, blank=True)
-
-    def __str__(self):
-        spellings = self.spellings.all().order_by('sort_number')
-        spellings_texts = []
-        for spelling in spellings:
-            spellings_texts.append(spelling.text)
-
-        return (
-            f'{self.sort_number}, '
-            f'{self.form}, '
-            f'spellings:  '
-            f'{spellings_texts}, '
-        )
+from languages.models import Iso_639_LanguageCode
 
 
 class Meaning(models.Model):
@@ -97,12 +26,82 @@ class Meaning(models.Model):
 
     def __str__(self):
         images = self.images.all().order_by('sort_number')
-        images_links = []
+        images_names = []
         for image in images:
-            images_links.append(image.link)
+            images_names.append(image.link)
 
         return (
             f'{self.definition}'
+        )
+
+
+class Transcription(models.Model):
+    text = models.TextField(blank=True)
+
+    system = models.ForeignKey(
+        TranscriptionSystem, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='system_Transcription_related'
+    )
+
+    sort_number = models.FloatField(default=0, blank=True)
+
+    def __str__(self):
+        return (
+            f'{self.sort_number}, '
+            f'{self.text},  '
+            f'system: '
+            f'{self.system}'
+        )
+
+
+class Pronunciation(models.Model):
+    sound = models.ForeignKey(
+        Sound, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='sound_Pronunciation_related'
+    )
+
+    form = models.ForeignKey(
+        PronunciationForm, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='form_Pronunciation_related'
+    )
+
+    transcriptions = models.ManyToManyField(
+        Transcription, blank=True,
+        related_name='transcriptions_Pronunciation_related'
+    )
+
+    sort_number = models.FloatField(default=0, blank=True)
+
+    def __str__(self):
+        transcriptions = self.transcriptions.all().order_by('sort_number')
+        transcriptions_texts = []
+        for transcription in transcriptions:
+            transcriptions_texts.append(transcription.text)
+
+        return (
+            f'{self.sort_number}, '
+            f'{self.form}, '
+            f'transcriptions:  '
+            f'{transcriptions_texts}, '
+        )
+
+
+class Spelling(models.Model):
+    text = models.TextField(blank=True)
+
+    script = models.ForeignKey(
+        TransliterationScript, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='script_Spelling_related'
+    )
+
+    sort_number = models.FloatField(default=0, blank=True)
+
+    def __str__(self):
+        return (
+            f'{self.sort_number}, '
+            f'{self.text},  '
+            f'script: '
+            f'{self.script}'
         )
 
 
@@ -136,6 +135,8 @@ class Phrase(models.Model):
         related_name='examples_Phrase_related'
     )
 
+    example_sort_number = models.FloatField(default=0, blank=True)
+
     sort_number = models.FloatField(default=0, blank=True)
 
     def __str__(self):
@@ -151,6 +152,4 @@ class Phrase(models.Model):
             f'{self.pronunciation} '
             f'spellings: '
             f'{spellings_texts}, '
-            f'synonym sort number: '
-            f'{self.synonym_sort_number}'
         )

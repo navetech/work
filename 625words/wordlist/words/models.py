@@ -6,7 +6,7 @@ from phrases.models import Meaning
 
 
 class Thema(models.Model):
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=128)
 
     sort_number = models.FloatField(default=0, blank=True)
 
@@ -23,7 +23,7 @@ class Group(models.Model):
         related_name='base_word_Group_related'
     )
 
-    grouping_key = models.CharField(max_length=64)
+    grouping_key = models.CharField(max_length=128)
 
     def __str__(self):
         return (
