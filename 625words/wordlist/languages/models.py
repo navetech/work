@@ -31,3 +31,15 @@ class TransliterationSystem(models.Model):
             f'{self.sort_number}, '
             f'{self.name}'
         )
+
+
+class PronunciationForm(models.Model):
+    name = models.CharField(max_length=64)
+
+    sort_number = models.FloatField(default=0, blank=True)
+
+    def __str__(self):
+        return (
+            f'{self.sort_number}, '
+            f'{self.name}'
+        )

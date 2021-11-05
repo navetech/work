@@ -4,6 +4,7 @@ from django.db import models
 
 from languages.models import Iso_639_LanguageCode
 from languages.models import TransliterationSystem
+from languages.models import PronunciationForm
 
 from images.models import Image
 
@@ -53,14 +54,19 @@ class Spelling(models.Model):
 
 
 class Pronunciation(models.Model):
-    spellings = models.ManyToManyField(
-        Spelling, blank=True,
-        related_name='spellings_Pronunciation_related'
-    )
-
     sound = models.ForeignKey(
         Sound, blank=True, null=True, on_delete=models.CASCADE,
         related_name='sound_Pronunciation_related'
+    )
+
+    form = models.ForeignKey(
+        PronunciationForm, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='form_Pronunciation_related'
+    )
+
+    spellings = models.ManyToManyField(
+        Spelling, blank=True,
+        related_name='spellings_Pronunciation_related'
     )
 
     sort_number = models.FloatField(default=0, blank=True)
@@ -73,6 +79,7 @@ class Pronunciation(models.Model):
 
         return (
             f'{self.sort_number}, '
+            f'{self.form}, '
             f'spellings:  '
             f'{spellings_texts}, '
         )
@@ -121,6 +128,8 @@ class Phrase(models.Model):
     )
 
     synonym_sort_number = models.FloatField(default=0, blank=True)
+
+    pronunciation_sort_number = models.FloatField(default=0, blank=True)
 
     examples = models.ManyToManyField(
         'self', blank=True,

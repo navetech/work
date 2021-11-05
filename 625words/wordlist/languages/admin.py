@@ -4,7 +4,9 @@ from django.contrib import admin
 
 from .models import Iso_639_LanguageCode
 from .models import TransliterationSystem
+from .models import PronunciationForm
 
 
 admin.site.register(Iso_639_LanguageCode)
 admin.site.register(TransliterationSystem)
+admin.site.register(PronunciationForm)
