@@ -23,8 +23,8 @@ from .models import UserSetting
 from .models import Dish
 from .models import Order, OrderDish, OrderType
 from .models import OrderFlavor, OrderSize
-from .models import get_order
-from .models import get_order_dish
+
+from .models import create_order_dish, get_order_dish
 
 from django.http import JsonResponse
 
@@ -297,9 +297,29 @@ def order_item(request, dish_id, type_id, flavor_id, size_id):
         return HttpResponseRedirect(reverse('index'))
 
     dish_id = None if dish_id == 'None' else dish_id
+    if not dish_id:
+        return HttpResponseRedirect(reverse('index'))
+
     type_id = None if type_id == 'None' else type_id
     flavor_id = None if flavor_id == 'None' else flavor_id
     size_id = None if size_id == 'None' else size_id
+
+    user = request.user
+    order = Order.objects.filter(user=user).first()
+    if not order:
+        order = Order(user=user)
+        order.save()
+
+        order_dish = create_order_dish(order, dish_id, type_id, flavor_id, size_id)
+        if not order_dish:
+            order.cancel()
+    else:
+        order_dish = get_order_dish(order, dish_id, type_id, flavor_id, size_id)
+        if not order_dish:
+            order_dish = create_order_dish(order, dish_id, type_id, flavor_id, size_id)
+
+    if not order_dish:
+        return HttpResponseRedirect(reverse('index'))
 
     user_settings = UserSetting.get_first(user=request.user)
     language = None
@@ -325,10 +345,6 @@ def order_item(request, dish_id, type_id, flavor_id, size_id):
     currencies_dict_list = to_dict_list(
         Currency.objects, 'code__sort_number', language=language
     )
-
-    order = get_order(user=request.user)
-
-    order_dish = get_order_dish(order, dish_id, type_id, flavor_id, size_id)
 
     order_dish_dict = {}
     order_dish.to_dict(order_dish_dict, language=language, currency=currency)
@@ -388,12 +404,13 @@ def cart(request):
         Currency.objects, 'code__sort_number', language=language
     )
 
-    order = get_order(user=request.user)
-
     order_dict = {}
-    order.to_dict(order_dict, language=language, currency=currency)
+    user = request.user
+    order = Order.objects.filter(user=user).first()
+    if order:
+        order.to_dict(order_dict, language=language, currency=currency)
 
-    calc_order_price(order_dict)
+        calc_order_price(order_dict)
 
 #    put_columns_to_order_dishes(order_dishes_dict_list)
 

@@ -1045,6 +1045,7 @@ def create_order_type(order_object, menu_object, type_id, flavor_id, size_id):
 def create_order_dish(order, dish_id, type_id, flavor_id, size_id):
     if not order:
         return None
+
     if dish_id is None:
         return None
 
@@ -1074,13 +1075,6 @@ def create_order_dish(order, dish_id, type_id, flavor_id, size_id):
     order.save()
 
     return order_dish
-
-
-def get_order_dishes(order):
-    if not order:
-        return []
-
-    return order.dishes.all()
 
 
 def get_order_dish(order, dish_id, type_id, flavor_id, size_id):
@@ -1126,24 +1120,7 @@ def get_order_dish(order, dish_id, type_id, flavor_id, size_id):
             if no_components:
                 return order_dish
 
-    order_dish = create_order_dish(order, dish_id, type_id, flavor_id, size_id)
-
-    return order_dish
-
-
-def create_order(user):
-    order = Order(user=user)
-    order.save()
-
-    return order
-
-
-def get_order(user):
-    order = Order.objects.filter(user=user).first()
-    if not order:
-        order = create_order(user=user)
-
-    return order
+    return None
 
 
 def get_order_type(order_object, type_id, flavor_id, size_id):
