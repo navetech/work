@@ -5,24 +5,24 @@ from django.db import models
 from languages.models import Iso_639_LanguageCode
 
 
+def to_dict(object, **settings):
+    if object:
+        dict = object.to_dict(**settings)
+    else:
+        dict = {}
+
+    return dict
+
+
 def to_dict_list(manager, *order_by_field_names, **settings):
     dict_list = []
 
     objects = manager.all().order_by(*order_by_field_names)
     for object in objects:
-        dict = {}
-        object.to_dict(dict, **settings)
+        dict = to_dict(object, **settings)
         dict_list.append(dict)
 
     return dict_list
-
-
-def to_dict(object, dict, key, **settings):
-    dict[key] = {}
-    if object:
-        object.to_dict(dict[key], **settings)
-
-    return
 
 
 class Phrase(models.Model):
@@ -84,7 +84,9 @@ class Phrase(models.Model):
                 return translated
         return translated
 
-    def to_dict(self, dict, **settings):
+    def to_dict(self, **settings):
+        dict = {}
+
         dict['id'] = self.id
 
         dict['words'] = self.words
@@ -94,7 +96,7 @@ class Phrase(models.Model):
         for language in languages:
             dict['languages'].append(language.english_name)
 
-        to_dict(self.translation_of, dict, key='translation_of', **settings)
+        dict['translation_of'] = to_dict(self.translation_of, **settings)
 
         if settings and settings['language']:
             language = settings['language']
@@ -103,7 +105,7 @@ class Phrase(models.Model):
 
         dict['translated'] = self.translate_to(language)
 
-        return
+        return dict
 
     def translate(self):
         language = Setting.get_first_language()
@@ -128,16 +130,19 @@ class Language(models.Model):
             f'{self.name}'
         )
 
-    def to_dict(self, dict, **settings):
+    def to_dict(self, **settings):
+        dict= {}
+
         dict['id'] = self.id
 
-        dict['code'] = {}
         if self.code:
             dict['code'] = self.code.english_name
+        else:
+            dict['code'] = {}
 
-        to_dict(self.name, dict, key='name', **settings)
+        dict['name'] = to_dict(self.name, **settings)
 
-        return
+        return dict
 
 
 class Setting(models.Model):

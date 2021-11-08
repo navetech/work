@@ -13,7 +13,7 @@ from django.shortcuts import render
 from django.contrib.auth.models import User
 
 from texts.models import Language
-from texts.models import to_dict_list
+from texts.models import to_dict, to_dict_list
 
 from quantities.models import Currency
 
@@ -112,23 +112,12 @@ def menu(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
 
-    user_settings = UserSetting.get_first(user=request.user)
-    language = None
-    currency = None
-    user_settings_dict = {}
-    if user_settings:
-        if user_settings.language:
-            language = user_settings.language
+    pages_basic_data = get_pages_basic_data(request)
 
-        if user_settings.currency:
-            currency = user_settings.currency
-
-        user_settings.to_dict(user_settings_dict, language=language)
-
-    settings = Setting.objects.first()
-    settings_dict = {}
-    if settings:
-        settings.to_dict(settings_dict, language=language)
+    language = pages_basic_data['language']
+    currency = pages_basic_data['currency']
+    user_settings_dict = pages_basic_data['user_settings_dict']
+    settings_dict = pages_basic_data['settings_dict']
 
     languages_dict_list = to_dict_list(
         Language.objects, 'code__sort_number'
@@ -136,6 +125,7 @@ def menu(request):
     currencies_dict_list = to_dict_list(
         Currency.objects, 'code__sort_number', language=language
     )
+
     dishes_dict_list = to_dict_list(
         Dish.objects, 'sort_number', language=language, currency=currency
     )
@@ -284,12 +274,6 @@ def alter_order(request):
 
 
 def order_item(request, dish_id, type_id, flavor_id, size_id):
-    """
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("index"))
-    return HttpResponse(f'{dish_id}/{type_id}/{flavor_id}/{size_id}')
-    """
-
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
 
@@ -321,23 +305,12 @@ def order_item(request, dish_id, type_id, flavor_id, size_id):
     if not order_dish:
         return HttpResponseRedirect(reverse('index'))
 
-    user_settings = UserSetting.get_first(user=request.user)
-    language = None
-    currency = None
-    user_settings_dict = {}
-    if user_settings:
-        if user_settings.language:
-            language = user_settings.language
+    pages_basic_data = get_pages_basic_data(request)
 
-        if user_settings.currency:
-            currency = user_settings.currency
-
-        user_settings.to_dict(user_settings_dict, language=language)
-
-    settings = Setting.objects.first()
-    settings_dict = {}
-    if settings:
-        settings.to_dict(settings_dict, language=language)
+    language = pages_basic_data['language']
+    currency = pages_basic_data['currency']
+    user_settings_dict = pages_basic_data['user_settings_dict']
+    settings_dict = pages_basic_data['settings_dict']
 
     languages_dict_list = to_dict_list(
         Language.objects, 'code__sort_number'
@@ -346,8 +319,7 @@ def order_item(request, dish_id, type_id, flavor_id, size_id):
         Currency.objects, 'code__sort_number', language=language
     )
 
-    order_dish_dict = {}
-    order_dish.to_dict(order_dish_dict, language=language, currency=currency)
+    order_dish_dict = to_dict(order_dish, language=language, currency=currency)
 
     calc_order_dish_price(order_dish_dict)
 
@@ -370,32 +342,15 @@ def order_item(request, dish_id, type_id, flavor_id, size_id):
 
 
 def cart(request):
-    """
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("index"))
-    return HttpResponse(f'Shopping Cart')
-    """
-
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
 
-    user_settings = UserSetting.get_first(user=request.user)
-    language = None
-    currency = None
-    user_settings_dict = {}
-    if user_settings:
-        if user_settings.language:
-            language = user_settings.language
+    pages_basic_data = get_pages_basic_data(request)
 
-        if user_settings.currency:
-            currency = user_settings.currency
-
-        user_settings.to_dict(user_settings_dict, language=language)
-
-    settings = Setting.objects.first()
-    settings_dict = {}
-    if settings:
-        settings.to_dict(settings_dict, language=language)
+    language = pages_basic_data['language']
+    currency = pages_basic_data['currency']
+    user_settings_dict = pages_basic_data['user_settings_dict']
+    settings_dict = pages_basic_data['settings_dict']
 
     languages_dict_list = to_dict_list(
         Language.objects, 'code__sort_number'
@@ -404,13 +359,13 @@ def cart(request):
         Currency.objects, 'code__sort_number', language=language
     )
 
-    order_dict = {}
-    user = request.user
-    order = Order.objects.filter(user=user).first()
+    order = Order.objects.filter(user=request.user).first()
     if order:
-        order.to_dict(order_dict, language=language, currency=currency)
-
+        order_dict = to_dict(order, language=language, currency=currency)
+        
         calc_order_price(order_dict)
+    else:
+        order_dict = {}
 
 #    put_columns_to_order_dishes(order_dishes_dict_list)
 
@@ -428,12 +383,6 @@ def cart(request):
 
 
 def clear_cart(request):
-    """
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("index"))
-    return HttpResponse(f'Shopping Cart')
-    """
-
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
 
@@ -619,39 +568,49 @@ def calc_order_size_price(order_size):
     return price
 
 
-def get_pages_basic_data(
-        request, language, currency,
-        settings_dict, user_settings_dict
-        ):
-
+def get_pages_basic_data(request):
     user_settings = UserSetting.get_first(user=request.user)
     if user_settings:
         if user_settings.language:
             language = user_settings.language
+        else:
+            language = None
 
         if user_settings.currency:
-            currency = currency
             currency = user_settings.currency
+        else:
+            currency = None
 
-        user_settings.to_dict(user_settings_dict, language=language)
+        user_settings_dict = to_dict(user_settings, language=language)
+    else:
+        language = None
+        currency = None
+        user_settings_dict = {}
 
     settings = Setting.objects.first()
     if settings:
-        settings.to_dict(settings_dict, language=language)
+        settings_dict = to_dict(settings, language=language)
+    else:
+        settings_dict = {}
+
+    pages_basic_data = {}
+    pages_basic_data['language'] = language
+    pages_basic_data['currency'] = currency
+    pages_basic_data['user_settings_dict'] = user_settings_dict
+    pages_basic_data['settings_dict'] = settings_dict
+
+    return pages_basic_data
 
 
 def success(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
 
-    language = None
-    currency = None
-    settings_dict = {}
-    user_settings_dict = {}
-    get_pages_basic_data(
-        request, language, currency,
-        settings_dict, user_settings_dict
-    )
+    pages_basic_data = get_pages_basic_data(request)
+
+    language = pages_basic_data['language']
+    user_settings_dict = pages_basic_data['user_settings_dict']
+    settings_dict = pages_basic_data['settings_dict']
 
     languages_dict_list = to_dict_list(
         Language.objects, 'code__sort_number'
@@ -677,14 +636,11 @@ def cancel(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
 
-    language = None
-    currency = None
-    settings_dict = {}
-    user_settings_dict = {}
-    get_pages_basic_data(
-        request, language, currency,
-        settings_dict, user_settings_dict
-    )
+    pages_basic_data = get_pages_basic_data(request)
+
+    language = pages_basic_data['language']
+    user_settings_dict = pages_basic_data['user_settings_dict']
+    settings_dict = pages_basic_data['settings_dict']
 
     languages_dict_list = to_dict_list(
         Language.objects, 'code__sort_number'

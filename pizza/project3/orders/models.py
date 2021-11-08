@@ -7,8 +7,7 @@ from django.contrib.auth.models import User
 from texts.models import Phrase
 from texts.models import Language
 from texts.models import Setting as TextSetting
-from texts.models import to_dict_list
-from texts.models import to_dict
+from texts.models import to_dict, to_dict_list
 
 from quantities.models import Currency
 from quantities.models import Setting as QuantitySetting
@@ -123,65 +122,30 @@ class Setting(models.Model):
             f'{self.cancel_page_contents}'
         )
 
-    def to_dict(self, dict, **settings):
+    def to_dict(self, **settings):
+        dict = {}
+
         dict['id'] = self.id
 
-        to_dict(self.product_title, dict, key='product_title', **settings)
-        to_dict(self.product_name, dict, key='product_name', **settings)
-        to_dict(
-            self.menu_page_title, dict, key='menu_page_title', **settings
-        )
-        to_dict(
-            self.menu_page_header, dict, key='menu_page_header', **settings
-        )
-        to_dict(
-            self.order_page_title, dict, key='order_page_title', **settings
-        )
-        to_dict(
-            self.order_page_header, dict, key='order_page_header', **settings
-        )
-        to_dict(
-            self.cart_page_title, dict, key='cart_page_title', **settings
-        )
-        to_dict(
-            self.cart_page_header, dict, key='cart_page_header', **settings
-        )
-        to_dict(
-            self.cart_page_items_header, dict,
-            key='cart_page_items_header', **settings
-        )
-        to_dict(
-            self.cart_page_no_items_header, dict,
-            key='cart_page_no_items_header', **settings
-        )
-        to_dict(
-            self.success_page_title,
-            dict, key='success_page_title', **settings
-        )
-        to_dict(
-            self.success_page_header,
-            dict, key='success_page_header', **settings
-        )
-        to_dict(
-            self.success_page_contents_01, dict,
-            key='success_page_contents_01', **settings
-        )
-        to_dict(
-            self.success_page_contents_02, dict,
-            key='success_page_contents_02', **settings
-        )
-        to_dict(
-            self.cancel_page_title, dict, key='cancel_page_title', **settings
-        )
-        to_dict(
-            self.cancel_page_header, dict, key='cancel_page_header', **settings
-        )
-        to_dict(
-            self.cancel_page_contents, dict,
-            key='cancel_page_contents', **settings
-        )
+        dict['product_title'] = to_dict(self.product_title, **settings)
+        dict['product_name'] = to_dict(self.product_name, **settings)
+        dict['menu_page_title'] = to_dict(self.menu_page_title, **settings)
+        dict['menu_page_header'] = to_dict(self.menu_page_header, **settings)
+        dict['order_page_title'] = to_dict(self.order_page_title, **settings)
+        dict['order_page_header'] = to_dict(self.order_page_header, **settings)
+        dict['cart_page_title'] = to_dict(self.cart_page_title, **settings)
+        dict['cart_page_header'] = to_dict(self.cart_page_header, **settings)
+        dict['cart_page_items_header'] = to_dict(self.cart_page_items_header, **settings)
+        dict['cart_page_no_items_header'] = to_dict(self.cart_page_no_items_header, **settings)
+        dict['success_page_title'] = to_dict(self.success_page_title, **settings)
+        dict['success_page_header'] = to_dict(self.success_page_header, **settings)
+        dict['success_page_contents_01'] = to_dict(self.success_page_contents_01, **settings)
+        dict['success_page_contents_02'] = to_dict(self.success_page_contents_02, **settings)
+        dict['cancel_page_title'] = to_dict(self.cancel_page_title, **settings)
+        dict['cancel_page_header'] = to_dict(self.cancel_page_header, **settings)
+        dict['cancel_page_contents'] = to_dict(self.cancel_page_contents, **settings)
 
-        return
+        return dict
 
 
 class UserSetting(models.Model):
@@ -207,13 +171,15 @@ class UserSetting(models.Model):
             f'{self.currency}'
         )
 
-    def to_dict(self, dict, **settings):
+    def to_dict(self, **settings):
+        dict = {}
+        
         dict['id'] = self.id
 
-        to_dict(self.language, dict, key='language', **settings)
-        to_dict(self.currency, dict, key='currency', **settings)
+        dict['language'] = to_dict(self.language, **settings)
+        dict['currency'] = to_dict(self.currency, **settings)
 
-        return
+        return dict
 
     @classmethod
     def get_first(cls, user):
@@ -260,12 +226,13 @@ class CommonFields(models.Model):
             f'{self.trait}'
         )
 
-    def to_dict(self, dict, **settings):
+    def to_dict(self, **settings):
+        dict = {}
         dict['id'] = self.id
 
-        to_dict(self.trait, dict, key='trait', **settings)
+        dict['trait'] = to_dict(self.trait, **settings)
 
-        return
+        return dict
 
 
 class MenuCommonFields(CommonFields):
@@ -280,11 +247,11 @@ class MenuCommonFields(CommonFields):
             f'{CommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict, **settings):
-        CommonFields.to_dict(self, dict, **settings)
+    def to_dict(self, **settings):
+        dict = CommonFields.to_dict(self, **settings)
         dict['sort_number'] = self.sort_number
 
-        return
+        return dict
 
 
 class CountLimit(models.Model):
@@ -297,13 +264,15 @@ class CountLimit(models.Model):
             f'{self.max}'
         )
 
-    def to_dict(self, dict, **settings):
+    def to_dict(self, **settings):
+        dict = {}
+
         dict['id'] = self.id
 
         dict['min'] = self.min
         dict['max'] = self.max
 
-        return
+        return dict
 
 
 class Size(MenuCommonFields):
@@ -314,10 +283,10 @@ class Size(MenuCommonFields):
             f'{MenuCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict, **settings):
-        MenuCommonFields.to_dict(self, dict, **settings)
+    def to_dict(self, **settings):
+        dict = MenuCommonFields.to_dict(self, **settings)
 
-        return
+        return dict
 
 
 class Adding(MenuCommonFields):
@@ -348,16 +317,16 @@ class Adding(MenuCommonFields):
             f'{MenuCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict, **settings):
-        MenuCommonFields.to_dict(self, dict, **settings)
+    def to_dict(self, **settings):
+        dict = MenuCommonFields.to_dict(self, **settings)
 
         dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
-        to_dict(self.flavors_count, dict, key='flavors_count', **settings)
+        dict['flavors_count'] = to_dict(self.flavors_count, **settings)
 
         dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
-        to_dict(self.sizes_count, dict, key='sizes_count', **settings)
+        dict['sizes_count'] = to_dict(self.sizes_count, **settings)
 
-        return
+        return dict
 
 
 class Flavor(MenuCommonFields):
@@ -388,16 +357,16 @@ class Flavor(MenuCommonFields):
             f'{MenuCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict, **settings):
-        MenuCommonFields.to_dict(self, dict, **settings)
+    def to_dict(self, **settings):
+        dict = MenuCommonFields.to_dict(self, **settings)
 
         dict['addings'] = to_dict_list(self.addings, 'sort_number', **settings)
-        to_dict(self.addings_count, dict, key='addings_count', **settings)
+        dict['addings_count'] = to_dict(self.addings_count, **settings)
 
         dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
-        to_dict(self.sizes_count, dict, key='sizes_count', **settings)
+        dict['sizes_count'] = to_dict(self.sizes_count, **settings)
 
-        return
+        return dict
 
 
 class Type(MenuCommonFields):
@@ -439,19 +408,19 @@ class Type(MenuCommonFields):
             f'{MenuCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict, **settings):
-        MenuCommonFields.to_dict(self, dict, **settings)
+    def to_dict(self, **settings):
+        dict = MenuCommonFields.to_dict(self, **settings)
 
         dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
-        to_dict(self.flavors_count, dict, key='flavors_count', **settings)
+        dict['flavors_count'] = to_dict(self.flavors_count, **settings)
 
         dict['addings'] = to_dict_list(self.addings, 'sort_number', **settings)
-        to_dict(self.addings_count, dict, key='addings_count', **settings)
+        dict['addings_count'] = to_dict(self.addings_count, **settings)
 
         dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
-        to_dict(self.sizes_count, dict, key='sizes_count', **settings)
+        dict['sizes_count'] = to_dict(self.sizes_count, **settings)
 
-        return
+        return dict
 
 
 class Dish(MenuCommonFields):
@@ -504,22 +473,22 @@ class Dish(MenuCommonFields):
             f'{MenuCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict, **settings):
-        MenuCommonFields.to_dict(self, dict, **settings)
+    def to_dict(self, **settings):
+        dict = MenuCommonFields.to_dict(self, **settings)
 
         dict['types'] = to_dict_list(self.types, 'sort_number', **settings)
-        to_dict(self.types_count, dict, key='types_count', **settings)
+        dict['types_count'] = to_dict(self.types_count, **settings)
 
         dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
-        to_dict(self.flavors_count, dict, key='flavors_count', **settings)
+        dict['flavors_count'] = to_dict(self.flavors_count, **settings)
 
         dict['addings'] = to_dict_list(self.addings, 'sort_number', **settings)
-        to_dict(self.addings_count, dict, key='addings_count', **settings)
+        dict['addings_count'] = to_dict(self.addings_count, **settings)
 
         dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
-        to_dict(self.sizes_count, dict, key='sizes_count', **settings)
+        dict['sizes_count'] = to_dict(self.sizes_count, **settings)
 
-        return
+        return dict
 
 
 class OrderBasicCommonFields(CommonFields):
@@ -534,11 +503,11 @@ class OrderBasicCommonFields(CommonFields):
             f'{CommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict, **settings):
-        CommonFields.to_dict(self, dict, **settings)
+    def to_dict(self, **settings):
+        dict = CommonFields.to_dict(self, **settings)
         dict['count'] = self.count
 
-        return
+        return dict
 
 
 class OrderCommonFields(OrderBasicCommonFields):
@@ -553,11 +522,11 @@ class OrderCommonFields(OrderBasicCommonFields):
             f'{OrderBasicCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict, **settings):
-        OrderBasicCommonFields.to_dict(self, dict, **settings)
+    def to_dict(self, **settings):
+        dict = OrderBasicCommonFields.to_dict(self, **settings)
         dict['plain'] = self.plain
 
-        return
+        return dict
 
 
 class OrderSize(OrderBasicCommonFields):
@@ -575,12 +544,12 @@ class OrderSize(OrderBasicCommonFields):
             f'{OrderBasicCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict, **settings):
-        OrderBasicCommonFields.to_dict(self, dict, **settings)
+    def to_dict(self, **settings):
+        dict = OrderBasicCommonFields.to_dict(self, **settings)
 
-        to_dict(self.menu, dict, key='menu', **settings)
+        dict['menu'] = to_dict(self.menu, **settings)
 
-        return
+        return dict
 
 
 def get_order_size(order_object, size_id):
@@ -633,15 +602,15 @@ class OrderAdding(OrderCommonFields):
             f'{OrderCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict, **settings):
-        OrderCommonFields.to_dict(self, dict, **settings)
+    def to_dict(self, **settings):
+        dict = OrderCommonFields.to_dict(self, **settings)
 
         dict['flavors'] = to_dict_list(self.flavors, **settings)
         dict['sizes'] = to_dict_list(self.sizes, **settings)
 
-        to_dict(self.menu, dict, key='menu', **settings)
+        dict['menu'] = to_dict(self.menu, **settings)
 
-        return
+        return dict
 
 
 class OrderFlavor(OrderCommonFields):
@@ -674,15 +643,15 @@ class OrderFlavor(OrderCommonFields):
             f'{OrderCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict, **settings):
-        OrderCommonFields.to_dict(self, dict, **settings)
+    def to_dict(self, **settings):
+        dict = OrderCommonFields.to_dict(self, **settings)
 
         dict['addings'] = to_dict_list(self.addings, **settings)
         dict['sizes'] = to_dict_list(self.sizes, **settings)
 
-        to_dict(self.menu, dict, key='menu', **settings)
+        dict['menu'] = to_dict(self.menu, **settings)
 
-        return
+        return dict
 
 
 def get_order_flavor(order_object, flavor_id, size_id):
@@ -752,16 +721,16 @@ class OrderType(OrderCommonFields):
             f'{OrderCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict, **settings):
-        OrderCommonFields.to_dict(self, dict, **settings)
+    def to_dict(self, **settings):
+        dict = OrderCommonFields.to_dict(self, **settings)
 
         dict['flavors'] = to_dict_list(self.flavors, **settings)
         dict['addings'] = to_dict_list(self.addings, **settings)
         dict['sizes'] = to_dict_list(self.sizes, **settings)
 
-        to_dict(self.menu, dict, key='menu', **settings)
+        dict['menu'] = to_dict(self.menu, **settings)
 
-        return
+        return dict
 
 
 class OrderDish(OrderCommonFields):
@@ -808,17 +777,17 @@ class OrderDish(OrderCommonFields):
             f'{OrderCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict, **settings):
-        OrderCommonFields.to_dict(self, dict, **settings)
+    def to_dict(self, **settings):
+        dict = OrderCommonFields.to_dict(self, **settings)
 
         dict['types'] = to_dict_list(self.types, **settings)
         dict['flavors'] = to_dict_list(self.flavors, **settings)
         dict['addings'] = to_dict_list(self.addings, **settings)
         dict['sizes'] = to_dict_list(self.sizes, **settings)
 
-        to_dict(self.menu, dict, key='menu', **settings)
+        dict['menu'] = to_dict(self.menu, **settings)
 
-        return
+        return dict
 
 
 class Order(CommonFields):
@@ -847,12 +816,12 @@ class Order(CommonFields):
             f'{CommonFields.__str__(self)}'
         )
 
-    def to_dict(self, dict, **settings):
-        CommonFields.to_dict(self, dict, **settings)
+    def to_dict(self, **settings):
+        dict = CommonFields.to_dict(self, **settings)
 
         dict['dishes'] = to_dict_list(self.dishes, **settings)
 
-        return
+        return dict
 
 
 class HistoricOrder(models.Model):

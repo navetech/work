@@ -37,12 +37,14 @@ class Trait(models.Model):
             f'{self.img}'
         )
 
-    def to_dict(self, dict, **settings):
+    def to_dict(self, **settings):
+        dict = {}
+
         dict['id'] = self.id
 
-        to_dict(self.short_name, dict, key='short_name', **settings)
-        to_dict(self.long_name, dict, key='long_name', **settings)
-        to_dict(self.quantity, dict, key='quantity', **settings)
+        dict['short_name'] = to_dict(self.short_name, **settings)
+        dict['long_name'] = to_dict(self.long_name, **settings)
+        dict['quantity'] = to_dict(self.quantity, **settings)
 
         dict['img'] = {}
         if self.img:
@@ -52,4 +54,4 @@ class Trait(models.Model):
             dict['img']['height'] = self.img.height
             dict['img']['width'] = self.img.width
 
-        return
+        return dict

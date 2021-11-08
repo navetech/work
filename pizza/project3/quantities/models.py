@@ -32,7 +32,9 @@ class Quantity(models.Model):
             f'{self.unit.alphabetic_code}'
         )
 
-    def to_dict(self, dict, **settings):
+    def to_dict(self, **settings):
+        dict = {}
+
         dict['id'] = self.id
 
         dict['value'] = self.value
@@ -45,7 +47,7 @@ class Quantity(models.Model):
 
         dict['converted'] = self.convert_currency_to(currency)
 
-        return
+        return dict
 
     def convert_currency(self):
         currency = Setting.get_first_currency()
@@ -103,14 +105,16 @@ class Currency(models.Model):
             f'{self.name}'
         )
 
-    def to_dict(self, dict, **settings):
+    def to_dict(self, **settings):
+        dict = {}
+
         dict['id'] = self.id
 
         dict['code'] = self.code.alphabetic_code
 
-        to_dict(self.name, dict, key='name', **settings)
+        dict['name'] = to_dict(self.name, **settings)
 
-        return
+        return dict
 
 
 class Setting(models.Model):
