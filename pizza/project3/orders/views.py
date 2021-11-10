@@ -22,7 +22,7 @@ from .models import UserSetting
 
 from .models import Dish
 from .models import Order, OrderDish, OrderType
-from .models import OrderFlavor, OrderSize
+from .models import OrderFlavor, OrderAdding, OrderSize
 
 from .models import create_order_dish, get_order_dish
 
@@ -214,17 +214,56 @@ def alter_order(request):
         order_flavor_id = request.POST["order-flavor-id"]
         order_size_id = request.POST["order-size-id"]
 
+        post_keys = request.POST.keys()
+
+        if "order-adding-id" in post_keys:
+            order_adding_id = request.POST["order-adding-id"]
+        else:
+            order_adding_id = None
+
+        if "order-adding-size-id" in post_keys:
+            order_adding_size_id = request.POST["order-adding-size-id"]
+        else:
+            order_adding_size_id = None
+
+        if "order-adding-flavor-id" in post_keys:
+            order_adding_flavor_id = request.POST["order-adding-flavor-id"]
+        else:
+            order_adding_flavor_id = None
+
+        if "order-adding-flavor-size-id" in post_keys:
+            order_adding_flavor_size_id = request.POST["order-adding-flavor-size-id"]
+        else:
+            order_adding_flavor_size_id = None
+
         order_dish_id = None if order_dish_id == 'None' else order_dish_id
         order_type_id = None if order_type_id == 'None' else order_type_id
         order_flavor_id = (
             None if order_flavor_id == 'None' else order_flavor_id
         )
         order_size_id = None if order_size_id == 'None' else order_size_id
+        order_adding_id = (
+            None if order_adding_id == 'None' else order_adding_id
+        )
+        order_adding_size_id = (
+            None if order_adding_size_id == 'None' else order_adding_size_id
+        )
+        order_adding_flavor_id = (
+            None if order_adding_flavor_id == 'None' else order_adding_flavor_id
+        )
+        order_adding_flavor_size_id = (
+            None if order_adding_flavor_size_id == 'None' else order_adding_flavor_size_id
+        )
 
         order_dish = OrderDish.objects.filter(id=order_dish_id).first()
         order_type = OrderType.objects.filter(id=order_type_id).first()
         order_flavor = OrderFlavor.objects.filter(id=order_flavor_id).first()
         order_size = OrderSize.objects.filter(id=order_size_id).first()
+
+        order_adding = OrderAdding.objects.filter(id=order_adding_id).first()
+        order_adding_size = OrderSize.objects.filter(id=order_adding_size_id).first()
+        order_adding_flavor = OrderFlavor.objects.filter(id=order_adding_flavor_id).first()
+        order_adding_flavor_size = OrderSize.objects.filter(id=order_adding_flavor_size_id).first()
 
         if request.POST["submit"] == 'inc-dish-count':
             order_dish.count += 1
@@ -257,6 +296,38 @@ def alter_order(request):
             if order_size.count > 0:
                 order_size.count -= 1
                 order_size.save()
+
+        elif request.POST["submit"] == 'inc-adding-count':
+            order_adding.count += 1
+            order_adding.save()
+        elif request.POST["submit"] == 'dec-adding-count':
+            if order_adding.count > 0:
+                order_adding.count -= 1
+                order_adding.save()
+
+        elif request.POST["submit"] == 'inc-adding-size-count':
+            order_adding_size.count += 1
+            order_adding_size.save()
+        elif request.POST["submit"] == 'dec-adding-size-count':
+            if order_adding_size.count > 0:
+                order_adding_size.count -= 1
+                order_adding_size.save()
+
+        elif request.POST["submit"] == 'inc-adding-flavor-count':
+            order_adding_flavor.count += 1
+            order_adding_flavor.save()
+        elif request.POST["submit"] == 'dec-adding-flavor-count':
+            if order_adding_flavor.count > 0:
+                order_adding_flavor.count -= 1
+                order_adding_flavor.save()
+
+        elif request.POST["submit"] == 'inc-adding-flavor-size-count':
+            order_adding_flavor_size.count += 1
+            order_adding_flavor_size.save()
+        elif request.POST["submit"] == 'dec-adding-flavor-size-count':
+            if order_adding_flavor_size.count > 0:
+                order_adding_flavor_size.count -= 1
+                order_adding_flavor_size.save()
 
         dish_id = None if not order_dish else order_dish.menu.id
         type_id = None if not order_type else order_type.menu.id

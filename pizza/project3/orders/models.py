@@ -860,9 +860,9 @@ def cancel_order_dishes(order_object):
 
 def create_order_sizes(order_object, menu_object):
     if not order_object:
-        return False
+        return 0
     if not menu_object:
-        return False
+        return 0
 
     for size in menu_object.sizes.all():
         order_size = OrderSize(menu=size, count=0)
@@ -871,7 +871,7 @@ def create_order_sizes(order_object, menu_object):
         order_object.sizes.add(order_size)
         order_object.save()
 
-    return True
+    return len(menu_object.sizes.all())
 
 
 def create_order_size(order_object, menu_object, size_id):
@@ -899,46 +899,50 @@ def create_order_size(order_object, menu_object, size_id):
 
 def create_order_flavors(order_object, menu_object):
     if not order_object:
-        return False
+        return 0
     if not menu_object:
-        return False
+        return 0
 
     for flavor in menu_object.flavors.all():
-        order_flavor = OrderFlavor(menu=flavor, count=0, plain=False)
+        order_flavor = OrderFlavor(menu=flavor, count=0, plain=True)
         order_flavor.save()
 
-        create_order_addings(order_flavor, flavor)
-        order_flavor.save()
+        if create_order_addings(order_flavor, flavor) > 0:
+            order_flavor.plain = False
+            order_flavor.save()
 
-        create_order_sizes(order_flavor, flavor)
-        order_flavor.save()
+        if create_order_sizes(order_flavor, flavor) > 0:
+            order_flavor.plain = False
+            order_flavor.save()
 
         order_object.flavors.add(order_flavor)
         order_object.save()
 
-    return True
+    return len(menu_object.flavors.all())
 
 
 def create_order_addings(order_object, menu_object):
     if not order_object:
-        return False
+        return 0
     if not menu_object:
-        return False
+        return 0
 
     for adding in menu_object.addings.all():
-        order_adding = OrderAdding(menu=adding, count=0, plain=False)
+        order_adding = OrderAdding(menu=adding, count=0, plain=True)
         order_adding.save()
 
-        create_order_flavors(order_adding, adding)
-        order_adding.save()
+        if create_order_flavors(order_adding, adding) > 0:
+            order_adding.plain = False
+            order_adding.save()
 
-        create_order_sizes(order_adding, adding)
-        order_adding.save()
+        if create_order_sizes(order_adding, adding) > 0:
+            order_adding.plain = False
+            order_adding.save()
 
         order_object.addings.add(order_adding)
         order_object.save()
 
-    return True
+    return len(menu_object.addings.all())
 
 
 def create_order_flavor(order_object, menu_object, flavor_id, size_id):
@@ -965,9 +969,9 @@ def create_order_flavor(order_object, menu_object, flavor_id, size_id):
 
     order_flavor.save()
 
-#    if flavor.addings_count.max != 0:
-    create_order_addings(order_flavor, flavor)
-    order_flavor.save()
+    if flavor.addings_count and flavor.addings_count.max:
+        create_order_addings(order_flavor, flavor)
+        order_flavor.save()
 
     order_object.flavors.add(order_flavor)
     order_object.save()
@@ -1001,9 +1005,9 @@ def create_order_type(order_object, menu_object, type_id, flavor_id, size_id):
 
     order_type.save()
 
-#    if type.addings_count.max != 0:
-    create_order_addings(order_type, type)
-    order_type.save()
+    if type.addings_count and type.addings_count.max:
+        create_order_addings(order_type, type)
+        order_type.save()
 
     order_object.types.add(order_type)
     order_object.save()
