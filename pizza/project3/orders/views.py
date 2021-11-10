@@ -365,13 +365,19 @@ def order_item(request, dish_id, type_id, flavor_id, size_id):
         order = Order(user=user)
         order.save()
 
+        print('create_order_dish:', dish_id, type_id, flavor_id, size_id)
         order_dish = create_order_dish(order, dish_id, type_id, flavor_id, size_id)
+        print(order_dish)
         if not order_dish:
             order.cancel()
     else:
+        print('get_order_dish:', dish_id, type_id, flavor_id, size_id)
         order_dish = get_order_dish(order, dish_id, type_id, flavor_id, size_id)
+        print(order_dish)
         if not order_dish:
+            print('create_order_dish:', dish_id, type_id, flavor_id, size_id)
             order_dish = create_order_dish(order, dish_id, type_id, flavor_id, size_id)
+            print(order_dish)
 
     if not order_dish:
         return HttpResponseRedirect(reverse('index'))

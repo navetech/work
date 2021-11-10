@@ -552,26 +552,6 @@ class OrderSize(OrderBasicCommonFields):
         return dict
 
 
-def get_order_size(order_object, size_id):
-    if not order_object:
-        return None
-
-    if size_id is None:
-        return None
-
-    size = Size.objects.filter(id=size_id).first()
-    if not size:
-        return None
-
-    for order_size in order_object.sizes.all():
-        menu_size = order_size.menu
-
-        if size == menu_size:
-            return order_size
-
-    return None
-
-
 class OrderAdding(OrderCommonFields):
     flavors = models.ManyToManyField(
         'OrderFlavor', blank=True,
@@ -652,36 +632,6 @@ class OrderFlavor(OrderCommonFields):
         dict['menu'] = to_dict(self.menu, **settings)
 
         return dict
-
-
-def get_order_flavor(order_object, flavor_id, size_id):
-    if not order_object:
-        return None
-
-    if flavor_id is None:
-        return None
-
-    flavor = Flavor.objects.filter(id=flavor_id).first()
-    if not flavor:
-        return None
-
-    for order_flavor in order_object.flavors.all():
-        menu_flavor = order_flavor.menu
-
-        if flavor == menu_flavor:
-            no_components = True
-
-            if menu_flavor.sizes.count() > 0:
-                no_components = False
-
-                order_size = get_order_size(order_flavor, size_id)
-                if order_size:
-                    return order_flavor
-
-            if no_components:
-                return order_flavor
-
-    return None
 
 
 class OrderType(OrderCommonFields):
@@ -970,7 +920,7 @@ def create_order_flavor(order_object, menu_object, flavor_id, size_id):
     order_flavor.save()
 
     if flavor.addings_count and flavor.addings_count.max:
-        create_order_addings(order_flavor, flavor)
+        # create_order_addings(order_flavor, flavor)
         order_flavor.save()
 
     order_object.flavors.add(order_flavor)
@@ -1006,7 +956,7 @@ def create_order_type(order_object, menu_object, type_id, flavor_id, size_id):
     order_type.save()
 
     if type.addings_count and type.addings_count.max:
-        create_order_addings(order_type, type)
+        # create_order_addings(order_type, type)
         order_type.save()
 
     order_object.types.add(order_type)
@@ -1040,9 +990,8 @@ def create_order_dish(order, dish_id, type_id, flavor_id, size_id):
 
     order_dish.save()
 
-    if dish.addings_count and dish.addings_count.max:
-        create_order_addings(order_dish, dish)
-        order_dish.save()
+    create_order_addings(order_dish, dish)
+    order_dish.save()
 
     order.dishes.add(order_dish)
     order.save()
@@ -1129,5 +1078,55 @@ def get_order_type(order_object, type_id, flavor_id, size_id):
 
             if no_components:
                 return order_type
+
+    return None
+
+
+def get_order_flavor(order_object, flavor_id, size_id):
+    if not order_object:
+        return None
+
+    if flavor_id is None:
+        return None
+
+    flavor = Flavor.objects.filter(id=flavor_id).first()
+    if not flavor:
+        return None
+
+    for order_flavor in order_object.flavors.all():
+        menu_flavor = order_flavor.menu
+
+        if flavor == menu_flavor:
+            no_components = True
+
+            if menu_flavor.sizes.count() > 0:
+                no_components = False
+
+                order_size = get_order_size(order_flavor, size_id)
+                if order_size:
+                    return order_flavor
+
+            if no_components:
+                return order_flavor
+
+    return None
+
+
+def get_order_size(order_object, size_id):
+    if not order_object:
+        return None
+
+    if size_id is None:
+        return None
+
+    size = Size.objects.filter(id=size_id).first()
+    if not size:
+        return None
+
+    for order_size in order_object.sizes.all():
+        menu_size = order_size.menu
+
+        if size == menu_size:
+            return order_size
 
     return None
