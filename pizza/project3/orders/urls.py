@@ -18,7 +18,7 @@ urlpatterns = [
         name="select_currency"
     ),
     path(
-        "order-item/<dish_id>/<type_id>/<flavor_id>/<size_id>",
+        "order-item/<order_dish_id>",
         views.order_item, name="order_item"
     ),
     path(

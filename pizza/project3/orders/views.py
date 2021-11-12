@@ -24,7 +24,7 @@ from .models import Dish
 from .models import Order, OrderDish, OrderType
 from .models import OrderFlavor, OrderAdding, OrderSize
 
-from .models import create_order_dish, get_order_dish
+from .models import create_order_dish, get_order_dishes
 
 from django.http import JsonResponse
 
@@ -183,7 +183,9 @@ def put_order(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("index"))
 
-    if request.method == "POST":
+    if request.method != "POST":
+        return HttpResponseRedirect(reverse("index"))
+    else:
         dish_id = request.POST["dish-id"]
         type_id = request.POST["type-id"]
         flavor_id = request.POST["flavor-id"]
@@ -194,21 +196,41 @@ def put_order(request):
         flavor_id = None if flavor_id == 'None' else flavor_id
         size_id = None if size_id == 'None' else size_id
 
+        user = request.user
+        order = Order.objects.filter(user=user).first()
+        if not order:
+            order = Order(user=user)
+            order.save()
+
+            print('create_order_dish:', dish_id, type_id, flavor_id, size_id)
+            order_dish = create_order_dish(order, dish_id, type_id, flavor_id, size_id)
+            print(order_dish)
+            if not order_dish:
+                order.cancel()
+        else:
+            print('get_order_dishes:', dish_id, type_id, flavor_id, size_id)
+            order_dishes = get_order_dishes(order, dish_id, type_id, flavor_id, size_id)
+            print(order_dishes)
+            if len(order_dishes) > 0:
+                order_dish = order_dishes[0]
+            else:
+                print('create_order_dish:', dish_id, type_id, flavor_id, size_id)
+                order_dish = create_order_dish(order, dish_id, type_id, flavor_id, size_id)
+                print(order_dish)
+
         return HttpResponseRedirect(reverse(
-                'order_item',
-                args=[dish_id, type_id, flavor_id, size_id]
+                'order_item', args=[order_dish.id]
             )
         )
-
-    else:
-        return HttpResponseRedirect(reverse("index"))
 
 
 def alter_order(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("index"))
 
-    if request.method == "POST":
+    if request.method != "POST":
+        return HttpResponseRedirect(reverse("index"))
+    else:
         order_dish_id = request.POST["order-dish-id"]
         order_type_id = request.POST["order-type-id"]
         order_flavor_id = request.POST["order-flavor-id"]
@@ -329,56 +351,20 @@ def alter_order(request):
                 order_adding_flavor_size.count -= 1
                 order_adding_flavor_size.save()
 
-        dish_id = None if not order_dish else order_dish.menu.id
-        type_id = None if not order_type else order_type.menu.id
-        flavor_id = None if not order_flavor else order_flavor.menu.id
-        size_id = None if not order_size else order_size.menu.id
-
         return HttpResponseRedirect(reverse(
-                'order_item',
-                args=[dish_id, type_id, flavor_id, size_id]
+                'order_item', args=[order_dish.id]
             )
         )
 
-    else:
-        return HttpResponseRedirect(reverse("index"))
 
-
-def order_item(request, dish_id, type_id, flavor_id, size_id):
+def order_item(request, order_dish_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
 
     if request.method != "GET":
         return HttpResponseRedirect(reverse('index'))
 
-    dish_id = None if dish_id == 'None' else dish_id
-    if not dish_id:
-        return HttpResponseRedirect(reverse('index'))
-
-    type_id = None if type_id == 'None' else type_id
-    flavor_id = None if flavor_id == 'None' else flavor_id
-    size_id = None if size_id == 'None' else size_id
-
-    user = request.user
-    order = Order.objects.filter(user=user).first()
-    if not order:
-        order = Order(user=user)
-        order.save()
-
-        print('create_order_dish:', dish_id, type_id, flavor_id, size_id)
-        order_dish = create_order_dish(order, dish_id, type_id, flavor_id, size_id)
-        print(order_dish)
-        if not order_dish:
-            order.cancel()
-    else:
-        print('get_order_dish:', dish_id, type_id, flavor_id, size_id)
-        order_dish = get_order_dish(order, dish_id, type_id, flavor_id, size_id)
-        print(order_dish)
-        if not order_dish:
-            print('create_order_dish:', dish_id, type_id, flavor_id, size_id)
-            order_dish = create_order_dish(order, dish_id, type_id, flavor_id, size_id)
-            print(order_dish)
-
+    order_dish = OrderDish.objects.filter(id=order_dish_id).first()
     if not order_dish:
         return HttpResponseRedirect(reverse('index'))
 
@@ -411,8 +397,7 @@ def order_item(request, dish_id, type_id, flavor_id, size_id):
     }
 
     request.session['page'] = reverse(
-        'order_item',
-        args=[dish_id, type_id, flavor_id, size_id]
+        'order_item', args=[order_dish.id]
     )
 
     return render(request, 'orders/order-item.html', context)
@@ -443,8 +428,6 @@ def cart(request):
         calc_order_price(order_dict)
     else:
         order_dict = {}
-
-#    put_columns_to_order_dishes(order_dishes_dict_list)
 
     context = {
         'settings': settings_dict,
@@ -489,6 +472,27 @@ def calc_order_price(order):
     return price
 
 
+def calc_plain_order_object_price(order_object):
+    if order_object['plain']:
+        if 'trait' in order_object['menu'].keys():
+            if 'quantity' in order_object['menu']['trait']:
+                if 'converted' in order_object['menu']['trait']['quantity']:
+                    value = (
+                        order_object['count'] *
+                        order_object['menu']['trait']['quantity']['converted']['value']
+                    )
+                    unit = order_object['menu']['trait']['quantity']['converted']['unit']
+
+                    price = {
+                        'value': value,
+                        'unit': unit,
+                    }
+
+                    return price
+
+    return None
+
+
 def calc_order_dish_price(order_dish):
     value = 0
     unit = None
@@ -513,12 +517,10 @@ def calc_order_dish_price(order_dish):
         value += p['value']
         unit = p['unit']
 
-    if order_dish['plain']:
-        value += (
-            order_dish['count'] *
-            order_dish['menu']['trait']['quantity']['converted']['value']
-        )
-        unit = order_dish['menu']['trait']['quantity']['converted']['unit']
+    p = calc_plain_order_object_price(order_dish)
+    if p:
+        value += p['value']
+        unit = p['unit']
 
     price = {
         'value': value,
@@ -549,12 +551,10 @@ def calc_order_type_price(order_type):
         value += p['value']
         unit = p['unit']
 
-    if order_type['plain']:
-        value += (
-            order_type['count'] *
-            order_type['menu']['trait']['quantity']['converted']['value']
-        )
-        unit = order_type['menu']['trait']['quantity']['converted']['unit']
+    p = calc_plain_order_object_price(order_type)
+    if p:
+        value += p['value']
+        unit = p['unit']
 
     price = {
         'value': value,
@@ -580,12 +580,10 @@ def calc_order_flavor_price(order_flavor):
         value += p['value']
         unit = p['unit']
 
-    if order_flavor['plain']:
-        value += (
-            order_flavor['count'] *
-            order_flavor['menu']['trait']['quantity']['converted']['value']
-        )
-        unit = order_flavor['menu']['trait']['quantity']['converted']['unit']
+    p = calc_plain_order_object_price(order_flavor)
+    if p:
+        value += p['value']
+        unit = p['unit']
 
     price = {
         'value': value,
@@ -611,12 +609,10 @@ def calc_order_adding_price(order_adding):
         value += p['value']
         unit = p['unit']
 
-    if order_adding['plain']:
-        value += (
-            order_adding['count'] *
-            order_adding['menu']['trait']['quantity']['converted']['value']
-        )
-        unit = order_adding['menu']['trait']['quantity']['converted']['unit']
+    p = calc_plain_order_object_price(order_adding)
+    if p:
+        value += p['value']
+        unit = p['unit']
 
     price = {
         'value': value,

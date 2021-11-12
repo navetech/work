@@ -4,7 +4,7 @@
             <td>
                 {{ order_flavor.menu.trait.short_name.translated.words }}
 
-                <a href="{% url 'order_item' order_dish.menu.id|default:None order_type.menu.id|default:None order_flavor.menu.id|default:None order_size.menu.id|default:None %}">
+                <a href="{% url 'order_item' order_dish.id|default:None %}">
                     {{ order_flavor.menu.trait.long_name.translated.words }}
                 </a>
             </td>
