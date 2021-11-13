@@ -14,10 +14,10 @@ class Iso_639_LanguageCode(models.Model):
 
     def __str__(self):
         return (
-            f'{self.iso_639_2_code}, '
+            f'{self.sort_number}, '
             f'{self.iso_639_1_code}, '
+            f'{self.iso_639_2_code}, '
             f'{self.english_name}, '
-            f'{self.french_name}, '
-            f'{self.german_name}, '
-            f'{self.sort_number}'
+            #f'{self.french_name}, '
+            #f'{self.german_name}, '
         )

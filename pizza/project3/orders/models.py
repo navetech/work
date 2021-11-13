@@ -119,7 +119,7 @@ class Setting(models.Model):
             f'{self.success_page_contents_02}, '
             f'{self.cancel_page_title}, '
             f'{self.cancel_page_header}, '
-            f'{self.cancel_page_contents}'
+            f'{self.cancel_page_contents}, '
         )
 
     def to_dict(self, **settings):
@@ -168,7 +168,7 @@ class UserSetting(models.Model):
         return (
             f'{self.user}, '
             f'{self.language}, '
-            f'{self.currency}'
+            f'{self.currency}, '
         )
 
     def to_dict(self, **settings):
@@ -223,7 +223,7 @@ class CommonFields(models.Model):
 
     def __str__(self):
         return (
-            f'{self.trait}'
+            f'{self.trait}, '
         )
 
     def to_dict(self, **settings):
@@ -258,10 +258,20 @@ class CountLimit(models.Model):
     min = models.IntegerField(default=0)
     max = models.IntegerField(default=0, blank=True)
 
+    def save(self, *args, **kwargs):
+        if self.min < 0:
+            self.min = 0
+
+        if self.max >= 0:
+            if self.max < self.min:
+                self.max = self.min
+
+        super().save(*args, **kwargs)  # Call the "real" save() method.
+            
     def __str__(self):
         return (
             f'{self.min}, '
-            f'{self.max}'
+            f'{self.max}, '
         )
 
     def to_dict(self, **settings):
@@ -310,11 +320,11 @@ class Adding(MenuCommonFields):
 
     def __str__(self):
         return (
-            f'{self.flavors}, '
+            f'{MenuCommonFields.__str__(self)}, '
             f'{self.flavors_count}, '
-            f'{self.sizes}, '
+            f'{self.flavors}, '
             f'{self.sizes_count}, '
-            f'{MenuCommonFields.__str__(self)}'
+            f'{self.sizes}, '
         )
 
     def to_dict(self, **settings):
@@ -350,11 +360,11 @@ class Flavor(MenuCommonFields):
 
     def __str__(self):
         return (
-            f'{self.addings}, '
+            f'{MenuCommonFields.__str__(self)}, '
             f'{self.addings_count}, '
-            f'{self.sizes}, '
+            f'{self.addings}, '
             f'{self.sizes_count}, '
-            f'{MenuCommonFields.__str__(self)}'
+            f'{self.sizes}, '
         )
 
     def to_dict(self, **settings):
@@ -399,13 +409,13 @@ class Type(MenuCommonFields):
 
     def __str__(self):
         return (
-            f'{self.flavors}, '
+            f'{MenuCommonFields.__str__(self)}, '
             f'{self.flavors_count}, '
-            f'{self.addings}, '
+            f'{self.flavors}, '
             f'{self.addings_count}, '
-            f'{self.sizes}, '
+            f'{self.addings}, '
             f'{self.sizes_count}, '
-            f'{MenuCommonFields.__str__(self)}'
+            f'{self.sizes}, '
         )
 
     def to_dict(self, **settings):
@@ -462,15 +472,15 @@ class Dish(MenuCommonFields):
 
     def __str__(self):
         return (
-            f'{self.types}, '
-            f'{self.types_count}, '
-            f'{self.flavors}, '
-            f'{self.flavors_count}, '
-            f'{self.addings}, '
-            f'{self.addings_count}, '
-            f'{self.sizes}, '
-            f'{self.sizes_count}, '
             f'{MenuCommonFields.__str__(self)}'
+            f'{self.types_count}, '
+            f'{self.types}, '
+            f'{self.flavors_count}, '
+            f'{self.flavors}, '
+            f'{self.addings_count}, '
+            f'{self.addings}, '
+            f'{self.sizes_count}, '
+            f'{self.sizes}, '
         )
 
     def to_dict(self, **settings):
@@ -499,8 +509,8 @@ class OrderBasicCommonFields(CommonFields):
 
     def __str__(self):
         return (
+            f'{CommonFields.__str__(self)}, '
             f'{self.count}, '
-            f'{CommonFields.__str__(self)}'
         )
 
     def to_dict(self, **settings):
@@ -508,6 +518,23 @@ class OrderBasicCommonFields(CommonFields):
         dict['count'] = self.count
 
         return dict
+
+    def check_count(self, range=None):
+        count = self.count
+        if count < 0:
+            count = 0
+
+        if range and range.max >= 0:
+            if count > range.max:
+                count = range.max
+
+        self.count = count
+        self.save()
+
+        return {
+            'count': count,
+            'in_range': True,
+        }
 
 
 class OrderCommonFields(OrderBasicCommonFields):
@@ -518,8 +545,8 @@ class OrderCommonFields(OrderBasicCommonFields):
 
     def __str__(self):
         return (
+            f'{OrderBasicCommonFields.__str__(self)}, '
             f'{self.plain}, '
-            f'{OrderBasicCommonFields.__str__(self)}'
         )
 
     def to_dict(self, **settings):
@@ -540,8 +567,8 @@ class OrderSize(OrderBasicCommonFields):
 
     def __str__(self):
         return (
+            f'{OrderBasicCommonFields.__str__(self)}, '
             f'{self.menu}, '
-            f'{OrderBasicCommonFields.__str__(self)}'
         )
 
     def to_dict(self, **settings):
@@ -550,6 +577,9 @@ class OrderSize(OrderBasicCommonFields):
         dict['menu'] = to_dict(self.menu, **settings)
 
         return dict
+
+    def check_count(self, range=None):
+        return super().check_count(range)
 
 
 class OrderAdding(OrderCommonFields):
@@ -576,10 +606,10 @@ class OrderAdding(OrderCommonFields):
 
     def __str__(self):
         return (
+            f'{OrderCommonFields.__str__(self)}, '
+            f'{self.menu}, '
             f'{self.flavors}, '
             f'{self.sizes}, '
-            f'{self.menu}, '
-            f'{OrderCommonFields.__str__(self)}'
         )
 
     def to_dict(self, **settings):
@@ -591,6 +621,28 @@ class OrderAdding(OrderCommonFields):
         dict['menu'] = to_dict(self.menu, **settings)
 
         return dict
+
+    def check_count(self, range=None):
+        if self.plain:
+            return super().check_count(range)
+
+        count = 0
+        in_range = True
+
+        check = check_objects_counts(self.flavors.all(), self.menu.flavors_count)
+        count += check['count']
+        if not check['in_range']:
+            in_range = False
+
+        check = check_objects_counts(self.sizes.all(), self.menu.sizes_count)
+        count += check['count']
+        if not check['in_range']:
+            in_range = False
+        
+        return {
+            'count': count,
+            'in_range': in_range,
+        }
 
 
 class OrderFlavor(OrderCommonFields):
@@ -617,10 +669,10 @@ class OrderFlavor(OrderCommonFields):
 
     def __str__(self):
         return (
+            f'{OrderCommonFields.__str__(self)}, '
+            f'{self.menu}, '
             f'{self.addings}, '
             f'{self.sizes}, '
-            f'{self.menu}, '
-            f'{OrderCommonFields.__str__(self)}'
         )
 
     def to_dict(self, **settings):
@@ -632,6 +684,27 @@ class OrderFlavor(OrderCommonFields):
         dict['menu'] = to_dict(self.menu, **settings)
 
         return dict
+
+    def check_count(self, range=None):
+        if self.plain:
+            return super().check_count(range)
+
+        count = 0
+        in_range = True
+
+        check = check_objects_counts(self.sizes.all(), self.menu.sizes_count)
+        count += check['count']
+        if not check['in_range']:
+            in_range = False
+
+        check = check_objects_counts(self.addings.all(), self.menu.addings_count)
+        if not check['in_range']:
+            in_range = False
+        
+        return {
+            'count': count,
+            'in_range': in_range,
+        }
 
 
 class OrderType(OrderCommonFields):
@@ -664,11 +737,11 @@ class OrderType(OrderCommonFields):
 
     def __str__(self):
         return (
+            f'{OrderCommonFields.__str__(self)}, '
+            f'{self.menu}, '
             f'{self.flavors}, '
             f'{self.addings}, '
             f'{self.sizes}, '
-            f'{self.menu}, '
-            f'{OrderCommonFields.__str__(self)}'
         )
 
     def to_dict(self, **settings):
@@ -681,6 +754,32 @@ class OrderType(OrderCommonFields):
         dict['menu'] = to_dict(self.menu, **settings)
 
         return dict
+
+    def check_count(self, range=None):
+        if self.plain:
+            return super().check_count(range)
+
+        count = 0
+        in_range = True
+
+        check = check_objects_counts(self.flavors.all(), self.menu.flavors_count)
+        count += check['count']
+        if not check['in_range']:
+            in_range = False
+
+        check = check_objects_counts(self.sizes.all(), self.menu.sizes_count)
+        count += check['count']
+        if not check['in_range']:
+            in_range = False
+
+        check = check_objects_counts(self.addings.all(), self.menu.addings_count)
+        if not check['in_range']:
+            in_range = False
+        
+        return {
+            'count': count,
+            'in_range': in_range,
+        }
 
 
 class OrderDish(OrderCommonFields):
@@ -719,12 +818,12 @@ class OrderDish(OrderCommonFields):
 
     def __str__(self):
         return (
+            f'{OrderCommonFields.__str__(self)}, '
+            f'{self.menu}, '
             f'{self.types}, '
             f'{self.flavors}, '
             f'{self.addings}, '
             f'{self.sizes}, '
-            f'{self.menu}, '
-            f'{OrderCommonFields.__str__(self)}'
         )
 
     def to_dict(self, **settings):
@@ -738,6 +837,37 @@ class OrderDish(OrderCommonFields):
         dict['menu'] = to_dict(self.menu, **settings)
 
         return dict
+
+    def check_count(self, range=None):
+        if self.plain:
+            return super().check_count(range)
+
+        count = 0
+        in_range = True
+
+        check = check_objects_counts(self.types.all(), self.menu.types_count)
+        count += check['count']
+        if not check['in_range']:
+            in_range = False
+
+        check = check_objects_counts(self.flavors.all(), self.menu.flavors_count)
+        count += check['count']
+        if not check['in_range']:
+            in_range = False
+
+        check = check_objects_counts(self.sizes.all(), self.menu.sizes_count)
+        count += check['count']
+        if not check['in_range']:
+            in_range = False
+
+        check = check_objects_counts(self.addings.all(), self.menu.addings_count)
+        if not check['in_range']:
+            in_range = False
+        
+        return {
+            'count': count,
+            'in_range': in_range,
+        }
 
 
 class Order(CommonFields):
@@ -760,10 +890,10 @@ class Order(CommonFields):
 
     def __str__(self):
         return (
-            f'{self.dishes}, '
+            f'{CommonFields.__str__(self)}, '
             f'{self.user}, '
             f'{self.date_time}, '
-            f'{CommonFields.__str__(self)}'
+            f'{self.dishes}, '
         )
 
     def to_dict(self, **settings):
@@ -773,9 +903,34 @@ class Order(CommonFields):
 
         return dict
 
+    def check_count(self):
+        return check_objects_counts(self.dishes.all())
+
 
 class HistoricOrder(models.Model):
     order = models.TextField(blank=True)
+
+
+def check_objects_counts(objects, range=None):
+    count = 0
+    in_range = True
+
+    for object in objects:
+        check = object.check_count(range)
+        count += check['count']
+        if not check['in_range']:
+            in_range = False
+        
+    if range:
+        if count < range.min:
+            in_range = False
+        elif range.max >= 0 and count > range.max:
+            in_range = False
+
+    return {
+        'count': count,
+        'in_range': in_range,
+    }
 
 
 def cancel_order_sizes(order_object):
@@ -1104,7 +1259,7 @@ def get_order_flavors(order, flavor_id, size_id):
     if not flavor:
         return order_flavors
 
-    for order_flavor in order.types.all():
+    for order_flavor in order.flavors.all():
         menu_type = order_flavor.menu
 
         if type == menu_type:

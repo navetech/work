@@ -46,10 +46,10 @@ class Phrase(models.Model):
 
         return (
             f'{self.words} '
-            f'in '
+            # f'in '
             f'{languages_names}, '
-            f'translation of '
-            f'{self.translation_of}'
+            # f'translation of '
+            # f'{self.translation_of}'
         )
 
     def translate_to(self, language):
@@ -126,8 +126,8 @@ class Language(models.Model):
 
     def __str__(self):
         return (
+            f'{self.name}, '
             f'{self.code}, '
-            f'{self.name}'
         )
 
     def to_dict(self, **settings):

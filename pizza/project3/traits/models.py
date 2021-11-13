@@ -34,7 +34,7 @@ class Trait(models.Model):
             f'{self.short_name}, '
             f'{self.long_name}, '
             f'{self.quantity}, '
-            f'{self.img}'
+            # f'{self.img}'
         )
 
     def to_dict(self, **settings):

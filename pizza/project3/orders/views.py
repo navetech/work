@@ -202,21 +202,15 @@ def put_order(request):
             order = Order(user=user)
             order.save()
 
-            print('create_order_dish:', dish_id, type_id, flavor_id, size_id)
             order_dish = create_order_dish(order, dish_id, type_id, flavor_id, size_id)
-            print(order_dish)
             if not order_dish:
                 order.cancel()
         else:
-            print('get_order_dishes:', dish_id, type_id, flavor_id, size_id)
             order_dishes = get_order_dishes(order, dish_id, type_id, flavor_id, size_id)
-            print(order_dishes)
             if len(order_dishes) > 0:
                 order_dish = order_dishes[0]
             else:
-                print('create_order_dish:', dish_id, type_id, flavor_id, size_id)
                 order_dish = create_order_dish(order, dish_id, type_id, flavor_id, size_id)
-                print(order_dish)
 
         return HttpResponseRedirect(reverse(
                 'order_item', args=[order_dish.id]
@@ -351,10 +345,15 @@ def alter_order(request):
                 order_adding_flavor_size.count -= 1
                 order_adding_flavor_size.save()
 
-        return HttpResponseRedirect(reverse(
-                'order_item', args=[order_dish.id]
+        check = order_dish.check_count()
+        if check['count'] > 0:
+            return HttpResponseRedirect(reverse(
+                    'order_item', args=[order_dish.id]
+                )
             )
-        )
+        else:
+            order_dish.cancel()
+            return HttpResponseRedirect(reverse('cart'))
 
 
 def order_item(request, order_dish_id):
@@ -366,7 +365,12 @@ def order_item(request, order_dish_id):
 
     order_dish = OrderDish.objects.filter(id=order_dish_id).first()
     if not order_dish:
-        return HttpResponseRedirect(reverse('index'))
+        return HttpResponseRedirect(reverse('cart'))
+
+    check = order_dish.check_count()
+    if check['count'] < 1:
+        order_dish.cancel()
+        return HttpResponseRedirect(reverse('cart'))
 
     pages_basic_data = get_pages_basic_data(request)
 
@@ -423,11 +427,17 @@ def cart(request):
 
     order = Order.objects.filter(user=request.user).first()
     if order:
-        order_dict = to_dict(order, language=language, currency=currency)
-        
-        calc_order_price(order_dict)
+        order_check = order.check_count()
+        if order_check['count'] > 0:
+            order_dict = to_dict(order, language=language, currency=currency)
+            calc_order_price(order_dict)
+        else:
+            order.cancel()
+            order_dict = {}
+            order_check = {}
     else:
         order_dict = {}
+        order_check = {}
 
     context = {
         'settings': settings_dict,
@@ -435,6 +445,7 @@ def cart(request):
         'languages': languages_dict_list,
         'currencies': currencies_dict_list,
         'order': order_dict,
+        'order_check': order_check,
     }
 
     request.session['page'] = reverse('cart')

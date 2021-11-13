@@ -16,10 +16,10 @@ class Iso_4217_CurrencyCode(models.Model):
 
     def __str__(self):
         return (
-            f'{self.entity}, '
-            f'{self.currency}, '
+            f'{self.sort_number}, '
+            # f'{self.entity}, '
             f'{self.alphabetic_code}, '
-            f'{self.numeric_code}, '
-            f'{self.minor_unit}, '
-            f'{self.sort_number}'
+            f'{self.currency}, '
+            # f'{self.numeric_code}, '
+            # f'{self.minor_unit}, '
         )

@@ -21,12 +21,6 @@ class Quantity(models.Model):
     )
 
     def __str__(self):
-        """
-        if self.unit:
-            convertion = self.convert_currency()
-            if convertion:
-                return convertion
-        """
         return (
             f'{self.value:.2f} '
             f'{self.unit.alphabetic_code}'
@@ -101,7 +95,7 @@ class Currency(models.Model):
 
     def __str__(self):
         return (
-            f'{self.code}, '
+            f'{self.code.alphabetic_code}, '
             f'{self.name}'
         )
 
