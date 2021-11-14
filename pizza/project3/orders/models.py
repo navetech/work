@@ -9,10 +9,9 @@ from texts.models import Language
 from texts.models import Setting as TextSetting
 from texts.models import to_dict, to_dict_list
 
+from quantities.models import Quantity
 from quantities.models import Currency
 from quantities.models import Setting as QuantitySetting
-
-from traits.models import Trait
 
 
 class Setting(models.Model):
@@ -34,6 +33,11 @@ class Setting(models.Model):
     menu_page_header = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.CASCADE,
         related_name='menu_page_header_Setting_related'
+    )
+    
+    menu_page_no_dishes = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='menu_page_no_dishes_Setting_related'
     )
 
     order_page_title = models.ForeignKey(
@@ -107,6 +111,7 @@ class Setting(models.Model):
             f'{self.product_name}, '
             f'{self.menu_page_title}, '
             f'{self.menu_page_header}, '
+            f'{self.menu_page_no_dishes}, '
             f'{self.order_page_title}, '
             f'{self.order_page_header}, '
             f'{self.cart_page_title}, '
@@ -131,6 +136,7 @@ class Setting(models.Model):
         dict['product_name'] = to_dict(self.product_name, **settings)
         dict['menu_page_title'] = to_dict(self.menu_page_title, **settings)
         dict['menu_page_header'] = to_dict(self.menu_page_header, **settings)
+        dict['menu_page_no_dishes'] = to_dict(self.menu_page_no_dishes, **settings)
         dict['order_page_title'] = to_dict(self.order_page_title, **settings)
         dict['order_page_header'] = to_dict(self.order_page_header, **settings)
         dict['cart_page_title'] = to_dict(self.cart_page_title, **settings)
@@ -212,10 +218,27 @@ class UserSetting(models.Model):
         return settings
 
 
-class CommonFields(models.Model):
-    trait = models.ForeignKey(
-        Trait, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='trait_CommonFields_related_%(app_label)s_%(class)s'
+class MenuCommonFields(models.Model):
+    sort_number = models.FloatField(default=0)
+
+    short_name = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='short_name_%(app_label)s_%(class)s_related'
+    )
+
+    long_name = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='long_name_%(app_label)s_%(class)s_related'
+    )
+
+    quantity = models.ForeignKey(
+        Quantity, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='quantity_%(app_label)s_%(class)s_related'
+    )
+
+    img = models.ImageField(
+        upload_to='uploads/static/images',
+        default=None, blank=True, null=True
     )
 
     class Meta:
@@ -223,40 +246,38 @@ class CommonFields(models.Model):
 
     def __str__(self):
         return (
-            f'{self.trait}, '
+            f'{self.sort_number}, '
+            f'{self.short_name}, '
+            f'{self.long_name}, '
+            f'{self.quantity}, '
+            # f'{self.img}'
         )
 
     def to_dict(self, **settings):
         dict = {}
+
         dict['id'] = self.id
 
-        dict['trait'] = to_dict(self.trait, **settings)
-
-        return dict
-
-
-class MenuCommonFields(CommonFields):
-    sort_number = models.FloatField(default=0)
-
-    class Meta:
-        abstract = True
-
-    def __str__(self):
-        return (
-            f'{self.sort_number}, '
-            f'{CommonFields.__str__(self)}'
-        )
-
-    def to_dict(self, **settings):
-        dict = CommonFields.to_dict(self, **settings)
         dict['sort_number'] = self.sort_number
+
+        dict['short_name'] = to_dict(self.short_name, **settings)
+        dict['long_name'] = to_dict(self.long_name, **settings)
+        dict['quantity'] = to_dict(self.quantity, **settings)
+
+        dict['img'] = {}
+        if self.img:
+            dict['img']['name'] = self.img.name
+            dict['img']['path'] = self.img.path
+            dict['img']['url'] = self.img.url
+            dict['img']['height'] = self.img.height
+            dict['img']['width'] = self.img.width
 
         return dict
 
 
 class CountLimit(models.Model):
-    min = models.IntegerField(default=0)
-    max = models.IntegerField(default=0, blank=True)
+    min = models.IntegerField(default=0, blank=True)
+    max = models.IntegerField(default=-1, blank=True)
 
     def save(self, *args, **kwargs):
         if self.min < 0:
@@ -469,6 +490,41 @@ class Dish(MenuCommonFields):
         CountLimit, blank=True, null=True, on_delete=models.CASCADE,
         related_name='sizes_count_Dish_related'
     )
+    """
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Call the "real" save() method.
+
+        if self.types and self.types.all().count() > 0:
+            if not self.types_count:
+                self.types_count = CountLimit()
+                self.types_count.save()
+        elif self.types_count:
+            self.types_count = None
+
+        if self.flavors:
+            if not self.flavors_count:
+                self.flavors_count = CountLimit()
+                self.flavors_count.save()
+        else:
+            if self.flavors_count:
+                self.flavors_count = None
+
+        if self.sizes and self.sizes.count() > 0:
+            if not self.sizes_count:
+                self.sizes_count = CountLimit()
+                self.sizes_count.save()
+        elif self.sizes_count:
+            self.sizes_count = None
+
+        if self.addings and self.addings.count() > 0:
+            if not self.addings_count:
+                self.addings_count = CountLimit(min=0, max=-1)
+                self.addings_count.save()
+        elif self.addings_count:
+            self.addings_count = None
+
+        super().save(*args, **kwargs)  # Call the "real" save() method.
+        """
 
     def __str__(self):
         return (
@@ -501,7 +557,7 @@ class Dish(MenuCommonFields):
         return dict
 
 
-class OrderBasicCommonFields(CommonFields):
+class OrderBasicCommonFields(models.Model):
     count = models.IntegerField(default=0)
 
     class Meta:
@@ -509,12 +565,14 @@ class OrderBasicCommonFields(CommonFields):
 
     def __str__(self):
         return (
-            f'{CommonFields.__str__(self)}, '
             f'{self.count}, '
         )
 
     def to_dict(self, **settings):
-        dict = CommonFields.to_dict(self, **settings)
+        dict = {}
+
+        dict['id'] = self.id
+
         dict['count'] = self.count
 
         return dict
@@ -870,18 +928,18 @@ class OrderDish(OrderCommonFields):
         }
 
 
-class Order(CommonFields):
-    dishes = models.ManyToManyField(
-        OrderDish, blank=True,
-        related_name='dishes_Order_related'
-    )
-
+class Order(models.Model):
     user = models.ForeignKey(
         User, blank=True, null=True, on_delete=models.CASCADE,
         related_name='user_Order_related'
     )
 
     date_time = models.DateTimeField(auto_now=True)
+
+    dishes = models.ManyToManyField(
+        OrderDish, blank=True,
+        related_name='dishes_Order_related'
+    )
 
     def cancel(self):
         cancel_order_dishes(self)
@@ -890,14 +948,15 @@ class Order(CommonFields):
 
     def __str__(self):
         return (
-            f'{CommonFields.__str__(self)}, '
             f'{self.user}, '
             f'{self.date_time}, '
             f'{self.dishes}, '
         )
 
     def to_dict(self, **settings):
-        dict = CommonFields.to_dict(self, **settings)
+        dict = {}
+
+        dict['id'] = self.id
 
         dict['dishes'] = to_dict_list(self.dishes, **settings)
 

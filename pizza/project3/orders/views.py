@@ -485,21 +485,20 @@ def calc_order_price(order):
 
 def calc_plain_order_object_price(order_object):
     if order_object['plain']:
-        if 'trait' in order_object['menu'].keys():
-            if 'quantity' in order_object['menu']['trait']:
-                if 'converted' in order_object['menu']['trait']['quantity']:
-                    value = (
-                        order_object['count'] *
-                        order_object['menu']['trait']['quantity']['converted']['value']
-                    )
-                    unit = order_object['menu']['trait']['quantity']['converted']['unit']
+        if 'quantity' in order_object['menu'].keys():
+            if 'converted' in order_object['menu']['quantity']:
+                value = (
+                    order_object['count'] *
+                    order_object['menu']['quantity']['converted']['value']
+                )
+                unit = order_object['menu']['quantity']['converted']['unit']
 
-                    price = {
-                        'value': value,
-                        'unit': unit,
-                    }
+                price = {
+                    'value': value,
+                    'unit': unit,
+                }
 
-                    return price
+                return price
 
     return None
 
@@ -638,9 +637,9 @@ def calc_order_adding_price(order_adding):
 def calc_order_size_price(order_size):
     value = (
         order_size['count'] *
-        order_size['menu']['trait']['quantity']['converted']['value']
+        order_size['menu']['quantity']['converted']['value']
     )
-    unit = order_size['menu']['trait']['quantity']['converted']['unit']
+    unit = order_size['menu']['quantity']['converted']['unit']
 
     price = {
         'value': value,
@@ -900,7 +899,7 @@ def put_sizes(columns, table):
     for size in table['sizes']:
         inserted = False
         for column in columns:
-            if column['trait']['short_name'] == size['trait']['short_name']:
+            if column['short_name'] == size['short_name']:
                 inserted = True
                 break
 
@@ -912,8 +911,8 @@ def put_order_sizes(columns, order_table):
     for size in order_table['sizes']:
         inserted = False
         for column in columns:
-            column_short_name = column['menu']['trait']['short_name']
-            size_short_name = size['menu']['trait']['short_name']
+            column_short_name = column['menu']['short_name']
+            size_short_name = size['menu']['short_name']
             if column_short_name == size_short_name:
                 inserted = True
                 break

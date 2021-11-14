@@ -1,11 +1,11 @@
 <tr>
-    <td>{{ order_adding_flavor.menu.trait.short_name.translated.words }}</td>
-    <td>{{ order_adding_flavor.menu.trait.long_name.translated.words }}</td>
+    <td>{{ order_adding_flavor.menu.short_name.translated.words }}</td>
+    <td>{{ order_adding_flavor.menu.long_name.translated.words }}</td>
 
     {% for order_adding_flavor_size in order_adding.flavors_columns.sizes %}
         <td>
-            {{ order_adding_flavor_size.menu.trait.quantity.converted.value|floatformat:2 }}
-            {{ order_adding_flavor_size.menu.trait.quantity.converted.unit }}
+            {{ order_adding_flavor_size.menu.quantity.converted.value|floatformat:2 }}
+            {{ order_adding_flavor_size.menu.quantity.converted.unit }}
         </td>
         
         <td>
@@ -26,8 +26,8 @@
         </td>
     {% empty %}
         <td>
-            {{ order_adding_flavor.menu.trait.quantity.converted.value|floatformat:2 }}
-            {{ order_adding_flavor.menu.trait.quantity.converted.unit }}
+            {{ order_adding_flavor.menu.quantity.converted.value|floatformat:2 }}
+            {{ order_adding_flavor.menu.quantity.converted.unit }}
         </td>
 
         <td>

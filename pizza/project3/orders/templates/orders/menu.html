@@ -11,29 +11,29 @@
     {% for dish in dishes %}
         <ul class="list-group pt-4">
             <li class="list-group-item ln-container01">
-                <h4>{{ dish.trait.short_name.translated.words }}</h4>
-                <h4>{{ dish.trait.long_name.translated.words }}</h4>
+                <h4>{{ dish.short_name.translated.words }}</h4>
+                <h4>{{ dish.long_name.translated.words }}</h4>
 
                 {% for type in dish.types %}
                     <ul class="list-group pt-4">
                         <li class="list-group-item ln-container02">
-                            <h5>{{ type.trait.short_name.translated.words }}</h5>
-                            <h5>{{ type.trait.long_name.translated.words }}</h5>
+                            <h5>{{ type.short_name.translated.words }}</h5>
+                            <h5>{{ type.long_name.translated.words }}</h5>
                             {% if type.flavors %}
                                 <table style="width:100%">
                                     <tr>
                                         <th></th>
                                         <th></th>
                                         {% for size in type.flavors_columns.sizes %}
-                                            <th>{{ size.trait.short_name.translated.words }}</th>
+                                            <th>{{ size.short_name.translated.words }}</th>
                                             <th></th>
                                             <th></th>
                                         {% endfor %}
                                     </tr>
                                     {% for flavor in type.flavors %}
                                         <tr>
-                                            <td>{{ flavor.trait.short_name.translated.words }}</td>
-                                            <td>{{ flavor.trait.long_name.translated.words }}</td>
+                                            <td>{{ flavor.short_name.translated.words }}</td>
+                                            <td>{{ flavor.long_name.translated.words }}</td>
                                             {% for size in flavor.sizes %}
                                             <td>
                                                 <form action="{% url 'put_order' %}" method="post">
@@ -44,12 +44,12 @@
                                                     <input type='text' style='display:none' name='size-id' value={{ size.id }}>
                                                     
                                                     <button type="submit" name="submit" value="dec-size-count">
-                                                        {{ size.trait.quantity.converted.value|floatformat:2 }} {{ size.trait.quantity.converted.unit }}
+                                                        {{ size.quantity.converted.value|floatformat:2 }} {{ size.quantity.converted.unit }}
                                                     </button>
                                                 </form>
                                             </td>
-                                            <td>{{ size.trait.short_name.translated.words }}</td>
-                                            <td>{{ size.trait.long_name.translated.words }}</td>
+                                            <td>{{ size.short_name.translated.words }}</td>
+                                            <td>{{ size.long_name.translated.words }}</td>
                                             {% empty %}
                                             <td>
                                                 <form action="{% url 'put_order' %}" method="post">
@@ -60,7 +60,7 @@
                                                     <input type='text' style='display:none' name='size-id' value=None }}>
                                                     
                                                     <button type="submit" name="submit" value="dec-size-count">
-                                                        {{ flavor.trait.quantity.converted.value|floatformat:2 }} {{ flavor.trait.quantity.converted.unit }}
+                                                        {{ flavor.quantity.converted.value|floatformat:2 }} {{ flavor.quantity.converted.unit }}
                                                     </button>
                                                 </form>
                                             </td>
@@ -82,15 +82,15 @@
                                         <th></th>
                                         <th></th>
                                         {% for size in dish.flavors_columns.sizes %}
-                                            <th>{{ size.trait.short_name.translated.words }}</th>
+                                            <th>{{ size.short_name.translated.words }}</th>
                                             <th></th>
                                             <th></th>
                                         {% endfor %}
                                     </tr>
                                     {% for flavor in dish.flavors %}
                                         <tr>
-                                            <td>{{ flavor.trait.short_name.translated.words }}</td>
-                                            <td>{{ flavor.trait.long_name.translated.words }}</td>
+                                            <td>{{ flavor.short_name.translated.words }}</td>
+                                            <td>{{ flavor.long_name.translated.words }}</td>
                                             {% for size in flavor.sizes %}
                                             <td>
                                                 <form action="{% url 'put_order' %}" method="post">
@@ -101,12 +101,12 @@
                                                     <input type='text' style='display:none' name='size-id' value={{ size.id }}>
                                                     
                                                     <button type="submit" name="submit" value="dec-size-count">
-                                                        {{ size.trait.quantity.converted.value|floatformat:2 }} {{ size.trait.quantity.converted.unit }}
+                                                        {{ size.quantity.converted.value|floatformat:2 }} {{ size.quantity.converted.unit }}
                                                     </button>
                                                 </form>
                                             </td>
-                                                <td>{{ size.trait.short_name.translated.words }}</td>
-                                                <td>{{ size.trait.long_name.translated.words }}</td>
+                                                <td>{{ size.short_name.translated.words }}</td>
+                                                <td>{{ size.long_name.translated.words }}</td>
                                             {% empty %}
                                             <td>
                                                 <form action="{% url 'put_order' %}" method="post">
@@ -117,7 +117,7 @@
                                                     <input type='text' style='display:none' name='size-id' value=None }}>
                                                     
                                                     <button type="submit" name="submit">
-                                                        {{ flavor.trait.quantity.converted.value|floatformat:2 }} {{ flavor.trait.quantity.converted.unit }}
+                                                        {{ flavor.quantity.converted.value|floatformat:2 }} {{ flavor.quantity.converted.unit }}
                                                     </button>
                                                 </form>
                                             </td>
@@ -133,27 +133,27 @@
                 {% for adding in dish.addings %}
                     <ul class="list-group pt-4">
                         <li class="list-group-item ln-container02">
-                            <h5>{{ adding.trait.short_name.translated.words }}</h5>
-                            <h5>{{ adding.trait.long_name.translated.words }}</h5>
+                            <h5>{{ adding.short_name.translated.words }}</h5>
+                            <h5>{{ adding.long_name.translated.words }}</h5>
                             {% if adding.flavors %}
                                 <table style="width:100%">
                                     <tr>
                                         <th></th>
                                         <th></th>
                                         {% for size in adding.flavors_columns.sizes %}
-                                            <th>{{ size.trait.short_name.translated.words }}</th>
+                                            <th>{{ size.short_name.translated.words }}</th>
                                             <th></th>
                                             <th></th>
                                         {% endfor %}
                                     </tr>
                                     {% for flavor in adding.flavors %}
                                         <tr>
-                                            <td>{{ flavor.trait.short_name.translated.words }}</td>
-                                            <td>{{ flavor.trait.long_name.translated.words }}</td>
+                                            <td>{{ flavor.short_name.translated.words }}</td>
+                                            <td>{{ flavor.long_name.translated.words }}</td>
                                             {% for size in flavor.sizes %}
-                                            <td>{{ size.trait.quantity.converted.value|floatformat:2 }} {{ size.trait.quantity.converted.unit }}</td>
-                                            <td>{{ size.trait.short_name.translated.words }}</td>
-                                            <td>{{ size.trait.long_name.translated.words }}</td>
+                                            <td>{{ size.quantity.converted.value|floatformat:2 }} {{ size.quantity.converted.unit }}</td>
+                                            <td>{{ size.short_name.translated.words }}</td>
+                                            <td>{{ size.long_name.translated.words }}</td>
                                             {% endfor %}
                                         </tr>
                                     {% endfor %}
@@ -166,6 +166,6 @@
             </li>
         </ul>
     {% empty %}
-        <h4>No dishes</h4>
+        <h4>{{ settings.menu_page_no_dishes.translated.words }}</h4>
     {% endfor %}
 {% endblock %}

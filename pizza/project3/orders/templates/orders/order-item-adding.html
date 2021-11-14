@@ -1,6 +1,6 @@
 <li class="list-group-item ln-container01">
-    <h5>{{ order_adding.menu.trait.short_name.translated.words }}</h6>
-    <h5>{{ order_adding.menu.trait.long_name.translated.words }}</h6>
+    <h5>{{ order_adding.menu.short_name.translated.words }}</h6>
+    <h5>{{ order_adding.menu.long_name.translated.words }}</h6>
 
     <ul class="list-group pt-4">
         {% if order_adding.flavors %}
@@ -11,7 +11,7 @@
                             {% for order_adding_flavor_size in order_adding.flavors_columns.sizes %}
                                 <th></th>
                                 <th></th>
-                                <th>{{ order_adding_flavor_size.menu.trait.short_name.translated.words }}</th>
+                                <th>{{ order_adding_flavor_size.menu.short_name.translated.words }}</th>
                             {% endfor %}
                         </tr>
                     {% endif %}
@@ -28,7 +28,7 @@
                 <table style="width:100%">
                     <tr>
                         {% for order_adding_size in order_adding.sizes %}
-                            <th>{{ order_adding_size.menu.trait.short_name.translated.words }}</th>
+                            <th>{{ order_adding_size.menu.short_name.translated.words }}</th>
                             <th></th>
                         {% endfor %}
                     </tr>
@@ -36,8 +36,8 @@
                     <tr>
                         {% for order_adding_size in order_adding.sizes %}
                             <td>
-                                {{ order_adding_size.menu.trait.quantity.converted.value|floatformat:2 }}
-                                {{ order_adding_size.menu.trait.quantity.converted.unit }}
+                                {{ order_adding_size.menu.quantity.converted.value|floatformat:2 }}
+                                {{ order_adding_size.menu.quantity.converted.unit }}
                             </td>
                             
                             <td>

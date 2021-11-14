@@ -5,19 +5,19 @@
         <tr>
             <td>
                 <figure>
-                    <img src="{% static order_size.menu.trait.img.path %}" alt="{{ order_size.menu.trait.long_name.translated.words }} Image">
-                    <figcaption>{{ order_size.menu.trait.long_name.translated.words }}</figcaption>
+                    <img src="{% static order_size.menu.img.path %}" alt="{{ order_size.menu.long_name.translated.words }} Image">
+                    <figcaption>{{ order_size.menu.long_name.translated.words }}</figcaption>
                 </figure>
             </td>
 
             <td>
-                {{ order_size.menu.trait.short_name.translated.words }}
-                {{ order_size.menu.trait.long_name.translated.words }}
+                {{ order_size.menu.short_name.translated.words }}
+                {{ order_size.menu.long_name.translated.words }}
             </td>
 
             <td>
-                {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
-                {{ order_size.menu.trait.quantity.converted.unit }}
+                {{ order_size.menu.quantity.converted.value|floatformat:2 }}
+                {{ order_size.menu.quantity.converted.unit }}
             </td>
 
             <td>

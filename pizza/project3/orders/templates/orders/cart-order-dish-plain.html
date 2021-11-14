@@ -2,10 +2,10 @@
     <table style="width:100%">
         <tr>
             <td>
-                {{ order_dish.menu.trait.short_name.translated.words }}
+                {{ order_dish.menu.short_name.translated.words }}
 
                 <a href="{% url 'order_item' order_dish.id|default:None %}">
-                    {{ order_dish.menu.trait.long_name.translated.words }}
+                    {{ order_dish.menu.long_name.translated.words }}
                 </a>
             </td>
 
