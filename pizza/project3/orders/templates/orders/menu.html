@@ -34,22 +34,31 @@
                                         <tr>
                                             <td>{{ flavor.short_name.translated.words }}</td>
                                             <td>{{ flavor.long_name.translated.words }}</td>
+                                            {% comment %}
                                             {% for size in flavor.sizes %}
-                                            <td>
-                                                <form action="{% url 'put_order' %}" method="post">
-                                                    {% csrf_token %}
-                                                    <input type='text' style='display:none' name='dish-id' value={{ dish.id }}>
-                                                    <input type='text' style='display:none' name='type-id' value={{ type.id }}>
-                                                    <input type='text' style='display:none' name='flavor-id' value={{ flavor.id }}>
-                                                    <input type='text' style='display:none' name='size-id' value={{ size.id }}>
-                                                    
-                                                    <button type="submit" name="submit" value="dec-size-count">
-                                                        {{ size.quantity.converted.value|floatformat:2 }} {{ size.quantity.converted.unit }}
-                                                    </button>
-                                                </form>
-                                            </td>
-                                            <td>{{ size.short_name.translated.words }}</td>
-                                            <td>{{ size.long_name.translated.words }}</td>
+                                            {% endcomment %}
+                                            {% for size in flavor.size_columns %}
+                                                {% if size %}
+                                                    <td>
+                                                        <form action="{% url 'put_order' %}" method="post">
+                                                            {% csrf_token %}
+                                                            <input type='text' style='display:none' name='dish-id' value={{ dish.id }}>
+                                                            <input type='text' style='display:none' name='type-id' value={{ type.id }}>
+                                                            <input type='text' style='display:none' name='flavor-id' value={{ flavor.id }}>
+                                                            <input type='text' style='display:none' name='size-id' value={{ size.id }}>
+                                                            
+                                                            <button type="submit" name="submit" value="dec-size-count">
+                                                                {{ size.quantity.converted.value|floatformat:2 }} {{ size.quantity.converted.unit }}
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                    <td>{{ size.short_name.translated.words }}</td>
+                                                    <td>{{ size.long_name.translated.words }}</td>
+                                                {% else %}
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                {% endif %}
                                             {% empty %}
                                             <td>
                                                 <form action="{% url 'put_order' %}" method="post">

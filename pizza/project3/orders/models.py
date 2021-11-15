@@ -279,13 +279,16 @@ class CountLimit(models.Model):
     min = models.IntegerField(default=0, blank=True)
     max = models.IntegerField(default=-1, blank=True)
 
-    def save(self, *args, **kwargs):
+    def clean(self):
         if self.min < 0:
             self.min = 0
 
         if self.max >= 0:
             if self.max < self.min:
                 self.max = self.min
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
 
         super().save(*args, **kwargs)  # Call the "real" save() method.
             

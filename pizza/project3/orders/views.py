@@ -855,6 +855,26 @@ def put_flavors(columns, table):
     sizes.sort(key=lambda size: size['sort_number'], reverse=False)
     columns['sizes'] = sizes
 
+    for flavor in table['flavors']:
+        flavor['size_columns'] = put_sizes_columns(sizes, flavor)
+
+
+def put_sizes_columns(inserted_sizes, table):
+    columns = []
+    for s in inserted_sizes:
+        present = False
+        for size in table['sizes']:
+            if s['short_name'] == size['short_name']:
+                present = True
+                break
+
+        if present:
+            columns.append(size)
+        else:
+            columns.append(None)
+
+    return columns
+
 
 def put_order_flavors(columns, order_table):
     sizes = []
