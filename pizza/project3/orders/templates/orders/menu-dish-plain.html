@@ -1,0 +1,11 @@
+<form action="{% url 'put_order' %}" method="post">
+    {% csrf_token %}
+    <input type='text' style='display:none' name='dish-id' value={{ dish.id }}>
+    <input type='text' style='display:none' name='type-id' value=None }}>
+    <input type='text' style='display:none' name='flavor-id' value=None }}>
+    <input type='text' style='display:none' name='size-id' value=None }}>
+    
+    <button type="submit" name="submit">
+        {{ dish.quantity.converted.value|floatformat:2 }} {{ dish.quantity.converted.unit }}
+    </button>
+</form>

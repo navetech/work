@@ -116,28 +116,23 @@ def menu(request):
 
     language = pages_basic_data['language']
     currency = pages_basic_data['currency']
-    user_settings_dict = pages_basic_data['user_settings_dict']
-    settings_dict = pages_basic_data['settings_dict']
+    user_settings = pages_basic_data['user_settings']
+    settings = pages_basic_data['settings']
+    languages = pages_basic_data['languages']
+    currencies = pages_basic_data['currencies']
 
-    languages_dict_list = to_dict_list(
-        Language.objects, 'code__sort_number'
-    )
-    currencies_dict_list = to_dict_list(
-        Currency.objects, 'code__sort_number', language=language
-    )
-
-    dishes_dict_list = to_dict_list(
+    dishes = to_dict_list(
         Dish.objects, 'sort_number', language=language, currency=currency
     )
 
-    put_columns_to_dishes(dishes_dict_list)
+    dishes = build_dishes_columns(dishes)
 
     context = {
-        'settings': settings_dict,
-        'user_settings': user_settings_dict,
-        'languages': languages_dict_list,
-        'currencies': currencies_dict_list,
-        'dishes': dishes_dict_list,
+        'settings': settings,
+        'user_settings': user_settings,
+        'languages': languages,
+        'currencies': currencies,
+        'dishes': dishes,
     }
 
     request.session['page'] = reverse('menu')
@@ -376,15 +371,10 @@ def order_item(request, order_dish_id):
 
     language = pages_basic_data['language']
     currency = pages_basic_data['currency']
-    user_settings_dict = pages_basic_data['user_settings_dict']
-    settings_dict = pages_basic_data['settings_dict']
-
-    languages_dict_list = to_dict_list(
-        Language.objects, 'code__sort_number'
-    )
-    currencies_dict_list = to_dict_list(
-        Currency.objects, 'code__sort_number', language=language
-    )
+    user_settings = pages_basic_data['user_settings']
+    settings = pages_basic_data['settings']
+    languages = pages_basic_data['languages']
+    currencies = pages_basic_data['currencies']
 
     order_dish_dict = to_dict(order_dish, language=language, currency=currency)
 
@@ -393,10 +383,10 @@ def order_item(request, order_dish_id):
     put_columns_to_order_dish(order_dish_dict)
 
     context = {
-        'settings': settings_dict,
-        'user_settings': user_settings_dict,
-        'languages': languages_dict_list,
-        'currencies': currencies_dict_list,
+        'settings': settings,
+        'user_settings': user_settings,
+        'languages': languages,
+        'currencies': currencies,
         'order_dish': order_dish_dict,
     }
 
@@ -415,15 +405,10 @@ def cart(request):
 
     language = pages_basic_data['language']
     currency = pages_basic_data['currency']
-    user_settings_dict = pages_basic_data['user_settings_dict']
-    settings_dict = pages_basic_data['settings_dict']
-
-    languages_dict_list = to_dict_list(
-        Language.objects, 'code__sort_number'
-    )
-    currencies_dict_list = to_dict_list(
-        Currency.objects, 'code__sort_number', language=language
-    )
+    user_settings = pages_basic_data['user_settings']
+    settings = pages_basic_data['settings']
+    languages = pages_basic_data['languages']
+    currencies = pages_basic_data['currencies']
 
     order = Order.objects.filter(user=request.user).first()
     if order:
@@ -440,10 +425,10 @@ def cart(request):
         order_check = {}
 
     context = {
-        'settings': settings_dict,
-        'user_settings': user_settings_dict,
-        'languages': languages_dict_list,
-        'currencies': currencies_dict_list,
+        'settings': settings,
+        'user_settings': user_settings,
+        'languages': languages,
+        'currencies': currencies,
         'order': order_dict,
         'order_check': order_check,
     }
@@ -676,11 +661,20 @@ def get_pages_basic_data(request):
     else:
         settings_dict = {}
 
+    languages = to_dict_list(
+        Language.objects, 'code__sort_number'
+    )
+    currencies = to_dict_list(
+        Currency.objects, 'code__sort_number', language=language
+    )
+
     pages_basic_data = {}
     pages_basic_data['language'] = language
     pages_basic_data['currency'] = currency
-    pages_basic_data['user_settings_dict'] = user_settings_dict
-    pages_basic_data['settings_dict'] = settings_dict
+    pages_basic_data['user_settings'] = user_settings_dict
+    pages_basic_data['settings'] = settings_dict
+    pages_basic_data['languages'] = languages
+    pages_basic_data['currencies'] = currencies
 
     return pages_basic_data
 
@@ -691,23 +685,16 @@ def success(request):
 
     pages_basic_data = get_pages_basic_data(request)
 
-    language = pages_basic_data['language']
-    user_settings_dict = pages_basic_data['user_settings_dict']
-    settings_dict = pages_basic_data['settings_dict']
-
-    languages_dict_list = to_dict_list(
-        Language.objects, 'code__sort_number'
-    )
-
-    currencies_dict_list = to_dict_list(
-        Currency.objects, 'code__sort_number', language=language
-    )
+    user_settings = pages_basic_data['user_settings']
+    settings = pages_basic_data['settings']
+    languages = pages_basic_data['languages']
+    currencies = pages_basic_data['currencies']
 
     context = {
-        'settings': settings_dict,
-        'user_settings': user_settings_dict,
-        'languages': languages_dict_list,
-        'currencies': currencies_dict_list,
+        'settings': settings,
+        'user_settings': user_settings,
+        'languages': languages,
+        'currencies': currencies,
     }
 
     request.session['page'] = reverse('success')
@@ -721,23 +708,16 @@ def cancel(request):
 
     pages_basic_data = get_pages_basic_data(request)
 
-    language = pages_basic_data['language']
-    user_settings_dict = pages_basic_data['user_settings_dict']
-    settings_dict = pages_basic_data['settings_dict']
-
-    languages_dict_list = to_dict_list(
-        Language.objects, 'code__sort_number'
-    )
-
-    currencies_dict_list = to_dict_list(
-        Currency.objects, 'code__sort_number', language=language
-    )
+    user_settings = pages_basic_data['user_settings']
+    settings = pages_basic_data['settings']
+    languages = pages_basic_data['languages']
+    currencies = pages_basic_data['currencies']
 
     context = {
-        'settings': settings_dict,
-        'user_settings': user_settings_dict,
-        'languages': languages_dict_list,
-        'currencies': currencies_dict_list,
+        'settings': settings,
+        'user_settings': user_settings,
+        'languages': languages,
+        'currencies': currencies,
     }
 
     request.session['page'] = reverse('cancel')
@@ -780,7 +760,35 @@ def create_checkout_session(request):
         return JsonResponse(error=str(e))
 
 
-def put_columns_to_dishes(dishes):
+def build_objects_columns(objects):
+    sizes = []
+
+    for object in objects:
+        if 'types' in object:
+            object['types_columns'] = build_objects_columns(object['types'])
+
+        if 'flavors' in object:
+            object['flavors_columns'] = build_objects_columns(object['flavors'])
+
+        if 'addings' in object:
+            object['addings_columns'] = build_objects_columns(object['addings'])
+
+        if 'sizes' in object:
+            object['sizes_columns'] = build_objects_columns(object['sizes'])
+
+        put_sizes_columns(sizes, dish)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
+
+    for dish in dishes:
+        dish['size_columns'] = put_sizes_columns(sizes, dish)
+
+    return dishes
+
+
+def build_dishes_columns(dishes):
+    sizes = []
+
     for dish in dishes:
         types_columns = {}
         put_types(types_columns, dish)
@@ -793,6 +801,41 @@ def put_columns_to_dishes(dishes):
         addings_columns = {}
         put_addings(addings_columns, dish)
         dish['addings_columns'] = addings_columns
+
+        put_sizes(sizes, dish)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
+
+    for dish in dishes:
+        dish['size_columns'] = put_sizes_columns(sizes, dish)
+
+    return dishes
+
+
+def put_columns_to_dishes(dishes):
+    sizes = []
+
+    for dish in dishes:
+        types_columns = {}
+        put_types(types_columns, dish)
+        dish['types_columns'] = types_columns
+
+        flavors_columns = {}
+        put_flavors(flavors_columns, dish)
+        dish['flavors_columns'] = flavors_columns
+
+        addings_columns = {}
+        put_addings(addings_columns, dish)
+        dish['addings_columns'] = addings_columns
+
+        put_sizes(sizes, dish)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
+
+    for dish in dishes:
+        dish['size_columns'] = put_sizes_columns(sizes, dish)
+
+    return dishes
 
 
 def put_columns_to_order_dish(order_dish):
