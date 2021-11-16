@@ -8,39 +8,8 @@
 {% block main %}
     <h3>{{ settings.menu_page_header.translated.words }}</h3>
 
-    {% for dish in dishes %}
-        <ul class="list-group pt-4">
-            <li class="list-group-item ln-container01">
-                <h4>{{ dish.short_name.translated.words }}</h4>
-                <h4>{{ dish.long_name.translated.words }}</h4>
-
-                {% if types not in dish %}
-                    {% if flavors not in dish %}
-                        {% if addings not in dish %}
-                            {% if sizes not in dish %}
-                                {% include "orders/menu-dish-plain.html" %}
-                            {% endif %}
-                        {% endif %}
-                    {% endif %}
-                {% endif %}
-
-                {% for type in order_dish.types %}
-                    {% include "orders/menu-type.html" %}
-                {% endfor %}
-    
-                {% for flavor in order_dish.flavors %}
-                    {% include "orders/menu-flavor.html" %}
-                {% endfor %}
-        
-                {% for size in order_dish.sizes %}
-                    {% include "orders/menu-size.html" %}
-                {% endfor %}
-        
-                {% for order_adding in order_dish.addings %}
-                    {% include "orders/menu-adding.html" %}
-                {% endfor %}
-            </li>
-        </ul>
+    {% for dish in menu.dishes %}
+        {% include "orders/menu-dish.html" %}
     {% empty %}
         <h4>{{ settings.menu_page_no_dishes.translated.words }}</h4>
     {% endfor %}

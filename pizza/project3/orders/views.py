@@ -125,14 +125,24 @@ def menu(request):
         Dish.objects, 'sort_number', language=language, currency=currency
     )
 
-    dishes = build_dishes_columns(dishes)
+    menu = {}
+    menu['dishes'] = dishes
+    for dish in dishes:
+        dish['columns'] = build_object_columns(dish)
+#    print('menu columns >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+#    print(menu['columns'])
+    for dish in dishes:
+        if 'columns' in dish:
+            print()
+            print('dish columns >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+            print(dish['columns'])
 
     context = {
         'settings': settings,
         'user_settings': user_settings,
         'languages': languages,
         'currencies': currencies,
-        'dishes': dishes,
+        'menu': menu,
     }
 
     request.session['page'] = reverse('menu')
@@ -758,6 +768,68 @@ def create_checkout_session(request):
         return JsonResponse({'id': checkout_session.id})
     except Exception as e:
         return JsonResponse(error=str(e))
+
+
+def build_object_columns(object):
+    columns = []
+    column = {}
+
+    if 'dishes' in object:
+        list= []
+        for obj in object['dishes']:
+            cols = build_object_columns(obj)
+            if not cols:
+                list.append(obj)
+        if list:
+            list.sort(key=lambda elem: elem['sort_number'], reverse=False)
+            column['dish'] = list
+            columns.append(column['dish'])
+
+    if 'types' in object:
+        list= []
+        for obj in object['types']:
+            cols = build_object_columns(obj)
+            if not cols:
+                list.append(obj)
+        if list:
+            list.sort(key=lambda elem: elem['sort_number'], reverse=False)
+            column['type'] = list
+            columns.append(column['type'])
+
+    if 'flavors' in object:
+        list= []
+        for obj in object['flavors']:
+            cols = build_object_columns(obj)
+            if not cols:
+                list.append(obj)
+        if list:
+            list.sort(key=lambda elem: elem['sort_number'], reverse=False)
+            column['flavor'] = list
+            columns.append(column['flavor'])
+
+    if 'addings' in object:
+        list= []
+        for obj in object['addings']:
+            cols = build_object_columns(obj)
+            if not cols:
+                list.append(obj)
+        if list:
+            list.sort(key=lambda elem: elem['sort_number'], reverse=False)
+            column['adding'] = list
+            columns.append(column['adding'])
+
+    if 'sizes' in object:
+        list= []
+        for obj in object['sizes']:
+            cols = build_object_columns(obj)
+            if not cols:
+                list.append(obj)
+        if list:
+            list.sort(key=lambda elem: elem['sort_number'], reverse=False)
+            column['size'] = list
+            columns.append(column['size'])
+
+    return columns
 
 
 def build_objects_columns(objects):

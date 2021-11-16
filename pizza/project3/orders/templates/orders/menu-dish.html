@@ -1,0 +1,44 @@
+<ul class="list-group pt-4">
+    <li class="list-group-item ln-container01">
+        {% if dish.columns %}
+            {% for column in dish.columns %}
+                {% include "orders/menu-column.html" %}
+            {% endfor %}
+        {% else %}
+            {% if dish.types or dish.flavors or dish.addings or dish.sizes %}
+                <h4>{{ dish.short_name.translated.words }}</h4>
+                <h4>{{ dish.long_name.translated.words }}</h4>
+                    
+                {% for type in dish.types %}
+                    {% include "orders/menu-type.html" %}
+                {% endfor %}
+
+                {% for flavor in dish.flavors %}
+                    {% include "orders/menu-flavor.html" %}
+                {% endfor %}
+
+                {% for size in dish.sizes %}
+                    {% include "orders/menu-size.html" %}
+                {% endfor %}
+
+                {% for adding in dish.addings %}
+                    {% include "orders/menu-adding.html" %}
+                {% endfor %}
+            {% else %}
+                <table style="width:100%">
+                    <tr>
+                        <th>
+                            <h4>{{ dish.short_name.translated.words }}</h4>
+                        </th>
+                        <th>
+                            <h4>{{ dish.long_name.translated.words }}</h4>
+                        </th>
+                        <th>
+                            {% include "orders/menu-dish-plain.html" %}
+                        </th>
+                    </tr>
+                </table>
+            {% endif %}
+        {% endif %}
+    </li>
+</ul>
