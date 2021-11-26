@@ -8,9 +8,16 @@
 {% block main %}
     <h3>{{ settings.menu_page_header.translated.words }}</h3>
 
-    {% for dish in menu.dishes %}
-        {% include "orders/menu-dish.html" %}
-    {% empty %}
+    {% if not menu.has_children %}
         <h4>{{ settings.menu_page_no_dishes.translated.words }}</h4>
-    {% endfor %}
+    {% else %}
+        {% include "orders/menu-plains.html" %}
+
+        {% if menu.columns %}
+            {% include "orders/menu-columns-headers.html" %}
+            {% include "orders/menu-columns-nodes.html" %}
+        {% endif %}
+
+        {% include "orders/menu-fulls.html" %}
+    {% endif %}
 {% endblock %}

@@ -1,0 +1,16 @@
+{% if not dish.has_children %}
+    {% if dish.is_plain %}
+        {% include "orders/menu-dish-plain.html" %}
+    {% else %}
+        <h5>{{ settings.pages_no_items.translated.words }}</h5>
+    {% endif %}
+{% else %}
+    {% include "orders/menu-dish-plains.html" %}
+
+    {% if dish.columns %}
+        {% include "orders/menu-dish-columns-headers.html" %}
+        {% include "orders/menu-dish-columns-nodes.html" %}
+    {% endif %}
+
+    {% include "orders/menu-dish-fulls.html" %}
+{% endif %}

@@ -1,0 +1,16 @@
+{% if not flavor.has_children %}
+    {% if flavor.is_plain %}
+        {% include "orders/menu-flavor-plain.html" %}
+    {% else %}
+        <h6>{{ settings.pages_no_items.translated.words }}</h6>
+    {% endif %}
+{% else %}
+    {% include "orders/menu-flavor-plains.html" %}
+
+    {% if flavor.columns %}
+        {% include "orders/menu-flavor-columns-headers.html" %}
+        {% include "orders/menu-flavor-columns-nodes.html" %}
+    {% endif %}
+
+    {% include "orders/menu-flavor-fulls.html" %}
+{% endif %}

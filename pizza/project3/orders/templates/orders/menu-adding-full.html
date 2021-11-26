@@ -1,0 +1,16 @@
+{% if not addding.has_children %}
+    {% if addding.is_plain %}
+        {% include "orders/menu-addding-plain.html" %}
+    {% else %}
+        <h6>{{ settings.pages_no_items.translated.words }}</h6>
+    {% endif %}
+{% else %}
+    {% include "orders/menu-addding-plains.html" %}
+
+    {% if addding.columns %}
+        {% include "orders/menu-addding-columns-headers.html" %}
+        {% include "orders/menu-addding-columns-nodes.html" %}
+    {% endif %}
+
+    {% include "orders/menu-addding-fulls.html" %}
+{% endif %}

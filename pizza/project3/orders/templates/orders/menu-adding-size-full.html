@@ -1,0 +1,16 @@
+{% if not addding_size.has_children %}
+    {% if addding_size.is_plain %}
+        {% include "orders/menu-addding-size-plain.html" %}
+    {% else %}
+        <h6>{{ settings.pages_no_items.translated.words }}</h6>
+    {% endif %}
+{% else %}
+    {% include "orders/menu-addding-size-plains.html" %}
+
+    {% if addding_size.columns %}
+        {% include "orders/menu-addding-size-columns-headers.html" %}
+        {% include "orders/menu-addding-size-columns-nodes.html" %}
+    {% endif %}
+
+    {% include "orders/menu-addding-size-fulls.html" %}
+{% endif %}

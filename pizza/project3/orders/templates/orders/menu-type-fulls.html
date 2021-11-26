@@ -1,0 +1,32 @@
+{% for flavor in type.full.flavors %}
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container03">
+            <h6>{{ flavor.short_name.translated.words }}</h6>
+            <h6>{{ flavor.long_name.translated.words }}</h6>
+
+            {% include "orders/menu-flavor-full.html" %}
+        </li>
+    </ul>
+{% endfor %}
+
+{% for adding in type.full.addings %}
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container03">
+            <h6>{{ adding.short_name.translated.words }}</h6>
+            <h6>{{ adding.long_name.translated.words }}</h6>
+
+            {% include "orders/menu-adding-full.html" %}
+        </li>
+    </ul>
+{% endfor %}
+
+{% for size in type.full.sizes %}
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container03">
+            <h6>{{ size.short_name.translated.words }}</h6>
+            <h6>{{ size.long_name.translated.words }}</h6>
+
+            {% include "orders/menu-size-full.html" %}
+        </li>
+    </ul>
+{% endfor %}

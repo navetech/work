@@ -1,0 +1,43 @@
+{% for type in dish.plain.types %}
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container02">
+            <h5>{{ type.short_name.translated.words }}</h5>
+            <h5>{{ type.long_name.translated.words }}</h5>
+
+            {% include "orders/menu-type-plain.html" %}
+        </li>
+    </ul>
+{% endfor %}
+
+{% for flavor in dish.plain.flavors %}
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container02">
+            <h5>{{ flavor.short_name.translated.words }}</h5>
+            <h5>{{ flavor.long_name.translated.words }}</h5>
+
+            {% include "orders/menu-flavor-plain.html" %}
+        </li>
+    </ul>
+{% endfor %}
+
+{% for adding in dish.plain.addings %}
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container02">
+            <h5>{{ adding.short_name.translated.words }}</h5>
+            <h5>{{ adding.long_name.translated.words }}</h5>
+
+            {% include "orders/menu-adding-plain.html" %}
+        </li>
+    </ul>
+{% endfor %}
+
+{% for size in dish.plain.sizes %}
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container02">
+            <h5>{{ size.short_name.translated.words }}</h5>
+            <h5>{{ size.long_name.translated.words }}</h5>
+
+            {% include "orders/menu-size-plain.html" %}
+        </li>
+    </ul>
+{% endfor %}

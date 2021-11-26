@@ -1,0 +1,10 @@
+{% for dish in menu.plain.dishes %}
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container01">
+            <h4>{{ dish.short_name.translated.words }}</h4>
+            <h4>{{ dish.long_name.translated.words }}</h4>
+
+            {% include "orders/menu-dish-plain.html" %}
+        </li>
+    </ul>
+{% endfor %}

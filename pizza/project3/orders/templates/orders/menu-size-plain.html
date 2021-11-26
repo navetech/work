@@ -1,0 +1,9 @@
+<form action="{% url 'put_order' %}" method="post">
+    {% csrf_token %}
+
+    {% include "orders/menu-form-inputs.html" %}
+
+    <button type="submit" name="submit">
+        {{ size.quantity.converted.value|floatformat:2 }} {{ size.quantity.converted.unit }}
+    </button>
+</form>
