@@ -1,0 +1,16 @@
+{% if not addding_flavor_size.has_children %}
+    {% if addding_flavor_size.is_plain %}
+        {% include "orders/menu-addding-flavor-size-plain.html" %}
+    {% else %}
+        <h6>{{ settings.pages_no_items.translated.words }}</h6>
+    {% endif %}
+{% else %}
+    {% include "orders/menu-addding-flavor-size-plains.html" %}
+
+    {% if addding_flavor_size.columns %}
+        {% include "orders/menu-addding-flavor-size-columns-headers.html" %}
+        {% include "orders/menu-addding-flavor-size-columns-nodes.html" %}
+    {% endif %}
+
+    {% include "orders/menu-addding-flavor-size-fulls.html" %}
+{% endif %}

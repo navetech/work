@@ -1,10 +1,12 @@
-{% for dish in menu.full.dishes %}
+{% if menu.full.dishes %}
     <ul class="list-group pt-4">
-        <li class="list-group-item ln-container01">
-            <h4>{{ dish.short_name.translated.words }}</h4>
-            <h4>{{ dish.long_name.translated.words }}</h4>
+        {% for dish in menu.full.dishes %}
+            <li class="list-group-item ln-container01">
+                <h4>{{ dish.short_name.translated.words }}</h4>
+                <h4>{{ dish.long_name.translated.words }}</h4>
 
-            {% include "orders/menu-dish-full.html" %}
-        </li>
+                {% include "orders/menu-dish.html" %}
+            </li>
+        {% endfor %}
     </ul>
-{% endfor %}
+{% endif %}
