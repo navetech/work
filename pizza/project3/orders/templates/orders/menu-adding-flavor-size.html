@@ -7,10 +7,7 @@
 {% else %}
     {% include "orders/menu-addding-flavor-size-plains.html" %}
 
-    {% if addding_flavor_size.columns %}
-        {% include "orders/menu-addding-flavor-size-columns-headers.html" %}
-        {% include "orders/menu-addding-flavor-size-columns-nodes.html" %}
-    {% endif %}
+    {% include "orders/menu-addding-flavor-size-table.html" %}
 
     {% include "orders/menu-addding-flavor-size-fulls.html" %}
 {% endif %}

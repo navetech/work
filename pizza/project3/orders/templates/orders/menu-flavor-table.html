@@ -1,0 +1,25 @@
+{% if flavor.table %}
+    <table style="width:100%">
+        <tr>
+            <th></th>
+            <th></th>
+
+            {% for header in flavor.table.headers.addings %}
+                {% include "orders/menu-table-header.html" %}
+            {% endfor %}
+
+            {% for header in flavor.table.headers.sizes %}
+                {% include "orders/menu-table-header.html" %}
+            {% endfor %}
+        </tr>
+
+        {% for adding in flavor.table.lines.addings %}
+            {% include "orders/menu-table-line-adding.html" %}
+        {% endfor %}
+
+        {% for size in flavor.table.lines.sizes %}
+            {% include "orders/menu-table-line-size.html" %}
+        {% endfor %}
+    </table>
+{% endif %}
+

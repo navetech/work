@@ -1,0 +1,11 @@
+<tr>
+    <td>{{ adding_flavor.short_name.translated.words }}</td>
+    <td>{{ adding_flavor.long_name.translated.words }}</td>
+
+    {% for adding_flavor_size in adding_flavor.columns.sizes %}
+        <td>
+            {% include "orders/menu-adding-flavor-size-plain.html" %}
+        </td>
+    {% endfor %}
+</tr>
+

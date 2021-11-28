@@ -7,10 +7,7 @@
 {% else %}
     {% include "orders/menu-size-plains.html" %}
 
-    {% if size.columns %}
-        {% include "orders/menu-size-columns-headers.html" %}
-        {% include "orders/menu-size-columns-nodes.html" %}
-    {% endif %}
+    {% include "orders/menu-size-table.html" %}
 
     {% include "orders/menu-size-fulls.html" %}
 {% endif %}

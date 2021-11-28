@@ -7,10 +7,7 @@
 {% else %}
     {% include "orders/menu-dish-plains.html" %}
 
-    {% if dish.columns %}
-        {% include "orders/menu-dish-columns-headers.html" %}
-        {% include "orders/menu-dish-columns-nodes.html" %}
-    {% endif %}
+    {% include "orders/menu-dish-table.html" %}
 
     {% include "orders/menu-dish-fulls.html" %}
 {% endif %}

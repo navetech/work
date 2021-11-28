@@ -13,10 +13,7 @@
     {% else %}
         {% include "orders/menu-plains.html" %}
 
-        {% if menu.columns %}
-            {% include "orders/menu-columns-headers.html" %}
-            {% include "orders/menu-columns-nodes.html" %}
-        {% endif %}
+        {% include "orders/menu-table.html" %}
 
         {% include "orders/menu-fulls.html" %}
     {% endif %}

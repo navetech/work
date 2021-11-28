@@ -1,0 +1,41 @@
+{% if dish.table %}
+    <table style="width:100%">
+        <tr>
+            <th></th>
+            <th></th>
+
+            {% for header in dish.table.headers.types %}
+                {% include "orders/menu-table-header.html" %}
+            {% endfor %}
+
+            {% for header in dish.table.headers.flavors %}
+                {% include "orders/menu-table-header.html" %}
+            {% endfor %}
+
+            {% for header in dish.table.headers.addings %}
+                {% include "orders/menu-table-header.html" %}
+            {% endfor %}
+
+            {% for header in dish.table.headers.sizes %}
+                {% include "orders/menu-table-header.html" %}
+            {% endfor %}
+        </tr>
+
+        {% for type in dish.table.lines.types %}
+            {% include "orders/menu-table-line-type.html" %}
+        {% endfor %}
+
+        {% for flavor in dish.table.lines.flavors %}
+            {% include "orders/menu-table-line-flavor.html" %}
+        {% endfor %}
+
+        {% for adding in dish.table.lines.addings %}
+            {% include "orders/menu-table-line-adding.html" %}
+        {% endfor %}
+
+        {% for size in dish.table.lines.sizes %}
+            {% include "orders/menu-table-line-size.html" %}
+        {% endfor %}
+    </table>
+{% endif %}
+

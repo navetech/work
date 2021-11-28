@@ -1,0 +1,17 @@
+{% if menu.table %}
+    <table style="width:100%">
+        <tr>
+            <th></th>
+            <th></th>
+
+            {% for header in menu.table.headers.dishes %}
+                {% include "orders/menu-table-header.html" %}
+            {% endfor %}
+        </tr>
+
+        {% for dish in menu.table.lines.dishes %}
+            {% include "orders/menu-table-line-dish.html" %}
+        {% endfor %}
+    </table>
+{% endif %}
+
