@@ -127,15 +127,8 @@ def menu(request):
 
     menu = {}
     menu['dishes'] = dishes
-    for dish in dishes:
-        dish['columns'] = build_object_columns(dish)
-#    print('menu columns >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-#    print(menu['columns'])
-    for dish in dishes:
-        if 'columns' in dish:
-            print()
-            print('dish columns >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-            print(dish['columns'])
+
+    menu = build(menu)
 
     context = {
         'settings': settings,
@@ -457,6 +450,114 @@ def clear_cart(request):
         order.cancel()
 
     return HttpResponseRedirect(reverse('cart'))
+
+
+def build(self):
+    if self:
+        self = build_is_plain(self)
+
+        if not 'has_children' in self or not self['has_children']:
+            pass
+        else:
+            key = 'dishes'
+            body = build_body(self, key)
+
+            key = 'dishes'
+            body = build_body(self, key)
+
+            key = 'dishes'
+            body = build_body(self, key)
+
+            key = 'dishes'
+            body = build_body(self, key)
+
+            key = 'dishes'
+            body = build_body(self, key)
+
+            plain = {}
+            table = {}
+            full = {}
+
+            if 'dishes' in self:
+                plain['dishes'] = []
+                table['dishes'] = []
+                full['dishes'] = []
+
+                for dish in self['dishes']:
+                    dish = build(dish)
+
+                    if dish:
+                        if 'is_plain' in dish and dish['is_plain']:
+                            plain['dishes'].append(dish)
+                        elif 'plain' in dish and dish['plain']:
+                            table['dishes'].append(dish)
+                        else:
+                            full['dishes'].append(dish)
+
+            if table:
+                table = fill_table(table)
+
+            if plain:
+                self['plain'] = plain
+            if table:
+                self['table'] = table
+            if full:
+                self['full'] full
+
+    return self
+
+
+
+            children_key = 'dishes'
+            dishes = build_children(self, children_key)
+
+            children_key = 'types'
+            types = build_children(self, children_key)
+
+            children_key = 'flavors'
+            flavors = build_children(self, children_key)
+
+            children_key = 'addings'
+            addings = build_children(self, children_key)
+
+            children_key = 'dishes'
+            dishes = build_children(self, children_key)
+
+    return self
+
+
+def build_children(self, children_key):
+    children = []
+
+    if self and children_key and children_key in self:
+        for child in self['children_key']:
+            child = build(child)
+            if child:
+                children.append(child)
+
+    return children
+
+
+
+def build_is_plain(self):
+    if self:
+        has_children = True
+        is_plain = False
+
+        if not 'dishes' in self or not self['dishes']:
+            if not 'types' in self or not self['types']:
+                if not 'flavors' in self or not self['flavors']:
+                    if not 'addings' in self or not self['addings']:
+                        if not 'sizes' in self or not self['sizes']:
+                            has_children = False
+
+                            if 'quantity' in self and self['quantity']:
+                                is_plain = True
+
+        self['has_children'] = has_children
+        self['is_plain'] = is_plain
+
+    return self
 
 
 def calc_order_price(order):
