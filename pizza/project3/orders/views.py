@@ -459,84 +459,59 @@ def build(self):
         if not 'has_children' in self or not self['has_children']:
             pass
         else:
-            key = 'dishes'
-            body = build_body(self, key)
+            self['plain'] = {}
+            self['table'] = {}
+            self['full'] = {}
+            
+            elems = 'dishes'
+            self = build_from_elems(self, elems)
 
-            key = 'dishes'
-            body = build_body(self, key)
+            elems = 'types'
+            self = build_from_elems(self, elems)
 
-            key = 'dishes'
-            body = build_body(self, key)
+            elems = 'flavors'
+            self = build_from_elems(self, elems)
 
-            key = 'dishes'
-            body = build_body(self, key)
+            elems = 'addings'
+            self = build_from_elems(self, elems)
 
-            key = 'dishes'
-            body = build_body(self, key)
+            elems = 'sizes'
+            self = build_from_elems(self, elems)
 
-            plain = {}
-            table = {}
-            full = {}
-
-            if 'dishes' in self:
-                plain['dishes'] = []
-                table['dishes'] = []
-                full['dishes'] = []
-
-                for dish in self['dishes']:
-                    dish = build(dish)
-
-                    if dish:
-                        if 'is_plain' in dish and dish['is_plain']:
-                            plain['dishes'].append(dish)
-                        elif 'plain' in dish and dish['plain']:
-                            table['dishes'].append(dish)
-                        else:
-                            full['dishes'].append(dish)
-
-            if table:
-                table = fill_table(table)
-
-            if plain:
-                self['plain'] = plain
-            if table:
-                self['table'] = table
-            if full:
-                self['full'] full
+            if 'table' in self and self['table']:
+                self['table'] = fill_table(self['table'])
 
     return self
 
 
+def build_from_elems(self, elems):
+    if self and elems:
+        if elems in self:
+            plain_elems = []
+            table_elems = []
+            full_elems = []
 
-            children_key = 'dishes'
-            dishes = build_children(self, children_key)
+            for elem in self[elems]:
+                elem = build(elem)
 
-            children_key = 'types'
-            types = build_children(self, children_key)
+                if elem:
+                    if 'is_plain' in elem and elem['is_plain']:
+                        plain_elems.append(elem)
+                    elif 'plain' in elem and elem['plain']:
+                        table_elems.append(elem)
+                    else:
+                        full_elems.append(elem)
 
-            children_key = 'flavors'
-            flavors = build_children(self, children_key)
+            if plain_elems:
+                self['plain'][elems] = plain_elems
 
-            children_key = 'addings'
-            addings = build_children(self, children_key)
+            if table_elems:
+                self['table'][elems] = table_elems
 
-            children_key = 'dishes'
-            dishes = build_children(self, children_key)
+            if full_elems:
+                self['full'][elems] = full_elems
 
     return self
-
-
-def build_children(self, children_key):
-    children = []
-
-    if self and children_key and children_key in self:
-        for child in self['children_key']:
-            child = build(child)
-            if child:
-                children.append(child)
-
-    return children
-
 
 
 def build_is_plain(self):
