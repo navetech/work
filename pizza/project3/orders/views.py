@@ -484,6 +484,55 @@ def build(self):
     return self
 
 
+def fill_table(table):
+    if table:
+        table['headers'] = {}
+        table = fill_table_headers(table)
+
+        table['lines'] = {}
+        table = fill_table_lines(table)
+
+
+def fill_table_headers(table):
+    if table:
+        elems = 'dishes'
+        table = fill_table_headers_from_elems(table, elems)
+
+        elems = 'types'
+        table = fill_table_headers_from_elems(table, elems)
+
+        elems = 'flavors'
+        table = fill_table_headers_from_elems(table, elems)
+
+        elems = 'addings'
+        table = fill_table_headers_from_elems(table, elems)
+
+        elems = 'sizes'
+        table = fill_table_headers_from_elems(table, elems)
+    
+    return table
+
+
+def fill_table_lines(table):
+    if table:
+        elems = 'dishes'
+        table = fill_table_lines_from_elems(table, elems)
+
+        elems = 'types'
+        table = fill_table_lines_from_elems(table, elems)
+
+        elems = 'flavors'
+        table = fill_table_lines_from_elems(table, elems)
+
+        elems = 'addings'
+        table = fill_table_lines_from_elems(table, elems)
+
+        elems = 'sizes'
+        table = fill_table_lines_from_elems(table, elems)
+    
+    return table
+
+
 def build_from_elems(self, elems):
     if self and elems:
         if elems in self:
