@@ -486,51 +486,107 @@ def build(self):
 
 def fill_table(table):
     if table:
-        table['headers'] = {}
-        table = fill_table_headers(table)
+        table['headers'] = fill_table_headers(table)
 
-        table['lines'] = {}
-        table = fill_table_lines(table)
+        table['lines'] = fill_table_lines(table, table['headers'])
 
 
 def fill_table_headers(table):
+    headers= {}
+
     if table:
         elems = 'dishes'
-        table = fill_table_headers_from_elems(table, elems)
+        headers[elems] = fill_table_headers_from_elems(table, elems)
 
         elems = 'types'
-        table = fill_table_headers_from_elems(table, elems)
+        headers[elems] = fill_table_headers_from_elems(table, elems)
 
         elems = 'flavors'
-        table = fill_table_headers_from_elems(table, elems)
+        headers[elems] = fill_table_headers_from_elems(table, elems)
 
         elems = 'addings'
-        table = fill_table_headers_from_elems(table, elems)
+        headers[elems] = fill_table_headers_from_elems(table, elems)
 
         elems = 'sizes'
-        table = fill_table_headers_from_elems(table, elems)
+        headers[elems] = fill_table_headers_from_elems(table, elems)
     
-    return table
+    return headers
 
 
-def fill_table_lines(table):
-    if table:
+def fill_table_headers_from_elems(table, elems):
+    elems_headers = []
+
+    if table and elems:
+        if elems in table:
+            table[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
+
+            for elem in table[elems]:
+                elem_headers = fill_elem_table_headers(elem)
+                elems_headers.extend(elem_headers)
+
+    return elems_headers
+
+
+def fill_elem_table_headers(elem):
+    elem_headers= []
+
+    if elem:
+        if 'plain' in elem:
+            sub_elems = 'dishes'
+            plains = get_list_from_elems(elem['plain'], sub_elems)
+            elem_headers.extend(plains)
+
+            sub_elems = 'types'
+            plains = get_list_from_elems(elem['plain'], sub_elems)
+            elem_headers.extend(plains)
+
+            sub_elems = 'flavors'
+            plains = get_list_from_elems(elem['plain'], sub_elems)
+            elem_headers.extend(plains)
+
+            sub_elems = 'addings'
+            plains = get_list_from_elems(elem['plain'], sub_elems)
+            elem_headers.extend(plains)
+
+            sub_elems = 'sizes'
+            plains = get_list_from_elems(elem['plain'], sub_elems)
+            elem_headers.extend(plains)
+
+    return elem_headers
+
+
+def get_list_from_elems(obj, elems):
+    list = []
+
+    if obj and elems:
+        if elems in obj:
+            obj[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
+            
+            list.extend(obj[elems])
+
+    return list
+
+
+def fill_table_lines(table, table_headers):
+    lines = {}
+
+    if table and table_headers:
         elems = 'dishes'
-        table = fill_table_lines_from_elems(table, elems)
+        lines['elem'] = fill_table_lines_from_elems(table, elems)
 
         elems = 'types'
-        table = fill_table_lines_from_elems(table, elems)
+        lines['elem'] = fill_table_lines_from_elems(table, elems)
 
         elems = 'flavors'
-        table = fill_table_lines_from_elems(table, elems)
+        lines['elem'] = fill_table_lines_from_elems(table, elems)
 
         elems = 'addings'
-        table = fill_table_lines_from_elems(table, elems)
+        lines['elem'] = fill_table_lines_from_elems(table, elems)
 
         elems = 'sizes'
-        table = fill_table_lines_from_elems(table, elems)
+        lines['elem'] = fill_table_lines_from_elems(table, elems)
     
-    return table
+    return lines
 
 
 def build_from_elems(self, elems):
