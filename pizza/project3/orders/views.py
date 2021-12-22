@@ -488,105 +488,176 @@ def fill_table(table):
     if table:
         table['headers'] = fill_table_headers(table)
 
-        table['lines'] = fill_table_lines(table, table['headers'])
+        table['lines'] = build_table_lines(table, table['headers'])
 
 
 def fill_table_headers(table):
-    headers= {}
+    if not table:
+        return None
+        
+    headers = {}
 
-    if table:
-        elems = 'dishes'
-        headers[elems] = fill_table_headers_from_elems(table, elems)
+    elems = 'dishes'
+    headers = fill_headers_from_elems(headers, table, elems)
 
-        elems = 'types'
-        headers[elems] = fill_table_headers_from_elems(table, elems)
+    elems = 'types'
+    headers = fill_headers_from_elems(headers, table, elems)
 
-        elems = 'flavors'
-        headers[elems] = fill_table_headers_from_elems(table, elems)
+    elems = 'flavors'
+    headers = fill_headers_from_elems(headers, table, elems)
 
-        elems = 'addings'
-        headers[elems] = fill_table_headers_from_elems(table, elems)
+    elems = 'addings'
+    headers = fill_headers_from_elems(headers, table, elems)
 
-        elems = 'sizes'
-        headers[elems] = fill_table_headers_from_elems(table, elems)
+    elems = 'sizes'
+    headers = fill_headers_from_elems(headers, table, elems)
     
     return headers
 
 
-def fill_table_headers_from_elems(table, elems):
-    elems_headers = []
-
+def fill_headers_from_elems(headers, table, elems):
     if table and elems:
         if elems in table:
             table[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
 
             for elem in table[elems]:
-                elem_headers = fill_elem_table_headers(elem)
-                elems_headers.extend(elem_headers)
+                headers = fill_headers_from_elem(headers, elem)
 
-    return elems_headers
+    return headers
 
 
-def fill_elem_table_headers(elem):
-    elem_headers= []
-
+def fill_headers_from_elem(headers, elem):
     if elem:
         if 'plain' in elem:
-            sub_elems = 'dishes'
-            plains = get_list_from_elems(elem['plain'], sub_elems)
-            elem_headers.extend(plains)
+            struct = elem['plain']
 
-            sub_elems = 'types'
-            plains = get_list_from_elems(elem['plain'], sub_elems)
-            elem_headers.extend(plains)
+            struct_elems = 'dishes'
+            headers = fill_headers_from_struct_elems(headers, struct, struct_elems)
 
-            sub_elems = 'flavors'
-            plains = get_list_from_elems(elem['plain'], sub_elems)
-            elem_headers.extend(plains)
+            struct_elems = 'types'
+            headers = fill_headers_from_struct_elems(headers, struct, struct_elems)
 
-            sub_elems = 'addings'
-            plains = get_list_from_elems(elem['plain'], sub_elems)
-            elem_headers.extend(plains)
+            struct_elems = 'flavors'
+            headers = fill_headers_from_struct_elems(headers, struct, struct_elems)
 
-            sub_elems = 'sizes'
-            plains = get_list_from_elems(elem['plain'], sub_elems)
-            elem_headers.extend(plains)
+            struct_elems = 'addings'
+            headers = fill_headers_from_struct_elems(headers, struct, struct_elems)
 
-    return elem_headers
+            struct_elems = 'sizes'
+            headers = fill_headers_from_struct_elems(headers, struct, struct_elems)
+
+    return headers
 
 
-def get_list_from_elems(obj, elems):
-    list = []
+def fill_headers_from_struct_elems(headers, struct, elems):
+    if struct and elems:
+        if elems in struct:
+            if struct[elems]:
+                struct[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
 
-    if obj and elems:
-        if elems in obj:
-            obj[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
+                if not elems in headers:
+                    headers[elems] = []
             
-            list.extend(obj[elems])
+                headers[elems].extend(struct[elems])
 
-    return list
+                headers[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
+
+    return headers
 
 
-def fill_table_lines(table, table_headers):
+def build_table_lines(table, headers):
+    if not (table and headers):
+        return None
+
     lines = {}
 
-    if table and table_headers:
-        elems = 'dishes'
-        lines['elem'] = fill_table_lines_from_elems(table, elems)
+    elems = 'dishes'
+    lines[elems] = build_table_lines_from_elems(table, headers, elems)
 
-        elems = 'types'
-        lines['elem'] = fill_table_lines_from_elems(table, elems)
+    elems = 'types'
+    lines[elems] = build_table_lines_from_elems(table, headers, elems)
 
-        elems = 'flavors'
-        lines['elem'] = fill_table_lines_from_elems(table, elems)
+    elems = 'flavors'
+    lines[elems] = build_table_lines_from_elems(table, headers, elems)
 
-        elems = 'addings'
-        lines['elem'] = fill_table_lines_from_elems(table, elems)
+    elems = 'addings'
+    lines[elems] = build_table_lines_from_elems(table, headers, elems)
 
-        elems = 'sizes'
-        lines['elem'] = fill_table_lines_from_elems(table, elems)
-    
+    elems = 'sizes'
+    lines[elems] = build_table_lines_from_elems(table, headers, elems)
+
     return lines
+
+
+def build_table_lines_from_elems(table, headers, elems):
+    if not (table and headers and elems):
+        return None
+
+    if not elems in table:
+        return None
+
+    table[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
+
+    lines = []
+
+    for elem in table[elems]:
+        line = build_line_from_elem(headers, elem)
+
+        lines.append(line)
+
+    return lines
+
+
+def build_line_from_elem(headers, elem):
+    if not (headers and elem):
+        return None
+
+    if not 'plain' in elem:
+        return None
+
+    line = {}
+
+    columns = {}
+
+    struct = elem['plain']
+
+    struct_elems = 'dishes'
+    columns[struct_elems]= build_columns_from_struct_elems(headers, struct, struct_elems)
+
+    struct_elems = 'types'
+    columns[struct_elems]= build_columns_from_struct_elems(headers, struct, struct_elems)
+
+    struct_elems = 'flavors'
+    columns[struct_elems]= build_columns_from_struct_elems(headers, struct, struct_elems)
+
+    struct_elems = 'addings'
+    columns[struct_elems]= build_columns_from_struct_elems(headers, struct, struct_elems)
+
+    struct_elems = 'sizes'
+    columns[struct_elems]= build_columns_from_struct_elems(headers, struct, struct_elems)
+
+    return line['columns']
+
+
+def build_columns_from_struct_elems(headers, struct, elems):
+    if not (headers and struct and elems):
+        return None
+
+    if not elems in headers:
+        return None
+
+    columns = []
+    for h_elem in headers[elems]:
+        column = None
+        if elems in struct:
+            for s_elem in struct[elems]:
+                if h_elem == s_elem:
+                    column = s_elem
+                    break
+
+        columns.append(column)
+
+    return columns
 
 
 def build_from_elems(self, elems):
