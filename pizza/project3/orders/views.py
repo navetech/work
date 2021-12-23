@@ -128,7 +128,7 @@ def menu(request):
     menu = {}
     menu['dishes'] = dishes
 
-    menu = build(menu)
+    menu = fill_menu_item(menu)
 
     context = {
         'settings': settings,
@@ -452,36 +452,91 @@ def clear_cart(request):
     return HttpResponseRedirect(reverse('cart'))
 
 
-def build(self):
-    if self:
-        self = build_is_plain(self)
+def fill_menu_item(item):
+    if not item:
+        return item
+    
+    item = fill_is_plain(item)
 
-        if not 'has_children' in self or not self['has_children']:
-            pass
-        else:
-            self['plain'] = {}
-            self['table'] = {}
-            self['full'] = {}
-            
-            elems = 'dishes'
-            self = build_from_elems(self, elems)
+    if not 'has_children' in item or not item['has_children']:
+        return item
+    
+    elems = 'dishes'
+    item = fill_menu_item_from_elems(item, elems)
 
-            elems = 'types'
-            self = build_from_elems(self, elems)
+    elems = 'types'
+    item = fill_menu_item_from_elems(item, elems)
 
-            elems = 'flavors'
-            self = build_from_elems(self, elems)
+    elems = 'flavors'
+    item = fill_menu_item_from_elems(item, elems)
 
-            elems = 'addings'
-            self = build_from_elems(self, elems)
+    elems = 'addings'
+    item = fill_menu_item_from_elems(item, elems)
 
-            elems = 'sizes'
-            self = build_from_elems(self, elems)
+    elems = 'sizes'
+    item = fill_menu_item_from_elems(item, elems)
 
-            if 'table' in self and self['table']:
-                self['table'] = fill_table(self['table'])
+    if 'table' in item and item['table']:
+        item['table'] = fill_table(item['table'])
 
-    return self
+    return item
+
+
+def fill_is_plain(item):
+    if item:
+        has_children = True
+        is_plain = False
+
+        if not 'dishes' in item or not item['dishes']:
+            if not 'types' in item or not item['types']:
+                if not 'flavors' in item or not item['flavors']:
+                    if not 'addings' in item or not item['addings']:
+                        if not 'sizes' in item or not item['sizes']:
+                            has_children = False
+
+                            if 'quantity' in item and item['quantity']:
+                                is_plain = True
+
+        item['has_children'] = has_children
+        item['is_plain'] = is_plain
+
+    return item
+
+
+def fill_menu_item_from_elems(item, elems):
+    if item and elems:
+        if elems in item:
+            plain_elems = []
+            table_elems = []
+            full_elems = []
+
+            for elem in item[elems]:
+                elem = fill_menu_item(elem)
+
+                if elem:
+                    if 'is_plain' in elem and elem['is_plain']:
+                        plain_elems.append(elem)
+                    elif 'plain' in elem and elem['plain']:
+                        table_elems.append(elem)
+                    else:
+                        full_elems.append(elem)
+
+            if plain_elems:
+                if not 'plain' in item:
+                    item['plain'] = {}
+                item['plain'][elems] = plain_elems
+
+            if table_elems:
+                if not 'table' in item:
+                    item['table'] = {}
+                item['table'][elems] = table_elems
+
+            if full_elems:
+                if not 'full' in item:
+                    item['full'] = {}
+                item['full'][elems] = full_elems
+
+    return item
 
 
 def fill_table(table):
@@ -598,14 +653,14 @@ def build_table_lines_from_elems(table, headers, elems):
 
     table[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
 
-    lines = []
+    elems_lines = []
 
     for elem in table[elems]:
         line = build_line_from_elem(headers, elem)
 
-        lines.append(line)
+        elems_lines.append(line)
 
-    return lines
+    return elems_lines
 
 
 def build_line_from_elem(headers, elem):
@@ -614,8 +669,6 @@ def build_line_from_elem(headers, elem):
 
     if not 'plain' in elem:
         return None
-
-    line = {}
 
     columns = {}
 
@@ -636,7 +689,10 @@ def build_line_from_elem(headers, elem):
     struct_elems = 'sizes'
     columns[struct_elems]= build_columns_from_struct_elems(headers, struct, struct_elems)
 
-    return line['columns']
+    line = {}
+    line['columns'] = columns
+
+    return line
 
 
 def build_columns_from_struct_elems(headers, struct, elems):
@@ -646,7 +702,7 @@ def build_columns_from_struct_elems(headers, struct, elems):
     if not elems in headers:
         return None
 
-    columns = []
+    elems_columns = []
     for h_elem in headers[elems]:
         column = None
         if elems in struct:
@@ -655,60 +711,9 @@ def build_columns_from_struct_elems(headers, struct, elems):
                     column = s_elem
                     break
 
-        columns.append(column)
+        elems_columns.append(column)
 
-    return columns
-
-
-def build_from_elems(self, elems):
-    if self and elems:
-        if elems in self:
-            plain_elems = []
-            table_elems = []
-            full_elems = []
-
-            for elem in self[elems]:
-                elem = build(elem)
-
-                if elem:
-                    if 'is_plain' in elem and elem['is_plain']:
-                        plain_elems.append(elem)
-                    elif 'plain' in elem and elem['plain']:
-                        table_elems.append(elem)
-                    else:
-                        full_elems.append(elem)
-
-            if plain_elems:
-                self['plain'][elems] = plain_elems
-
-            if table_elems:
-                self['table'][elems] = table_elems
-
-            if full_elems:
-                self['full'][elems] = full_elems
-
-    return self
-
-
-def build_is_plain(self):
-    if self:
-        has_children = True
-        is_plain = False
-
-        if not 'dishes' in self or not self['dishes']:
-            if not 'types' in self or not self['types']:
-                if not 'flavors' in self or not self['flavors']:
-                    if not 'addings' in self or not self['addings']:
-                        if not 'sizes' in self or not self['sizes']:
-                            has_children = False
-
-                            if 'quantity' in self and self['quantity']:
-                                is_plain = True
-
-        self['has_children'] = has_children
-        self['is_plain'] = is_plain
-
-    return self
+    return elems_columns
 
 
 def calc_order_price(order):

@@ -24,6 +24,11 @@ class Setting(models.Model):
         Phrase, blank=True, null=True, on_delete=models.CASCADE,
         related_name='product_name_Setting_related'
     )
+    
+    pages_no_items = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='pages_no_items_Setting_related'
+    )
 
     menu_page_title = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.CASCADE,
@@ -109,6 +114,7 @@ class Setting(models.Model):
         return (
             f'{self.product_title}, '
             f'{self.product_name}, '
+            f'{self.pages_no_items}, '
             f'{self.menu_page_title}, '
             f'{self.menu_page_header}, '
             f'{self.menu_page_no_dishes}, '
@@ -134,6 +140,7 @@ class Setting(models.Model):
 
         dict['product_title'] = to_dict(self.product_title, **settings)
         dict['product_name'] = to_dict(self.product_name, **settings)
+        dict['pages_no_items'] = to_dict(self.pages_no_items, **settings)
         dict['menu_page_title'] = to_dict(self.menu_page_title, **settings)
         dict['menu_page_header'] = to_dict(self.menu_page_header, **settings)
         dict['menu_page_no_dishes'] = to_dict(self.menu_page_no_dishes, **settings)
