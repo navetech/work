@@ -544,6 +544,9 @@ def fill_table(table):
         table['headers'] = fill_table_headers(table)
 
         table['lines'] = build_table_lines(table, table['headers'])
+        print(table['lines'])
+
+    return table
 
 
 def fill_table_headers(table):
@@ -689,10 +692,9 @@ def build_line_from_elem(headers, elem):
     struct_elems = 'sizes'
     columns[struct_elems]= build_columns_from_struct_elems(headers, struct, struct_elems)
 
-    line = {}
-    line['columns'] = columns
+    elem['columns'] = columns
 
-    return line
+    return elem
 
 
 def build_columns_from_struct_elems(headers, struct, elems):
