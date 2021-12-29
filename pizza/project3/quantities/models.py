@@ -21,10 +21,15 @@ class Quantity(models.Model):
     )
 
     def __str__(self):
-        return (
-            f'{self.value:.2f} '
-            f'{self.unit.alphabetic_code}'
-        )
+        if self.unit:
+            return (
+                f'{self.value:.2f} '
+                f'{self.unit.alphabetic_code}'
+            )
+        else:
+            return (
+                f'{self.value:.2f} '
+            )
 
     def to_dict(self, **settings):
         dict = {}

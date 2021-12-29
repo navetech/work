@@ -544,7 +544,6 @@ def fill_table(table):
         table['headers'] = fill_table_headers(table)
 
         table['lines'] = build_table_lines(table, table['headers'])
-        print(table['lines'])
 
     return table
 
@@ -614,9 +613,11 @@ def fill_headers_from_struct_elems(headers, struct, elems):
                 struct[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
 
                 if not elems in headers:
-                    headers[elems] = []
-            
-                headers[elems].extend(struct[elems])
+                    headers[elems] = struct[elems]
+                else:
+                    for elem in struct[elems]:
+                        if not elem in headers[elems]:
+                            headers[elems].append(elem)
 
                 headers[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
 

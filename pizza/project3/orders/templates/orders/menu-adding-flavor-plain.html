@@ -1,3 +1,5 @@
-<button type="submit" name="submit">
-    {{ adding_flavor.quantity.converted.value|floatformat:2 }} {{ adding_flavor.quantity.converted.unit }}
-</button>
+{% if adding_flavor.quantity.converted.value %}
+    <button type="submit" name="submit">
+        {{ adding_flavor.quantity.converted.value|floatformat:2 }} {{ adding_flavor.quantity.converted.unit }}
+    </button>
+{% endif %}

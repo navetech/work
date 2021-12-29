@@ -1,48 +1,52 @@
 {% if menu.table %}
-    <table style="width:100%">
-        <tr>
-            <th></th>
-            <th></th>
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container01">
+            <table style="width:100%">
+                <tr>
+                    <th></th>
+                    <th></th>
 
-            {% for header in menu.table.headers.dishes %}
-                {% include "orders/menu-table-header.html" %}
-            {% endfor %}
+                    {% for header in menu.table.headers.dishes %}
+                        {% include "orders/menu-table-header.html" %}
+                    {% endfor %}
 
-            {% for header in menu.table.headers.types %}
-                {% include "orders/menu-table-header.html" %}
-            {% endfor %}
+                    {% for header in menu.table.headers.types %}
+                        {% include "orders/menu-table-header.html" %}
+                    {% endfor %}
 
-            {% for header in menu.table.headers.flavors %}
-                {% include "orders/menu-table-header.html" %}
-            {% endfor %}
+                    {% for header in menu.table.headers.flavors %}
+                        {% include "orders/menu-table-header.html" %}
+                    {% endfor %}
 
-            {% for header in menu.table.headers.addings %}
-                {% include "orders/menu-table-header.html" %}
-            {% endfor %}
+                    {% for header in menu.table.headers.addings %}
+                        {% include "orders/menu-table-header.html" %}
+                    {% endfor %}
 
-            {% for header in menu.table.headers.sizes %}
-                {% include "orders/menu-table-header.html" %}
-            {% endfor %}
-        </tr>
+                    {% for header in menu.table.headers.sizes %}
+                        {% include "orders/menu-table-header.html" %}
+                    {% endfor %}
+                </tr>
 
-        {% for dish in menu.table.lines.dishes %}
-            {% include "orders/menu-table-line-dish.html" %}
-        {% endfor %}
+                {% for dish in menu.table.lines.dishes %}
+                    {% include "orders/menu-table-line-dish.html" %}
+                {% endfor %}
 
-        {% for type in menu.table.lines.types %}
-            {% include "orders/menu-table-line-type.html" %}
-        {% endfor %}
+                {% for type in menu.table.lines.types %}
+                    {% include "orders/menu-table-line-type.html" %}
+                {% endfor %}
 
-        {% for flavor in menu.table.lines.flavors %}
-            {% include "orders/menu-table-line-flavor.html" %}
-        {% endfor %}
+                {% for flavor in menu.table.lines.flavors %}
+                    {% include "orders/menu-table-line-flavor.html" %}
+                {% endfor %}
 
-        {% for adding in menu.table.lines.addings %}
-            {% include "orders/menu-table-line-adding.html" %}
-        {% endfor %}
+                {% for adding in menu.table.lines.addings %}
+                    {% include "orders/menu-table-line-adding.html" %}
+                {% endfor %}
 
-        {% for size in menu.table.lines.sizes %}
-            {% include "orders/menu-table-line-size.html" %}
-        {% endfor %}
-    </table>
+                {% for size in menu.table.lines.sizes %}
+                    {% include "orders/menu-table-line-size.html" %}
+                {% endfor %}
+            </table>
+        </li>
+    </ul>
 {% endif %}

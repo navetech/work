@@ -1,5 +1,5 @@
 {% if adding.plain.flavors %}
-    <table style="width:100%">
+    <table style="width:100%" class="ln-container03">
         {% for adding_flavor in adding.plain.flavors %}
             <tr>
                 <td>{{ adding_flavor.short_name.translated.words }}</td>
@@ -12,7 +12,7 @@
 {% endif %}
 
 {% if adding.plain.sizes %}
-    <table style="width:100%">
+    <table style="width:100%" class="ln-container03">
         {% for adding_size in adding.plain.sizes %}
             <tr>
                 <td>{{ adding_size.short_name.translated.words }}</td>

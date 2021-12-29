@@ -1,12 +1,16 @@
 {% if menu.plain.dishes %}
-    <table style="width:100%">
-        {% for dish in menu.plain.dishes %}
-            <tr>
-                <td>{{ dish.short_name.translated.words }}</td>
-                <td>{{ dish.long_name.translated.words }}</td>
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container01">
+            <table style="width:100%">
+                {% for dish in menu.plain.dishes %}
+                    <tr>
+                        <th>{{ dish.short_name.translated.words }}</th>
+                        <th>{{ dish.long_name.translated.words }}</th>
 
-                <td>{% include "orders/menu-dish-plain.html" %}</td>
-            </tr>
-        {% endfor %}
-    </table>
+                        <td>{% include "orders/menu-dish-plain.html" %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </li>
+    </ul>
 {% endif %}
