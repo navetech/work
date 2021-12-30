@@ -1,33 +1,37 @@
 {% if type.table %}
-    <table style="width:100%">
-        <tr>
-            <th></th>
-            <th></th>
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container03">
+            <table style="width:100%">
+                <tr>
+                    <th></th>
+                    <th></th>
 
-            {% for header in type.table.headers.flavors %}
-                {% include "orders/menu-table-header.html" %}
-            {% endfor %}
+                    {% for header in type.table.headers.flavors %}
+                        {% include "orders/menu-table-header.html" %}
+                    {% endfor %}
 
-            {% for header in type.table.headers.addings %}
-                {% include "orders/menu-table-header.html" %}
-            {% endfor %}
+                    {% for header in type.table.headers.addings %}
+                        {% include "orders/menu-table-header.html" %}
+                    {% endfor %}
 
-            {% for header in type.table.headers.sizes %}
-                {% include "orders/menu-table-header.html" %}
-            {% endfor %}
-        </tr>
+                    {% for header in type.table.headers.sizes %}
+                        {% include "orders/menu-table-header.html" %}
+                    {% endfor %}
+                </tr>
 
-        {% for flavor in type.table.lines.flavors %}
-            {% include "orders/menu-table-line-flavor.html" %}
-        {% endfor %}
+                {% for flavor in type.table.lines.flavors %}
+                    {% include "orders/menu-table-line-flavor.html" %}
+                {% endfor %}
 
-        {% for adding in type.table.lines.addings %}
-            {% include "orders/menu-table-line-adding.html" %}
-        {% endfor %}
+                {% for adding in type.table.lines.addings %}
+                    {% include "orders/menu-table-line-adding.html" %}
+                {% endfor %}
 
-        {% for size in type.table.lines.sizes %}
-            {% include "orders/menu-table-line-size.html" %}
-        {% endfor %}
-    </table>
+                {% for size in type.table.lines.sizes %}
+                    {% include "orders/menu-table-line-size.html" %}
+                {% endfor %}
+            </table>
+        </li>
+    </ul>
 {% endif %}
 

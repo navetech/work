@@ -1,4 +1,4 @@
-{% if flavor.table %}
+{% if adding.table %}
     <ul class="list-group pt-4">
         <li class="list-group-item ln-container03">
             <table style="width:100%">
@@ -6,21 +6,21 @@
                     <th></th>
                     <th></th>
 
-                    {% for header in flavor.table.headers.addings %}
+                    {% for header in adding.table.headers.flavors %}
                         {% include "orders/menu-table-header.html" %}
                     {% endfor %}
 
-                    {% for header in flavor.table.headers.sizes %}
+                    {% for header in adding.table.headers.sizes %}
                         {% include "orders/menu-table-header.html" %}
                     {% endfor %}
                 </tr>
 
-                {% for adding in flavor.table.lines.addings %}
-                    {% include "orders/menu-table-line-adding.html" %}
+                {% for adding_flavor in adding.table.lines.flavors %}
+                    {% include "orders/menu-table-line-adding-flavor.html" %}
                 {% endfor %}
 
-                {% for size in flavor.table.lines.sizes %}
-                    {% include "orders/menu-table-line-size.html" %}
+                {% for adding_size in adding.table.lines.sizes %}
+                    {% include "orders/menu-table-line-adding-size.html" %}
                 {% endfor %}
             </table>
         </li>

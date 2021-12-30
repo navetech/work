@@ -352,10 +352,6 @@ class Adding(MenuCommonFields):
     def __str__(self):
         return (
             f'{MenuCommonFields.__str__(self)}, '
-            f'{self.flavors_count}, '
-            f'{self.flavors}, '
-            f'{self.sizes_count}, '
-            f'{self.sizes}, '
         )
 
     def to_dict(self, **settings):
@@ -392,10 +388,6 @@ class Flavor(MenuCommonFields):
     def __str__(self):
         return (
             f'{MenuCommonFields.__str__(self)}, '
-            f'{self.addings_count}, '
-            f'{self.addings}, '
-            f'{self.sizes_count}, '
-            f'{self.sizes}, '
         )
 
     def to_dict(self, **settings):
@@ -441,12 +433,6 @@ class Type(MenuCommonFields):
     def __str__(self):
         return (
             f'{MenuCommonFields.__str__(self)}, '
-            f'{self.flavors_count}, '
-            f'{self.flavors}, '
-            f'{self.addings_count}, '
-            f'{self.addings}, '
-            f'{self.sizes_count}, '
-            f'{self.sizes}, '
         )
 
     def to_dict(self, **settings):
@@ -539,14 +525,6 @@ class Dish(MenuCommonFields):
     def __str__(self):
         return (
             f'{MenuCommonFields.__str__(self)}'
-            f'{self.types_count}, '
-            f'{self.types}, '
-            f'{self.flavors_count}, '
-            f'{self.flavors}, '
-            f'{self.addings_count}, '
-            f'{self.addings}, '
-            f'{self.sizes_count}, '
-            f'{self.sizes}, '
         )
 
     def to_dict(self, **settings):

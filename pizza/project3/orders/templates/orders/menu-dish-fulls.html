@@ -1,51 +1,43 @@
-{% if dish.full.types %}
+{% for type in dish.full.types %}
     <ul class="list-group pt-4">
-        {% for type in dish.full.types %}
         <li class="list-group-item ln-container02">
             <h5>{{ type.short_name.translated.words }}</h5>
             <h5>{{ type.long_name.translated.words }}</h5>
 
             {% include "orders/menu-type.html" %}
         </li>
-        {% endfor %}
     </ul>
-{% endif %}
+{% endfor %}
 
-{% if dish.full.flavors %}
+{% for flavor in dish.full.flavors %}
     <ul class="list-group pt-4">
-        {% for flavor in dish.full.flavors %}
-            <li class="list-group-item ln-container02">
-                <h5>{{ flavor.short_name.translated.words }}</h5>
-                <h5>{{ flavor.long_name.translated.words }}</h5>
+        <li class="list-group-item ln-container02">
+            <h5>{{ flavor.short_name.translated.words }}</h5>
+            <h5>{{ flavor.long_name.translated.words }}</h5>
 
-                {% include "orders/menu-flavor.html" %}
-            </li>
-        {% endfor %}
+            {% include "orders/menu-flavor.html" %}
+        </li>
     </ul>
-{% endif %}
+{% endfor %}
 
-{% if dish.full.addings %}
+{% for adding in dish.full.addings %}
     <ul class="list-group pt-4">
-        {% for adding in dish.full.addings %}
-            <li class="list-group-item ln-container02">
-                <h5>{{ adding.short_name.translated.words }}</h5>
-                <h5>{{ adding.long_name.translated.words }}</h5>
+        <li class="list-group-item ln-container02">
+            <h5>{{ adding.short_name.translated.words }}</h5>
+            <h5>{{ adding.long_name.translated.words }}</h5>
 
-                {% include "orders/menu-adding.html" %}
-            </li>
-        {% endfor %}
+            {% include "orders/menu-adding.html" %}
+        </li>
     </ul>
-{% endif %}
+{% endfor %}
 
-{% if dish.full.sizes %}
+{% for size in dish.full.sizes %}
     <ul class="list-group pt-4">
-        {% for size in dish.full.sizes %}
-            <li class="list-group-item ln-container02">
-                <h5>{{ size.short_name.translated.words }}</h5>
-                <h5>{{ size.long_name.translated.words }}</h5>
+        <li class="list-group-item ln-container02">
+            <h5>{{ size.short_name.translated.words }}</h5>
+            <h5>{{ size.long_name.translated.words }}</h5>
 
-                {% include "orders/menu-size.html" %}
-            </li>
-        {% endfor %}
+            {% include "orders/menu-size.html" %}
+        </li>
     </ul>
-{% endif %}
+{% endfor %}

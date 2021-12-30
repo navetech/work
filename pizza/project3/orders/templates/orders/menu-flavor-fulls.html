@@ -1,25 +1,21 @@
-{% if flavor.full.addings %}
+{% for adding in flavor.full.addings %}
     <ul class="list-group pt-4">
-        {% for adding in flavor.full.addings %}
-            <li class="list-group-item ln-container03">
-                <h6>{{ adding.short_name.translated.words }}</h6>
-                <h6>{{ adding.long_name.translated.words }}</h6>
+        <li class="list-group-item ln-container03">
+            <h6>{{ adding.short_name.translated.words }}</h6>
+            <h6>{{ adding.long_name.translated.words }}</h6>
 
-                {% include "orders/menu-adding.html" %}
-            </li>
-        {% endfor %}
+            {% include "orders/menu-adding.html" %}
+        </li>
     </ul>
-{% endif %}
+{% endfor %}
 
-{% if flavor.full.sizes %}
+{% for size in flavor.full.sizes %}
     <ul class="list-group pt-4">
-        {% for size in flavor.full.sizes %}
-            <li class="list-group-item ln-container03">
-                <h6>{{ size.short_name.translated.words }}</h6>
-                <h6>{{ size.long_name.translated.words }}</h6>
+        <li class="list-group-item ln-container03">
+            <h6>{{ size.short_name.translated.words }}</h6>
+            <h6>{{ size.long_name.translated.words }}</h6>
 
-                {% include "orders/menu-size.html" %}
-            </li>
-        {% endfor %}
+            {% include "orders/menu-size.html" %}
+        </li>
     </ul>
-{% endif %}
+{% endfor %}

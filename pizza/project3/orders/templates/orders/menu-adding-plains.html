@@ -1,25 +1,33 @@
 {% if adding.plain.flavors %}
-    <table style="width:100%" class="ln-container03">
-        {% for adding_flavor in adding.plain.flavors %}
-            <tr>
-                <td>{{ adding_flavor.short_name.translated.words }}</td>
-                <td>{{ adding_flavor.long_name.translated.words }}</td>
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container03">
+            <table style="width:100%">
+                {% for adding_flavor in adding.plain.flavors %}
+                    <tr>
+                        <th>{{ adding_flavor.short_name.translated.words }}</th>
+                        <th>{{ adding_flavor.long_name.translated.words }}</th>
 
-                <td>{% include "orders/menu-adding-flavor-plain.html" %}</td>
-            </tr>
-        {% endfor %}
-    </table>
+                        <td>{% include "orders/menu-adding-flavor-plain.html" %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </li>
+    </ul>
 {% endif %}
 
 {% if adding.plain.sizes %}
-    <table style="width:100%" class="ln-container03">
-        {% for adding_size in adding.plain.sizes %}
-            <tr>
-                <td>{{ adding_size.short_name.translated.words }}</td>
-                <td>{{ adding_size.long_name.translated.words }}</td>
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container03">
+            <table style="width:100%">
+                {% for adding_size in adding.plain.sizes %}
+                    <tr>
+                        <th>{{ adding_size.short_name.translated.words }}</th>
+                        <th>{{ adding_size.long_name.translated.words }}</th>
 
-                <td>{% include "orders/menu-adding-size-plain.html" %}</td>
-            </tr>
-        {% endfor %}
-    </table>
+                        <td>{% include "orders/menu-adding-size-plain.html" %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </li>
+    </ul>
 {% endif %}

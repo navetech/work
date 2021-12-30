@@ -1,38 +1,32 @@
-{% if type.full.flavors %}
+{% for flavor in type.full.flavors %}
     <ul class="list-group pt-4">
-        {% for flavor in type.full.flavors %}
-            <li class="list-group-item ln-container03">
-                <h6>{{ flavor.short_name.translated.words }}</h6>
-                <h6>{{ flavor.long_name.translated.words }}</h6>
+        <li class="list-group-item ln-container03">
+            <h6>{{ flavor.short_name.translated.words }}</h6>
+            <h6>{{ flavor.long_name.translated.words }}</h6>
 
-                {% include "orders/menu-flavor.html" %}
-            </li>
-        {% endfor %}
+            {% include "orders/menu-flavor.html" %}
+        </li>
     </ul>
-{% endif %}
+{% endfor %}
 
-{% if type.full.addings %}
+{% for adding in type.full.addings %}
     <ul class="list-group pt-4">
-        {% for adding in type.full.addings %}
-            <li class="list-group-item ln-container03">
-                <h6>{{ adding.short_name.translated.words }}</h6>
-                <h6>{{ adding.long_name.translated.words }}</h6>
+        <li class="list-group-item ln-container03">
+            <h6>{{ adding.short_name.translated.words }}</h6>
+            <h6>{{ adding.long_name.translated.words }}</h6>
 
-                {% include "orders/menu-adding.html" %}
-            </li>
-        {% endfor %}
+            {% include "orders/menu-adding.html" %}
+        </li>
     </ul>
-{% endif %}
+{% endfor %}
 
-{% if type.full.sizes %}
+{% for size in type.full.sizes %}
     <ul class="list-group pt-4">
-        {% for size in type.full.sizes %}
-            <li class="list-group-item ln-container03">
-                <h6>{{ size.short_name.translated.words }}</h6>
-                <h6>{{ size.long_name.translated.words }}</h6>
+        <li class="list-group-item ln-container03">
+            <h6>{{ size.short_name.translated.words }}</h6>
+            <h6>{{ size.long_name.translated.words }}</h6>
 
-                {% include "orders/menu-size.html" %}
-            </li>
-        {% endfor %}
+            {% include "orders/menu-size.html" %}
+        </li>
     </ul>
-{% endif %}
+{% endfor %}

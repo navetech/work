@@ -1,51 +1,67 @@
 {% if dish.plain.types %}
-    <table style="width:100%" class="ln-container02">
-        {% for type in dish.plain.types %}
-            <tr>
-                <td>{{ type.short_name.translated.words }}</td>
-                <td>{{ type.long_name.translated.words }}</td>
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container02">
+            <table style="width:100%">
+                {% for type in dish.plain.types %}
+                    <tr>
+                        <th>{{ type.short_name.translated.words }}</th>
+                        <th>{{ type.long_name.translated.words }}</th>
 
-                <td>{% include "orders/menu-type-plain.html" %}</td>
-            </tr>
-        {% endfor %}
-    </table>
+                        <td>{% include "orders/menu-type-plain.html" %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </li>
+    </ul>
 {% endif %}
 
 {% if dish.plain.flavors %}
-    <table style="width:100%" class="ln-container02">
-        {% for flavor in dish.plain.flavors %}
-            <tr>
-                <td>{{ flavor.short_name.translated.words }}</td>
-                <td>{{ flavor.long_name.translated.words }}</td>
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container02">
+            <table style="width:100%">
+                {% for flavor in dish.plain.flavors %}
+                    <tr>
+                        <th>{{ flavor.short_name.translated.words }}</th>
+                        <th>{{ flavor.long_name.translated.words }}</th>
 
-                <td>{% include "orders/menu-flavor-plain.html" %}</td>
-            </tr>
-        {% endfor %}
-    </table>
+                        <td>{% include "orders/menu-flavor-plain.html" %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </li>
+    </ul>
 {% endif %}
 
 {% if dish.plain.addings %}
-    <table style="width:100%" class="ln-container02">
-        {% for adding in dish.plain.addings %}
-            <tr>
-                <td>{{ adding.short_name.translated.words }}</td>
-                <td>{{ adding.long_name.translated.words }}</td>
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container02">
+            <table style="width:100%">
+                {% for adding in dish.plain.addings %}
+                    <tr>
+                        <th>{{ adding.short_name.translated.words }}</th>
+                        <th>{{ adding.long_name.translated.words }}</th>
 
-                <td>{% include "orders/menu-adding-plain.html" %}</td>
-            </tr>
-        {% endfor %}
-    </table>
+                        <td>{% include "orders/menu-adding-plain.html" %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </li>
+    </ul>
 {% endif %}
 
 {% if dish.plain.sizes %}
-    <table style="width:100%" class="ln-container02">
-        {% for size in dish.plain.sizes %}
-            <tr>
-                <td>{{ size.short_name.translated.words }}</td>
-                <td>{{ size.long_name.translated.words }}</td>
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container02">
+            <table style="width:100%">
+                {% for size in dish.plain.sizes %}
+                    <tr>
+                        <th>{{ size.short_name.translated.words }}</th>
+                        <th>{{ size.long_name.translated.words }}</th>
 
-                <td>{% include "orders/menu-size-plain.html" %}</td>
-            </tr>
-        {% endfor %}
-    </table>
+                        <td>{% include "orders/menu-size-plain.html" %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </li>
+    </ul>
 {% endif %}
