@@ -510,6 +510,8 @@ def fill_menu_item_from_elems(item, elems):
             table_elems = []
             full_elems = []
 
+            item[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
+
             for elem in item[elems]:
                 elem = fill_menu_item(elem)
 
@@ -541,14 +543,14 @@ def fill_menu_item_from_elems(item, elems):
 
 def fill_table(table):
     if table:
-        table['headers'] = fill_table_headers(table)
+        table['headers'] = build_table_headers(table)
 
         table['lines'] = build_table_lines(table, table['headers'])
 
     return table
 
 
-def fill_table_headers(table):
+def build_table_headers(table):
     if not table:
         return None
         
@@ -613,11 +615,11 @@ def fill_headers_from_struct_elems(headers, struct, elems):
                 struct[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
 
                 if not elems in headers:
-                    headers[elems] = struct[elems]
-                else:
-                    for elem in struct[elems]:
-                        if not elem in headers[elems]:
-                            headers[elems].append(elem)
+                    headers[elems] = []
+
+                for elem in struct[elems]:
+                    if not elem in headers[elems]:
+                        headers[elems].append(elem)
 
                 headers[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
 
@@ -704,6 +706,11 @@ def build_columns_from_struct_elems(headers, struct, elems):
 
     if not elems in headers:
         return None
+
+    headers[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
+
+    if elems in struct:
+        struct[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
 
     elems_columns = []
     for h_elem in headers[elems]:
