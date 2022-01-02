@@ -14,3 +14,71 @@
         </li>
     </ul>
 {% endif %}
+
+{% if menu.plain.types %}
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container02">
+            <table style="width:100%">
+                {% for type in menu.plain.types %}
+                    <tr>
+                        <th>{{ type.short_name.translated.words }}</th>
+                        <th>{{ type.long_name.translated.words }}</th>
+
+                        <td>{% include "orders/menu-type-plain.html" %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </li>
+    </ul>
+{% endif %}
+
+{% if menu.plain.flavors %}
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container02">
+            <table style="width:100%">
+                {% for flavor in menu.plain.flavors %}
+                    <tr>
+                        <th>{{ flavor.short_name.translated.words }}</th>
+                        <th>{{ flavor.long_name.translated.words }}</th>
+
+                        <td>{% include "orders/menu-flavor-plain.html" %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </li>
+    </ul>
+{% endif %}
+
+{% if menu.plain.addings %}
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container02">
+            <table style="width:100%">
+                {% for adding in menu.plain.addings %}
+                    <tr>
+                        <th>{{ adding.short_name.translated.words }}</th>
+                        <th>{{ adding.long_name.translated.words }}</th>
+
+                        <td>{% include "orders/menu-adding-plain.html" %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </li>
+    </ul>
+{% endif %}
+
+{% if menu.plain.sizes %}
+    <ul class="list-group pt-4">
+        <li class="list-group-item ln-container02">
+            <table style="width:100%">
+                {% for size in menu.plain.sizes %}
+                    <tr>
+                        <th>{{ size.short_name.translated.words }}</th>
+                        <th>{{ size.long_name.translated.words }}</th>
+
+                        <td>{% include "orders/menu-size-plain.html" %}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </li>
+    </ul>
+{% endif %}
