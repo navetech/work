@@ -507,6 +507,7 @@ def fill_menu_item_from_elems(item, elems):
     if item and elems:
         if elems in item:
             plain_elems = []
+            not_plain_elems = []
             table_elems = []
             full_elems = []
 
@@ -519,17 +520,28 @@ def fill_menu_item_from_elems(item, elems):
                     if 'is_plain' in elem and elem['is_plain']:
                         plain_elems.append(elem)
                     else:
-                        if 'plain' in elem and elem['plain']:
+                        not_plain_elems.append(elem)
+
+                        if 'not_plain' in elem and elem['not_plain']:
+                            full_elems.append(elem)
+                        elif 'plain' in elem and elem['plain']:
                             table_elems.append(elem)
+                        else:
+                            full_elems.append(elem)
 
-                        full_elems.append(elem)
-
-            if len(plain_elems) > 0 and len(plain_elems) >= len(item[elems]):
+            if len(plain_elems) > 0:
                 if not 'plain' in item:
                     item['plain'] = {}
                 if not elems in item['plain']:
                     item['plain'][elems]= []
                 item['plain'][elems].extend(plain_elems)
+
+            if len(not_plain_elems) > 0:
+                if not 'not_plain' in item:
+                    item['not_plain'] = {}
+                if not elems in item['not_plain']:
+                    item['not_plain'][elems]= []
+                item['not_plain'][elems].extend(not_plain_elems)
 
             if len(table_elems) > 0:
                 if not 'table' in item:
