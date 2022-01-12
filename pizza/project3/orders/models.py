@@ -25,9 +25,14 @@ class Setting(models.Model):
         related_name='product_name_Setting_related'
     )
     
-    pages_no_items = models.ForeignKey(
+    pages_items_header = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='pages_no_items_Setting_related'
+        related_name='pages_items_header_Setting_related'
+    )
+
+    pages_no_items_header = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='pages_no_items_header_Setting_related'
     )
 
     menu_page_title = models.ForeignKey(
@@ -38,11 +43,6 @@ class Setting(models.Model):
     menu_page_header = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.CASCADE,
         related_name='menu_page_header_Setting_related'
-    )
-    
-    menu_page_no_dishes = models.ForeignKey(
-        Phrase, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='menu_page_no_dishes_Setting_related'
     )
 
     order_page_title = models.ForeignKey(
@@ -63,16 +63,6 @@ class Setting(models.Model):
     cart_page_header = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.CASCADE,
         related_name='cart_page_header_Setting_related'
-    )
-
-    cart_page_items_header = models.ForeignKey(
-        Phrase, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='cart_page_items_header_Setting_related'
-    )
-
-    cart_page_no_items_header = models.ForeignKey(
-        Phrase, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='cart_page_no_items_header_Setting_related'
     )
 
     success_page_title = models.ForeignKey(
@@ -114,16 +104,14 @@ class Setting(models.Model):
         return (
             f'{self.product_title}, '
             f'{self.product_name}, '
-            f'{self.pages_no_items}, '
+            f'{self.pages_items_header}, '
+            f'{self.pages_no_items_header}, '
             f'{self.menu_page_title}, '
             f'{self.menu_page_header}, '
-            f'{self.menu_page_no_dishes}, '
             f'{self.order_page_title}, '
             f'{self.order_page_header}, '
             f'{self.cart_page_title}, '
             f'{self.cart_page_header}, '
-            f'{self.cart_page_items_header}, '
-            f'{self.cart_page_no_items_header}, '
             f'{self.success_page_title}, '
             f'{self.success_page_header}, '
             f'{self.success_page_contents_01}, '
@@ -140,16 +128,14 @@ class Setting(models.Model):
 
         dict['product_title'] = to_dict(self.product_title, **settings)
         dict['product_name'] = to_dict(self.product_name, **settings)
-        dict['pages_no_items'] = to_dict(self.pages_no_items, **settings)
+        dict['pages_items_header'] = to_dict(self.pages_items_header, **settings)
+        dict['pages_no_items_header'] = to_dict(self.pages_no_items_header, **settings)
         dict['menu_page_title'] = to_dict(self.menu_page_title, **settings)
         dict['menu_page_header'] = to_dict(self.menu_page_header, **settings)
-        dict['menu_page_no_dishes'] = to_dict(self.menu_page_no_dishes, **settings)
         dict['order_page_title'] = to_dict(self.order_page_title, **settings)
         dict['order_page_header'] = to_dict(self.order_page_header, **settings)
         dict['cart_page_title'] = to_dict(self.cart_page_title, **settings)
         dict['cart_page_header'] = to_dict(self.cart_page_header, **settings)
-        dict['cart_page_items_header'] = to_dict(self.cart_page_items_header, **settings)
-        dict['cart_page_no_items_header'] = to_dict(self.cart_page_no_items_header, **settings)
         dict['success_page_title'] = to_dict(self.success_page_title, **settings)
         dict['success_page_header'] = to_dict(self.success_page_header, **settings)
         dict['success_page_contents_01'] = to_dict(self.success_page_contents_01, **settings)

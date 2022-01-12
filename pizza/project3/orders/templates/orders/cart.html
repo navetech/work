@@ -32,9 +32,9 @@
 
         <a class="btn btn-secondary" href="{% url 'clear_cart' %}" role="button">Clear Cart</a>
 
-        <h4>{{ settings.cart_page_items_header.translated.words }}</h4>
+        <h4>{{ settings.pages_items_header.translated.words }}</h4>
     {% else %}
-        <h4>{{ settings.cart_page_no_items_header.translated.words }}</h4>
+        <h4>{{ settings.pages_no_items_header.translated.words }}</h4>
     {% endif %}
 
     <ul class="list-group pt-4">
