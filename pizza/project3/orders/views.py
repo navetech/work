@@ -1054,135 +1054,21 @@ def create_checkout_session(request):
         return JsonResponse(error=str(e))
 
 
-def build_object_columns(object):
-    columns = []
-    column = {}
-
-    if 'dishes' in object:
-        list= []
-        for obj in object['dishes']:
-            cols = build_object_columns(obj)
-            if not cols:
-                list.append(obj)
-        if list:
-            list.sort(key=lambda elem: elem['sort_number'], reverse=False)
-            column['dish'] = list
-            columns.append(column['dish'])
-
-    if 'types' in object:
-        list= []
-        for obj in object['types']:
-            cols = build_object_columns(obj)
-            if not cols:
-                list.append(obj)
-        if list:
-            list.sort(key=lambda elem: elem['sort_number'], reverse=False)
-            column['type'] = list
-            columns.append(column['type'])
-
-    if 'flavors' in object:
-        list= []
-        for obj in object['flavors']:
-            cols = build_object_columns(obj)
-            if not cols:
-                list.append(obj)
-        if list:
-            list.sort(key=lambda elem: elem['sort_number'], reverse=False)
-            column['flavor'] = list
-            columns.append(column['flavor'])
-
-    if 'addings' in object:
-        list= []
-        for obj in object['addings']:
-            cols = build_object_columns(obj)
-            if not cols:
-                list.append(obj)
-        if list:
-            list.sort(key=lambda elem: elem['sort_number'], reverse=False)
-            column['adding'] = list
-            columns.append(column['adding'])
-
-    if 'sizes' in object:
-        list= []
-        for obj in object['sizes']:
-            cols = build_object_columns(obj)
-            if not cols:
-                list.append(obj)
-        if list:
-            list.sort(key=lambda elem: elem['sort_number'], reverse=False)
-            column['size'] = list
-            columns.append(column['size'])
-
-    return columns
-
-
-def build_objects_columns(objects):
-    sizes = []
-
-    for object in objects:
-        if 'types' in object:
-            object['types_columns'] = build_objects_columns(object['types'])
-
-        if 'flavors' in object:
-            object['flavors_columns'] = build_objects_columns(object['flavors'])
-
-        if 'addings' in object:
-            object['addings_columns'] = build_objects_columns(object['addings'])
-
-        if 'sizes' in object:
-            object['sizes_columns'] = build_objects_columns(object['sizes'])
-
-        put_sizes_columns(sizes, dish)
-
-    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
-
-    for dish in dishes:
-        dish['size_columns'] = put_sizes_columns(sizes, dish)
-
-    return dishes
-
-
-def build_dishes_columns(dishes):
-    sizes = []
-
-    for dish in dishes:
-        types_columns = {}
-        put_types(types_columns, dish)
-        dish['types_columns'] = types_columns
-
-        flavors_columns = {}
-        put_flavors(flavors_columns, dish)
-        dish['flavors_columns'] = flavors_columns
-
-        addings_columns = {}
-        put_addings(addings_columns, dish)
-        dish['addings_columns'] = addings_columns
-
-        put_sizes(sizes, dish)
-
-    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
-
-    for dish in dishes:
-        dish['size_columns'] = put_sizes_columns(sizes, dish)
-
-    return dishes
-
-
 def put_columns_to_dishes(dishes):
     sizes = []
 
     for dish in dishes:
         types_columns = {}
-        put_types(types_columns, dish)
+        put_types_columns(types_columns, dish)
         dish['types_columns'] = types_columns
 
         flavors_columns = {}
-        put_flavors(flavors_columns, dish)
+        put_flavors_columns(flavors_columns, dish)
         dish['flavors_columns'] = flavors_columns
 
-        addings_columns = {}
-        put_addings(addings_columns, dish)
-        dish['addings_columns'] = addings_columns
+        adding_columns = {}
+        put_adding_columns(adding_columns, dish)
+        dish['adding_columns'] = adding_columns
 
         put_sizes(sizes, dish)
 
@@ -1194,60 +1080,46 @@ def put_columns_to_dishes(dishes):
     return dishes
 
 
-def put_columns_to_order_dish(order_dish):
-    types_columns = {}
-    put_order_types(types_columns, order_dish)
-    order_dish['types_columns'] = types_columns
+def put_sizes(columns, table):
+    for size in table['sizes']:
+        inserted = False
+        for column in columns:
+            if column['short_name'] == size['short_name']:
+                inserted = True
+                break
 
-    flavors_columns = {}
-    put_order_flavors(flavors_columns, order_dish)
-    order_dish['flavors_columns'] = flavors_columns
-
-    addings_columns = {}
-    put_order_addings(addings_columns, order_dish)
-    order_dish['addings_columns'] = addings_columns
+        if not inserted:
+            columns.append(size)
 
 
-def put_types(columns, table):
+def put_types_columns(columns, table):
     sizes = []
+
     for type in table['types']:
         flavors_columns = {}
-        put_flavors(flavors_columns, type)
+        put_flavors_columns(flavors_columns, type)
         type['flavors_columns'] = flavors_columns
 
-        addings_columns = {}
-        put_addings(addings_columns, type)
-        type['addings_columns'] = addings_columns
+        adding_columns = {}
+        put_adding_columns(adding_columns, type)
+        type['adding_columns'] = adding_columns
 
         put_sizes(sizes, type)
 
     sizes.sort(key=lambda size: size['sort_number'], reverse=False)
     columns['sizes'] = sizes
 
+    for type in table['types']:
+        type['size_columns'] = put_sizes_columns(sizes, type)
 
-def put_order_types(columns, order_table):
+
+def put_flavors_columns(columns, table):
     sizes = []
-    for type in order_table['types']:
-        flavors_columns = {}
-        put_order_flavors(flavors_columns, type)
-        type['flavors_columns'] = flavors_columns
 
-        addings_columns = {}
-        put_order_addings(addings_columns, type)
-        type['addings_columns'] = addings_columns
-
-        put_order_sizes(sizes, type)
-
-    sizes.sort(key=lambda size: size['menu']['sort_number'], reverse=False)
-    columns['sizes'] = sizes
-
-
-def put_flavors(columns, table):
-    sizes = []
     for flavor in table['flavors']:
-        addings_columns = {}
-        put_addings(addings_columns, flavor)
-        flavor['addings_columns'] = addings_columns
+        adding_columns = {}
+        put_adding_columns(adding_columns, flavor)
+        flavor['adding_columns'] = adding_columns
 
         put_sizes(sizes, flavor)
 
@@ -1256,6 +1128,25 @@ def put_flavors(columns, table):
 
     for flavor in table['flavors']:
         flavor['size_columns'] = put_sizes_columns(sizes, flavor)
+
+
+def put_adding_columns(columns, table):
+    sizes = []
+
+    if 'adding' in table and table['adding']:
+        adding = table['adding']
+
+        flavors_columns = {}
+        put_flavors_columns(flavors_columns, adding)
+        adding['flavors_columns'] = flavors_columns
+
+        put_sizes(sizes, adding)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
+    columns['sizes'] = sizes
+
+    adding['size_columns'] = put_sizes_columns(sizes, adding)
+
 
 
 def put_sizes_columns(inserted_sizes, table):
@@ -1275,6 +1166,37 @@ def put_sizes_columns(inserted_sizes, table):
     return columns
 
 
+def put_columns_to_order_dish(order_dish):
+    types_columns = {}
+    put_order_types(types_columns, order_dish)
+    order_dish['types_columns'] = types_columns
+
+    flavors_columns = {}
+    put_order_flavors(flavors_columns, order_dish)
+    order_dish['flavors_columns'] = flavors_columns
+
+    addings_columns = {}
+    put_order_addings(addings_columns, order_dish)
+    order_dish['addings_columns'] = addings_columns
+
+
+def put_order_types(columns, order_table):
+    sizes = []
+    for type in order_table['types']:
+        flavors_columns = {}
+        put_order_flavors(flavors_columns, type)
+        type['flavors_columns'] = flavors_columns
+
+        addings_columns = {}
+        put_order_addings(addings_columns, type)
+        type['addings_columns'] = addings_columns
+
+        put_order_sizes(sizes, type)
+
+    sizes.sort(key=lambda size: size['menu']['sort_number'], reverse=False)
+    columns['sizes'] = sizes
+
+
 def put_order_flavors(columns, order_table):
     sizes = []
     for flavor in order_table['flavors']:
@@ -1285,19 +1207,6 @@ def put_order_flavors(columns, order_table):
         put_order_sizes(sizes, flavor)
 
     sizes.sort(key=lambda size: size['menu']['sort_number'], reverse=False)
-    columns['sizes'] = sizes
-
-
-def put_addings(columns, table):
-    sizes = []
-    for adding in table['addings']:
-        flavors_columns = {}
-        put_flavors(flavors_columns, adding)
-        adding['flavors_columns'] = flavors_columns
-
-        put_sizes(sizes, adding)
-
-    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
     columns['sizes'] = sizes
 
 
@@ -1312,18 +1221,6 @@ def put_order_addings(columns, order_table):
 
     sizes.sort(key=lambda size: size['menu']['sort_number'], reverse=False)
     columns['sizes'] = sizes
-
-
-def put_sizes(columns, table):
-    for size in table['sizes']:
-        inserted = False
-        for column in columns:
-            if column['short_name'] == size['short_name']:
-                inserted = True
-                break
-
-        if not inserted:
-            columns.append(size)
 
 
 def put_order_sizes(columns, order_table):
