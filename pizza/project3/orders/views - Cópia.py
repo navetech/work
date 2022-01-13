@@ -121,21 +121,19 @@ def menu(request):
     languages = pages_basic_data['languages']
     currencies = pages_basic_data['currencies']
 
-    dishes = to_dict_list(
+
+    dishes_dict_list = to_dict_list(
         Dish.objects, 'sort_number', language=language, currency=currency
     )
 
-    menu = {}
-    menu['dishes'] = dishes
-
-    menu = fill_menu_item(menu)
+    put_columns_to_dishes(dishes_dict_list)
 
     context = {
         'settings': settings,
         'user_settings': user_settings,
         'languages': languages,
         'currencies': currencies,
-        'menu': menu,
+        'dishes': dishes_dict_list,
     }
 
     request.session['page'] = reverse('menu')

@@ -321,6 +321,19 @@ class Adding(MenuCommonFields):
         'Flavor', blank=True,
         related_name='flavors_Adding_related'
     )
+    flavors_count = models.ForeignKey(
+        CountLimit, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='flavors_count_Adding_related'
+    )
+
+    sizes = models.ManyToManyField(
+        Size, blank=True,
+        related_name='sizes_Adding_related'
+    )
+    sizes_count = models.ForeignKey(
+        CountLimit, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='sizes_count_Adding_related'
+    )
 
     def __str__(self):
         return (
@@ -331,23 +344,31 @@ class Adding(MenuCommonFields):
         dict = MenuCommonFields.to_dict(self, **settings)
 
         dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
+        dict['flavors_count'] = to_dict(self.flavors_count, **settings)
+
+        dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
+        dict['sizes_count'] = to_dict(self.sizes_count, **settings)
 
         return dict
 
 
 class Flavor(MenuCommonFields):
+    addings = models.ManyToManyField(
+        'Adding', blank=True,
+        related_name='addings_Flavor_related'
+    )
+    addings_count = models.ForeignKey(
+        CountLimit, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='addings_count_Flavor_related'
+    )
+
     sizes = models.ManyToManyField(
         Size, blank=True,
         related_name='sizes_Flavor_related'
     )
-
-    adding = models.ForeignKey(
-        Adding, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='adding_Flavor_related'
-    )
-    adding_count = models.ForeignKey(
+    sizes_count = models.ForeignKey(
         CountLimit, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='adding_count_Flavor_related'
+        related_name='sizes_count_Flavor_related'
     )
 
     def __str__(self):
@@ -358,10 +379,11 @@ class Flavor(MenuCommonFields):
     def to_dict(self, **settings):
         dict = MenuCommonFields.to_dict(self, **settings)
 
-        dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
+        dict['addings'] = to_dict_list(self.addings, 'sort_number', **settings)
+        dict['addings_count'] = to_dict(self.addings_count, **settings)
 
-        dict['adding'] = to_dict(self.adding, **settings)
-        dict['adding_count'] = to_dict(self.adding_count, **settings)
+        dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
+        dict['sizes_count'] = to_dict(self.sizes_count, **settings)
 
         return dict
 
@@ -371,19 +393,27 @@ class Type(MenuCommonFields):
         Flavor, blank=True,
         related_name='flavors_Type_related'
     )
+    flavors_count = models.ForeignKey(
+        CountLimit, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='flavors_count_Type_related'
+    )
+
+    addings = models.ManyToManyField(
+        Adding, blank=True,
+        related_name='addings_Type_related'
+    )
+    addings_count = models.ForeignKey(
+        CountLimit, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='addings_count_Type_related'
+    )
 
     sizes = models.ManyToManyField(
         Size, blank=True,
         related_name='sizes_Type_related'
     )
-
-    adding = models.ForeignKey(
-        Adding, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='adding_Type_related'
-    )
-    adding_count = models.ForeignKey(
+    sizes_count = models.ForeignKey(
         CountLimit, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='adding_count_Type_related'
+        related_name='sizes_count_Type_related'
     )
 
     def __str__(self):
@@ -395,11 +425,13 @@ class Type(MenuCommonFields):
         dict = MenuCommonFields.to_dict(self, **settings)
 
         dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
+        dict['flavors_count'] = to_dict(self.flavors_count, **settings)
+
+        dict['addings'] = to_dict_list(self.addings, 'sort_number', **settings)
+        dict['addings_count'] = to_dict(self.addings_count, **settings)
+
         dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
-
-        dict['adding'] = to_dict(self.adding, **settings)
-        dict['adding_count'] = to_dict(self.adding_count, **settings)
-
+        dict['sizes_count'] = to_dict(self.sizes_count, **settings)
 
         return dict
 
@@ -409,25 +441,72 @@ class Dish(MenuCommonFields):
         Type, blank=True,
         related_name='types_Dish_related'
     )
+    types_count = models.ForeignKey(
+        CountLimit, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='types_count_Dish_related'
+    )
 
     flavors = models.ManyToManyField(
         Flavor, blank=True,
         related_name='flavors_Dish_related'
+    )
+    flavors_count = models.ForeignKey(
+        CountLimit, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='flavors_count_Dish_related'
+    )
+
+    addings = models.ManyToManyField(
+        Adding, blank=True,
+        related_name='addings_Dish_related'
+    )
+    addings_count = models.ForeignKey(
+        CountLimit, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='addings_count_Dish_related'
     )
 
     sizes = models.ManyToManyField(
         Size, blank=True,
         related_name='sizes_Dish_related'
     )
-
-    adding = models.ForeignKey(
-        Adding, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='adding_Dish_related'
-    )
-    adding_count = models.ForeignKey(
+    sizes_count = models.ForeignKey(
         CountLimit, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='adding_count_Dish_related'
+        related_name='sizes_count_Dish_related'
     )
+    """
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Call the "real" save() method.
+
+        if self.types and self.types.all().count() > 0:
+            if not self.types_count:
+                self.types_count = CountLimit()
+                self.types_count.save()
+        elif self.types_count:
+            self.types_count = None
+
+        if self.flavors:
+            if not self.flavors_count:
+                self.flavors_count = CountLimit()
+                self.flavors_count.save()
+        else:
+            if self.flavors_count:
+                self.flavors_count = None
+
+        if self.sizes and self.sizes.count() > 0:
+            if not self.sizes_count:
+                self.sizes_count = CountLimit()
+                self.sizes_count.save()
+        elif self.sizes_count:
+            self.sizes_count = None
+
+        if self.addings and self.addings.count() > 0:
+            if not self.addings_count:
+                self.addings_count = CountLimit(min=0, max=-1)
+                self.addings_count.save()
+        elif self.addings_count:
+            self.addings_count = None
+
+        super().save(*args, **kwargs)  # Call the "real" save() method.
+        """
 
     def __str__(self):
         return (
@@ -438,16 +517,20 @@ class Dish(MenuCommonFields):
         dict = MenuCommonFields.to_dict(self, **settings)
 
         dict['types'] = to_dict_list(self.types, 'sort_number', **settings)
-        dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
-        dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
+        dict['types_count'] = to_dict(self.types_count, **settings)
 
-        dict['adding'] = to_dict(self.adding, **settings)
-        dict['adding_count'] = to_dict(self.adding_count, **settings)
+        dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
+        dict['flavors_count'] = to_dict(self.flavors_count, **settings)
+
+        dict['addings'] = to_dict_list(self.addings, 'sort_number', **settings)
+        dict['addings_count'] = to_dict(self.addings_count, **settings)
+
+        dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
+        dict['sizes_count'] = to_dict(self.sizes_count, **settings)
 
         return dict
 
 
-"""
 class OrderBasicCommonFields(models.Model):
     count = models.IntegerField(default=0)
 
@@ -529,6 +612,7 @@ class OrderSize(OrderBasicCommonFields):
 
     def check_count(self, range=None):
         return super().check_count(range)
+
 
 class OrderAdding(OrderCommonFields):
     flavors = models.ManyToManyField(
@@ -858,9 +942,9 @@ class Order(models.Model):
     def check_count(self):
         return check_objects_counts(self.dishes.all())
 
+
 class HistoricOrder(models.Model):
     order = models.TextField(blank=True)
-"""
 
 
 def check_objects_counts(objects, range=None):

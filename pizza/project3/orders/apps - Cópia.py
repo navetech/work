@@ -1,13 +1,6 @@
 from django.apps import AppConfig
 
 
-class OrdersConfig(AppConfig):
-    name = 'orders'
-
-"""
-from django.apps import AppConfig
-
-
 from django.db.models.signals import m2m_changed
 
 
@@ -118,4 +111,3 @@ class OrdersConfig(AppConfig):
 
         m2m_changed.connect(flavors_changed, sender=Adding.flavors.through)
         m2m_changed.connect(sizes_changed, sender=Adding.sizes.through)
-"""

@@ -21,8 +21,8 @@ from .models import Setting
 from .models import UserSetting
 
 from .models import Dish
-from .models import Order, OrderDish, OrderType
-from .models import OrderFlavor, OrderAdding, OrderSize
+#from .models import Order, OrderDish, OrderType
+#from .models import OrderFlavor, OrderAdding, OrderSize
 
 from .models import create_order_dish, get_order_dishes
 
