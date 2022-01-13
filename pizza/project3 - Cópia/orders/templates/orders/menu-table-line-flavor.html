@@ -1,0 +1,17 @@
+<tr>
+    <th>{{ flavor.short_name.translated.words }}</th>
+    <th>{{ flavor.long_name.translated.words }}</th>
+
+    {% for adding in flavor.columns.addings %}
+        <td>
+            {% include "orders/menu-adding-plain.html" %}
+        </td>
+    {% endfor %}
+
+    {% for size in flavor.columns.sizes %}
+        <td>
+            {% include "orders/menu-size-plain.html" %}
+        </td>
+    {% endfor %}
+</tr>
+

@@ -1,0 +1,39 @@
+{% load static %}
+
+<li class="list-group-item ln-container01">
+    <table style="width:100%">
+        <tr>
+            <td>
+                <figure>
+                    <img src="{% static order_type.menu.img.path %}" alt="{{ order_type.menu.long_name.translated.words }} Image">
+                    <figcaption>{{ order_type.menu.long_name.translated.words }}</figcaption>
+                </figure>
+            </td>
+
+            <td>
+                {{ order_type.menu.short_name.translated.words }}
+                {{ order_type.menu.long_name.translated.words }}
+            </td>
+
+            <td>
+                {{ order_type.menu.quantity.converted.value|floatformat:2 }}
+                {{ order_type.menu.quantity.converted.unit }}
+            </td>
+
+            <td>
+                <div class="ln-group-divider"></div>
+                <form action="{% url 'alter_order' %}" method="post">
+                    {% csrf_token %}
+                    <input type='text' style='display:none' name='order-dish-id' value={{ order_dish.id|default:None }}>
+                    <input type='text' style='display:none' name='order-type-id' value={{ order_type.id|default:None }}>
+                    <input type='text' style='display:none' name='order-flavor-id' value={{ order_flavor.id|default:None }}>
+                    <input type='text' style='display:none' name='order-size-id' value={{ order_size.id|default:None }}>
+
+                    <button type="submit" name="submit" value="dec-type-count">-</button>
+                    <span>{{ order_type.count }}</span>
+                    <button type="submit" name="submit" value="inc-type-count">+</button>
+                </form>
+            </td>
+        </tr>
+    </table>
+</li>

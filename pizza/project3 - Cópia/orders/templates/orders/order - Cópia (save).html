@@ -1,0 +1,449 @@
+{% extends "orders/base.html" %}
+
+
+{% load static %}
+
+
+{% block title %}
+    Order
+{% endblock %}
+
+{% block main %}
+    <h3>Order</h3>
+
+    <form action="{% url 'order' order_dish.id None None None %}" method="post">
+        {% csrf_token %}
+
+        <ul class="list-group pt-4">
+            <li class="list-group-item ln-container01">
+            <table style="width:100%">
+                {% for order_type in order_dish.types %}
+                <tr>
+                    <table style="width:100%">
+                        {% for order_flavor in order_type.flavors %}
+                        <tr>
+                            <table style="width:100%">
+                                {% for order_size in order_flavor.sizes %}
+                                <tr>
+                                    <td>
+                                        {{ order_size.menu.trait.short_name.translated.words }}
+                                        {{ order_size.menu.trait.long_name.translated.words }}
+                                    </td>
+                                    <td>
+                                        {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
+                                        {{ order_size.menu.trait.quantity.converted.unit }}
+                                    </td>
+                                    <td>
+                                        <div class="ln-group-divider"></div>
+                                        <button type="submit" name="submit" value="dec-count">-</button>
+                                        <span>{{ order_size.count }}</span>
+                                        <button type="submit" name="submit" value="inc-coun">+</button>
+                                    </td>
+                                        </tr>
+                                {% endfor %}
+
+                                {% if order_flavor.plain %}
+                                <tr>
+                                    <td>
+                                        {{ order_flavor.menu.trait.short_name.translated.words }}
+                                        {{ order_flavor.menu.trait.long_name.translated.words }}
+                                    </td>
+                                    <td>
+                                        {{ order_flavor.menu.trait.quantity.converted.value|floatformat:2 }}
+                                        {{ order_flavor.menu.trait.quantity.converted.unit }}
+                                    </td>
+                                    <td>
+                                        <div class="ln-group-divider"></div>
+                                        <button type="submit" name="submit" value="dec-count">-</button>
+                                        <span>{{ order_flavor.count }}</span>
+                                        <button type="submit" name="submit" value="inc-coun">+</button>
+                                    </td>
+                                </tr>
+                                {% endif %}
+
+                                {% if order_flavor.menu.addings_count.max != 0 %}
+                                {% for order_adding in order_flavor.addings %}
+                                {% if order_adding.flavors %}
+                                <tr>
+                                    <td>
+                                        {{ order_adding.menu.trait.short_name.translated.words }}
+                                        {{ order_adding.menu.trait.long_name.translated.words }}
+                                    </td>
+                                    <table style="width:100%">
+                                        <tr>
+                                            {% for order_size in order_adding.flavors_columns.sizes %}
+                                                <th></th>
+                                                <th></th>
+                                                <th>{{ order_size.menu.trait.short_name.translated.words }}</th>
+                                            {% endfor %}
+                                        </tr>
+                
+                                        {% for order_flavor in order_adding.flavors %}
+                                        <tr>
+                                            <td>{{ order_flavor.menu.trait.short_name.translated.words }}</td>
+                                            <td>{{ order_flavor.menu.trait.long_name.translated.words }}</td>
+                                            {% for order_size in order_flavor.sizes %}
+                                                <td>
+                                                    {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
+                                                    {{ order_size.menu.trait.quantity.converted.unit }}
+                                                </td>
+                                                <td>
+                                                    <div class="ln-group-divider"></div>
+                                                    <button type="submit" name="submit" value="dec-count">-</button>
+                                                    <span>{{ order_size.count }}</span>
+                                                    <button type="submit" name="submit" value="inc-coun">+</button>
+                                                </td>
+                                                <td>
+                                                    {{ order_size.menu.trait.short_name.translated.words }}
+                                                    {{ order_size.menu.trait.long_name.translated.words }}
+                                                </td>
+                                            {% empty %}
+                                                {% comment %}
+                                                <td>
+                                                    {{ order_flavor.menu.trait.short_name.translated.words }}
+                                                    {{ order_flavor.menu.trait.long_name.translated.words }}
+                                                </td>
+                                                {% endcomment %}
+                                                <td>
+                                                    {{ order_flavor.menu.trait.quantity.converted.value|floatformat:2 }}
+                                                    {{ order_flavor.menu.trait.quantity.converted.unit }}
+                                                </td>
+                                                <td>
+                                                    <div class="ln-group-divider"></div>
+                                                    <button type="submit" name="submit" value="dec-count">-</button>
+                                                    <span>{{ order_flavor.count }}</span>
+                                                    <button type="submit" name="submit" value="inc-coun">+</button>
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
+                                        {% endfor %}
+                
+                                    </table>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                                {% endif %}
+        
+                            </table>
+                        </tr>
+                        {% endfor %}
+
+                        {% for order_size in order_type.sizes %}
+                        <tr>
+                            <td>
+                                {{ order_size.menu.trait.short_name.translated.words }}
+                                {{ order_size.menu.trait.long_name.translated.words }}
+                            </td>
+                            <td>
+                                {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
+                                {{ order_size.menu.trait.quantity.converted.unit }}
+                            </td>
+                            <td>
+                                <div class="ln-group-divider"></div>
+                                <button type="submit" name="submit" value="dec-count">-</button>
+                                <span>{{ order_size.count }}</span>
+                                <button type="submit" name="submit" value="inc-coun">+</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                        {% if order_type.plain %}
+                        <tr>
+                            <td>
+                                {{ order_type.menu.trait.short_name.translated.words }}
+                                {{ order_type.menu.trait.long_name.translated.words }}
+                            </td>
+                            <td>
+                                {{ order_type.menu.trait.quantity.converted.value|floatformat:2 }}
+                                {{ order_type.menu.trait.quantity.converted.unit }}
+                            </td>
+                            <td>
+                                <div class="ln-group-divider"></div>
+                                <button type="submit" name="submit" value="dec-count">-</button>
+                                <span>{{ order_type.count }}</span>
+                                <button type="submit" name="submit" value="inc-coun">+</button>
+                            </td>
+                        </tr>
+                        {% endif %}
+
+                        {% if order_type.menu.addings_count.max != 0 %}
+                        {% for order_adding in order_type.addings %}
+                        {% if order_adding.flavors %}
+                        <tr>
+                            <td>
+                                {{ order_adding.menu.trait.short_name.translated.words }}
+                                {{ order_adding.menu.trait.long_name.translated.words }}
+                            </td>
+                            <table style="width:100%">
+                                <tr>
+                                    {% for order_size in order_adding.flavors_columns.sizes %}
+                                        <th></th>
+                                        <th></th>
+                                        <th>{{ order_size.menu.trait.short_name.translated.words }}</th>
+                                    {% endfor %}
+                                </tr>
+        
+                                {% for order_flavor in order_adding.flavors %}
+                                <tr>
+                                    <td>{{ order_flavor.menu.trait.short_name.translated.words }}</td>
+                                    <td>{{ order_flavor.menu.trait.long_name.translated.words }}</td>
+                                    {% for order_size in order_flavor.sizes %}
+                                        <td>
+                                            {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
+                                            {{ order_size.menu.trait.quantity.converted.unit }}
+                                        </td>
+                                        <td>
+                                            <div class="ln-group-divider"></div>
+                                            <button type="submit" name="submit" value="dec-count">-</button>
+                                            <span>{{ order_size.count }}</span>
+                                            <button type="submit" name="submit" value="inc-coun">+</button>
+                                        </td>
+                                        <td>
+                                            {{ order_size.menu.trait.short_name.translated.words }}
+                                            {{ order_size.menu.trait.long_name.translated.words }}
+                                        </td>
+                                    {% empty %}
+                                        {% comment %}
+                                        <td>
+                                            {{ order_flavor.menu.trait.short_name.translated.words }}
+                                            {{ order_flavor.menu.trait.long_name.translated.words }}
+                                        </td>
+                                        {% endcomment %}
+                                        <td>
+                                            {{ order_flavor.menu.trait.quantity.converted.value|floatformat:2 }}
+                                            {{ order_flavor.menu.trait.quantity.converted.unit }}
+                                        </td>
+                                        <td>
+                                            <div class="ln-group-divider"></div>
+                                            <button type="submit" name="submit" value="dec-count">-</button>
+                                            <span>{{ order_flavor.count }}</span>
+                                            <button type="submit" name="submit" value="inc-coun">+</button>
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+        
+                            </table>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                        {% endif %}
+
+                    </table>
+                </tr>
+                {% endfor %}
+
+                {% for order_flavor in order_dish.flavors %}
+                <tr>
+                    <table style="width:100%">
+                        {% for order_size in order_flavor.sizes %}
+                        <tr>
+                            <td>
+                                {{ order_size.menu.trait.short_name.translated.words }}
+                                {{ order_size.menu.trait.long_name.translated.words }}
+                            </td>
+                            <td>
+                                {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
+                                {{ order_size.menu.trait.quantity.converted.unit }}
+                            </td>
+                            <td>
+                                <div class="ln-group-divider"></div>
+                                <button type="submit" name="submit" value="dec-count">-</button>
+                                <span>{{ order_size.count }}</span>
+                                <button type="submit" name="submit" value="inc-coun">+</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                        {% if order_flavor.plain %}
+                        <tr>
+                            <td>
+                                {{ order_flavor.menu.trait.short_name.translated.words }}
+                                {{ order_flavor.menu.trait.long_name.translated.words }}
+                            </td>
+                            <td>
+                                {{ order_flavor.menu.trait.quantity.converted.value|floatformat:2 }}
+                                {{ order_flavor.menu.trait.quantity.converted.unit }}
+                            </td>
+                            <td>
+                                <div class="ln-group-divider"></div>
+                                <button type="submit" name="submit" value="dec-count">-</button>
+                                <span>{{ order_flavor.count }}</span>
+                                <button type="submit" name="submit" value="inc-coun">+</button>
+                            </td>
+                        </tr>
+                        {% endif %}
+
+                        {% if order_flavor.menu.addings_count.max != 0 %}
+                        {% for order_adding in order_flavor.addings %}
+                        {% if order_adding.flavors %}
+                        <tr>
+                            <td>
+                                {{ order_adding.menu.trait.short_name.translated.words }}
+                                {{ order_adding.menu.trait.long_name.translated.words }}
+                            </td>
+                            <table style="width:100%">
+                                <tr>
+                                    {% for order_size in order_adding.flavors_columns.sizes %}
+                                        <th></th>
+                                        <th></th>
+                                        <th>{{ order_size.menu.trait.short_name.translated.words }}</th>
+                                    {% endfor %}
+                                </tr>
+        
+                                {% for order_flavor in order_adding.flavors %}
+                                <tr>
+                                    <td>{{ order_flavor.menu.trait.short_name.translated.words }}</td>
+                                    <td>{{ order_flavor.menu.trait.long_name.translated.words }}</td>
+                                    {% for order_size in order_flavor.sizes %}
+                                        <td>
+                                            {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
+                                            {{ order_size.menu.trait.quantity.converted.unit }}
+                                        </td>
+                                        <td>
+                                            <div class="ln-group-divider"></div>
+                                            <button type="submit" name="submit" value="dec-count">-</button>
+                                            <span>{{ order_size.count }}</span>
+                                            <button type="submit" name="submit" value="inc-coun">+</button>
+                                        </td>
+                                        <td>
+                                            {{ order_size.menu.trait.short_name.translated.words }}
+                                            {{ order_size.menu.trait.long_name.translated.words }}
+                                        </td>
+                                    {% empty %}
+                                        {% comment %}
+                                        <td>
+                                            {{ order_flavor.menu.trait.short_name.translated.words }}
+                                            {{ order_flavor.menu.trait.long_name.translated.words }}
+                                        </td>
+                                        {% endcomment %}
+                                        <td>
+                                            {{ order_flavor.menu.trait.quantity.converted.value|floatformat:2 }}
+                                            {{ order_flavor.menu.trait.quantity.converted.unit }}
+                                        </td>
+                                        <td>
+                                            <div class="ln-group-divider"></div>
+                                            <button type="submit" name="submit" value="dec-count">-</button>
+                                            <span>{{ order_flavor.count }}</span>
+                                            <button type="submit" name="submit" value="inc-coun">+</button>
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+        
+                            </table>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                        {% endif %}
+       
+                    </table>
+                </tr>
+                {% endfor %}
+
+                {% for order_size in order_dish.sizes %}
+                <tr>
+                    <td>
+                        {{ order_size.menu.trait.short_name.translated.words }}
+                        {{ order_size.menu.trait.long_name.translated.words }}
+                    </td>
+                    <td>
+                        {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
+                        {{ order_size.menu.trait.quantity.converted.unit }}
+                    </td>
+                    <td>
+                        <div class="ln-group-divider"></div>
+                        <button type="submit" name="submit" value="dec-count">-</button>
+                        <span>{{ order_size.count }}</span>
+                        <button type="submit" name="submit" value="inc-coun">+</button>
+                    </td>
+                </tr>
+                {% endfor %}
+
+                {% if order_dish.plain %}
+                <tr>
+                    <td>
+                        {{ order_dish.menu.trait.short_name.translated.words }}
+                        {{ order_dish.menu.trait.long_name.translated.words }}
+                    </td>
+                    <td>
+                        {{ order_dish.menu.trait.quantity.converted.value|floatformat:2 }}
+                        {{ order_dish.menu.trait.quantity.converted.unit }}
+                    </td>
+                    <td>
+                        <div class="ln-group-divider"></div>
+                        <button type="submit" name="submit" value="dec-count">-</button>
+                        <span>{{ order_dish.count }}</span>
+                        <button type="submit" name="submit" value="inc-coun">+</button>
+                    </td>
+                </tr>
+                {% endif %}
+
+                {% if order_dish.menu.addings_count.max != 0 %}
+                {% for order_adding in order_dish.addings %}
+                {% if order_adding.flavors %}
+                <tr>
+                    <td>
+                        {{ order_adding.menu.trait.short_name.translated.words }}
+                        {{ order_adding.menu.trait.long_name.translated.words }}
+                    </td>
+                    <table style="width:100%">
+                        <tr>
+                            {% for order_size in order_adding.flavors_columns.sizes %}
+                                <th></th>
+                                <th></th>
+                                <th>{{ order_size.menu.trait.short_name.translated.words }}</th>
+                            {% endfor %}
+                        </tr>
+
+                        {% for order_flavor in order_adding.flavors %}
+                        <tr>
+                            <td>{{ order_flavor.menu.trait.short_name.translated.words }}</td>
+                            <td>{{ order_flavor.menu.trait.long_name.translated.words }}</td>
+                            {% for order_size in order_flavor.sizes %}
+                                <td>
+                                    {{ order_size.menu.trait.quantity.converted.value|floatformat:2 }}
+                                    {{ order_size.menu.trait.quantity.converted.unit }}
+                                </td>
+                                <td>
+                                    <div class="ln-group-divider"></div>
+                                    <button type="submit" name="submit" value="dec-count">-</button>
+                                    <span>{{ order_size.count }}</span>
+                                    <button type="submit" name="submit" value="inc-coun">+</button>
+                                </td>
+                                <td>
+                                    {{ order_size.menu.trait.short_name.translated.words }}
+                                    {{ order_size.menu.trait.long_name.translated.words }}
+                                </td>
+                            {% empty %}
+                                {% comment %}
+                                <td>
+                                    {{ order_flavor.menu.trait.short_name.translated.words }}
+                                    {{ order_flavor.menu.trait.long_name.translated.words }}
+                                </td>
+                                {% endcomment %}
+                                <td>
+                                    {{ order_flavor.menu.trait.quantity.converted.value|floatformat:2 }}
+                                    {{ order_flavor.menu.trait.quantity.converted.unit }}
+                                </td>
+                                <td>
+                                    <div class="ln-group-divider"></div>
+                                    <button type="submit" name="submit" value="dec-count">-</button>
+                                    <span>{{ order_flavor.count }}</span>
+                                    <button type="submit" name="submit" value="inc-coun">+</button>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+
+                    </table>
+                </tr>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+
+            </table>
+            </li>
+        </ul>
+    </form>
+{% endblock %}

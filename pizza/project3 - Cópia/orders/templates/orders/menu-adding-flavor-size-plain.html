@@ -1,0 +1,5 @@
+{% if adding_flavor_size.quantity.converted.value %}
+    <button type="submit" name="submit">
+        {{ adding_flavor_size.quantity.converted.value|floatformat:2 }} {{ adding_flavor_size.quantity.converted.unit }}
+    </button>
+{% endif %}

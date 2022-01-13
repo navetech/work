@@ -1,0 +1,13 @@
+{% if not addding_flavor_size.has_children %}
+    {% if addding_flavor_size.is_plain %}
+        {% include "orders/menu-adding-flavor-size-plain.html" %}
+    {% else %}
+        <h6>{{ settings.pages_no_items.translated.words }}</h6>
+    {% endif %}
+{% else %}
+    {% include "orders/menu-adding-flavor-size-plains.html" %}
+
+    {% include "orders/menu-adding-flavor-size-table.html" %}
+
+    {% include "orders/menu-adding-flavor-size-fulls.html" %}
+{% endif %}
