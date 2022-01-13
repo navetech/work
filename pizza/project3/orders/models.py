@@ -670,6 +670,9 @@ class OrderAdding(OrderCommonFields):
         count += check['count']
         if not check['in_range']:
             in_range = False
+
+        if range and count > range.max:
+            in_range = False
         
         return {
             'count': count,
