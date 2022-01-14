@@ -1,0 +1,37 @@
+<li class="list-group-item ln-container02">
+    <h5>{{ type.short_name.translated.words }}</h5>
+    <h5>{{ type.long_name.translated.words }}</h5>
+
+    <h6>{{ type.quantity.converted.value|floatformat:2 }} {{ type.quantity.converted.unit }}</h6>
+
+    {% if type.sizes %}
+        <ul class="list-group pt-4">
+            {% for size in type.sizes %}
+                {% include "orders/menu-size.html" %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+    
+    {% if type.flavors %}
+        <table style="width:100%">
+            <tr>
+                <th></th>
+                <th></th>
+                {% for size in type.flavors_table.sizes %}
+                    {% include "orders/menu-table-size-header.html" %}
+                {% endfor %}
+            </tr>
+
+            {% for flavor in type.flavors %}
+                {% include "orders/menu-table-flavor-line.html" %}
+            {% endfor %}
+        </table>
+    {% endif %}
+    
+    {% if type.adding %}
+        <ul class="list-group pt-4">
+            {% include "orders/menu-adding.html" %}
+        </ul>
+    {% endif %}
+</li>
+

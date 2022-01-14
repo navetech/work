@@ -108,6 +108,238 @@ def unregister_view(request):
     return HttpResponseRedirect(reverse('index'))
 
 
+def get_pages_basic_data(request):
+    user_settings = UserSetting.get_first(user=request.user)
+    if user_settings:
+        if user_settings.language:
+            language = user_settings.language
+        else:
+            language = None
+
+        if user_settings.currency:
+            currency = user_settings.currency
+        else:
+            currency = None
+
+        user_settings_dict = to_dict(user_settings, language=language)
+    else:
+        language = None
+        currency = None
+        user_settings_dict = {}
+
+    settings = Setting.objects.first()
+    if settings:
+        settings_dict = to_dict(settings, language=language)
+    else:
+        settings_dict = {}
+
+    languages = to_dict_list(
+        Language.objects, 'code__sort_number'
+    )
+    currencies = to_dict_list(
+        Currency.objects, 'code__sort_number', language=language
+    )
+
+    pages_basic_data = {}
+    pages_basic_data['language'] = language
+    pages_basic_data['currency'] = currency
+    pages_basic_data['user_settings'] = user_settings_dict
+    pages_basic_data['settings'] = settings_dict
+    pages_basic_data['languages'] = languages
+    pages_basic_data['currencies'] = currencies
+
+    return pages_basic_data
+
+
+def insert_object_sizes(sizes_list, object):
+    for object_size in object['sizes']:
+        inserted = False
+        for list_size in sizes_list:
+            if list_size['short_name'] == object_size['short_name']:
+                inserted = True
+                break
+
+        if not inserted:
+            sizes_list.append(object_size)
+
+
+def build_flavors_table(object):
+    table = {}
+
+    sizes = []
+    for flavor in object['flavors']:
+        insert_object_sizes(sizes, object=flavor)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
+    table['sizes'] = sizes
+
+    return table
+
+
+def build_object_sizes_columns(sizes, object):
+    columns = []
+    for size in sizes:
+        present = False
+        for object_size in object['sizes']:
+            if size['short_name'] == object_size['short_name']:
+                present = True
+                break
+
+        if present:
+            columns.append(object_size)
+        else:
+            columns.append(None)
+
+    return columns
+
+
+
+
+def build_menu_adding(adding):
+    menu_object = object
+
+    return menu_object
+
+
+def build_menu_object(object):
+    menu_object = object
+
+    if 'types' in object and object['types']:
+        list = []
+        for type in object['types']:
+            elem = build_menu_object(type)
+            list.append(elem)
+        menu_object['types'] = list
+
+    if 'flavors' in object and object['flavors']:
+        flavors_table = build_flavors_table(object)
+        menu_object['flavors_table'] = flavors_table
+
+        for flavor in object['flavors']:
+            flavor['size_columns'] = build_object_sizes_columns(
+                sizes=flavors_table['sizes'], object=flavor
+            )
+
+    if 'sizes' in object and object['sizes']:
+        menu_object['sizes'] = object['sizes']
+
+    if 'adding' in object and object['adding']:
+        adding = object['adding']
+        elem = build_menu_adding(adding)
+        menu_object['adding'] = object['adding']
+
+    return menu_object
+
+
+def build_menu(dishes):
+    menu = {}
+
+    menu_dishes = []
+    for dish in dishes:
+        menu_dish = build_menu_object(dish)
+        menu_dishes.append(menu_dish)
+    menu['dishes'] = menu_dishes
+
+    return menu
+
+
+def put_columns_buildto_dishes(dishes):
+    sizes = []
+
+    for dish in dishes:
+        types_columns = {}
+        put_types_columns(types_columns, dish)
+        dish['types_columns'] = types_columns
+
+        flavors_columns = {}
+        put_flavors_columns(flavors_columns, dish)
+        dish['flavors_columns'] = flavors_columns
+
+        adding_columns = {}
+        put_adding_columns(adding_columns, dish)
+        dish['adding_columns'] = adding_columns
+
+        put_sizes(sizes, dish)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
+
+    for dish in dishes:
+        dish['size_columns'] = put_sizes_columns(sizes, dish)
+
+    return dishes
+
+
+def put_sizes(columns, table):
+    for size in table['sizes']:
+        inserted = False
+        for column in columns:
+            if column['short_name'] == size['short_name']:
+                inserted = True
+                break
+
+        if not inserted:
+            columns.append(size)
+
+
+def put_types_columns(columns, table):
+    sizes = []
+
+    for type in table['types']:
+        flavors_columns = {}
+        put_flavors_columns(flavors_columns, type)
+        type['flavors_columns'] = flavors_columns
+
+        adding_columns = {}
+        put_adding_columns(adding_columns, type)
+        type['adding_columns'] = adding_columns
+
+        put_sizes(sizes, type)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
+    columns['sizes'] = sizes
+
+    for type in table['types']:
+        type['size_columns'] = put_sizes_columns(sizes, type)
+
+
+def put_flavors_columns(columns, table):
+    sizes = []
+
+    for flavor in table['flavors']:
+        adding_columns = {}
+        put_adding_columns(adding_columns, flavor)
+        flavor['adding_columns'] = adding_columns
+
+        put_sizes(sizes, flavor)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
+    columns['sizes'] = sizes
+
+    for flavor in table['flavors']:
+        flavor['size_columns'] = put_sizes_columns(sizes, flavor)
+
+
+def put_adding_columns(columns, table):
+    sizes = []
+
+    if 'adding' in table and table['adding']:
+        adding = table['adding']
+
+        flavors_columns = {}
+        put_flavors_columns(flavors_columns, adding)
+        adding['flavors_columns'] = flavors_columns
+
+        put_sizes(sizes, adding)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
+    columns['sizes'] = sizes
+
+    adding['size_columns'] = put_sizes_columns(sizes, adding)
+
+
+
+
+
 def menu(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
@@ -121,19 +353,18 @@ def menu(request):
     languages = pages_basic_data['languages']
     currencies = pages_basic_data['currencies']
 
-
-    dishes_dict_list = to_dict_list(
+    dishes = to_dict_list(
         Dish.objects, 'sort_number', language=language, currency=currency
     )
 
-    put_columns_to_dishes(dishes_dict_list)
+    menu = build_menu(dishes)
 
     context = {
         'settings': settings,
         'user_settings': user_settings,
         'languages': languages,
         'currencies': currencies,
-        'dishes': dishes_dict_list,
+        'menu': menu,
     }
 
     request.session['page'] = reverse('menu')
@@ -450,299 +681,6 @@ def clear_cart(request):
     return HttpResponseRedirect(reverse('cart'))
 
 
-def fill_menu_item(item):
-    if not item:
-        return item
-    
-    item = fill_is_plain(item)
-
-    if not 'has_children' in item or not item['has_children']:
-        return item
-    
-    elems = 'dishes'
-    item = fill_menu_item_from_elems(item, elems)
-
-    elems = 'types'
-    item = fill_menu_item_from_elems(item, elems)
-
-    elems = 'flavors'
-    item = fill_menu_item_from_elems(item, elems)
-
-    elems = 'addings'
-    item = fill_menu_item_from_elems(item, elems)
-
-    elems = 'sizes'
-    item = fill_menu_item_from_elems(item, elems)
-
-    if 'table' in item and item['table']:
-        item['table'] = fill_table(item['table'])
-
-    return item
-
-
-def fill_is_plain(item):
-    if item:
-        has_children = True
-        is_plain = False
-
-        if not 'dishes' in item or not item['dishes']:
-            if not 'types' in item or not item['types']:
-                if not 'flavors' in item or not item['flavors']:
-                    if not 'addings' in item or not item['addings']:
-                        if not 'sizes' in item or not item['sizes']:
-                            has_children = False
-
-                            if 'quantity' in item and item['quantity']:
-                                is_plain = True
-
-        item['has_children'] = has_children
-        item['is_plain'] = is_plain
-
-    return item
-
-
-def fill_menu_item_from_elems(item, elems):
-    if item and elems:
-        if elems in item:
-            plain_elems = []
-            not_plain_elems = []
-            table_elems = []
-            full_elems = []
-
-            item[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
-
-            for elem in item[elems]:
-                elem = fill_menu_item(elem)
-
-                if elem:
-                    if 'is_plain' in elem and elem['is_plain']:
-                        plain_elems.append(elem)
-                    else:
-                        not_plain_elems.append(elem)
-
-                        if 'not_plain' in elem and elem['not_plain']:
-                            full_elems.append(elem)
-                        elif 'plain' in elem and elem['plain']:
-                            table_elems.append(elem)
-                        else:
-                            full_elems.append(elem)
-
-            if len(plain_elems) > 0:
-                if not 'plain' in item:
-                    item['plain'] = {}
-                if not elems in item['plain']:
-                    item['plain'][elems]= []
-                item['plain'][elems].extend(plain_elems)
-
-            if len(not_plain_elems) > 0:
-                if not 'not_plain' in item:
-                    item['not_plain'] = {}
-                if not elems in item['not_plain']:
-                    item['not_plain'][elems]= []
-                item['not_plain'][elems].extend(not_plain_elems)
-
-            if len(table_elems) > 0:
-                if not 'table' in item:
-                    item['table'] = {}
-                if not elems in item['table']:
-                    item['table'][elems] = []
-                item['table'][elems].extend(table_elems)
-
-            if len(full_elems) > 0:
-                if not 'full' in item:
-                    item['full'] = {}
-                if not elems in item['full']:
-                    item['full'][elems] = []
-                item['full'][elems].extend(full_elems)
-
-    return item
-
-
-def fill_table(table):
-    if table:
-        table['headers'] = build_table_headers(table)
-
-        table['lines'] = build_table_lines(table, table['headers'])
-
-    return table
-
-
-def build_table_headers(table):
-    if not table:
-        return None
-        
-    headers = {}
-
-    elems = 'dishes'
-    headers = fill_headers_from_elems(headers, table, elems)
-
-    elems = 'types'
-    headers = fill_headers_from_elems(headers, table, elems)
-
-    elems = 'flavors'
-    headers = fill_headers_from_elems(headers, table, elems)
-
-    elems = 'addings'
-    headers = fill_headers_from_elems(headers, table, elems)
-
-    elems = 'sizes'
-    headers = fill_headers_from_elems(headers, table, elems)
-    
-    return headers
-
-
-def fill_headers_from_elems(headers, table, elems):
-    if table and elems:
-        if elems in table:
-            table[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
-
-            for elem in table[elems]:
-                headers = fill_headers_from_elem(headers, elem)
-
-    return headers
-
-
-def fill_headers_from_elem(headers, elem):
-    if elem:
-        if 'plain' in elem:
-            struct = elem['plain']
-
-            struct_elems = 'dishes'
-            headers = fill_headers_from_struct_elems(headers, struct, struct_elems)
-
-            struct_elems = 'types'
-            headers = fill_headers_from_struct_elems(headers, struct, struct_elems)
-
-            struct_elems = 'flavors'
-            headers = fill_headers_from_struct_elems(headers, struct, struct_elems)
-
-            struct_elems = 'addings'
-            headers = fill_headers_from_struct_elems(headers, struct, struct_elems)
-
-            struct_elems = 'sizes'
-            headers = fill_headers_from_struct_elems(headers, struct, struct_elems)
-
-    return headers
-
-
-def fill_headers_from_struct_elems(headers, struct, elems):
-    if struct and elems:
-        if elems in struct:
-            if struct[elems]:
-                struct[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
-
-                if not elems in headers:
-                    headers[elems] = []
-
-                for elem in struct[elems]:
-                    if not elem in headers[elems]:
-                        headers[elems].append(elem)
-
-                headers[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
-
-    return headers
-
-
-def build_table_lines(table, headers):
-    if not (table and headers):
-        return None
-
-    lines = {}
-
-    elems = 'dishes'
-    lines[elems] = build_table_lines_from_elems(table, headers, elems)
-
-    elems = 'types'
-    lines[elems] = build_table_lines_from_elems(table, headers, elems)
-
-    elems = 'flavors'
-    lines[elems] = build_table_lines_from_elems(table, headers, elems)
-
-    elems = 'addings'
-    lines[elems] = build_table_lines_from_elems(table, headers, elems)
-
-    elems = 'sizes'
-    lines[elems] = build_table_lines_from_elems(table, headers, elems)
-
-    return lines
-
-
-def build_table_lines_from_elems(table, headers, elems):
-    if not (table and headers and elems):
-        return None
-
-    if not elems in table:
-        return None
-
-    table[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
-
-    elems_lines = []
-
-    for elem in table[elems]:
-        line = build_line_from_elem(headers, elem)
-
-        elems_lines.append(line)
-
-    return elems_lines
-
-
-def build_line_from_elem(headers, elem):
-    if not (headers and elem):
-        return None
-
-    if not 'plain' in elem:
-        return None
-
-    columns = {}
-
-    struct = elem['plain']
-
-    struct_elems = 'dishes'
-    columns[struct_elems]= build_columns_from_struct_elems(headers, struct, struct_elems)
-
-    struct_elems = 'types'
-    columns[struct_elems]= build_columns_from_struct_elems(headers, struct, struct_elems)
-
-    struct_elems = 'flavors'
-    columns[struct_elems]= build_columns_from_struct_elems(headers, struct, struct_elems)
-
-    struct_elems = 'addings'
-    columns[struct_elems]= build_columns_from_struct_elems(headers, struct, struct_elems)
-
-    struct_elems = 'sizes'
-    columns[struct_elems]= build_columns_from_struct_elems(headers, struct, struct_elems)
-
-    elem['columns'] = columns
-
-    return elem
-
-
-def build_columns_from_struct_elems(headers, struct, elems):
-    if not (headers and struct and elems):
-        return None
-
-    if not elems in headers:
-        return None
-
-    headers[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
-
-    if elems in struct:
-        struct[elems].sort(key=lambda elem: elem['sort_number'], reverse=False)
-
-    elems_columns = []
-    for h_elem in headers[elems]:
-        column = None
-        if elems in struct:
-            for s_elem in struct[elems]:
-                if h_elem == s_elem:
-                    column = s_elem
-                    break
-
-        elems_columns.append(column)
-
-    return elems_columns
-
-
 def calc_order_price(order):
     value = 0
     unit = None
@@ -930,49 +868,6 @@ def calc_order_size_price(order_size):
     return price
 
 
-def get_pages_basic_data(request):
-    user_settings = UserSetting.get_first(user=request.user)
-    if user_settings:
-        if user_settings.language:
-            language = user_settings.language
-        else:
-            language = None
-
-        if user_settings.currency:
-            currency = user_settings.currency
-        else:
-            currency = None
-
-        user_settings_dict = to_dict(user_settings, language=language)
-    else:
-        language = None
-        currency = None
-        user_settings_dict = {}
-
-    settings = Setting.objects.first()
-    if settings:
-        settings_dict = to_dict(settings, language=language)
-    else:
-        settings_dict = {}
-
-    languages = to_dict_list(
-        Language.objects, 'code__sort_number'
-    )
-    currencies = to_dict_list(
-        Currency.objects, 'code__sort_number', language=language
-    )
-
-    pages_basic_data = {}
-    pages_basic_data['language'] = language
-    pages_basic_data['currency'] = currency
-    pages_basic_data['user_settings'] = user_settings_dict
-    pages_basic_data['settings'] = settings_dict
-    pages_basic_data['languages'] = languages
-    pages_basic_data['currencies'] = currencies
-
-    return pages_basic_data
-
-
 def success(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
@@ -1052,118 +947,6 @@ def create_checkout_session(request):
         return JsonResponse({'id': checkout_session.id})
     except Exception as e:
         return JsonResponse(error=str(e))
-
-
-def put_columns_to_dishes(dishes):
-    sizes = []
-
-    for dish in dishes:
-        types_columns = {}
-        put_types_columns(types_columns, dish)
-        dish['types_columns'] = types_columns
-
-        flavors_columns = {}
-        put_flavors_columns(flavors_columns, dish)
-        dish['flavors_columns'] = flavors_columns
-
-        adding_columns = {}
-        put_adding_columns(adding_columns, dish)
-        dish['adding_columns'] = adding_columns
-
-        put_sizes(sizes, dish)
-
-    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
-
-    for dish in dishes:
-        dish['size_columns'] = put_sizes_columns(sizes, dish)
-
-    return dishes
-
-
-def put_sizes(columns, table):
-    for size in table['sizes']:
-        inserted = False
-        for column in columns:
-            if column['short_name'] == size['short_name']:
-                inserted = True
-                break
-
-        if not inserted:
-            columns.append(size)
-
-
-def put_types_columns(columns, table):
-    sizes = []
-
-    for type in table['types']:
-        flavors_columns = {}
-        put_flavors_columns(flavors_columns, type)
-        type['flavors_columns'] = flavors_columns
-
-        adding_columns = {}
-        put_adding_columns(adding_columns, type)
-        type['adding_columns'] = adding_columns
-
-        put_sizes(sizes, type)
-
-    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
-    columns['sizes'] = sizes
-
-    for type in table['types']:
-        type['size_columns'] = put_sizes_columns(sizes, type)
-
-
-def put_flavors_columns(columns, table):
-    sizes = []
-
-    for flavor in table['flavors']:
-        adding_columns = {}
-        put_adding_columns(adding_columns, flavor)
-        flavor['adding_columns'] = adding_columns
-
-        put_sizes(sizes, flavor)
-
-    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
-    columns['sizes'] = sizes
-
-    for flavor in table['flavors']:
-        flavor['size_columns'] = put_sizes_columns(sizes, flavor)
-
-
-def put_adding_columns(columns, table):
-    sizes = []
-
-    if 'adding' in table and table['adding']:
-        adding = table['adding']
-
-        flavors_columns = {}
-        put_flavors_columns(flavors_columns, adding)
-        adding['flavors_columns'] = flavors_columns
-
-        put_sizes(sizes, adding)
-
-    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
-    columns['sizes'] = sizes
-
-    adding['size_columns'] = put_sizes_columns(sizes, adding)
-
-
-
-def put_sizes_columns(inserted_sizes, table):
-    columns = []
-    for s in inserted_sizes:
-        present = False
-        for size in table['sizes']:
-            if s['short_name'] == size['short_name']:
-                present = True
-                break
-
-        if present:
-            columns.append(size)
-        else:
-            columns.append(None)
-
-    return columns
 
 
 def put_columns_to_order_dish(order_dish):
