@@ -21,9 +21,6 @@ from .models import Setting
 from .models import UserSetting
 
 from .models import Dish
-
-from .models import MenuItem
-
 #from .models import Order, OrderDish, OrderType
 #from .models import OrderFlavor, OrderAdding, OrderSize
 
@@ -196,6 +193,14 @@ def build_object_sizes_columns(sizes, object):
     return columns
 
 
+
+
+def build_menu_adding(adding):
+    menu_object = object
+
+    return menu_object
+
+
 def build_menu_object(object):
     menu_object = object
 
@@ -219,18 +224,14 @@ def build_menu_object(object):
         menu_object['sizes'] = object['sizes']
 
     if 'adding' in object and object['adding']:
+        adding = object['adding']
+        elem = build_menu_adding(adding)
         menu_object['adding'] = object['adding']
 
     return menu_object
 
 
-def build_menu(**settings):
-    menu_object = MenuItem.objects.filter(container=None).first()
-    menu = to_dict(menu_object, **settings)
-
-    return menu
-
-    """
+def build_menu(dishes):
     menu = {}
 
     menu_dishes = []
@@ -240,7 +241,103 @@ def build_menu(**settings):
     menu['dishes'] = menu_dishes
 
     return menu
-    """
+
+
+def put_columns_buildto_dishes(dishes):
+    sizes = []
+
+    for dish in dishes:
+        types_columns = {}
+        put_types_columns(types_columns, dish)
+        dish['types_columns'] = types_columns
+
+        flavors_columns = {}
+        put_flavors_columns(flavors_columns, dish)
+        dish['flavors_columns'] = flavors_columns
+
+        adding_columns = {}
+        put_adding_columns(adding_columns, dish)
+        dish['adding_columns'] = adding_columns
+
+        put_sizes(sizes, dish)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
+
+    for dish in dishes:
+        dish['size_columns'] = put_sizes_columns(sizes, dish)
+
+    return dishes
+
+
+def put_sizes(columns, table):
+    for size in table['sizes']:
+        inserted = False
+        for column in columns:
+            if column['short_name'] == size['short_name']:
+                inserted = True
+                break
+
+        if not inserted:
+            columns.append(size)
+
+
+def put_types_columns(columns, table):
+    sizes = []
+
+    for type in table['types']:
+        flavors_columns = {}
+        put_flavors_columns(flavors_columns, type)
+        type['flavors_columns'] = flavors_columns
+
+        adding_columns = {}
+        put_adding_columns(adding_columns, type)
+        type['adding_columns'] = adding_columns
+
+        put_sizes(sizes, type)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
+    columns['sizes'] = sizes
+
+    for type in table['types']:
+        type['size_columns'] = put_sizes_columns(sizes, type)
+
+
+def put_flavors_columns(columns, table):
+    sizes = []
+
+    for flavor in table['flavors']:
+        adding_columns = {}
+        put_adding_columns(adding_columns, flavor)
+        flavor['adding_columns'] = adding_columns
+
+        put_sizes(sizes, flavor)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
+    columns['sizes'] = sizes
+
+    for flavor in table['flavors']:
+        flavor['size_columns'] = put_sizes_columns(sizes, flavor)
+
+
+def put_adding_columns(columns, table):
+    sizes = []
+
+    if 'adding' in table and table['adding']:
+        adding = table['adding']
+
+        flavors_columns = {}
+        put_flavors_columns(flavors_columns, adding)
+        adding['flavors_columns'] = flavors_columns
+
+        put_sizes(sizes, adding)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
+    columns['sizes'] = sizes
+
+    adding['size_columns'] = put_sizes_columns(sizes, adding)
+
+
+
 
 
 def menu(request):
@@ -256,15 +353,11 @@ def menu(request):
     languages = pages_basic_data['languages']
     currencies = pages_basic_data['currencies']
 
-    """
     dishes = to_dict_list(
         Dish.objects, 'sort_number', language=language, currency=currency
     )
 
     menu = build_menu(dishes)
-    """
-
-    menu = build_menu(language=language, currency=currency)
 
     context = {
         'settings': settings,

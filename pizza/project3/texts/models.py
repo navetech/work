@@ -47,7 +47,7 @@ class Phrase(models.Model):
         return (
             f'{self.words} '
             # f'in '
-            f'{languages_names}, '
+            # f'{languages_names}, '
             # f'translation of '
             # f'{self.translation_of}'
         )

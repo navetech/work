@@ -12,6 +12,8 @@ from .models import Flavor
 from .models import Type
 from .models import Dish
 
+from .models import MenuItem
+
 
 admin.site.register(Setting)
 
@@ -21,4 +23,5 @@ admin.site.register(Size)
 admin.site.register(Adding)
 admin.site.register(Flavor)
 admin.site.register(Type)
-admin.site.register(Dish)
+
+admin.site.register(MenuItem)
