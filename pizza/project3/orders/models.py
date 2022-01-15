@@ -460,9 +460,9 @@ class MenuItemCommonFields(models.Model):
         related_name='container_%(app_label)s_%(class)s_related'
     )
 
-    short_name = models.ForeignKey(
+    name = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='short_name_%(app_label)s_%(class)s_related'
+        related_name='name_%(app_label)s_%(class)s_related'
     )
 
     long_name = models.ForeignKey(
@@ -488,7 +488,7 @@ class MenuItemCommonFields(models.Model):
             return (
     #           f'{self.sort_number}, '
                 f'{self.category}, '
-                f'{self.short_name}, '
+                f'{self.name}, '
                 f'{self.container}, '
     #            f'{container_short_name}, '
     #            f'{self.long_name}, '
@@ -499,14 +499,14 @@ class MenuItemCommonFields(models.Model):
             return (
     #           f'{self.sort_number}, '
                 f'{self.category}, '
-                f'{self.short_name}, '
+                f'{self.name}, '
     #            f'{container_short_name}, '
     #            f'{self.long_name}, '
     #            f'{self.quantity}, '
                 # f'{self.img}'
             )
 
-    def to_dict(self, **settings):
+    def to_dict(self, container_dict, **settings):
         dict = {}
 
         dict['id'] = self.id
@@ -514,8 +514,10 @@ class MenuItemCommonFields(models.Model):
         dict['sort_number'] = self.sort_number
 
         dict['category'] = to_dict(self.category, **settings)
-        #dict['container'] = to_dict(self.container, **settings)
-        dict['short_name'] = to_dict(self.short_name, **settings)
+
+        dict['container'] = container_dict
+
+        dict['name'] = to_dict(self.name, **settings)
         dict['long_name'] = to_dict(self.long_name, **settings)
         dict['quantity'] = to_dict(self.quantity, **settings)
 
@@ -526,6 +528,11 @@ class MenuItemCommonFields(models.Model):
             dict['img']['url'] = self.img.url
             dict['img']['height'] = self.img.height
             dict['img']['width'] = self.img.width
+
+        if container_dict and container_dict['full_name']:
+            dict['full_name'] = self.name.words + ' ' + container_dict['full_name']
+        else:
+            dict['full_name'] = self.name.words
 
         return dict
 
@@ -565,31 +572,48 @@ class MenuItem(MenuItemCommonFields):
             f'{MenuItemCommonFields.__str__(self)}'
         )
 
-    def to_dict(self, **settings):
-        dict = MenuItemCommonFields.to_dict(self, **settings)
+    def to_dict(self, container_dict, **settings):
+        dict = MenuItemCommonFields.to_dict(self, container_dict, **settings)
 
-        dict['dishes'] = to_menu_items_dict_list(self.dishes, 'Dish', 'sort_number', **settings)
-        dict['types'] = to_menu_items_dict_list(self.types, 'Type', 'sort_number', **settings)
+        dict['dishes'] = menu_items_to_dict_list(
+            dict, self.dishes, 'Dish', 'sort_number', **settings
+        )
+        dict['types'] = menu_items_to_dict_list(
+            dict, self.types, 'Type', 'sort_number', **settings
+        )
+        dict['flavors'] = menu_items_to_dict_list(
+            dict, self.flavors, 'Flavor', 'sort_number', **settings
+        )
+        dict['flavors_selection_limit'] = to_dict(
+            self.flavors_selection_limit, **settings
+        )
 
-        """
-        dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
-        dict['flavors_selection_limit'] = to_dict(self.flavors_selection_limit, **settings)
+        dict['sizes'] = menu_items_to_dict_list(
+            dict, self.sizes, 'Size', 'sort_number', **settings
+        )
+        dict['addings'] = menu_items_to_dict_list(
+            dict, self.addings, 'Adding', 'sort_number', **settings
+        )
 
-        dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
-        dict['addings'] = to_dict_list(self.addings, 'sort_number', **settings)
-        """
         return dict
 
 
+def menu_item_to_dict(container_dict, object, **settings):
+    if object:
+        dict = object.to_dict(container_dict, **settings)
+    else:
+        dict = {}
+
+    return dict
 
 
-def to_menu_items_dict_list(manager, category, *order_by_field_names, **settings):
+def menu_items_to_dict_list(container_dict, manager, category, *order_by_field_names, **settings):
     dict_list = []
 
     objects = manager.all().order_by(*order_by_field_names)
     for object in objects:
         if category == object.category.words:
-            dict = to_dict(object, **settings)
+            dict = menu_item_to_dict(container_dict, object, **settings)
             dict_list.append(dict)
 
     return dict_list

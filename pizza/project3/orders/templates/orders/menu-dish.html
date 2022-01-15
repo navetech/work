@@ -1,6 +1,6 @@
 <li class="list-group-item ln-container01">
-    <h4>{{ dish.short_name.translated.words }}</h4>
-    <h4>{{ dish.long_name.translated.words }}</h4>
+    <h4>{{ dish.name.translated.words }}</h4>
+    <h4>{{ dish.full_name }}</h4>
 
     <h5>{{ dish.quantity.converted.value|floatformat:2 }} {{ dish.quantity.converted.unit }}</h5>
 
@@ -36,20 +36,11 @@
         </ul>
     {% endif %}
     
-    {% if dish.adding %}
+    {% if dish.addings %}
         <ul class="list-group pt-4">
-            <li class="list-group-item ln-container02">
-                <h5>{{ dish.adding.short_name.translated.words }}</h5>
-                <h5>{{ dish.adding.long_name.translated.words }}</h5>
-            
-                {{ dish.adding.quantity.converted.value|floatformat:2 }} {{ dish.adding.quantity.converted.unit }}
-            
-                {% if dish.adding.flavors %}
-                    {% for flavor in dish.adding.flavors %}
-                        {% include "orders/menu-flavor.html" %}
-                    {% endfor %}
-                {% endif %}
-            </li>
+            {% for adding in dish.addings %}
+                {% include "orders/menu-adding.html" %}
+            {% endfor %}
         </ul>
     {% endif %}
 </li>

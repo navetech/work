@@ -23,6 +23,7 @@ from .models import UserSetting
 from .models import Dish
 
 from .models import MenuItem
+from .models import menu_item_to_dict
 
 #from .models import Order, OrderDish, OrderType
 #from .models import OrderFlavor, OrderAdding, OrderSize
@@ -226,7 +227,8 @@ def build_menu_object(object):
 
 def build_menu(**settings):
     menu_object = MenuItem.objects.filter(container=None).first()
-    menu = to_dict(menu_object, **settings)
+    container_dict = {}
+    menu = menu_item_to_dict(container_dict, menu_object, **settings)
 
     return menu
 
