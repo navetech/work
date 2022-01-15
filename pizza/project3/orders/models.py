@@ -211,6 +211,41 @@ class UserSetting(models.Model):
         return settings
 
 
+class CountLimit(models.Model):
+    min = models.IntegerField(default=0, blank=True)
+    max = models.IntegerField(default=-1, blank=True)
+
+    def clean(self):
+        if self.min < 0:
+            self.min = 0
+
+        if self.max >= 0:
+            if self.max < self.min:
+                self.max = self.min
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+
+        super().save(*args, **kwargs)  # Call the "real" save() method.
+            
+    def __str__(self):
+        return (
+            f'{self.min}, '
+            f'{self.max}, '
+        )
+
+    def to_dict(self, **settings):
+        dict = {}
+
+        dict['id'] = self.id
+
+        dict['min'] = self.min
+        dict['max'] = self.max
+
+        return dict
+
+
+"""
 class MenuCommonFields(models.Model):
     sort_number = models.FloatField(default=0)
 
@@ -266,42 +301,9 @@ class MenuCommonFields(models.Model):
             dict['img']['width'] = self.img.width
 
         return dict
+"""
 
-
-class CountLimit(models.Model):
-    min = models.IntegerField(default=0, blank=True)
-    max = models.IntegerField(default=-1, blank=True)
-
-    def clean(self):
-        if self.min < 0:
-            self.min = 0
-
-        if self.max >= 0:
-            if self.max < self.min:
-                self.max = self.min
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-
-        super().save(*args, **kwargs)  # Call the "real" save() method.
-            
-    def __str__(self):
-        return (
-            f'{self.min}, '
-            f'{self.max}, '
-        )
-
-    def to_dict(self, **settings):
-        dict = {}
-
-        dict['id'] = self.id
-
-        dict['min'] = self.min
-        dict['max'] = self.max
-
-        return dict
-
-
+"""
 class Size(MenuCommonFields):
     pass
 
@@ -445,8 +447,269 @@ class Dish(MenuCommonFields):
         dict['adding_count'] = to_dict(self.adding_count, **settings)
 
         return dict
+"""
 
 
+class MenuItemCommonFields(models.Model):
+    sort_number = models.FloatField(default=0)
+
+    name = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='name_%(app_label)s_%(class)s_related'
+    )
+
+    long_name = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='long_name_%(app_label)s_%(class)s_related'
+    )
+
+    quantity = models.ForeignKey(
+        Quantity, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='quantity_%(app_label)s_%(class)s_related'
+    )
+
+    img = models.ImageField(
+        upload_to='uploads/static/images',
+        default=None, blank=True, null=True
+    )
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return (
+#           f'{self.sort_number}, '
+            f'{self.name}, '
+#            f'{self.long_name}, '
+#            f'{self.quantity}, '
+            # f'{self.img}'
+        )
+
+    def to_dict(self, container_dict, **settings):
+        dict = {}
+
+        dict['id'] = self.id
+
+        dict['sort_number'] = self.sort_number
+
+        dict['name'] = to_dict(self.name, **settings)
+        dict['long_name'] = to_dict(self.long_name, **settings)
+        dict['quantity'] = to_dict(self.quantity, **settings)
+
+        dict['img'] = {}
+        if self.img:
+            dict['img']['name'] = self.img.name
+            dict['img']['path'] = self.img.path
+            dict['img']['url'] = self.img.url
+            dict['img']['height'] = self.img.height
+            dict['img']['width'] = self.img.width
+
+        dict['container'] = container_dict
+
+        if container_dict and container_dict['full_name']:
+            dict['full_name'] = self.name.words + ' ' + container_dict['full_name']
+        else:
+            dict['full_name'] = self.name.words
+
+        return dict
+
+
+class Size(MenuItemCommonFields):
+    pass
+
+
+class AddingFlavor(MenuItemCommonFields):
+    special = models.BooleanField(default=False)
+
+    sizes = models.ManyToManyField(
+        Size, blank=True,
+        related_name='sizes_AddingFlavor_related'
+    )
+
+    def __str__(self):
+        return (
+            f'{MenuItemCommonFields.__str__(self)}, '
+
+            f'Special={self.special}, '
+        )
+
+    def to_dict(self, container_dict, **settings):
+        dict = MenuItemCommonFields.to_dict(
+            self, container_dict, **settings
+        )
+
+        dict['special'] = self.special
+
+        dict['sizes'] = menu_items_to_dict_list(
+            dict, self.sizes, 'sort_number', **settings
+        )
+
+        return dict
+
+
+class AddingFlavorSet(MenuItemCommonFields):
+    flavors = models.ManyToManyField(
+        AddingFlavor, blank=True,
+        related_name='flavors_AddingFlavorSet_related'
+    )
+
+    def to_dict(self, container_dict, **settings):
+        dict = MenuItemCommonFields.to_dict(
+            self, container_dict, **settings
+        )
+
+        dict['flavors'] = menu_items_to_dict_list(
+            dict, self.flavors, 'sort_number', **settings
+        )
+
+        return dict
+
+
+class Adding(MenuItemCommonFields):
+    flavors_set = models.ForeignKey(
+        AddingFlavorSet, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='flavors_set_Adding_related'
+    )
+
+    only_special_flavors = models.BooleanField(default=False)
+
+    flavors_selection_limit = models.ForeignKey(
+        CountLimit, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='flavors_selection_limit_Adding_related'
+    )
+
+    def __str__(self):
+        return (
+            f'{MenuItemCommonFields.__str__(self)}, '
+
+            f'Only Special={self.only_special_flavors}, '
+        )
+
+    def to_dict(self, container_dict, **settings):
+        dict = MenuItemCommonFields.to_dict(
+            self, container_dict, **settings
+        )
+
+        dict['flavors_set'] = menu_item_to_dict(
+            dict, self.flavors_set, **settings
+        )
+
+        dict['only_special_flavors'] = self.only_special_flavors
+
+        dict['flavors_selection_limit'] = to_dict(
+            self.flavors_selection_limit, **settings
+        )
+
+        return dict
+
+
+class FlavorCommonFields(MenuItemCommonFields):
+    sizes = models.ManyToManyField(
+        Size, blank=True,
+        related_name='sizes_%(app_label)s_%(class)s_related'
+    )
+
+    addings = models.ManyToManyField(
+        Adding, blank=True,
+        related_name='addings_%(app_label)s_%(class)s_related'
+    )
+
+    class Meta:
+        abstract = True
+
+    def to_dict(self, container_dict, **settings):
+        dict = MenuItemCommonFields.to_dict(
+            self, container_dict, **settings
+        )
+
+        dict['sizes'] = menu_items_to_dict_list(
+            dict, self.sizes, 'sort_number', **settings
+        )
+        dict['addings'] = menu_items_to_dict_list(
+            dict, self.addings, 'sort_number', **settings
+        )
+
+        return dict
+
+
+class Flavor(FlavorCommonFields):
+    pass
+
+
+class TypeCommonFields(FlavorCommonFields):
+    flavors = models.ManyToManyField(
+        Flavor, blank=True,
+        related_name='flavors_%(app_label)s_%(class)s_related'
+    )
+
+    class Meta:
+        abstract = True
+
+    def to_dict(self, container_dict, **settings):
+        dict = FlavorCommonFields.to_dict(self, container_dict, **settings)
+
+        dict['flavors'] = menu_items_to_dict_list(
+            dict, self.flavors, 'sort_number', **settings
+        )
+
+        return dict
+
+class Type(TypeCommonFields):
+    pass
+
+
+class DishCommonFields(TypeCommonFields):
+    types = models.ManyToManyField(
+        Type, blank=True,
+        related_name='types_%(app_label)s_%(class)s_related'
+    )
+
+    class Meta:
+        abstract = True
+
+    def to_dict(self, container_dict, **settings):
+        dict = TypeCommonFields.to_dict(self, container_dict, **settings)
+
+        dict['types'] = menu_items_to_dict_list(
+            dict, self.types, 'sort_number', **settings
+        )
+
+        return dict
+
+
+class Dish(DishCommonFields):
+    pass
+
+
+class MenuCommonFields(DishCommonFields):
+    dishes = models.ManyToManyField(
+        Dish, blank=True,
+        related_name='dishes_%(app_label)s_%(class)s_related'
+    )
+
+    class Meta:
+        abstract = True
+
+    def to_dict(self, container_dict, **settings):
+        dict = DishCommonFields.to_dict(self, container_dict, **settings)
+
+        dict['dishes'] = menu_items_to_dict_list(
+            dict, self.dishes, 'sort_number', **settings
+        )
+
+        return dict
+
+
+class Menu(MenuCommonFields):
+    pass
+
+
+
+
+
+
+
+"""
 class MenuItemCommonFields(models.Model):
     sort_number = models.FloatField(default=0)
 
@@ -552,6 +815,16 @@ class MenuItem(MenuItemCommonFields):
         'self', blank=True,
         related_name='flavors_MenuItem_related'
     )
+
+    flavors_set = models.ForeignKey(
+        'self', blank=True, null=True, on_delete=models.CASCADE,
+        related_name='flavors_set_MenuItem_related'
+    )
+
+    special_flavor = models.BooleanField(default=False)
+
+    only_special_flavors = models.BooleanField(default=False)
+
     flavors_selection_limit = models.ForeignKey(
         CountLimit, blank=True, null=True, on_delete=models.CASCADE,
         related_name='flavors_selection_limit_MenuItem_related'
@@ -584,6 +857,14 @@ class MenuItem(MenuItemCommonFields):
         dict['flavors'] = menu_items_to_dict_list(
             dict, self.flavors, 'Flavor', 'sort_number', **settings
         )
+        dict['flavors_set'] = menu_item_to_dict(
+            dict, self.flavors_set, **settings
+        )
+
+        dict['special_flavor'] = self.special_flavor
+
+        dict['only_special_flavors'] = self.only_special_flavors
+
         dict['flavors_selection_limit'] = to_dict(
             self.flavors_selection_limit, **settings
         )
@@ -596,7 +877,7 @@ class MenuItem(MenuItemCommonFields):
         )
 
         return dict
-
+"""
 
 def menu_item_to_dict(container_dict, object, **settings):
     if object:

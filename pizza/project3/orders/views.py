@@ -20,9 +20,8 @@ from quantities.models import Currency
 from .models import Setting
 from .models import UserSetting
 
-from .models import Dish
+from .models import Menu
 
-from .models import MenuItem
 from .models import menu_item_to_dict
 
 #from .models import Order, OrderDish, OrderType
