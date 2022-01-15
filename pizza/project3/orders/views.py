@@ -155,24 +155,24 @@ def get_pages_basic_data(request):
     return pages_basic_data
 
 
-def insert_object_sizes(sizes_list, object):
-    for object_size in object['sizes']:
+def insert_item_sizes(sizes_list, item):
+    for item_size in item['sizes']:
         inserted = False
         for list_size in sizes_list:
-            if list_size['short_name'] == object_size['short_name']:
+            if list_size['name'] == item_size['name']:
                 inserted = True
                 break
 
         if not inserted:
-            sizes_list.append(object_size)
+            sizes_list.append(item_size)
 
 
-def build_flavors_table(object):
+def build_flavors_table(item):
     table = {}
 
     sizes = []
-    for flavor in object['flavors']:
-        insert_object_sizes(sizes, object=flavor)
+    for flavor in item['flavors']:
+        insert_item_sizes(sizes, item=flavor)
 
     sizes.sort(key=lambda size: size['sort_number'], reverse=False)
     table['sizes'] = sizes
@@ -180,49 +180,56 @@ def build_flavors_table(object):
     return table
 
 
-def build_object_sizes_columns(sizes, object):
+def build_item_sizes_columns(sizes, item):
     columns = []
     for size in sizes:
         present = False
-        for object_size in object['sizes']:
-            if size['short_name'] == object_size['short_name']:
+        for item_size in item['sizes']:
+            if size['name'] == item_size['name']:
                 present = True
                 break
 
         if present:
-            columns.append(object_size)
+            columns.append(item_size)
         else:
             columns.append(None)
 
     return columns
 
 
-def build_menu_object(object):
-    menu_object = object
+def fill_menu_item_tables(item):
+    menu_item = item
 
-    if 'types' in object and object['types']:
+    if 'dishes' in item and item['dishes']:
         list = []
-        for type in object['types']:
-            elem = build_menu_object(type)
+        for dish in item['dishes']:
+            elem = fill_menu_item_tables(dish)
             list.append(elem)
-        menu_object['types'] = list
+        menu_item['dishes'] = list
 
-    if 'flavors' in object and object['flavors']:
-        flavors_table = build_flavors_table(object)
-        menu_object['flavors_table'] = flavors_table
+    if 'types' in item and item['types']:
+        list = []
+        for type in item['types']:
+            elem = fill_menu_item_tables(type)
+            list.append(elem)
+        menu_item['types'] = list
 
-        for flavor in object['flavors']:
-            flavor['size_columns'] = build_object_sizes_columns(
-                sizes=flavors_table['sizes'], object=flavor
+    if 'flavors' in item and item['flavors']:
+        flavors_table = build_flavors_table(item)
+        menu_item['flavors_table'] = flavors_table
+
+        for flavor in item['flavors']:
+            flavor['size_columns'] = build_item_sizes_columns(
+                sizes=flavors_table['sizes'], item=flavor
             )
 
-    if 'sizes' in object and object['sizes']:
-        menu_object['sizes'] = object['sizes']
+    if 'sizes' in item and item['sizes']:
+        menu_item['sizes'] = item['sizes']
 
-    if 'adding' in object and object['adding']:
-        menu_object['adding'] = object['adding']
+    if 'addinga' in item and item['adding']:
+        menu_item['adding'] = item['adding']
 
-    return menu_object
+    return menu_item
 
 
 def build_menu(**settings):
@@ -230,19 +237,9 @@ def build_menu(**settings):
     container_dict = {}
     menu = menu_item_to_dict(container_dict, menu_object, **settings)
 
-    return menu
-
-    """
-    menu = {}
-
-    menu_dishes = []
-    for dish in dishes:
-        menu_dish = build_menu_object(dish)
-        menu_dishes.append(menu_dish)
-    menu['dishes'] = menu_dishes
+    menu = fill_menu_item_tables(menu)
 
     return menu
-    """
 
 
 def menu(request):
@@ -257,14 +254,6 @@ def menu(request):
     settings = pages_basic_data['settings']
     languages = pages_basic_data['languages']
     currencies = pages_basic_data['currencies']
-
-    """
-    dishes = to_dict_list(
-        Dish.objects, 'sort_number', language=language, currency=currency
-    )
-
-    menu = build_menu(dishes)
-    """
 
     menu = build_menu(language=language, currency=currency)
 
