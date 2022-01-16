@@ -4,6 +4,7 @@ from django.db import models
 
 from django.contrib.auth.models import User
 
+
 from texts.models import Phrase
 from texts.models import Language
 from texts.models import Setting as TextSetting
@@ -245,209 +246,7 @@ class CountLimit(models.Model):
         return dict
 
 
-"""
-class MenuCommonFields(models.Model):
-    sort_number = models.FloatField(default=0)
-
-    short_name = models.ForeignKey(
-        Phrase, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='short_name_%(app_label)s_%(class)s_related'
-    )
-
-    long_name = models.ForeignKey(
-        Phrase, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='long_name_%(app_label)s_%(class)s_related'
-    )
-
-    quantity = models.ForeignKey(
-        Quantity, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='quantity_%(app_label)s_%(class)s_related'
-    )
-
-    img = models.ImageField(
-        upload_to='uploads/static/images',
-        default=None, blank=True, null=True
-    )
-
-    class Meta:
-        abstract = True
-
-    def __str__(self):
-        return (
-            f'{self.sort_number}, '
-            f'{self.short_name}, '
-            f'{self.long_name}, '
-            f'{self.quantity}, '
-            # f'{self.img}'
-        )
-
-    def to_dict(self, **settings):
-        dict = {}
-
-        dict['id'] = self.id
-
-        dict['sort_number'] = self.sort_number
-
-        dict['short_name'] = to_dict(self.short_name, **settings)
-        dict['long_name'] = to_dict(self.long_name, **settings)
-        dict['quantity'] = to_dict(self.quantity, **settings)
-
-        dict['img'] = {}
-        if self.img:
-            dict['img']['name'] = self.img.name
-            dict['img']['path'] = self.img.path
-            dict['img']['url'] = self.img.url
-            dict['img']['height'] = self.img.height
-            dict['img']['width'] = self.img.width
-
-        return dict
-"""
-
-"""
-class Size(MenuCommonFields):
-    pass
-
-    def __str__(self):
-        return (
-            f'{MenuCommonFields.__str__(self)}'
-        )
-
-    def to_dict(self, **settings):
-        dict = MenuCommonFields.to_dict(self, **settings)
-
-        return dict
-
-
-class Adding(MenuCommonFields):
-    flavors = models.ManyToManyField(
-        'Flavor', blank=True,
-        related_name='flavors_Adding_related'
-    )
-
-    def __str__(self):
-        return (
-            f'{MenuCommonFields.__str__(self)}, '
-        )
-
-    def to_dict(self, **settings):
-        dict = MenuCommonFields.to_dict(self, **settings)
-
-        dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
-
-        return dict
-
-
-class Flavor(MenuCommonFields):
-    sizes = models.ManyToManyField(
-        Size, blank=True,
-        related_name='sizes_Flavor_related'
-    )
-
-    adding = models.ForeignKey(
-        Adding, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='adding_Flavor_related'
-    )
-    adding_count = models.ForeignKey(
-        CountLimit, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='adding_count_Flavor_related'
-    )
-
-    def __str__(self):
-        return (
-            f'{MenuCommonFields.__str__(self)}, '
-        )
-
-    def to_dict(self, **settings):
-        dict = MenuCommonFields.to_dict(self, **settings)
-
-        dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
-
-        dict['adding'] = to_dict(self.adding, **settings)
-        dict['adding_count'] = to_dict(self.adding_count, **settings)
-
-        return dict
-
-
-class Type(MenuCommonFields):
-    flavors = models.ManyToManyField(
-        Flavor, blank=True,
-        related_name='flavors_Type_related'
-    )
-
-    sizes = models.ManyToManyField(
-        Size, blank=True,
-        related_name='sizes_Type_related'
-    )
-
-    adding = models.ForeignKey(
-        Adding, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='adding_Type_related'
-    )
-    adding_count = models.ForeignKey(
-        CountLimit, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='adding_count_Type_related'
-    )
-
-    def __str__(self):
-        return (
-            f'{MenuCommonFields.__str__(self)}, '
-        )
-
-    def to_dict(self, **settings):
-        dict = MenuCommonFields.to_dict(self, **settings)
-
-        dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
-        dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
-
-        dict['adding'] = to_dict(self.adding, **settings)
-        dict['adding_count'] = to_dict(self.adding_count, **settings)
-
-
-        return dict
-
-
-class Dish(MenuCommonFields):
-    types = models.ManyToManyField(
-        Type, blank=True,
-        related_name='types_Dish_related'
-    )
-
-    flavors = models.ManyToManyField(
-        Flavor, blank=True,
-        related_name='flavors_Dish_related'
-    )
-
-    sizes = models.ManyToManyField(
-        Size, blank=True,
-        related_name='sizes_Dish_related'
-    )
-
-    adding = models.ForeignKey(
-        Adding, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='adding_Dish_related'
-    )
-    adding_count = models.ForeignKey(
-        CountLimit, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='adding_count_Dish_related'
-    )
-
-    def __str__(self):
-        return (
-            f'{MenuCommonFields.__str__(self)}'
-        )
-
-    def to_dict(self, **settings):
-        dict = MenuCommonFields.to_dict(self, **settings)
-
-        dict['types'] = to_dict_list(self.types, 'sort_number', **settings)
-        dict['flavors'] = to_dict_list(self.flavors, 'sort_number', **settings)
-        dict['sizes'] = to_dict_list(self.sizes, 'sort_number', **settings)
-
-        dict['adding'] = to_dict(self.adding, **settings)
-        dict['adding_count'] = to_dict(self.adding_count, **settings)
-
-        return dict
-"""
+from django.apps import apps
 
 
 class MenuItemCommonFields(models.Model):
@@ -476,14 +275,26 @@ class MenuItemCommonFields(models.Model):
     class Meta:
         abstract = True
 
+
     def __str__(self):
-        return (
-#           f'{self.sort_number}, '
-            f'{self.name}, '
-#            f'{self.long_name}, '
-#            f'{self.quantity}, '
-            # f'{self.img}'
-        )
+        ret = f'{self._meta.model_name}: {self.name}'
+
+#        app_models = apps.get_app_config('orders').get_models()
+        app = self._meta.app_label
+
+        app_models = apps.get_models()
+        for app_model in app_models:
+            model_name = app_model._meta.model_name
+
+            attr = f'{app}_{model_name}_related'
+            if hasattr(self, attr):
+                containers = getattr(self, attr).all()
+
+                if containers.count() == 1:
+                    ret = ret + ' ' + f'{containers.first()}'
+                    break
+
+        return ret
 
     def to_dict(self, container_dict, **settings):
         dict = {}
@@ -639,7 +450,7 @@ class Flavor(FlavorCommonFields):
 class TypeCommonFields(FlavorCommonFields):
     flavors = models.ManyToManyField(
         Flavor, blank=True,
-        related_name='flavors_%(app_label)s_%(class)s_related'
+        related_name='%(app_label)s_%(class)s_related'
     )
 
     class Meta:
@@ -661,7 +472,7 @@ class Type(TypeCommonFields):
 class DishCommonFields(TypeCommonFields):
     types = models.ManyToManyField(
         Type, blank=True,
-        related_name='types_%(app_label)s_%(class)s_related'
+        related_name='%(app_label)s_%(class)s_related'
     )
 
     class Meta:
@@ -684,7 +495,7 @@ class Dish(DishCommonFields):
 class MenuCommonFields(DishCommonFields):
     dishes = models.ManyToManyField(
         Dish, blank=True,
-        related_name='dishes_%(app_label)s_%(class)s_related'
+        related_name='%(app_label)s_%(class)s_related'
     )
 
     class Meta:
