@@ -225,12 +225,45 @@ def fill_menu_elem_tables(elem):
     return elem
 
 
+def insert_global_sets(sets, elem):
+    if 'dishes' in elem and elem['dishes']:
+        for dish in elem['dishes']:
+            sets = insert_global_sets(sets, dish)
+
+    if 'types' in elem and elem['types']:
+        for type in elem['types']:
+            sets = insert_global_sets(sets, type)
+
+    if 'flavors' in elem and elem['flavors']:
+        for flavor in elem['flavors']:
+            sets = insert_global_sets(sets, flavor)
+
+    if 'addings' in elem and elem['addings']:
+        for adding in elem['addings']:
+            if 'flavors_set' in adding and adding['flavors_set']:
+                inserted = False
+                for set in sets:
+                    if set == adding['flavors_set']:
+                        inserted = True
+                        break
+
+                if not inserted:
+                    sets.append(adding['flavors_set'])
+
+    return sets
+
+
 def build_menu(**settings):
     menu_object = Menu.objects.first()
     container_dict = {}
     menu = menu_elem_to_dict(container_dict, menu_object, **settings)
 
     menu = fill_menu_elem_tables(menu)
+
+    global_sets = []
+    global_sets = insert_global_sets(global_sets, menu )
+#    menu['global_sets'] = prune_global_sets(global_sets)
+    menu['global_sets'] = global_sets
 
     return menu
 

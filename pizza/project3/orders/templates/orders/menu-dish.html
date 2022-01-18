@@ -43,5 +43,25 @@
             {% endfor %}
         </ul>
     {% endif %}
+        
+    {% if dish.global_sets %}
+        <ul class="list-group pt-4">
+            {% for set in dish.global_sets %}
+            <li class="list-group-item ln-container02">
+                <table style="width:100%">
+                    {% for flavor in set.flavors %}
+                        <tr>
+                            <td>
+                                {% include "orders/menu-adding-flavor.html" %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+
 </li>
 
