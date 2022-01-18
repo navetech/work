@@ -22,7 +22,7 @@ from .models import UserSetting
 
 from .models import Menu
 
-from .models import menu_item_to_dict
+from .models import menu_elem_to_dict
 
 #from .models import Order, OrderDish, OrderType
 #from .models import OrderFlavor, OrderAdding, OrderSize
@@ -154,24 +154,26 @@ def get_pages_basic_data(request):
     return pages_basic_data
 
 
-def insert_item_sizes(sizes_list, item):
-    for item_size in item['sizes']:
+def insert_menu_elem_sizes(sizes, elem):
+    for elem_size in elem['sizes']:
         inserted = False
-        for list_size in sizes_list:
-            if list_size['name'] == item_size['name']:
+        for size in sizes:
+            if size['name'] == elem_size['name']:
                 inserted = True
                 break
 
         if not inserted:
-            sizes_list.append(item_size)
+            sizes.append(elem_size)
+
+    return sizes
 
 
-def build_flavors_table(item):
+def build_menu_elem_flavors_table(elem):
     table = {}
 
     sizes = []
-    for flavor in item['flavors']:
-        insert_item_sizes(sizes, item=flavor)
+    for flavor in elem['flavors']:
+        sizes = insert_menu_elem_sizes(sizes, flavor)
 
     sizes.sort(key=lambda size: size['sort_number'], reverse=False)
     table['sizes'] = sizes
@@ -179,64 +181,56 @@ def build_flavors_table(item):
     return table
 
 
-def build_item_sizes_columns(sizes, item):
+def build_menu_elem_sizes_columns(sizes, elem):
     columns = []
     for size in sizes:
         present = False
-        for item_size in item['sizes']:
-            if size['name'] == item_size['name']:
+        for elem_size in elem['sizes']:
+            if size['name'] == elem_size['name']:
                 present = True
                 break
 
         if present:
-            columns.append(item_size)
+            columns.append(elem_size)
         else:
             columns.append(None)
 
     return columns
 
 
-def fill_menu_item_tables(item):
-    menu_item = item
+def fill_menu_elem_tables(elem):
+    if 'dishes' in elem and elem['dishes']:
+        l = []
+        for dish in elem['dishes']:
+            e = fill_menu_elem_tables(dish)
+            l.append(e)
+        elem['dishes'] = l
 
-    if 'dishes' in item and item['dishes']:
-        list = []
-        for dish in item['dishes']:
-            elem = fill_menu_item_tables(dish)
-            list.append(elem)
-        menu_item['dishes'] = list
+    if 'types' in elem and elem['types']:
+        l = []
+        for type in elem['types']:
+            e = fill_menu_elem_tables(type)
+            l.append(e)
+        elem['types'] = l
 
-    if 'types' in item and item['types']:
-        list = []
-        for type in item['types']:
-            elem = fill_menu_item_tables(type)
-            list.append(elem)
-        menu_item['types'] = list
+    if 'flavors' in elem and elem['flavors']:
+        flavors_table = build_menu_elem_flavors_table(elem)
+        elem['flavors_table'] = flavors_table
 
-    if 'flavors' in item and item['flavors']:
-        flavors_table = build_flavors_table(item)
-        menu_item['flavors_table'] = flavors_table
-
-        for flavor in item['flavors']:
-            flavor['size_columns'] = build_item_sizes_columns(
-                sizes=flavors_table['sizes'], item=flavor
+        for flavor in elem['flavors']:
+            flavor['size_columns'] = build_menu_elem_sizes_columns(
+                sizes=flavors_table['sizes'], elem=flavor
             )
 
-    if 'sizes' in item and item['sizes']:
-        menu_item['sizes'] = item['sizes']
-
-    if 'addinga' in item and item['adding']:
-        menu_item['adding'] = item['adding']
-
-    return menu_item
+    return elem
 
 
 def build_menu(**settings):
-    menu_object = MenuItem.objects.filter(container=None).first()
+    menu_object = Menu.objects.first()
     container_dict = {}
-    menu = menu_item_to_dict(container_dict, menu_object, **settings)
+    menu = menu_elem_to_dict(container_dict, menu_object, **settings)
 
-    menu = fill_menu_item_tables(menu)
+    menu = fill_menu_elem_tables(menu)
 
     return menu
 

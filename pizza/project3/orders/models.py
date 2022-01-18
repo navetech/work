@@ -249,7 +249,7 @@ class CountLimit(models.Model):
 from django.apps import apps
 
 
-class MenuItemCommonFields(models.Model):
+class MenuElementDefinitionFields(models.Model):
     sort_number = models.FloatField(default=0)
 
     name = models.ForeignKey(
@@ -262,6 +262,63 @@ class MenuItemCommonFields(models.Model):
         related_name='long_name_%(app_label)s_%(class)s_related'
     )
 
+    description = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='descripton_%(app_label)s_%(class)s_related'
+    )
+
+    class Meta:
+        abstract = True
+
+
+    def __str__(self):
+        first_name = f'{self._meta.model_name}: {self.name}'
+        full_name = first_name
+
+        app_label = self._meta.app_label
+#        modelos = apps.get_app_config(app_label).get_models()
+        modelos = apps.get_models()
+        for modelo in modelos:
+            model_name = modelo._meta.model_name
+
+            attr = f'{app_label}_{model_name}_related'
+            related_name_count = 0
+            if hasattr(self, attr):
+                related_name_count += 1
+                if related_name_count != 1:
+                    full_name = first_name
+                    break
+                else:
+                    containers = getattr(self, attr).all()
+                    if containers.count() == 1:
+                        full_name = full_name + ' ' + f'{containers.first()}'
+
+        return full_name
+
+    def to_dict(self, container_dict=None, **settings):
+        dict = {}
+
+        dict['id'] = self.id
+
+        dict['sort_number'] = self.sort_number
+
+        dict['name'] = to_dict(self.name, **settings)
+        dict['long_name'] = to_dict(self.long_name, **settings)
+        dict['description'] = to_dict(self.description, **settings)
+
+        if container_dict:
+            dict['container'] = container_dict
+
+            if 'full name' in container_dict:
+                dict['full_name'] = self.name.words + ' ' + container_dict['full_name']
+            else:
+                dict['full_name'] = self.name.words
+
+        return dict
+
+
+
+class MenuElementFields(MenuElementDefinitionFields):
     quantity = models.ForeignKey(
         Quantity, blank=True, null=True, on_delete=models.CASCADE,
         related_name='quantity_%(app_label)s_%(class)s_related'
@@ -276,35 +333,11 @@ class MenuItemCommonFields(models.Model):
         abstract = True
 
 
-    def __str__(self):
-        ret = f'{self._meta.model_name}: {self.name}'
+    def to_dict(self, container_dict=None, **settings):
+        dict = MenuElementDefinitionFields.to_dict(
+            self, container_dict, **settings
+        )
 
-#        app_models = apps.get_app_config('orders').get_models()
-        app = self._meta.app_label
-
-        app_models = apps.get_models()
-        for app_model in app_models:
-            model_name = app_model._meta.model_name
-
-            attr = f'{app}_{model_name}_related'
-            if hasattr(self, attr):
-                containers = getattr(self, attr).all()
-
-                if containers.count() == 1:
-                    ret = ret + ' ' + f'{containers.first()}'
-                    break
-
-        return ret
-
-    def to_dict(self, container_dict, **settings):
-        dict = {}
-
-        dict['id'] = self.id
-
-        dict['sort_number'] = self.sort_number
-
-        dict['name'] = to_dict(self.name, **settings)
-        dict['long_name'] = to_dict(self.long_name, **settings)
         dict['quantity'] = to_dict(self.quantity, **settings)
 
         dict['img'] = {}
@@ -315,21 +348,14 @@ class MenuItemCommonFields(models.Model):
             dict['img']['height'] = self.img.height
             dict['img']['width'] = self.img.width
 
-        dict['container'] = container_dict
-
-        if container_dict and container_dict['full_name']:
-            dict['full_name'] = self.name.words + ' ' + container_dict['full_name']
-        else:
-            dict['full_name'] = self.name.words
-
         return dict
 
 
-class Size(MenuItemCommonFields):
+class Size(MenuElementFields):
     pass
 
 
-class AddingFlavor(MenuItemCommonFields):
+class AddingFlavor(MenuElementFields):
     special = models.BooleanField(default=False)
 
     sizes = models.ManyToManyField(
@@ -339,44 +365,45 @@ class AddingFlavor(MenuItemCommonFields):
 
     def __str__(self):
         return (
-            f'{MenuItemCommonFields.__str__(self)}, '
+            f'{MenuElementFields.__str__(self)}, '
 
             f'Special={self.special}, '
         )
 
-    def to_dict(self, container_dict, **settings):
-        dict = MenuItemCommonFields.to_dict(
+    def to_dict(self, container_dict=None, **settings):
+        dict = MenuElementFields.to_dict(
             self, container_dict, **settings
         )
 
         dict['special'] = self.special
 
-        dict['sizes'] = menu_items_to_dict_list(
+        dict['sizes'] = menu_elems_to_dict_list(
             dict, self.sizes, 'sort_number', **settings
         )
 
         return dict
 
 
-class AddingFlavorSet(MenuItemCommonFields):
+class AddingFlavorSet(MenuElementDefinitionFields):
     flavors = models.ManyToManyField(
         AddingFlavor, blank=True,
         related_name='flavors_AddingFlavorSet_related'
     )
 
-    def to_dict(self, container_dict, **settings):
-        dict = MenuItemCommonFields.to_dict(
+
+    def to_dict(self, container_dict=None, **settings):
+        dict = MenuElementDefinitionFields.to_dict(
             self, container_dict, **settings
         )
 
-        dict['flavors'] = menu_items_to_dict_list(
+        dict['flavors'] = menu_elems_to_dict_list(
             dict, self.flavors, 'sort_number', **settings
         )
 
         return dict
 
 
-class Adding(MenuItemCommonFields):
+class Adding(MenuElementFields):
     flavors_set = models.ForeignKey(
         AddingFlavorSet, blank=True, null=True, on_delete=models.CASCADE,
         related_name='flavors_set_Adding_related'
@@ -391,17 +418,17 @@ class Adding(MenuItemCommonFields):
 
     def __str__(self):
         return (
-            f'{MenuItemCommonFields.__str__(self)}, '
+            f'{MenuElementFields.__str__(self)}, '
 
             f'Only Special={self.only_special_flavors}, '
         )
 
-    def to_dict(self, container_dict, **settings):
-        dict = MenuItemCommonFields.to_dict(
+    def to_dict(self, container_dict=None, **settings):
+        dict = MenuElementFields.to_dict(
             self, container_dict, **settings
         )
 
-        dict['flavors_set'] = menu_item_to_dict(
+        dict['flavors_set'] = menu_elem_to_dict(
             dict, self.flavors_set, **settings
         )
 
@@ -414,10 +441,10 @@ class Adding(MenuItemCommonFields):
         return dict
 
 
-class FlavorCommonFields(MenuItemCommonFields):
+class FlavorFields(MenuElementFields):
     sizes = models.ManyToManyField(
         Size, blank=True,
-        related_name='sizes_%(app_label)s_%(class)s_related'
+        related_name='%(app_label)s_%(class)s_related'
     )
 
     addings = models.ManyToManyField(
@@ -428,26 +455,26 @@ class FlavorCommonFields(MenuItemCommonFields):
     class Meta:
         abstract = True
 
-    def to_dict(self, container_dict, **settings):
-        dict = MenuItemCommonFields.to_dict(
+    def to_dict(self, container_dict=None, **settings):
+        dict = MenuElementFields.to_dict(
             self, container_dict, **settings
         )
 
-        dict['sizes'] = menu_items_to_dict_list(
+        dict['sizes'] = menu_elems_to_dict_list(
             dict, self.sizes, 'sort_number', **settings
         )
-        dict['addings'] = menu_items_to_dict_list(
+        dict['addings'] = menu_elems_to_dict_list(
             dict, self.addings, 'sort_number', **settings
         )
 
         return dict
 
 
-class Flavor(FlavorCommonFields):
+class Flavor(FlavorFields):
     pass
 
 
-class TypeCommonFields(FlavorCommonFields):
+class TypeFields(FlavorFields):
     flavors = models.ManyToManyField(
         Flavor, blank=True,
         related_name='%(app_label)s_%(class)s_related'
@@ -456,20 +483,20 @@ class TypeCommonFields(FlavorCommonFields):
     class Meta:
         abstract = True
 
-    def to_dict(self, container_dict, **settings):
-        dict = FlavorCommonFields.to_dict(self, container_dict, **settings)
+    def to_dict(self, container_dict=None, **settings):
+        dict = FlavorFields.to_dict(self, container_dict, **settings)
 
-        dict['flavors'] = menu_items_to_dict_list(
+        dict['flavors'] = menu_elems_to_dict_list(
             dict, self.flavors, 'sort_number', **settings
         )
 
         return dict
 
-class Type(TypeCommonFields):
+class Type(TypeFields):
     pass
 
 
-class DishCommonFields(TypeCommonFields):
+class DishFields(TypeFields):
     types = models.ManyToManyField(
         Type, blank=True,
         related_name='%(app_label)s_%(class)s_related'
@@ -478,21 +505,21 @@ class DishCommonFields(TypeCommonFields):
     class Meta:
         abstract = True
 
-    def to_dict(self, container_dict, **settings):
-        dict = TypeCommonFields.to_dict(self, container_dict, **settings)
+    def to_dict(self, container_dict=None, **settings):
+        dict = TypeFields.to_dict(self, container_dict, **settings)
 
-        dict['types'] = menu_items_to_dict_list(
+        dict['types'] = menu_elems_to_dict_list(
             dict, self.types, 'sort_number', **settings
         )
 
         return dict
 
 
-class Dish(DishCommonFields):
+class Dish(DishFields):
     pass
 
 
-class MenuCommonFields(DishCommonFields):
+class MenuFields(DishFields):
     dishes = models.ManyToManyField(
         Dish, blank=True,
         related_name='%(app_label)s_%(class)s_related'
@@ -501,17 +528,17 @@ class MenuCommonFields(DishCommonFields):
     class Meta:
         abstract = True
 
-    def to_dict(self, container_dict, **settings):
-        dict = DishCommonFields.to_dict(self, container_dict, **settings)
+    def to_dict(self, container_dict=None, **settings):
+        dict = DishFields.to_dict(self, container_dict, **settings)
 
-        dict['dishes'] = menu_items_to_dict_list(
+        dict['dishes'] = menu_elems_to_dict_list(
             dict, self.dishes, 'sort_number', **settings
         )
 
         return dict
 
 
-class Menu(MenuCommonFields):
+class Menu(MenuFields):
     pass
 
 
@@ -690,7 +717,7 @@ class MenuItem(MenuItemCommonFields):
         return dict
 """
 
-def menu_item_to_dict(container_dict, object, **settings):
+def menu_elem_to_dict(container_dict, object, **settings):
     if object:
         dict = object.to_dict(container_dict, **settings)
     else:
@@ -699,14 +726,13 @@ def menu_item_to_dict(container_dict, object, **settings):
     return dict
 
 
-def menu_items_to_dict_list(container_dict, manager, category, *order_by_field_names, **settings):
+def menu_elems_to_dict_list(container_dict, manager, *order_by_field_names, **settings):
     dict_list = []
 
     objects = manager.all().order_by(*order_by_field_names)
     for object in objects:
-        if category == object.category.words:
-            dict = menu_item_to_dict(container_dict, object, **settings)
-            dict_list.append(dict)
+        dict = menu_elem_to_dict(container_dict, object, **settings)
+        dict_list.append(dict)
 
     return dict_list
 
