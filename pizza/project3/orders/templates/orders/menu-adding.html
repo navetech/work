@@ -5,16 +5,6 @@
     {{ adding.quantity.converted.value|floatformat:2 }} {{ adding.quantity.converted.unit }}
 
     {% if adding.flavors_set %}
-        {% if adding.flavors_set.flavors %}
-            <table style="width:100%">
-                {% for flavor in adding.flavors_set.flavors %}
-                    <tr>
-                        <td>
-                            {% include "orders/menu-adding-flavor.html" %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
+        {% include "orders/menu-flavors-set.html" with flavors_set=adding.flavors_set %}
     {% endif %}
 </li>

@@ -225,32 +225,113 @@ def fill_menu_elem_tables(elem):
     return elem
 
 
-def insert_global_sets(sets, elem):
+def add_elem_globals(globals, elem):
+    if 'globals' in elem and elem['globals']:
+        elem_globals = set(elem['globals']) 
+        globals.update(elem_globals)
+    
+    return globals
+
+
+def add_sub_globals(globals, elem):
     if 'dishes' in elem and elem['dishes']:
         for dish in elem['dishes']:
-            sets = insert_global_sets(sets, dish)
+            globals = add_elem_globals(globals, dish)
 
     if 'types' in elem and elem['types']:
         for type in elem['types']:
-            sets = insert_global_sets(sets, type)
+            globals = add_elem_globals(globals, type)
 
     if 'flavors' in elem and elem['flavors']:
         for flavor in elem['flavors']:
-            sets = insert_global_sets(sets, flavor)
+            globals = add_elem_globals(globals, flavor)
+
+    return globals
+
+
+def build_globals(elem):
+    globals = set()
 
     if 'addings' in elem and elem['addings']:
         for adding in elem['addings']:
             if 'flavors_set' in adding and adding['flavors_set']:
-                inserted = False
-                for set in sets:
-                    if set == adding['flavors_set']:
-                        inserted = True
-                        break
+                globals.add(adding['flavors_set'])
 
-                if not inserted:
-                    sets.append(adding['flavors_set'])
+    globals = add_sub_globals(globals, elem)
 
-    return sets
+    globals = list(globals)
+    globals.sort(key=lambda flavors_set: flavors_set['sort_number'], reverse=False)
+
+    return globals
+
+
+def prune_elem_globals(elem):
+    if 'globals' in elem and elem['globals']:
+        elem_globals = set(elem['globals']) 
+
+        if 'addings' in elem and elem['addings']:
+            for adding in elem['addings']:
+                if 'flavors_set' in adding and adding['flavors_set']:
+                    elem_globals.discard(adding['flavors_set'])
+
+    if 'globals' in elem and elem['globals']:
+        elem_globals = set(elem['globals']) 
+        globals.update(elem_globals)
+    
+    return globals
+
+
+def prune_sub_globals(elem):
+    if 'dishes' in elem and elem['dishes']:
+        for dish in elem['dishes']:
+            dish = prune_elem_globals(dish)
+
+    if 'types' in elem and elem['types']:
+        for type in elem['types']:
+            type = prune_elem_globals(type)
+
+    if 'flavors' in elem and elem['flavors']:
+        for flavor in elem['flavors']:
+            flavor = prune_elem_globals(flavor)
+
+    return elem
+
+
+
+def fill_globals(elem):
+    if 'dishes' in elem and elem['dishes']:
+        for dish in elem['dishes']:
+            dish = fill_globals(dish)
+
+    if 'types' in elem and elem['types']:
+        for type in elem['types']:
+            type = fill_globals(type)
+
+    if 'flavors' in elem and elem['flavors']:
+        for flavor in elem['flavors']:
+            flavor = fill_globals(flavor)
+
+    elem['globals'] = build_globals(elem)
+
+    elem = prune_sub_globals(elem)
+
+    return elem
+
+
+def fill_sub_globals(elem):
+    if 'dishes' in elem and elem['dishes']:
+        for dish in elem['dishes']:
+            dish = fill_globals(dish)
+
+    if 'types' in elem and elem['types']:
+        for type in elem['types']:
+            type = fill_globals(type)
+
+    if 'flavors' in elem and elem['flavors']:
+        for flavor in elem['flavors']:
+            flavor = fill_globals(flavor)
+
+    return elem
 
 
 def build_menu(**settings):
@@ -260,10 +341,7 @@ def build_menu(**settings):
 
     menu = fill_menu_elem_tables(menu)
 
-    global_sets = []
-    global_sets = insert_global_sets(global_sets, menu )
-#    menu['global_sets'] = prune_global_sets(global_sets)
-    menu['global_sets'] = global_sets
+    menu = fill_sub_globals(menu)
 
     return menu
 

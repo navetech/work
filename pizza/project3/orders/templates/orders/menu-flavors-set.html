@@ -1,0 +1,11 @@
+{% if flavors_set.flavors %}
+    <table style="width:100%">
+        {% for flavor in flavors_set.flavors %}
+            <tr>
+                <td>
+                    {% include "orders/menu-adding-flavor.html" %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endif %}
