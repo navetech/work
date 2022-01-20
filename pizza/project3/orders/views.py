@@ -265,34 +265,42 @@ def build_globals(elem):
     return globals
 
 
-def prune_elem_globals(elem):
+def prune_elem_globals(elem, container_globals):
     if 'globals' in elem and elem['globals']:
-        elem_globals = set(elem['globals']) 
+        elem_globals_set = set(elem['globals']) 
 
         if 'addings' in elem and elem['addings']:
             for adding in elem['addings']:
                 if 'flavors_set' in adding and adding['flavors_set']:
-                    elem_globals.discard(adding['flavors_set'])
+                    elem_globals_set.discard(adding['flavors_set'])
 
-    if 'globals' in elem and elem['globals']:
-        elem_globals = set(elem['globals']) 
-        globals.update(elem_globals)
+        if container_globals:
+            container_globals_set = set(container_globals)
+            elem_globals_set = elem_globals_set.difference(container_globals_set)
+
+        elem['globals'] = list(elem_globals_set)
+        elem['globals'].sort(key=lambda flavors_set: flavors_set['sort_number'], reverse=False)
     
-    return globals
+    return elem
 
 
 def prune_sub_globals(elem):
+    if 'globals' in elem:
+        container_globals = elem['globals']
+    else:
+        container_globals = None
+
     if 'dishes' in elem and elem['dishes']:
         for dish in elem['dishes']:
-            dish = prune_elem_globals(dish)
+            dish = prune_elem_globals(dish, container_globals)
 
     if 'types' in elem and elem['types']:
         for type in elem['types']:
-            type = prune_elem_globals(type)
+            type = prune_elem_globals(type, container_globals)
 
     if 'flavors' in elem and elem['flavors']:
         for flavor in elem['flavors']:
-            flavor = prune_elem_globals(flavor)
+            flavor = prune_elem_globals(flavor, container_globals)
 
     return elem
 
@@ -311,7 +319,9 @@ def fill_globals(elem):
         for flavor in elem['flavors']:
             flavor = fill_globals(flavor)
 
-    elem['globals'] = build_globals(elem)
+    globals = build_globals(elem)
+    if globals:
+        elem['globals'] = globals
 
     elem = prune_sub_globals(elem)
 
