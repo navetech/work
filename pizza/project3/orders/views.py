@@ -24,8 +24,8 @@ from .models import Menu
 
 from .models import menu_elem_to_dict
 
-#from .models import Order, OrderDish, OrderType
-#from .models import OrderFlavor, OrderAdding, OrderSize
+# from .models import Order, OrderDish, OrderType
+# from .models import OrderFlavor, OrderAdding, OrderSize
 
 from .models import create_order_dish, get_order_dishes
 
@@ -200,18 +200,18 @@ def build_menu_elem_sizes_columns(sizes, elem):
 
 def fill_menu_elem_tables(elem):
     if 'dishes' in elem and elem['dishes']:
-        l = []
+        lista = []
         for dish in elem['dishes']:
             e = fill_menu_elem_tables(dish)
-            l.append(e)
-        elem['dishes'] = l
+            lista.append(e)
+        elem['dishes'] = lista
 
     if 'types' in elem and elem['types']:
-        l = []
+        lista = []
         for type in elem['types']:
             e = fill_menu_elem_tables(type)
-            l.append(e)
-        elem['types'] = l
+            lista.append(e)
+        elem['types'] = lista
 
     if 'flavors' in elem and elem['flavors']:
         flavors_table = build_menu_elem_flavors_table(elem)
@@ -227,9 +227,10 @@ def fill_menu_elem_tables(elem):
 
 def add_elem_globals(globals, elem):
     if 'globals' in elem and elem['globals']:
-        elem_globals = set(elem['globals']) 
-        globals.update(elem_globals)
-    
+        for elem_global in elem['globals']:
+            if elem_global not in globals:
+                globals.append(elem_global)
+
     return globals
 
 
@@ -250,37 +251,43 @@ def add_sub_globals(globals, elem):
 
 
 def build_globals(elem):
-    globals = set()
+    globals = []
 
     if 'addings' in elem and elem['addings']:
         for adding in elem['addings']:
             if 'flavors_set' in adding and adding['flavors_set']:
-                globals.add(adding['flavors_set'])
+                if adding['flavors_set'] not in globals:
+                    globals.append(adding['flavors_set'])
 
     globals = add_sub_globals(globals, elem)
 
-    globals = list(globals)
-    globals.sort(key=lambda flavors_set: flavors_set['sort_number'], reverse=False)
+    globals.sort(
+        key=lambda flavors_set: flavors_set['sort_number'],
+        reverse=False
+    )
 
     return globals
 
 
 def prune_elem_globals(elem, container_globals):
     if 'globals' in elem and elem['globals']:
-        elem_globals_set = set(elem['globals']) 
 
         if 'addings' in elem and elem['addings']:
             for adding in elem['addings']:
                 if 'flavors_set' in adding and adding['flavors_set']:
-                    elem_globals_set.discard(adding['flavors_set'])
+                    if adding['flavors_set'] in elem['globals']:
+                        elem['globals'].remove(adding['flavors_set'])
 
         if container_globals:
-            container_globals_set = set(container_globals)
-            elem_globals_set = elem_globals_set.difference(container_globals_set)
+            for container_global in container_globals:
+                if container_global in elem['globals']:
+                    elem['globals'].remove(container_global)
 
-        elem['globals'] = list(elem_globals_set)
-        elem['globals'].sort(key=lambda flavors_set: flavors_set['sort_number'], reverse=False)
-    
+        elem['globals'].sort(
+            key=lambda flavors_set: flavors_set['sort_number'],
+            reverse=False
+        )
+
     return elem
 
 
@@ -303,7 +310,6 @@ def prune_sub_globals(elem):
             flavor = prune_elem_globals(flavor, container_globals)
 
     return elem
-
 
 
 def fill_globals(elem):
@@ -340,6 +346,8 @@ def fill_sub_globals(elem):
     if 'flavors' in elem and elem['flavors']:
         for flavor in elem['flavors']:
             flavor = fill_globals(flavor)
+
+    elem = prune_sub_globals(elem)
 
     return elem
 

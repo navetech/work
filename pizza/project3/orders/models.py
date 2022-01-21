@@ -2,13 +2,15 @@ from django.db import models
 
 # Create your models here.
 
+from django.apps import apps
+
 from django.contrib.auth.models import User
 
 
 from texts.models import Phrase
 from texts.models import Language
 from texts.models import Setting as TextSetting
-from texts.models import to_dict, to_dict_list
+from texts.models import to_dict
 
 from quantities.models import Quantity
 from quantities.models import Currency
@@ -25,7 +27,7 @@ class Setting(models.Model):
         Phrase, blank=True, null=True, on_delete=models.CASCADE,
         related_name='product_name_Setting_related'
     )
-    
+
     pages_items_header = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.CASCADE,
         related_name='pages_items_header_Setting_related'
@@ -129,21 +131,37 @@ class Setting(models.Model):
 
         dict['product_title'] = to_dict(self.product_title, **settings)
         dict['product_name'] = to_dict(self.product_name, **settings)
-        dict['pages_items_header'] = to_dict(self.pages_items_header, **settings)
-        dict['pages_no_items_header'] = to_dict(self.pages_no_items_header, **settings)
+        dict['pages_items_header'] = to_dict(
+            self.pages_items_header, **settings
+        )
+        dict['pages_no_items_header'] = to_dict(
+            self.pages_no_items_header, **settings
+        )
         dict['menu_page_title'] = to_dict(self.menu_page_title, **settings)
         dict['menu_page_header'] = to_dict(self.menu_page_header, **settings)
         dict['order_page_title'] = to_dict(self.order_page_title, **settings)
         dict['order_page_header'] = to_dict(self.order_page_header, **settings)
         dict['cart_page_title'] = to_dict(self.cart_page_title, **settings)
         dict['cart_page_header'] = to_dict(self.cart_page_header, **settings)
-        dict['success_page_title'] = to_dict(self.success_page_title, **settings)
-        dict['success_page_header'] = to_dict(self.success_page_header, **settings)
-        dict['success_page_contents_01'] = to_dict(self.success_page_contents_01, **settings)
-        dict['success_page_contents_02'] = to_dict(self.success_page_contents_02, **settings)
+        dict['success_page_title'] = to_dict(
+            self.success_page_title, **settings
+        )
+        dict['success_page_header'] = to_dict(
+            self.success_page_header, **settings
+        )
+        dict['success_page_contents_01'] = to_dict(
+            self.success_page_contents_01, **settings
+        )
+        dict['success_page_contents_02'] = to_dict(
+            self.success_page_contents_02, **settings
+        )
         dict['cancel_page_title'] = to_dict(self.cancel_page_title, **settings)
-        dict['cancel_page_header'] = to_dict(self.cancel_page_header, **settings)
-        dict['cancel_page_contents'] = to_dict(self.cancel_page_contents, **settings)
+        dict['cancel_page_header'] = to_dict(
+            self.cancel_page_header, **settings
+        )
+        dict['cancel_page_contents'] = to_dict(
+            self.cancel_page_contents, **settings
+        )
 
         return dict
 
@@ -173,7 +191,7 @@ class UserSetting(models.Model):
 
     def to_dict(self, **settings):
         dict = {}
-        
+
         dict['id'] = self.id
 
         dict['language'] = to_dict(self.language, **settings)
@@ -228,7 +246,7 @@ class CountLimit(models.Model):
         self.full_clean()
 
         super().save(*args, **kwargs)  # Call the "real" save() method.
-            
+
     def __str__(self):
         return (
             f'{self.min}, '
@@ -244,9 +262,6 @@ class CountLimit(models.Model):
         dict['max'] = self.max
 
         return dict
-
-
-from django.apps import apps
 
 
 class MenuElementDefinitionFields(models.Model):
@@ -269,7 +284,6 @@ class MenuElementDefinitionFields(models.Model):
 
     class Meta:
         abstract = True
-
 
     def __str__(self):
         first_name = f'{self._meta.model_name}: {self.name}'
@@ -310,12 +324,13 @@ class MenuElementDefinitionFields(models.Model):
             dict['container'] = container_dict
 
             if 'full name' in container_dict:
-                dict['full_name'] = self.name.words + ' ' + container_dict['full_name']
+                dict['full_name'] = (
+                    self.name.words + ' ' + container_dict['full_name']
+                )
             else:
                 dict['full_name'] = self.name.words
 
         return dict
-
 
 
 class MenuElementFields(MenuElementDefinitionFields):
@@ -331,7 +346,6 @@ class MenuElementFields(MenuElementDefinitionFields):
 
     class Meta:
         abstract = True
-
 
     def to_dict(self, container_dict=None, **settings):
         dict = MenuElementDefinitionFields.to_dict(
@@ -360,7 +374,7 @@ class AddingFlavor(MenuElementFields):
 
     sizes = models.ManyToManyField(
         Size, blank=True,
-        related_name='sizes_AddingFlavor_related'
+        related_name='%(app_label)s_%(class)s_related'
     )
 
     def __str__(self):
@@ -387,9 +401,8 @@ class AddingFlavor(MenuElementFields):
 class AddingFlavorSet(MenuElementDefinitionFields):
     flavors = models.ManyToManyField(
         AddingFlavor, blank=True,
-        related_name='flavors_AddingFlavorSet_related'
+        related_name='%(app_label)s_%(class)s_related'
     )
-
 
     def to_dict(self, container_dict=None, **settings):
         dict = MenuElementDefinitionFields.to_dict(
@@ -449,7 +462,7 @@ class FlavorFields(MenuElementFields):
 
     addings = models.ManyToManyField(
         Adding, blank=True,
-        related_name='addings_%(app_label)s_%(class)s_related'
+        related_name='%(app_label)s_%(class)s_related'
     )
 
     class Meta:
@@ -491,6 +504,7 @@ class TypeFields(FlavorFields):
         )
 
         return dict
+
 
 class Type(TypeFields):
     pass
@@ -542,181 +556,6 @@ class Menu(MenuFields):
     pass
 
 
-
-
-
-
-
-"""
-class MenuItemCommonFields(models.Model):
-    sort_number = models.FloatField(default=0)
-
-    category = models.ForeignKey(
-        Phrase, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='category_%(app_label)s_%(class)s_related'
-    )
-
-    container = models.ForeignKey(
-        "MenuItem", blank=True, null=True, on_delete=models.CASCADE,
-        related_name='container_%(app_label)s_%(class)s_related'
-    )
-
-    name = models.ForeignKey(
-        Phrase, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='name_%(app_label)s_%(class)s_related'
-    )
-
-    long_name = models.ForeignKey(
-        Phrase, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='long_name_%(app_label)s_%(class)s_related'
-    )
-
-    quantity = models.ForeignKey(
-        Quantity, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='quantity_%(app_label)s_%(class)s_related'
-    )
-
-    img = models.ImageField(
-        upload_to='uploads/static/images',
-        default=None, blank=True, null=True
-    )
-
-    class Meta:
-        abstract = True
-
-    def __str__(self):
-        if self.container:
-            return (
-    #           f'{self.sort_number}, '
-                f'{self.category}, '
-                f'{self.name}, '
-                f'{self.container}, '
-    #            f'{container_short_name}, '
-    #            f'{self.long_name}, '
-    #            f'{self.quantity}, '
-                # f'{self.img}'
-            )
-        else:
-            return (
-    #           f'{self.sort_number}, '
-                f'{self.category}, '
-                f'{self.name}, '
-    #            f'{container_short_name}, '
-    #            f'{self.long_name}, '
-    #            f'{self.quantity}, '
-                # f'{self.img}'
-            )
-
-    def to_dict(self, container_dict, **settings):
-        dict = {}
-
-        dict['id'] = self.id
-
-        dict['sort_number'] = self.sort_number
-
-        dict['category'] = to_dict(self.category, **settings)
-
-        dict['container'] = container_dict
-
-        dict['name'] = to_dict(self.name, **settings)
-        dict['long_name'] = to_dict(self.long_name, **settings)
-        dict['quantity'] = to_dict(self.quantity, **settings)
-
-        dict['img'] = {}
-        if self.img:
-            dict['img']['name'] = self.img.name
-            dict['img']['path'] = self.img.path
-            dict['img']['url'] = self.img.url
-            dict['img']['height'] = self.img.height
-            dict['img']['width'] = self.img.width
-
-        if container_dict and container_dict['full_name']:
-            dict['full_name'] = self.name.words + ' ' + container_dict['full_name']
-        else:
-            dict['full_name'] = self.name.words
-
-        return dict
-
-
-class MenuItem(MenuItemCommonFields):
-    dishes = models.ManyToManyField(
-        'self', blank=True,
-        related_name='dishes_MenuItem_related'
-    )
-
-    types = models.ManyToManyField(
-        'self', blank=True,
-        related_name='types_MenuItem_related'
-    )
-
-    flavors = models.ManyToManyField(
-        'self', blank=True,
-        related_name='flavors_MenuItem_related'
-    )
-
-    flavors_set = models.ForeignKey(
-        'self', blank=True, null=True, on_delete=models.CASCADE,
-        related_name='flavors_set_MenuItem_related'
-    )
-
-    special_flavor = models.BooleanField(default=False)
-
-    only_special_flavors = models.BooleanField(default=False)
-
-    flavors_selection_limit = models.ForeignKey(
-        CountLimit, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='flavors_selection_limit_MenuItem_related'
-    )
-
-    sizes = models.ManyToManyField(
-        'self', blank=True,
-        related_name='sizes_MenuItem_related'
-    )
-
-    addings = models.ManyToManyField(
-        'self', blank=True,
-        related_name='addings_MenuItem_related'
-    )
-
-    def __str__(self):
-        return (
-            f'{MenuItemCommonFields.__str__(self)}'
-        )
-
-    def to_dict(self, container_dict, **settings):
-        dict = MenuItemCommonFields.to_dict(self, container_dict, **settings)
-
-        dict['dishes'] = menu_items_to_dict_list(
-            dict, self.dishes, 'Dish', 'sort_number', **settings
-        )
-        dict['types'] = menu_items_to_dict_list(
-            dict, self.types, 'Type', 'sort_number', **settings
-        )
-        dict['flavors'] = menu_items_to_dict_list(
-            dict, self.flavors, 'Flavor', 'sort_number', **settings
-        )
-        dict['flavors_set'] = menu_item_to_dict(
-            dict, self.flavors_set, **settings
-        )
-
-        dict['special_flavor'] = self.special_flavor
-
-        dict['only_special_flavors'] = self.only_special_flavors
-
-        dict['flavors_selection_limit'] = to_dict(
-            self.flavors_selection_limit, **settings
-        )
-
-        dict['sizes'] = menu_items_to_dict_list(
-            dict, self.sizes, 'Size', 'sort_number', **settings
-        )
-        dict['addings'] = menu_items_to_dict_list(
-            dict, self.addings, 'Adding', 'sort_number', **settings
-        )
-
-        return dict
-"""
-
 def menu_elem_to_dict(container_dict, object, **settings):
     if object:
         dict = object.to_dict(container_dict, **settings)
@@ -726,7 +565,9 @@ def menu_elem_to_dict(container_dict, object, **settings):
     return dict
 
 
-def menu_elems_to_dict_list(container_dict, manager, *order_by_field_names, **settings):
+def menu_elems_to_dict_list(
+    container_dict, manager, *order_by_field_names, **settings
+):
     dict_list = []
 
     objects = manager.all().order_by(*order_by_field_names)
@@ -879,7 +720,7 @@ class OrderAdding(OrderCommonFields):
 
         if range and count > range.max:
             in_range = False
-        
+
         return {
             'count': count,
             'in_range': in_range,
@@ -941,7 +782,7 @@ class OrderFlavor(OrderCommonFields):
         check = check_objects_counts(self.addings.all(), self.menu.addings_count)
         if not check['in_range']:
             in_range = False
-        
+
         return {
             'count': count,
             'in_range': in_range,
@@ -1016,7 +857,7 @@ class OrderType(OrderCommonFields):
         check = check_objects_counts(self.addings.all(), self.menu.addings_count)
         if not check['in_range']:
             in_range = False
-        
+
         return {
             'count': count,
             'in_range': in_range,
@@ -1104,7 +945,7 @@ class OrderDish(OrderCommonFields):
         check = check_objects_counts(self.addings.all(), self.menu.addings_count)
         if not check['in_range']:
             in_range = False
-        
+
         return {
             'count': count,
             'in_range': in_range,
@@ -1162,7 +1003,7 @@ def check_objects_counts(objects, range=None):
         count += check['count']
         if not check['in_range']:
             in_range = False
-        
+
     if range:
         if count < range.min:
             in_range = False
