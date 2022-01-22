@@ -839,7 +839,7 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return (
-            f'{self.user}, '
+            f'{self.menu}, '
             f'{self.dish}, '
             f'{self.type}, '
             f'{self.flavor}, '
