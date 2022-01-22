@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from texts.models import Phrase
 from texts.models import Language
 from texts.models import Setting as TextSetting
-from texts.models import to_dict
+from texts.models import to_dict, to_dict_list
 
 from quantities.models import Quantity
 from quantities.models import Currency
@@ -578,16 +578,18 @@ def menu_elems_to_dict_list(
     return dict_list
 
 
-"""
-class OrderBasicCommonFields(models.Model):
-    count = models.IntegerField(default=0)
+class OrderSize(models.Model):
+    elem = models.ForeignKey(
+        Size, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='elem_OrderSize_related'
+    )
 
-    class Meta:
-        abstract = True
+    def cancel(self):
+        self.delete()
 
     def __str__(self):
         return (
-            f'{self.count}, '
+            f'{self.elem}, '
         )
 
     def to_dict(self, **settings):
@@ -595,361 +597,267 @@ class OrderBasicCommonFields(models.Model):
 
         dict['id'] = self.id
 
-        dict['count'] = self.count
+        dict['elem'] = menu_elem_to_dict(
+            dict, self.elem, **settings
+        )
 
         return dict
 
-    def check_count(self, range=None):
-        count = self.count
-        if count < 0:
-            count = 0
 
-        if range and range.max >= 0:
-            if count > range.max:
-                count = range.max
+class OrderAddingFlavor(models.Model):
+    elem = models.ForeignKey(
+        AddingFlavor, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='elem_OrderAddigFlavor_related'
+    )
 
-        self.count = count
-        self.save()
+    size = models.ForeignKey(
+        OrderSize, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='size_OrderAddingFlavor_related'
+    )
 
-        return {
-            'count': count,
-            'in_range': True,
-        }
+    def cancel(self):
+        self.size.cancel()
+
+        self.delete()
+
+    def __str__(self):
+        return (
+            f'{self.elem}, '
+        )
+
+    def to_dict(self, **settings):
+        dict = {}
+
+        dict['id'] = self.id
+
+        dict['elem'] = menu_elem_to_dict(
+            dict, self.elem, **settings
+        )
+
+        dict['size'] = to_dict(self.size, **settings)
+
+        return dict
 
 
-class OrderCommonFields(OrderBasicCommonFields):
-    plain = models.BooleanField(default=False)
+class OrderAdding(models.Model):
+    elem = models.ForeignKey(
+        Adding, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='elem_OrderAdding_related'
+    )
+
+    flavors = models.ManyToManyField(
+        OrderAddingFlavor, blank=True,
+        related_name='flavors_OrderAdding_related'
+    )
+
+    def cancel(self):
+        for flavor in self.flavors.all():
+            flavor.cancel()
+
+        self.delete()
+
+    def __str__(self):
+        return (
+            f'{self.elem}, '
+        )
+
+    def to_dict(self, **settings):
+        dict = {}
+
+        dict['id'] = self.id
+
+        dict['elem'] = menu_elem_to_dict(
+            dict, self.elem, **settings
+        )
+
+        dict['flavors'] = to_dict_list(self.flavors, **settings)
+
+        return dict
+
+
+class OrderElementFields(models.Model):
+    addings = models.ManyToManyField(
+        OrderAdding, blank=True,
+        related_name='%(app_label)s_%(class)s_related'
+    )
 
     class Meta:
         abstract = True
 
-    def __str__(self):
-        return (
-            f'{OrderBasicCommonFields.__str__(self)}, '
-            f'{self.plain}, '
-        )
-
-    def to_dict(self, **settings):
-        dict = OrderBasicCommonFields.to_dict(self, **settings)
-        dict['plain'] = self.plain
-
-        return dict
-
-
-class OrderSize(OrderBasicCommonFields):
-    menu = models.ForeignKey(
-        Size, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='menu_OrderSize_related'
-    )
-
     def cancel(self):
-        self.delete()
-
-    def __str__(self):
-        return (
-            f'{OrderBasicCommonFields.__str__(self)}, '
-            f'{self.menu}, '
-        )
-
-    def to_dict(self, **settings):
-        dict = OrderBasicCommonFields.to_dict(self, **settings)
-
-        dict['menu'] = to_dict(self.menu, **settings)
-
-        return dict
-
-    def check_count(self, range=None):
-        return super().check_count(range)
-
-class OrderAdding(OrderCommonFields):
-    flavors = models.ManyToManyField(
-        'OrderFlavor', blank=True,
-        related_name='flavors_OrderAdding_related'
-    )
-
-    sizes = models.ManyToManyField(
-        OrderSize, blank=True,
-        related_name='sizes_OrderAdding_related'
-    )
-
-    menu = models.ForeignKey(
-        Adding, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='menu_OrderAdding_related'
-    )
-
-    def cancel(self):
-        cancel_order_flavors(self)
-        cancel_order_sizes(self)
+        for adding in self.addings.all():
+            adding.cancel()
 
         self.delete()
 
-    def __str__(self):
-        return (
-            f'{OrderCommonFields.__str__(self)}, '
-            f'{self.menu}, '
-            f'{self.flavors}, '
-            f'{self.sizes}, '
-        )
-
     def to_dict(self, **settings):
-        dict = OrderCommonFields.to_dict(self, **settings)
+        dict = {}
 
-        dict['flavors'] = to_dict_list(self.flavors, **settings)
-        dict['sizes'] = to_dict_list(self.sizes, **settings)
+        dict['id'] = self.id
 
-        dict['menu'] = to_dict(self.menu, **settings)
-
-        return dict
-
-    def check_count(self, range=None):
-        if self.plain:
-            return super().check_count(range)
-
-        count = 0
-        in_range = True
-
-        check = check_objects_counts(self.flavors.all(), self.menu.flavors_count)
-        count += check['count']
-        if not check['in_range']:
-            in_range = False
-
-        check = check_objects_counts(self.sizes.all(), self.menu.sizes_count)
-        count += check['count']
-        if not check['in_range']:
-            in_range = False
-
-        if range and count > range.max:
-            in_range = False
-
-        return {
-            'count': count,
-            'in_range': in_range,
-        }
+        dict['addings'] = to_dict_list(self.addings, **settings)
 
 
-class OrderFlavor(OrderCommonFields):
-    addings = models.ManyToManyField(
-        'OrderAdding', blank=True,
-        related_name='addings_OrderFlavor_related'
-    )
-
-    sizes = models.ManyToManyField(
-        OrderSize, blank=True,
-        related_name='sizes_OrderFlavor_related'
-    )
-
-    menu = models.ForeignKey(
+class OrderFlavor(OrderElementFields):
+    elem = models.ForeignKey(
         Flavor, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='menu_OrderFlavor_related'
+        related_name='elem_OrderFlavor_related'
     )
 
     def cancel(self):
-        cancel_order_addings(self)
-        cancel_order_sizes(self)
+        super().cancel(self)
 
         self.delete()
 
     def __str__(self):
         return (
-            f'{OrderCommonFields.__str__(self)}, '
-            f'{self.menu}, '
-            f'{self.addings}, '
-            f'{self.sizes}, '
+            f'{self.elem}, '
         )
 
     def to_dict(self, **settings):
-        dict = OrderCommonFields.to_dict(self, **settings)
+        dict = OrderElementFields.to_dict(self, **settings)
 
-        dict['addings'] = to_dict_list(self.addings, **settings)
-        dict['sizes'] = to_dict_list(self.sizes, **settings)
-
-        dict['menu'] = to_dict(self.menu, **settings)
+        dict['elem'] = menu_elem_to_dict(
+            dict, self.elem, **settings
+        )
 
         return dict
 
-    def check_count(self, range=None):
-        if self.plain:
-            return super().check_count(range)
 
-        count = 0
-        in_range = True
-
-        check = check_objects_counts(self.sizes.all(), self.menu.sizes_count)
-        count += check['count']
-        if not check['in_range']:
-            in_range = False
-
-        check = check_objects_counts(self.addings.all(), self.menu.addings_count)
-        if not check['in_range']:
-            in_range = False
-
-        return {
-            'count': count,
-            'in_range': in_range,
-        }
-
-
-class OrderType(OrderCommonFields):
-    flavors = models.ManyToManyField(
-        OrderFlavor, blank=True,
-        related_name='flavors_OrderType_related'
-    )
-
-    addings = models.ManyToManyField(
-        OrderAdding, blank=True,
-        related_name='addings_OrderType_related'
-    )
-
-    sizes = models.ManyToManyField(
-        OrderSize, blank=True,
-        related_name='sizes_OrderType_related'
-    )
-
-    menu = models.ForeignKey(
+class OrderType(OrderElementFields):
+    elem = models.ForeignKey(
         Type, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='menu_OrderType_related'
+        related_name='elem_OrderType_related'
     )
 
     def cancel(self):
-        cancel_order_flavors(self)
-        cancel_order_addings(self)
-        cancel_order_sizes(self)
+        super().cancel(self)
 
         self.delete()
 
     def __str__(self):
         return (
-            f'{OrderCommonFields.__str__(self)}, '
-            f'{self.menu}, '
-            f'{self.flavors}, '
-            f'{self.addings}, '
-            f'{self.sizes}, '
+            f'{self.elem}, '
         )
 
     def to_dict(self, **settings):
-        dict = OrderCommonFields.to_dict(self, **settings)
+        dict = OrderElementFields.to_dict(self, **settings)
 
-        dict['flavors'] = to_dict_list(self.flavors, **settings)
-        dict['addings'] = to_dict_list(self.addings, **settings)
-        dict['sizes'] = to_dict_list(self.sizes, **settings)
-
-        dict['menu'] = to_dict(self.menu, **settings)
+        dict['elem'] = menu_elem_to_dict(
+            dict, self.elem, **settings
+        )
 
         return dict
 
-    def check_count(self, range=None):
-        if self.plain:
-            return super().check_count(range)
 
-        count = 0
-        in_range = True
-
-        check = check_objects_counts(self.flavors.all(), self.menu.flavors_count)
-        count += check['count']
-        if not check['in_range']:
-            in_range = False
-
-        check = check_objects_counts(self.sizes.all(), self.menu.sizes_count)
-        count += check['count']
-        if not check['in_range']:
-            in_range = False
-
-        check = check_objects_counts(self.addings.all(), self.menu.addings_count)
-        if not check['in_range']:
-            in_range = False
-
-        return {
-            'count': count,
-            'in_range': in_range,
-        }
-
-
-class OrderDish(OrderCommonFields):
-    types = models.ManyToManyField(
-        OrderType, blank=True,
-        related_name='types_OrderDish_related'
-    )
-
-    flavors = models.ManyToManyField(
-        OrderFlavor, blank=True,
-        related_name='flavors_OrderDish_related'
-    )
-
-    addings = models.ManyToManyField(
-        OrderAdding, blank=True,
-        related_name='addings_OrderDish_related'
-    )
-
-    sizes = models.ManyToManyField(
-        OrderSize, blank=True,
-        related_name='sizes_OrderDish_related'
-    )
-
-    menu = models.ForeignKey(
+class OrderDish(OrderElementFields):
+    elem = models.ForeignKey(
         Dish, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='menu_OrderDish_related'
+        related_name='elem_OrderDish_related'
     )
 
     def cancel(self):
-        cancel_order_types(self)
-        cancel_order_flavors(self)
-        cancel_order_addings(self)
-        cancel_order_sizes(self)
+        super().cancel(self)
 
         self.delete()
 
     def __str__(self):
         return (
-            f'{OrderCommonFields.__str__(self)}, '
-            f'{self.menu}, '
-            f'{self.types}, '
-            f'{self.flavors}, '
-            f'{self.addings}, '
-            f'{self.sizes}, '
+            f'{self.elem}, '
         )
 
     def to_dict(self, **settings):
-        dict = OrderCommonFields.to_dict(self, **settings)
+        dict = OrderElementFields.to_dict(self, **settings)
 
-        dict['types'] = to_dict_list(self.types, **settings)
-        dict['flavors'] = to_dict_list(self.flavors, **settings)
-        dict['addings'] = to_dict_list(self.addings, **settings)
-        dict['sizes'] = to_dict_list(self.sizes, **settings)
-
-        dict['menu'] = to_dict(self.menu, **settings)
+        dict['elem'] = menu_elem_to_dict(
+            dict, self.elem, **settings
+        )
 
         return dict
 
-    def check_count(self, range=None):
-        if self.plain:
-            return super().check_count(range)
 
-        count = 0
-        in_range = True
+class OrderMenu(OrderElementFields):
+    elem = models.ForeignKey(
+        Menu, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='elem_OrderMenu_related'
+    )
 
-        check = check_objects_counts(self.types.all(), self.menu.types_count)
-        count += check['count']
-        if not check['in_range']:
-            in_range = False
+    def cancel(self):
+        super().cancel(self)
 
-        check = check_objects_counts(self.flavors.all(), self.menu.flavors_count)
-        count += check['count']
-        if not check['in_range']:
-            in_range = False
+        self.delete()
 
-        check = check_objects_counts(self.sizes.all(), self.menu.sizes_count)
-        count += check['count']
-        if not check['in_range']:
-            in_range = False
+    def __str__(self):
+        return (
+            f'{self.elem}, '
+        )
 
-        check = check_objects_counts(self.addings.all(), self.menu.addings_count)
-        if not check['in_range']:
-            in_range = False
+    def to_dict(self, **settings):
+        dict = OrderElementFields.to_dict(self, **settings)
 
-        return {
-            'count': count,
-            'in_range': in_range,
-        }
+        dict['elem'] = menu_elem_to_dict(
+            dict, self.elem, **settings
+        )
+
+        return dict
+
+
+class OrderItem(models.Model):
+    menu = models.ForeignKey(
+        OrderMenu, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='menu_OrderItem_related'
+    )
+
+    dish = models.ForeignKey(
+        OrderDish, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='dish_OrderItem_related'
+    )
+
+    type = models.ForeignKey(
+        OrderType, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='type_OrderItem_related'
+    )
+
+    flavor = models.ForeignKey(
+        OrderFlavor, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='flavor_OrderItem_related'
+    )
+
+    size = models.ForeignKey(
+        OrderSize, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='size_OrderItem_related'
+    )
+
+    def cancel(self):
+        self.size.cancel()
+        self.flavor.cancel()
+        self.type.cancel()
+        self.dish.cancel()
+        self.menu.cancel()
+
+        self.delete()
+
+    def __str__(self):
+        return (
+            f'{self.user}, '
+            f'{self.dish}, '
+            f'{self.type}, '
+            f'{self.flavor}, '
+            f'{self.size}, '
+        )
+
+    def to_dict(self, **settings):
+        dict = {}
+
+        dict['id'] = self.id
+
+        dict['menu'] = to_dict(self.menu, **settings)
+        dict['dish'] = to_dict(self.dish, **settings)
+        dict['type'] = to_dict(self.type, **settings)
+        dict['flavor'] = to_dict(self.flavor, **settings)
+        dict['size'] = to_dict(self.size, **settings)
+
+        return dict
 
 
 class Order(models.Model):
@@ -960,13 +868,16 @@ class Order(models.Model):
 
     date_time = models.DateTimeField(auto_now=True)
 
-    dishes = models.ManyToManyField(
-        OrderDish, blank=True,
-        related_name='dishes_Order_related'
+    status = models.CharField(max_length=64, blank=True)
+
+    items = models.ManyToManyField(
+        OrderItem, blank=True,
+        related_name='items_Order_related'
     )
 
     def cancel(self):
-        cancel_order_dishes(self)
+        for item in self.items.all():
+            item.cancel()
 
         self.delete()
 
@@ -974,7 +885,6 @@ class Order(models.Model):
         return (
             f'{self.user}, '
             f'{self.date_time}, '
-            f'{self.dishes}, '
         )
 
     def to_dict(self, **settings):
@@ -982,13 +892,12 @@ class Order(models.Model):
 
         dict['id'] = self.id
 
-        dict['dishes'] = to_dict_list(self.dishes, **settings)
+        dict['items'] = to_dict_list(self.items, **settings)
 
         return dict
 
-    def check_count(self):
-        return check_objects_counts(self.dishes.all())
 
+"""
 class HistoricOrder(models.Model):
     order = models.TextField(blank=True)
 """
@@ -1014,36 +923,6 @@ def check_objects_counts(objects, range=None):
         'count': count,
         'in_range': in_range,
     }
-
-
-def cancel_order_sizes(order_object):
-    if order_object:
-        for order_size in order_object.sizes.all():
-            order_size.cancel()
-
-
-def cancel_order_addings(order_object):
-    if order_object:
-        for order_adding in order_object.addings.all():
-            order_adding.cancel()
-
-
-def cancel_order_flavors(order_object):
-    if order_object:
-        for order_flavor in order_object.flavors.all():
-            order_flavor.cancel()
-
-
-def cancel_order_types(order_object):
-    if order_object:
-        for order_type in order_object.types.all():
-            order_type.cancel()
-
-
-def cancel_order_dishes(order_object):
-    if order_object:
-        for order_dish in order_object.dishes.all():
-            order_dish.cancel()
 
 
 def create_order_sizes(order_object, menu_object):
