@@ -1,0 +1,20 @@
+{% extends "orders/base.html" %}
+
+
+{% block title %}
+    {{ settings.menu_page_title.translated.words }}
+{% endblock %}
+
+{% block main %}
+    <h2>{{ settings.menu_page_header.translated.words }}</h2>
+
+    {% if menus %}
+        <ul class="list-group pt-4">
+            {% for menu in menus %}
+                <li class="list-group-item ln-container01">
+                    {% include "orders/menu-menu.html" %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

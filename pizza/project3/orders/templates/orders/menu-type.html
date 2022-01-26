@@ -2,7 +2,17 @@
     <h5>{{ type.name.translated.words }}</h5>
     <h5>{{ type.full_name }}</h5>
 
-    <h6>{{ type.quantity.converted.value|floatformat:2 }} {{ type.quantity.converted.unit }}</h6>
+    {% if type.quantity %}
+        <form action="{% url 'put_order' %}" method="post">
+            {% csrf_token %}
+
+            {% include "orders/menu-form-inputs.html" %}
+            
+            <button type="submit" name="submit">
+                {{ type.quantity.converted.value|floatformat:2 }} {{ type.quantity.converted.unit }}
+            </button>
+        </form>
+    {% endif %}
 
     {% if type.sizes %}
         <ul class="list-group pt-4">
@@ -28,9 +38,19 @@
         </table>
     {% endif %}
     
-    {% if type.adding %}
+    {% if type.addings %}
         <ul class="list-group pt-4">
-            {% include "orders/menu-adding.html" %}
+            {% for adding in type.addings %}
+                {% include "orders/menu-adding.html" %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if type.globals %}
+        <ul class="list-group pt-4">
+            {% for global in type.globals %}
+                {% include "orders/menu-global.html" %}
+            {% endfor %}
         </ul>
     {% endif %}
 </li>

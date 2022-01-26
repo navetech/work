@@ -320,15 +320,15 @@ class MenuElementDefinitionFields(models.Model):
         dict['long_name'] = to_dict(self.long_name, **settings)
         dict['description'] = to_dict(self.description, **settings)
 
+        dict['full_name'] = self.name.words
+
         if container_dict:
             dict['container'] = container_dict
 
-            if 'full name' in container_dict:
-                dict['full_name'] = (
-                    self.name.words + ' ' + container_dict['full_name']
+            if 'full_name' in container_dict:
+                dict['full_name'] += (
+                    ' ' + container_dict['full_name']
                 )
-            else:
-                dict['full_name'] = self.name.words
 
         return dict
 

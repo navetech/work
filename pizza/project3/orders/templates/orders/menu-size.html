@@ -2,5 +2,15 @@
     <h6>{{ size.name.translated.words }}</h6>
     <h6>{{ size.full_name }}</h6>
 
-    {{ size.quantity.converted.value|floatformat:2 }} {{ size.quantity.converted.unit }}
+    {% if size.quantity %}
+        <form action="{% url 'put_order' %}" method="post">
+            {% csrf_token %}
+
+            {% include "orders/menu-form-inputs.html" %}
+            
+            <button type="submit" name="submit">
+                {{ size.quantity.converted.value|floatformat:2 }} {{ size.quantity.converted.unit }}
+            </button>
+        </form>
+    {% endif %}
 </li>

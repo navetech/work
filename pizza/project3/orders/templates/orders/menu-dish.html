@@ -2,7 +2,17 @@
     <h4>{{ dish.name.translated.words }}</h4>
     <h4>{{ dish.full_name }}</h4>
 
-    <h5>{{ dish.quantity.converted.value|floatformat:2 }} {{ dish.quantity.converted.unit }}</h5>
+    {% if dish.quantity %}
+        <form action="{% url 'put_order' %}" method="post">
+            {% csrf_token %}
+
+            {% include "orders/menu-form-inputs.html" %}
+            
+            <button type="submit" name="submit">
+                {{ dish.quantity.converted.value|floatformat:2 }} {{ dish.quantity.converted.unit }}
+            </button>
+        </form>
+    {% endif %}
 
     {% if dish.sizes %}
         <ul class="list-group pt-4">
@@ -51,7 +61,5 @@
             {% endfor %}
         </ul>
     {% endif %}
-
-
 </li>
 

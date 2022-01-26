@@ -1,3 +1,9 @@
+{% if menu %}
+    <input type='text' style='display:none' name='menu-id' value={{ menu.id }}>
+{% else %}
+    <input type='text' style='display:none' name='menu-id' value=None }}>
+{% endif %}
+
 {% if dish %}
     <input type='text' style='display:none' name='dish-id' value={{ dish.id }}>
 {% else %}
