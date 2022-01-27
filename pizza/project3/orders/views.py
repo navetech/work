@@ -24,14 +24,16 @@ from .models import Menu
 
 from .models import menu_elem_to_dict
 
+from .models import get_order_item_by_user, create_order_item_for_user
+
 from .models import Order, OrderItem
+from .models import OrderMenu, OrderDish, OrderType
+from .models import OrderFlavor, OrderSize
+from .models import OrderAdding, OrderAddingFlavor
 
-# from .models import Order, OrderDish, OrderType
-# from .models import OrderFlavor, OrderAdding, OrderSize
-
-from .models import create_order_dish, get_order_dishes
 
 from django.http import JsonResponse
+
 
 import stripe
 
@@ -448,21 +450,27 @@ def put_order(request):
         size_id = None if size_id == 'None' else size_id
 
         user = request.user
-        order = Order.objects.filter(user=user, status='InCart').first()
-        if not order:
-            order = Order(user=user, status='InCart')
-            order.save()
+        order_status = 'InCart'
 
-            order_item = create_order_item(order, menu_id, dish_id, type_id, flavor_id, size_id)
-            if not order_item:
-                order.cancel()
+        order_item = get_order_item_by_user(
+            menu_id, dish_id, type_id,
+            flavor_id, size_id,
+            user, order_status
+        )
+        if not order_item:
+            order_item = create_order_item_for_user(
+                menu_id, dish_id, type_id,
+                flavor_id, size_id,
+                user, order_status
+            )
+
+        if order_item:
+            order_item_id = order_item.id
         else:
-            order_item = get_order_item(order, menu_id, dish_id, type_id, flavor_id, size_id)
-            if not order_item:
-                order_item = create_order_item(order, menu_id, dish_id, type_id, flavor_id, size_id)
+            order_item_id = None
 
         return HttpResponseRedirect(reverse(
-                'order_item', args=[order_item.id]
+                'order_item', args=[order_item_id]
             )
         )
 
@@ -612,8 +620,8 @@ def order_item(request, order_item_id):
     if request.method != "GET":
         return HttpResponseRedirect(reverse('index'))
 
-    order_item = OrderItem.objects.filter(id=order_item_id).first()
-    if not order_item:
+    order_item_object = OrderItem.objects.filter(id=order_item_id).first()
+    if not order_item_object:
         return HttpResponseRedirect(reverse('cart'))
 
     pages_basic_data = get_pages_basic_data(request)
@@ -625,22 +633,32 @@ def order_item(request, order_item_id):
     languages = pages_basic_data['languages']
     currencies = pages_basic_data['currencies']
 
-    order_item_dict = to_dict(order_item, language=language, currency=currency)
+    order_item = to_dict(order_item_object, language=language, currency=currency)
 
+    """"
     order_item_dict = calc_order_item_price(order_item_dict)
+    order_item = fill_order_item_prices(order_item)
 
     order_item_dict = put_columns_to_order_item(order_item_dict)
+    order_item = fill_order_item_tables(order_item)
+
+    menu = menu_elem_to_dict(container_dict, menu_object, **settings)
+
+    menu = fill_menu_elem_tables(menu)
+
+    menu = fill_sub_globals(menu)
+    """
 
     context = {
         'settings': settings,
         'user_settings': user_settings,
         'languages': languages,
         'currencies': currencies,
-        'order_item': order_item_dict,
+        'order_item': order_item,
     }
 
     request.session['page'] = reverse(
-        'order_item', args=[order_item.id]
+        'order_item', args=[order_item_id]
     )
 
     return render(request, 'orders/order-item.html', context)

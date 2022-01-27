@@ -903,6 +903,181 @@ class HistoricOrder(models.Model):
 """
 
 
+def create_order_adding_flavor(adding_flavor):
+    order_elem = OrderAddingFlavor(elem=adding_flavor)
+    if order_elem:
+        order_elem.save()
+
+    return order_elem
+
+
+def create_order_adding(adding):
+    order_elem = OrderAdding(elem=adding)
+    if order_elem:
+        order_elem.save()
+        if adding.only_special_flavors:
+            flavors = adding.flavors_set.flavors.all()
+            for flavor in flavors:
+                if flavor.special:
+                    order_adding_flavor = create_order_adding_flavor(flavor)
+                    order_elem.flavors.add(order_adding_flavor)
+                    order_elem.save()
+
+    return order_elem
+
+
+def create_order_elem(elem_id, elem_class, order_elem_class):
+    elem = elem_class.objects.filter(id=elem_id).first()
+    if elem:
+        order_elem = order_elem_class(elem=elem)
+        if order_elem:
+            order_elem.save()
+            for adding in elem.addings:
+                order_adding = create_order_adding(adding)
+                order_elem.addings.add(order_adding)
+                order_elem.save()
+    else:
+        order_elem = None
+
+    return order_elem
+
+
+def create_order_size(size_id):
+    elem = Size.objects.filter(id=size_id).first()
+    if elem:
+        order_elem = OrderSize(elem=elem)
+        if order_elem:
+            order_elem.save()
+    else:
+        order_elem = None
+
+    return order_elem
+
+
+def create_order_item(
+    menu_id, dish_id, type_id, flavor_id, size_id
+):
+    menu = create_order_elem(menu_id, Menu, OrderMenu)
+    dish = create_order_elem(dish_id, Dish, OrderDish)
+    type = create_order_elem(type_id, Type, OrderType)
+    flavor = create_order_elem(flavor_id, Flavor, OrderFlavor)
+    size = create_order_size(size_id)
+
+    if menu or dish or type or flavor or size:
+        order_item = OrderItem(
+            menu=menu, dish=dish, type=type,
+            flavor=flavor, size=size
+        )
+        order_item.save()
+    else:
+        order_item = None
+
+    return order_item
+
+
+def create_order_item_for_user(
+        menu_id, dish_id, type_id, flavor_id, size_id,
+        user, status='InCart'
+):
+    order_item = create_order_item(
+        menu_id, dish_id, type_id, flavor_id, size_id
+    )
+    if order_item:
+        order = Order.objects.filter(user=user, status=status).first()
+        if order:
+            order.items.add(order_item)
+            order.save()
+        else:
+            order = Order(user=user, status=status)
+            if order:
+                order.items.add(order_item)
+                order.save()
+            else:
+                order_item.cancel()
+                order_item = None
+
+    return order_item
+
+
+def is_the_order_item(
+    menu_id, dish_id, type_id, flavor_id, size_id,
+    item
+):
+    no_elems_ids = True
+
+    if menu_id is not None:
+        no_elems_ids = False
+        elem = Menu.objects.filter(id=menu_id).first()
+        if elem != item.menu.elem:
+            return False
+
+    if dish_id is not None:
+        no_elems_ids = False
+        elem = Dish.objects.filter(id=dish_id).first()
+        if elem != item.dish.elem:
+            return False
+
+    if type_id is not None:
+        no_elems_ids = False
+        elem = Type.objects.filter(id=type_id).first()
+        if elem != item.type.elem:
+            return False
+
+    if flavor_id is not None:
+        no_elems_ids = False
+        elem = Flavor.objects.filter(id=flavor_id).first()
+        if elem != item.flavor.elem:
+            return False
+
+    if size_id is not None:
+        no_elems_ids = False
+        elem = Size.objects.filter(id=size_id).first()
+        if elem != item.size.elem:
+            return False
+
+    if no_elems_ids:
+        return False
+    else:
+        return True
+
+
+def get_order_item(
+        menu_id, dish_id, type_id, flavor_id, size_id,
+        order
+):
+    items = order.items.all()
+    founds = []
+    for item in items:
+        if is_the_order_item(
+            menu_id, dish_id, type_id, flavor_id, size_id,
+            item
+        ):
+            founds.append(item)
+
+    if len(founds) == 1:
+        order_item = founds[0]
+    else:
+        order_item = None
+
+    return order_item
+
+
+def get_order_item_by_user(
+        menu_id, dish_id, type_id, flavor_id, size_id,
+        user, status='InCart'
+):
+    order = Order.objects.filter(user=user, status=status).first()
+    if order:
+        order_item = get_order_item(
+            menu_id, dish_id, type_id, flavor_id, size_id,
+            order
+        )
+    else:
+        order_item = None
+
+    return order_item
+
+
 def check_objects_counts(objects, range=None):
     count = 0
     in_range = True
@@ -923,424 +1098,3 @@ def check_objects_counts(objects, range=None):
         'count': count,
         'in_range': in_range,
     }
-
-
-def create_order_sizes(order_object, menu_object):
-    order_sizes = []
-
-    if not order_object:
-        return order_sizes
-    if not menu_object:
-        return order_sizes
-
-    if menu_object.sizes_count and menu_object.sizes_count.max == 0:
-        return order_sizes
-
-    for size in menu_object.sizes.all():
-        order_size = OrderSize(menu=size, count=0)
-        order_size.save()
-
-        order_object.sizes.add(order_size)
-        order_object.save()
-
-    order_sizes = order_object.sizes.all()
-
-    return order_sizes
-
-
-def create_order_flavors(order_object, menu_object):
-    order_flavors = []
-
-    if not order_object:
-        return order_flavors
-    if not menu_object:
-        return order_flavors
-
-    if menu_object.flavors_count and menu_object.flavors_count.max == 0:
-        return order_flavors
-
-    for flavor in menu_object.flavors.all():
-        order_flavor = OrderFlavor(menu=flavor, count=0, plain=True)
-        order_flavor.save()
-
-        if len(create_order_addings(order_flavor, flavor)) > 0:
-            order_flavor.plain = False
-            order_flavor.save()
-
-        if len(create_order_sizes(order_flavor, flavor)) > 0:
-            order_flavor.plain = False
-            order_flavor.save()
-
-        order_object.flavors.add(order_flavor)
-        order_object.save()
-
-    order_flavors = order_object.flavors.all()
-
-    return order_flavors
-
-
-def create_order_addings(order_object, menu_object):
-    order_addings = []
-
-    if not order_object:
-        return order_addings
-    if not menu_object:
-        return order_addings
-
-    if menu_object.addings_count and menu_object.addings_count.max == 0:
-        return order_addings
-
-    for adding in menu_object.addings.all():
-        order_adding = OrderAdding(menu=adding, count=0, plain=True)
-        order_adding.save()
-
-        if len(create_order_flavors(order_adding, adding)) > 0:
-            order_adding.plain = False
-            order_adding.save()
-
-        if len(create_order_sizes(order_adding, adding)) > 0:
-            order_adding.plain = False
-            order_adding.save()
-
-        order_object.addings.add(order_adding)
-        order_object.save()
-
-    order_addings = order_object.addings.all()
-
-    return order_addings
-
-
-def create_order_size(order_object, menu_object, size_id):
-    if not order_object:
-        return None
-    if not menu_object:
-        return None
-    if size_id is None:
-        return None
-
-    size = Size.objects.filter(id=size_id).first()
-    if not size:
-        return None
-    if size not in menu_object.sizes.all():
-        return None
-
-    order_size = OrderSize(menu=size, count=1)
-    order_size.save()
-
-    order_object.sizes.add(order_size)
-    order_object.save()
-
-    return order_size
-
-
-def create_order_flavor(order_object, menu_object, flavor_id, size_id):
-    if not order_object:
-        return None
-    if not menu_object:
-        return None
-    if flavor_id is None:
-        return None
-
-    flavor = Flavor.objects.filter(id=flavor_id).first()
-    if not flavor:
-        return None
-    if flavor not in menu_object.flavors.all():
-        return None
-
-    order_flavor = OrderFlavor(menu=flavor, count=1, plain=False)
-    order_flavor.save()
-
-    if size_id is not None:
-        create_order_size(order_flavor, flavor, size_id)
-    else:
-        order_flavor.plain = True
-
-    order_flavor.save()
-
-    create_order_addings(order_flavor, flavor)
-    order_flavor.save()
-
-    order_object.flavors.add(order_flavor)
-    order_object.save()
-
-    return order_flavor
-
-
-def create_order_type(order_object, menu_object, type_id, flavor_id, size_id):
-    if not order_object:
-        return None
-    if not menu_object:
-        return None
-    if type_id is None:
-        return None
-
-    type = Type.objects.filter(id=type_id).first()
-    if not type:
-        return None
-    if type not in menu_object.types.all():
-        return None
-
-    order_type = OrderType(menu=type, count=1, plain=False)
-    order_type.save()
-
-    if flavor_id is not None:
-        create_order_flavor(order_type, type, flavor_id, size_id)
-    elif size_id is not None:
-        create_order_size(order_type, type, size_id)
-    else:
-        order_type.plain = True
-
-    order_type.save()
-
-    create_order_addings(order_type, type)
-    order_type.save()
-
-    order_object.types.add(order_type)
-    order_object.save()
-
-    return order_type
-
-
-def create_order_dish(order, dish_id, type_id, flavor_id, size_id):
-    if not order:
-        return None
-
-    if dish_id is None:
-        return None
-
-    dish = Dish.objects.filter(id=dish_id).first()
-    if not dish:
-        return None
-
-    order_dish = OrderDish(menu=dish, count=1, plain=False)
-    order_dish.save()
-
-    if type_id is not None:
-        create_order_type(order_dish, dish, type_id, flavor_id, size_id)
-    elif flavor_id is not None:
-        create_order_flavor(order_dish, dish, flavor_id, size_id)
-    elif size_id is not None:
-        create_order_size(order_dish, dish, size_id)
-    else:
-        order_dish.plain = True
-
-    order_dish.save()
-
-    create_order_addings(order_dish, dish)
-    order_dish.save()
-
-    order.dishes.add(order_dish)
-    order.save()
-
-    return order_dish
-
-
-def get_order_dishes(order, dish_id, type_id, flavor_id, size_id):
-    order_dishes = []
-    if not order:
-        return order_dishes
-
-    if dish_id is None:
-        return order_dishes
-
-    dish = Dish.objects.filter(id=dish_id).first()
-    if not dish:
-        return order_dishes
-
-    for order_dish in order.dishes.all():
-        menu_dish = order_dish.menu
-
-        if dish == menu_dish:
-            if type_id is not None:
-                order_types = get_order_types(
-                    order_dish, type_id, flavor_id, size_id
-                )
-                if len(order_types) > 0:
-                    order_dishes.append(order_dish)
-            elif flavor_id is not None:
-                order_flavors = get_order_flavors(
-                    order_dish, flavor_id, size_id
-                )
-                if len(order_flavors) > 0:
-                    order_dishes.append(order_dish)
-            elif size_id is not None:
-                order_sizes = get_order_sizes(
-                    order_dish, size_id
-                )
-                if len(order_sizes) > 0:
-                    order_dishes.append(order_dish)
-            else:
-                order_dishes.append(order_dish)
-
-    return order_dishes
-
-
-def get_order_types(order, type_id, flavor_id, size_id):
-    order_types = []
-    if not order:
-        return order_types
-
-    if type_id is None:
-        return order_types
-
-    type = Type.objects.filter(id=type_id).first()
-    if not type:
-        return order_types
-
-    for order_type in order.types.all():
-        menu_type = order_type.menu
-
-        if type == menu_type:
-            if flavor_id is not None:
-                order_flavors = get_order_flavors(
-                    order_type, flavor_id, size_id
-                )
-                if len(order_flavors) > 0:
-                    order_types.append(order_type)
-            elif size_id is not None:
-                order_sizes = get_order_sizes(
-                    order_type, size_id
-                )
-                if len(order_sizes) > 0:
-                    order_types.append(order_type)
-            else:
-                order_types.append(order_type)
-
-    return order_types
-
-
-def get_order_flavors(order, flavor_id, size_id):
-    order_flavors = []
-    if not order:
-        return order_flavors
-
-    if flavor_id is None:
-        return order_flavors
-
-    flavor = Flavor.objects.filter(id=flavor_id).first()
-    if not flavor:
-        return order_flavors
-
-    for order_flavor in order.flavors.all():
-        menu_type = order_flavor.menu
-
-        if type == menu_type:
-            if size_id is not None:
-                order_sizes = get_order_sizes(
-                    order_flavor, size_id
-                )
-                if len(order_sizes) > 0:
-                    order_flavors.append(order_flavor)
-            else:
-                order_flavors.append(order_flavor)
-
-    return order_flavors
-
-
-def get_order_sizes(order_object, size_id):
-    order_sizes = []
-
-    if not order_object:
-        return order_sizes
-
-    if size_id is None:
-        return order_sizes
-
-    size = Size.objects.filter(id=size_id).first()
-    if not size:
-        return order_sizes
-
-    for order_size in order_object.sizes.all():
-        menu_size = order_size.menu
-
-        if size == menu_size:
-            order_sizes.append(order_size)
-
-    return order_sizes
-
-
-def get_order_type(order_object, type_id, flavor_id, size_id):
-    if not order_object:
-        return None
-
-    if type_id is None:
-        return None
-
-    type = Type.objects.filter(id=type_id).first()
-    if not type:
-        return None
-
-    for order_type in order_object.types.all():
-        menu_type = order_type.menu
-
-        if type == menu_type:
-            no_components = True
-
-            if menu_type.flavors.count() > 0:
-                no_components = False
-
-                order_flavor = get_order_flavor(order_type, flavor_id, size_id)
-                if order_flavor:
-                    return order_type
-
-            if menu_type.sizes.count() > 0:
-                no_components = False
-
-                order_size = get_order_size(order_type, size_id)
-                if order_size:
-                    return order_type
-
-            if no_components:
-                return order_type
-
-    return None
-
-
-def get_order_flavor(order_object, flavor_id, size_id):
-    if not order_object:
-        return None
-
-    if flavor_id is None:
-        return None
-
-    flavor = Flavor.objects.filter(id=flavor_id).first()
-    if not flavor:
-        return None
-
-    for order_flavor in order_object.flavors.all():
-        menu_flavor = order_flavor.menu
-
-        if flavor == menu_flavor:
-            no_components = True
-
-            if menu_flavor.sizes.count() > 0:
-                no_components = False
-
-                order_size = get_order_size(order_flavor, size_id)
-                if order_size:
-                    return order_flavor
-
-            if no_components:
-                return order_flavor
-
-    return None
-
-
-def get_order_size(order_object, size_id):
-    if not order_object:
-        return None
-
-    if size_id is None:
-        return None
-
-    size = Size.objects.filter(id=size_id).first()
-    if not size:
-        return None
-
-    for order_size in order_object.sizes.all():
-        menu_size = order_size.menu
-
-        if size == menu_size:
-            return order_size
-
-    return None
