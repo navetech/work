@@ -801,7 +801,6 @@ class OrderMenu(OrderElementFields):
 
         return dict
 
-
 class OrderItem(models.Model):
     menu = models.ForeignKey(
         OrderMenu, blank=True, null=True, on_delete=models.CASCADE,
@@ -885,6 +884,7 @@ class Order(models.Model):
         return (
             f'{self.user}, '
             f'{self.date_time}, '
+            f'{self.status}, '
         )
 
     def to_dict(self, **settings):
@@ -926,13 +926,77 @@ def create_order_adding(adding):
     return order_elem
 
 
+def create_order_menu(menu_id):
+    elem = Menu.objects.filter(id=menu_id).first()
+    if elem:
+        order_elem = OrderMenu(elem=elem)
+        if order_elem:
+            order_elem.save()
+            for adding in elem.addings.all():
+                order_adding = create_order_adding(adding)
+                order_elem.addings.add(order_adding)
+                order_elem.save()
+    else:
+        order_elem = None
+
+    return order_elem
+
+
+def create_order_dish(dish_id):
+    elem = Dish.objects.filter(id=dish_id).first()
+    if elem:
+        order_elem = OrderDish(elem=elem)
+        if order_elem:
+            order_elem.save()
+            for adding in elem.addings.all():
+                order_adding = create_order_adding(adding)
+                order_elem.addings.add(order_adding)
+                order_elem.save()
+    else:
+        order_elem = None
+
+    return order_elem
+
+
+def create_order_type(type_id):
+    elem = Type.objects.filter(id=type_id).first()
+    if elem:
+        order_elem = OrderType(elem=elem)
+        if order_elem:
+            order_elem.save()
+            for adding in elem.addings.all():
+                order_adding = create_order_adding(adding)
+                order_elem.addings.add(order_adding)
+                order_elem.save()
+    else:
+        order_elem = None
+
+    return order_elem
+
+
+def create_order_flavor(flavor_id):
+    elem = Flavor.objects.filter(id=flavor_id).first()
+    if elem:
+        order_elem = OrderFlavor(elem=elem)
+        if order_elem:
+            order_elem.save()
+            for adding in elem.addings.all():
+                order_adding = create_order_adding(adding)
+                order_elem.addings.add(order_adding)
+                order_elem.save()
+    else:
+        order_elem = None
+
+    return order_elem
+
+
 def create_order_elem(elem_id, elem_class, order_elem_class):
     elem = elem_class.objects.filter(id=elem_id).first()
     if elem:
         order_elem = order_elem_class(elem=elem)
         if order_elem:
             order_elem.save()
-            for adding in elem.addings:
+            for adding in elem.addings.all():
                 order_adding = create_order_adding(adding)
                 order_elem.addings.add(order_adding)
                 order_elem.save()
@@ -957,11 +1021,15 @@ def create_order_size(size_id):
 def create_order_item(
     menu_id, dish_id, type_id, flavor_id, size_id
 ):
-    menu = create_order_elem(menu_id, Menu, OrderMenu)
-    dish = create_order_elem(dish_id, Dish, OrderDish)
-    type = create_order_elem(type_id, Type, OrderType)
-    flavor = create_order_elem(flavor_id, Flavor, OrderFlavor)
-    size = create_order_size(size_id)
+    menu = create_order_menu(menu_id)
+#    dish = create_order_dish(dish_id)
+#    type = create_order_type(type_id)
+#    flavor = create_order_flavor(flavor_id)
+#    size = create_order_size(size_id)
+    dish = None
+    type = None
+    flavor = None
+    size = None
 
     if menu or dish or type or flavor or size:
         order_item = OrderItem(

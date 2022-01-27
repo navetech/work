@@ -21,16 +21,16 @@ urlpatterns = [
         name="select_currency"
     ),
     path(
-        "order-item/<order_dish_id>",
-        views.order_item, name="order_item"
-    ),
-    path(
         "put-order", views.put_order,
         name="put_order"
     ),
     path(
         "alter-order", views.alter_order,
         name="alter_order"
+    ),
+    path(
+        "order-item/<order_item_id>",
+        views.order_item, name="order_item"
     ),
     path("cart", views.cart, name="cart"),
     path(

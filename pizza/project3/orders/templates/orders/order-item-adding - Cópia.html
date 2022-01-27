@@ -1,0 +1,70 @@
+<li class="list-group-item ln-container01">
+    <h5>{{ order_adding.menu.short_name.translated.words }}</h6>
+    <h5>{{ order_adding.menu.long_name.translated.words }}</h6>
+
+    <ul class="list-group pt-4">
+        {% if order_adding.flavors %}
+            <li class="list-group-item ln-container02">
+                <table style="width:100%">
+                    {% if order_adding.flavors_columns.sizes %}
+                        <tr>
+                            {% for order_adding_flavor_size in order_adding.flavors_columns.sizes %}
+                                <th></th>
+                                <th></th>
+                                <th>{{ order_adding_flavor_size.menu.short_name.translated.words }}</th>
+                            {% endfor %}
+                        </tr>
+                    {% endif %}
+        
+                    {% for order_adding_flavor in order_adding.flavors %}
+                        {% include "orders/order-item-adding-flavor.html" %}
+                    {% endfor %}
+                </table>
+            </li>
+        {% endif %}
+
+        {% if order_adding.sizes %}
+            <li class="list-group-item ln-container02">
+                <table style="width:100%">
+                    <tr>
+                        {% for order_adding_size in order_adding.sizes %}
+                            <th>{{ order_adding_size.menu.short_name.translated.words }}</th>
+                            <th></th>
+                        {% endfor %}
+                    </tr>
+        
+                    <tr>
+                        {% for order_adding_size in order_adding.sizes %}
+                            <td>
+                                {{ order_adding_size.menu.quantity.converted.value|floatformat:2 }}
+                                {{ order_adding_size.menu.quantity.converted.unit }}
+                            </td>
+                            
+                            <td>
+                                <div class="ln-group-divider"></div>
+                                <form action="{% url 'alter_order' %}" method="post">
+                                    {% csrf_token %}
+                                    <input type='text' style='display:none' name='order-dish-id' value={{ order_dish.id|default:None }}>
+                                    <input type='text' style='display:none' name='order-type-id' value={{ order_type.id|default:None }}>
+                                    <input type='text' style='display:none' name='order-flavor-id' value={{ order_flavor.id|default:None }}>
+                                    <input type='text' style='display:none' name='order-size-id' value={{ order_size.id|default:None }}>
+
+                                    <input type='text' style='display:none' name='order-adding-size-id' value={{ order_adding_size.id|default:None }}>
+
+                                    <button type="submit" name="submit" value="dec-adding-size-count">-</button>
+                                    <span>{{ order_adding_size.count }}</span>
+                                    <button type="submit" name="submit" value="inc-adding-size-count">+</button>
+                                </form>
+                            </td>
+                        {% endfor %}
+                    </tr>
+                </table>
+            </li>
+        {% endif %}
+
+        {% if order_adding.plain %}
+            {% include "orders/order-item-adding-plain.html" %}
+        {% endif %}
+
+    </ul>
+</li>

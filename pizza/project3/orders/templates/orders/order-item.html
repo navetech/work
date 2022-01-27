@@ -14,8 +14,8 @@
         <tr>
         <tr>
             <td>
-                {{order_dish.price.value|floatformat:2 }}
-                {{ order_dish.price.unit }}
+                {{order_item.price.value|floatformat:2 }}
+                {{ order_item.price.unit }}
             </td>
         <tr>
     </table>
@@ -23,26 +23,25 @@
     <a class="btn btn-secondary" role="button" href="{% url 'cart' %}">Show Cart</a>
 
     <ul class="list-group pt-4">
-        {% for order_type in order_dish.types %}
-            {% include "orders/order-item-type.html" %}
-        {% endfor %}
-
-        {% for order_flavor in order_dish.flavors %}
-            {% include "orders/order-item-flavor.html" %}
-        {% endfor %}
-
-        {% for order_size in order_dish.sizes %}
+        {% if order_item.size %}
             {% include "orders/order-item-size.html" %}
-        {% endfor %}
-
-        {% if order_dish.plain %}
-            {% include "orders/order-item-dish-plain.html" %}
-        {% endif %}
-
-        {% if order_dish.menu.addings_count.max != 0 %}
-            {% for order_adding in order_dish.addings %}
-                {% include "orders/order-item-adding.html" %}
-            {% endfor %}
+        {% else %}
+            {% if order_item.flavor %}
+                {% include "orders/order-item-flavor.html" %}
+            {% else %}
+                {% if order_item.type %}
+                    {% include "orders/order-item-type.html" %}
+                {% else %}
+                    {% if order_item.dish %}
+                        {% include "orders/order-item-dish.html" %}
+                    {% else %}
+                        {% if order_item.menu %}
+                            {% include "orders/order-item-menu.html" %}
+                        {% else %}
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
         {% endif %}
     </ul>
 {% endblock %}

@@ -26,11 +26,12 @@ from .models import menu_elem_to_dict
 
 from .models import get_order_item_by_user, create_order_item_for_user
 
+"""
 from .models import Order, OrderItem
 from .models import OrderMenu, OrderDish, OrderType
 from .models import OrderFlavor, OrderSize
 from .models import OrderAdding, OrderAddingFlavor
-
+"""
 
 from django.http import JsonResponse
 

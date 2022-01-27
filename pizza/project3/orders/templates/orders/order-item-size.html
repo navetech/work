@@ -5,33 +5,30 @@
         <tr>
             <td>
                 <figure>
-                    <img src="{% static order_size.menu.img.path %}" alt="{{ order_size.menu.long_name.translated.words }} Image">
-                    <figcaption>{{ order_size.menu.long_name.translated.words }}</figcaption>
+                    <img src="{% static order_item.size.elem.img.path %}" alt="{{ order_item.size.elem.full_name }} Image">
+                    <figcaption>{{ order_item.size.elem.full_name }}</figcaption>
                 </figure>
             </td>
 
             <td>
-                {{ order_size.menu.short_name.translated.words }}
-                {{ order_size.menu.long_name.translated.words }}
+                {{ order_item.size.elem.short_name.translated.words }}
+                {{ order_item.size.elem.full_name }}
             </td>
 
             <td>
-                {{ order_size.menu.quantity.converted.value|floatformat:2 }}
-                {{ order_size.menu.quantity.converted.unit }}
+                {{ order_item.size.elem.quantity.converted.value|floatformat:2 }}
+                {{ order_item.size.elem.quantity.converted.unit }}
             </td>
 
             <td>
                 <div class="ln-group-divider"></div>
                 <form action="{% url 'alter_order' %}" method="post">
                     {% csrf_token %}
-                    <input type='text' style='display:none' name='order-dish-id' value={{ order_dish.id|default:None }}>
-                    <input type='text' style='display:none' name='order-type-id' value={{ order_type.id|default:None }}>
-                    <input type='text' style='display:none' name='order-flavor-id' value={{ order_flavor.id|default:None }}>
-                    <input type='text' style='display:none' name='order-size-id' value={{ order_size.id|default:None }}>
+                    <input type='text' style='display:none' name='order-item-id' value={{ order_item.id|default:None }}>
                     
-                    <button type="submit" name="submit" value="dec-size-count">-</button>
-                    <span>{{ order_size.count }}</span>
-                    <button type="submit" name="submit" value="inc-size-count">+</button>
+                    <button type="submit" name="submit" value="dec-ordem-item-count">-</button>
+                    <span>{{ order_item.count }}</span>
+                    <button type="submit" name="submit" value="inc-order-item-count">+</button>
                 </form>
             </td>
         </tr>
