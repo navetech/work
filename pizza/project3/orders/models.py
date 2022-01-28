@@ -675,14 +675,16 @@ class OrderAdding(models.Model):
         return dict
 
 
-class OrderElementFields(models.Model):
-    addings = models.ManyToManyField(
-        OrderAdding, blank=True,
-        related_name='%(app_label)s_%(class)s_related'
+class OrderFlavor(models.Model):
+    elem = models.ForeignKey(
+        Flavor, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='elem_OrderFlavor_related'
     )
 
-    class Meta:
-        abstract = True
+    addings = models.ManyToManyField(
+        OrderAdding, blank=True,
+        related_name='addings_OrderFlavor_related'
+    )
 
     def cancel(self):
         for adding in self.addings.all():
@@ -690,48 +692,39 @@ class OrderElementFields(models.Model):
 
         self.delete()
 
+    def __str__(self):
+        return (
+            f'{self.elem}, '
+        )
+
     def to_dict(self, **settings):
         dict = {}
 
         dict['id'] = self.id
 
-        dict['addings'] = to_dict_list(self.addings, **settings)
-
-
-class OrderFlavor(OrderElementFields):
-    elem = models.ForeignKey(
-        Flavor, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='elem_OrderFlavor_related'
-    )
-
-    def cancel(self):
-        super().cancel(self)
-
-        self.delete()
-
-    def __str__(self):
-        return (
-            f'{self.elem}, '
-        )
-
-    def to_dict(self, **settings):
-        dict = OrderElementFields.to_dict(self, **settings)
-
         dict['elem'] = menu_elem_to_dict(
             dict, self.elem, **settings
         )
 
+        dict['addings'] = to_dict_list(self.addings, **settings)
+
         return dict
 
 
-class OrderType(OrderElementFields):
+class OrderType(models.Model):
     elem = models.ForeignKey(
         Type, blank=True, null=True, on_delete=models.CASCADE,
         related_name='elem_OrderType_related'
     )
 
+    addings = models.ManyToManyField(
+        OrderAdding, blank=True,
+        related_name='addings_OrderType_related'
+    )
+
     def cancel(self):
-        super().cancel(self)
+        for adding in self.addings.all():
+            adding.cancel()
 
         self.delete()
 
@@ -741,49 +734,69 @@ class OrderType(OrderElementFields):
         )
 
     def to_dict(self, **settings):
-        dict = OrderElementFields.to_dict(self, **settings)
+        dict = {}
+
+        dict['id'] = self.id
 
         dict['elem'] = menu_elem_to_dict(
             dict, self.elem, **settings
         )
 
+        dict['addings'] = to_dict_list(self.addings, **settings)
+
         return dict
 
 
-class OrderDish(OrderElementFields):
+class OrderDish(models.Model):
     elem = models.ForeignKey(
         Dish, blank=True, null=True, on_delete=models.CASCADE,
         related_name='elem_OrderDish_related'
     )
 
+    addings = models.ManyToManyField(
+        OrderAdding, blank=True,
+        related_name='addings_OrderDish_related'
+    )
+
     def cancel(self):
-        super().cancel(self)
+        for adding in self.addings.all():
+            adding.cancel()
 
         self.delete()
 
     def __str__(self):
         return (
-            f'{self.elem}, '
+            f'{self.proprio}, '
         )
 
     def to_dict(self, **settings):
-        dict = OrderElementFields.to_dict(self, **settings)
+        dict = {}
+
+        dict['id'] = self.id
 
         dict['elem'] = menu_elem_to_dict(
-            dict, self.elem, **settings
+            dict, self.proprio, **settings
         )
+
+        dict['addings'] = to_dict_list(self.addings, **settings)
 
         return dict
 
 
-class OrderMenu(OrderElementFields):
+class OrderMenu(models.Model):
     elem = models.ForeignKey(
         Menu, blank=True, null=True, on_delete=models.CASCADE,
         related_name='elem_OrderMenu_related'
     )
 
+    addings = models.ManyToManyField(
+        OrderAdding, blank=True,
+        related_name='addings_OrderMenu_related'
+    )
+
     def cancel(self):
-        super().cancel(self)
+        for adding in self.addings.all():
+            adding.cancel()
 
         self.delete()
 
@@ -793,13 +806,18 @@ class OrderMenu(OrderElementFields):
         )
 
     def to_dict(self, **settings):
-        dict = OrderElementFields.to_dict(self, **settings)
+        dict = {}
+
+        dict['id'] = self.id
 
         dict['elem'] = menu_elem_to_dict(
             dict, self.elem, **settings
         )
 
+        dict['addings'] = to_dict_list(self.addings, **settings)
+
         return dict
+
 
 class OrderItem(models.Model):
     menu = models.ForeignKey(
@@ -927,12 +945,22 @@ def create_order_adding(adding):
 
 
 def create_order_menu(menu_id):
+    print('create_order_menu', menu_id)
     elem = Menu.objects.filter(id=menu_id).first()
+    print(elem)
     if elem:
+        print(elem)
         order_elem = OrderMenu(elem=elem)
+        print(order_elem)
         if order_elem:
+            print('xxx')
+            print(order_elem)
             order_elem.save()
+            print('all')
+            print(elem.addings.all())
             for adding in elem.addings.all():
+                print('adding')
+                print(adding)
                 order_adding = create_order_adding(adding)
                 order_elem.addings.add(order_adding)
                 order_elem.save()
@@ -954,6 +982,8 @@ def create_order_dish(dish_id):
                 order_elem.save()
     else:
         order_elem = None
+
+    order_elem = None
 
     return order_elem
 
@@ -992,9 +1022,15 @@ def create_order_flavor(flavor_id):
 
 def create_order_elem(elem_id, elem_class, order_elem_class):
     elem = elem_class.objects.filter(id=elem_id).first()
+    print(elem)
     if elem:
+        print('elem')
+        print(elem)
         order_elem = order_elem_class(elem=elem)
+        print(order_elem)
         if order_elem:
+            print('order_elem')
+            print(order_elem)
             order_elem.save()
             for adding in elem.addings.all():
                 order_adding = create_order_adding(adding)
@@ -1021,22 +1057,28 @@ def create_order_size(size_id):
 def create_order_item(
     menu_id, dish_id, type_id, flavor_id, size_id
 ):
-    menu = create_order_menu(menu_id)
+    print('create_order_item')
+    menu = create_order_elem(menu_id, Menu, OrderMenu)
+#    menu = create_order_menu(menu_id)
+    print('menu')
+    print(menu)
 #    dish = create_order_dish(dish_id)
+    dish = create_order_elem(dish_id, Dish, OrderDish)
 #    type = create_order_type(type_id)
+    type = create_order_elem(type_id, Type, OrderType)
 #    flavor = create_order_flavor(flavor_id)
-#    size = create_order_size(size_id)
-    dish = None
-    type = None
-    flavor = None
-    size = None
+    flavor = create_order_elem(flavor_id, Flavor, OrderFlavor)
+    size = create_order_size(size_id)
 
     if menu or dish or type or flavor or size:
         order_item = OrderItem(
             menu=menu, dish=dish, type=type,
             flavor=flavor, size=size
         )
+        print(order_item)
         order_item.save()
+        print('order_item')
+        print(order_item)
     else:
         order_item = None
 
@@ -1047,20 +1089,31 @@ def create_order_item_for_user(
         menu_id, dish_id, type_id, flavor_id, size_id,
         user, status='InCart'
 ):
+    print('create_order_item_for_user')
     order_item = create_order_item(
         menu_id, dish_id, type_id, flavor_id, size_id
     )
     if order_item:
+        print('output create_order_item_for_user')
+        print(order_item)
         order = Order.objects.filter(user=user, status=status).first()
+        print(order)
         if order:
+            print('order')
             order.items.add(order_item)
             order.save()
+            print(order)
         else:
+            print('no order')
             order = Order(user=user, status=status)
             if order:
+                order.save()
+                print('create order')
                 order.items.add(order_item)
                 order.save()
+                print(order)
             else:
+                print('cancel order_item')
                 order_item.cancel()
                 order_item = None
 

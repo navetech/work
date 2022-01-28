@@ -1,4 +1,4 @@
-# from django.http import HttpResponse
+from django.http import HttpResponse
 # from django.shortcuts import render
 
 # Create your views here.
@@ -26,8 +26,8 @@ from .models import menu_elem_to_dict
 
 from .models import get_order_item_by_user, create_order_item_for_user
 
-"""
 from .models import Order, OrderItem
+"""
 from .models import OrderMenu, OrderDish, OrderType
 from .models import OrderFlavor, OrderSize
 from .models import OrderAdding, OrderAddingFlavor
@@ -453,11 +453,14 @@ def put_order(request):
         user = request.user
         order_status = 'InCart'
 
+        """
         order_item = get_order_item_by_user(
             menu_id, dish_id, type_id,
             flavor_id, size_id,
             user, order_status
         )
+        """
+        order_item = None
         if not order_item:
             order_item = create_order_item_for_user(
                 menu_id, dish_id, type_id,
@@ -468,7 +471,7 @@ def put_order(request):
         if order_item:
             order_item_id = order_item.id
         else:
-            order_item_id = None
+            order_item_id = 'None'
 
         return HttpResponseRedirect(reverse(
                 'order_item', args=[order_item_id]
@@ -619,6 +622,11 @@ def order_item(request, order_item_id):
         return HttpResponseRedirect(reverse('index'))
 
     if request.method != "GET":
+        return HttpResponseRedirect(reverse('index'))
+
+    order_item_id = None if order_item_id == 'None' else order_item_id
+
+    if order_item_id is None:
         return HttpResponseRedirect(reverse('index'))
 
     order_item_object = OrderItem.objects.filter(id=order_item_id).first()

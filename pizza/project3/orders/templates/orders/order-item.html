@@ -24,19 +24,19 @@
 
     <ul class="list-group pt-4">
         {% if order_item.size %}
-            {% include "orders/order-item-size.html" %}
+            {% include "orders/order-item-elem.html" with order_elem=order_item.size %}
         {% else %}
             {% if order_item.flavor %}
-                {% include "orders/order-item-flavor.html" %}
+                {% include "orders/order-item-elem.html" with order_elem=order_item.flavor %}
             {% else %}
                 {% if order_item.type %}
-                    {% include "orders/order-item-type.html" %}
+                    {% include "orders/order-item-elem.html" with order_elem=order_item.type %}
                 {% else %}
                     {% if order_item.dish %}
-                        {% include "orders/order-item-dish.html" %}
+                        {% include "orders/order-item-elem.html" with order_elem=order_item.dish %}
                     {% else %}
                         {% if order_item.menu %}
-                            {% include "orders/order-item-menu.html" %}
+                            {% include "orders/order-item-elem.html" with order_elem=order_item.menu %}
                         {% else %}
                         {% endif %}
                     {% endif %}
