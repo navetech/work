@@ -616,7 +616,8 @@ class OrderAddingFlavor(models.Model):
     )
 
     def cancel(self):
-        self.size.cancel()
+        if self.size:
+            self.size.cancel()
 
         self.delete()
 
@@ -846,11 +847,16 @@ class OrderItem(models.Model):
     )
 
     def cancel(self):
-        self.size.cancel()
-        self.flavor.cancel()
-        self.type.cancel()
-        self.dish.cancel()
-        self.menu.cancel()
+        if self.size:
+            self.size.cancel()
+        if self.flavor:
+            self.flavor.cancel()
+        if self.type:
+            self.type.cancel()
+        if self.dish:
+            self.dish.cancel()
+        if self.menu:
+            self.menu.cancel()
 
         self.delete()
 
@@ -1167,15 +1173,22 @@ def get_order_item(
         order
 ):
     items = order.items.all()
+    print('items')
+    print(items)
     founds = []
     for item in items:
+        print('item')
+        print(item)
         if is_the_order_item(
             menu_id, dish_id, type_id, flavor_id, size_id,
             item
         ):
             founds.append(item)
 
-    if len(founds) == 1:
+    print('founds')    
+    print(len(founds))
+
+    if len(founds) > 0:
         order_item = founds[0]
     else:
         order_item = None
@@ -1188,6 +1201,8 @@ def get_order_item_by_user(
         user, status='InCart'
 ):
     order = Order.objects.filter(user=user, status=status).first()
+    print('order')
+    print(order)
     if order:
         order_item = get_order_item(
             menu_id, dish_id, type_id, flavor_id, size_id,

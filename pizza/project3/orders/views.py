@@ -432,6 +432,8 @@ def select_currency(request, currency_id):
 
 
 def put_order(request):
+    print('//////////////////////')
+    print('put_order')
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("index"))
 
@@ -450,17 +452,19 @@ def put_order(request):
         flavor_id = None if flavor_id == 'None' else flavor_id
         size_id = None if size_id == 'None' else size_id
 
+        print('put_order 2')
+        print('//////////////////////')
         user = request.user
         order_status = 'InCart'
 
-        """
         order_item = get_order_item_by_user(
             menu_id, dish_id, type_id,
             flavor_id, size_id,
             user, order_status
         )
-        """
-        order_item = None
+        print('output get_order_item_by_user')
+        print(order_item)
+        print('-------------------------------')
         if not order_item:
             order_item = create_order_item_for_user(
                 menu_id, dish_id, type_id,
@@ -617,6 +621,53 @@ def alter_order(request):
             return HttpResponseRedirect(reverse('cart'))
 
 
+def calc_order_size_price(order_size):
+    value = order_size['elem']['quantity']['converted']['value']
+    unit = order_size['elem']['quantity']['converted']['unit']
+
+    price = {
+        'value': value,
+        'unit': unit,
+        }
+
+    return price
+
+
+def calc_order_elem_price(order_elem):
+    value = order_elem['elem']['quantity']['converted']['value']
+    unit = order_elem['elem']['quantity']['converted']['unit']
+
+    price = {
+        'value': value,
+        'unit': unit,
+        }
+
+    return price
+    
+
+def calc_order_item_price(order_item):
+    value = 0
+    unit = None
+
+    price = {
+        'value': value,
+        'unit': unit,
+        }
+
+    if order_item['size']:
+        price = calc_order_size_price(order_item['size'])
+    elif order_item['flavor']:
+        price = calc_order_elem_price(order_item['flavor'])
+    elif order_item['type']:
+        price = calc_order_elem_price(order_item['type'])
+    elif order_item['dish']:
+        price = calc_order_elem_price(order_item['dish'])
+    elif order_item['menu']:
+        price = calc_order_elem_price(order_item['menu'])
+
+    return price
+
+
 def order_item(request, order_item_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
@@ -644,6 +695,8 @@ def order_item(request, order_item_id):
 
     order_item = to_dict(order_item_object, language=language, currency=currency)
 
+    price = calc_order_item_price(order_item)
+
     """"
     order_item_dict = calc_order_item_price(order_item_dict)
     order_item = fill_order_item_prices(order_item)
@@ -664,6 +717,7 @@ def order_item(request, order_item_id):
         'languages': languages,
         'currencies': currencies,
         'order_item': order_item,
+        'price': price,
     }
 
     request.session['page'] = reverse(
@@ -686,7 +740,10 @@ def cart(request):
     languages = pages_basic_data['languages']
     currencies = pages_basic_data['currencies']
 
-    order = Order.objects.filter(user=request.user).first()
+    user = request.user
+    status='InCart'
+    order = Order.objects.filter(user=user, status=status).first()
+    """
     if order:
         order_check = order.check_count()
         if order_check['count'] > 0:
@@ -699,6 +756,9 @@ def cart(request):
     else:
         order_dict = {}
         order_check = {}
+    """
+    order_dict = {}
+    order_check = {}
 
     context = {
         'settings': settings,
@@ -718,8 +778,10 @@ def clear_cart(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
 
-    order = Order.objects.filter(user=request.user).first()
-    if order:
+    user = request.user
+    status='InCart'
+    orders = Order.objects.filter(user=user, status=status).all()
+    for order in orders:
         order.cancel()
 
     return HttpResponseRedirect(reverse('cart'))
@@ -891,23 +953,6 @@ def calc_order_adding_price(order_adding):
     }
 
     order_adding['price'] = price
-
-    return price
-
-
-def calc_order_size_price(order_size):
-    value = (
-        order_size['count'] *
-        order_size['menu']['quantity']['converted']['value']
-    )
-    unit = order_size['menu']['quantity']['converted']['unit']
-
-    price = {
-        'value': value,
-        'unit': unit,
-        }
-
-    order_size['price'] = price
 
     return price
 
