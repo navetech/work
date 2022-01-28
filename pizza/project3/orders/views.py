@@ -597,7 +597,6 @@ def alter_order(request):
         )
 
 
-
 def calc_order_size_price(order_size):
     value = order_size['elem']['quantity']['converted']['value']
     unit = order_size['elem']['quantity']['converted']['unit']
@@ -647,6 +646,13 @@ def calc_order_item_price(order_item):
     return price
 
 
+def fill_order_item_price(order_item):
+    price = calc_order_item_price(order_item)
+    order_item['price'] = price
+
+    return order_item
+
+
 def order_item(request, order_item_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
@@ -677,8 +683,7 @@ def order_item(request, order_item_id):
     currencies = pages_basic_data['currencies']
 
     order_item = to_dict(order_item_object, language=language, currency=currency)
-
-    price = calc_order_item_price(order_item)
+    order_item = fill_order_item_price(order_item)
 
     """"
     order_item_dict = calc_order_item_price(order_item_dict)
@@ -700,7 +705,6 @@ def order_item(request, order_item_id):
         'languages': languages,
         'currencies': currencies,
         'order_item': order_item,
-        'price': price,
     }
 
     request.session['page'] = reverse(
@@ -708,6 +712,26 @@ def order_item(request, order_item_id):
     )
 
     return render(request, 'orders/order-item.html', context)
+
+
+def fill_order_price(order):
+    value = 0
+    unit = None
+
+    price = {
+        'value': value,
+        'unit': unit,
+        }
+
+    for order_item in order['items']:
+        order_item = fill_order_item_price(order_item)
+
+        price['value'] += order_item['price']['value']
+        price['unit'] = order_item['price']['unit']
+
+    order['price'] = price
+
+    return order
 
 
 def cart(request):
@@ -725,31 +749,22 @@ def cart(request):
 
     user = request.user
     status='InCart'
-    order = Order.objects.filter(user=user, status=status).first()
-    """
-    if order:
-        order_check = order.check_count()
-        if order_check['count'] > 0:
-            order_dict = to_dict(order, language=language, currency=currency)
-            calc_order_price(order_dict)
-        else:
-            order.cancel()
-            order_dict = {}
-            order_check = {}
+    order_object = Order.objects.filter(user=user, status=status).first()
+    if not order_object:
+        order = {}
+    elif order_object.items.count() < 1:
+        order_object.cancel()
+        order = {}
     else:
-        order_dict = {}
-        order_check = {}
-    """
-    order_dict = {}
-    order_check = {}
+            order = to_dict(order_object, language=language, currency=currency)
+            order = fill_order_price(order)
 
     context = {
         'settings': settings,
         'user_settings': user_settings,
         'languages': languages,
         'currencies': currencies,
-        'order': order_dict,
-        'order_check': order_check,
+        'order': order,
     }
 
     request.session['page'] = reverse('cart')
@@ -943,6 +958,12 @@ def calc_order_adding_price(order_adding):
 def success(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
+
+    user = request.user
+    status='InCart'
+    orders = Order.objects.filter(user=user, status=status).all()
+    for order in orders:
+        order.cancel()
 
     pages_basic_data = get_pages_basic_data(request)
 

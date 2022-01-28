@@ -43,6 +43,26 @@
     {% else %}
         <h4>{{ settings.pages_no_items_header.translated.words }}</h4>
     {% endif %}
+
+    <ul class="list-group pt-4">
+        {% for order_dish in order.dishes %}
+            {% for order_type in order_dish.types %}
+                {% include "orders/cart-order-type.html" %}
+            {% endfor %}
+
+            {% for order_flavor in order_dish.flavors %}
+                {% include "orders/cart-order-flavor.html" %}
+            {% endfor %}
+
+            {% for order_size in order_dish.sizes %}
+                {% include "orders/cart-order-size.html" %}
+            {% endfor %}
+
+            {% if order_dish.plain %}
+                {% include "orders/cart-order-dish-plain.html" %}
+            {% endif %}
+        {% endfor %}
+    </ul>
 {% endblock %}
 
 
