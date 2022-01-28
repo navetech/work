@@ -26,7 +26,7 @@
                     {% csrf_token %}
                     <input type='text' style='display:none' name='order-item-id' value={{ order_item.id|default:None }}>
                     
-                    <button type="submit" name="submit" value="dec-ordem-item-count">-</button>
+                    <button type="submit" name="submit" value="dec-order-item-count">-</button>
                     <span>{{ order_item.count }}</span>
                     <button type="submit" name="submit" value="inc-order-item-count">+</button>
                 </form>

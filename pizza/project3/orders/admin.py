@@ -15,7 +15,6 @@ from .models import Type
 from .models import Dish
 from .models import Menu
 
-"""
 from .models import OrderSize
 from .models import OrderAddingFlavor
 from .models import OrderAdding
@@ -25,7 +24,6 @@ from .models import OrderDish
 from .models import OrderMenu
 from .models import OrderItem
 from .models import Order
-"""
 
 admin.site.register(Setting)
 
@@ -40,7 +38,6 @@ admin.site.register(Type)
 admin.site.register(Dish)
 admin.site.register(Menu)
 
-"""
 admin.site.register(OrderSize)
 admin.site.register(OrderAddingFlavor)
 admin.site.register(OrderAdding)
@@ -50,4 +47,3 @@ admin.site.register(OrderDish)
 admin.site.register(OrderMenu)
 admin.site.register(OrderItem)
 admin.site.register(Order)
-"""

@@ -490,11 +490,9 @@ def alter_order(request):
     if request.method != "POST":
         return HttpResponseRedirect(reverse("index"))
     else:
-        order_dish_id = request.POST["order-dish-id"]
-        order_type_id = request.POST["order-type-id"]
-        order_flavor_id = request.POST["order-flavor-id"]
-        order_size_id = request.POST["order-size-id"]
+        order_item_id = request.POST["order-item-id"]
 
+        """
         post_keys = request.POST.keys()
 
         if "order-adding-id" in post_keys:
@@ -517,12 +515,8 @@ def alter_order(request):
         else:
             order_adding_flavor_size_id = None
 
-        order_dish_id = None if order_dish_id == 'None' else order_dish_id
-        order_type_id = None if order_type_id == 'None' else order_type_id
-        order_flavor_id = (
-            None if order_flavor_id == 'None' else order_flavor_id
-        )
-        order_size_id = None if order_size_id == 'None' else order_size_id
+        order_item_id = None if order_item_id == 'None' else order_item_id
+
         order_adding_id = (
             None if order_adding_id == 'None' else order_adding_id
         )
@@ -535,49 +529,25 @@ def alter_order(request):
         order_adding_flavor_size_id = (
             None if order_adding_flavor_size_id == 'None' else order_adding_flavor_size_id
         )
+        """
 
-        order_dish = OrderDish.objects.filter(id=order_dish_id).first()
-        order_type = OrderType.objects.filter(id=order_type_id).first()
-        order_flavor = OrderFlavor.objects.filter(id=order_flavor_id).first()
-        order_size = OrderSize.objects.filter(id=order_size_id).first()
+        order_item = OrderItem.objects.filter(id=order_item_id).first()
 
+        """
         order_adding = OrderAdding.objects.filter(id=order_adding_id).first()
         order_adding_size = OrderSize.objects.filter(id=order_adding_size_id).first()
         order_adding_flavor = OrderFlavor.objects.filter(id=order_adding_flavor_id).first()
         order_adding_flavor_size = OrderSize.objects.filter(id=order_adding_flavor_size_id).first()
+        """
 
-        if request.POST["submit"] == 'inc-dish-count':
-            order_dish.count += 1
-            order_dish.save()
-        elif request.POST["submit"] == 'dec-dish-count':
-            if order_dish.count > 0:
-                order_dish.count -= 1
-                order_dish.save()
+        if request.POST["submit"] == 'inc-order-item-count':
+            order_item.count += 1
+            order_item.save()
+        elif request.POST["submit"] == 'dec-order-item-count':
+            order_item.count -= 1
+            order_item.save()
 
-        elif request.POST["submit"] == 'inc-type-count':
-            order_type.count += 1
-            order_type.save()
-        elif request.POST["submit"] == 'dec-type-count':
-            if order_type.count > 0:
-                order_type.count -= 1
-                order_type.save()
-
-        elif request.POST["submit"] == 'inc-flavor-count':
-            order_flavor.count += 1
-            order_flavor.save()
-        elif request.POST["submit"] == 'dec-flavor-count':
-            if order_flavor.count > 0:
-                order_flavor.count -= 1
-                order_flavor.save()
-
-        elif request.POST["submit"] == 'inc-size-count':
-            order_size.count += 1
-            order_size.save()
-        elif request.POST["submit"] == 'dec-size-count':
-            if order_size.count > 0:
-                order_size.count -= 1
-                order_size.save()
-
+        """
         elif request.POST["submit"] == 'inc-adding-count':
             order_adding.count += 1
             order_adding.save()
@@ -619,6 +589,13 @@ def alter_order(request):
         else:
             order_dish.cancel()
             return HttpResponseRedirect(reverse('cart'))
+        """
+
+        return HttpResponseRedirect(reverse(
+            'order_item', args=[order_item.id]
+            )
+        )
+
 
 
 def calc_order_size_price(order_size):
@@ -665,6 +642,8 @@ def calc_order_item_price(order_item):
     elif order_item['menu']:
         price = calc_order_elem_price(order_item['menu'])
 
+    price['value'] *= order_item['count']
+
     return price
 
 
@@ -682,6 +661,10 @@ def order_item(request, order_item_id):
 
     order_item_object = OrderItem.objects.filter(id=order_item_id).first()
     if not order_item_object:
+        return HttpResponseRedirect(reverse('cart'))
+
+    if order_item_object.count < 1:
+        order_item_object.cancel()
         return HttpResponseRedirect(reverse('cart'))
 
     pages_basic_data = get_pages_basic_data(request)

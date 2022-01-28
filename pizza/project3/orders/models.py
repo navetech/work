@@ -821,6 +821,8 @@ class OrderMenu(models.Model):
 
 
 class OrderItem(models.Model):
+    count = models.IntegerField(default=1, blank=True)
+
     menu = models.ForeignKey(
         OrderMenu, blank=True, null=True, on_delete=models.CASCADE,
         related_name='menu_OrderItem_related'
@@ -873,6 +875,8 @@ class OrderItem(models.Model):
         dict = {}
 
         dict['id'] = self.id
+
+        dict['count'] = self.count
 
         dict['menu'] = to_dict(self.menu, **settings)
         dict['dish'] = to_dict(self.dish, **settings)
