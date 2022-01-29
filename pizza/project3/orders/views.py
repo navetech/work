@@ -687,6 +687,119 @@ def fill_order_item_price(order_item):
     return order_item
 
 
+def insert_order_adding_flavor_sizes(sizes, order_adding_flavor):
+    for order_adding_flavor_size in order_adding_flavor['sizes']:
+        inserted = False
+        for size in sizes:
+            if size['name'] == order_adding_flavor_size['elem']['name']:
+                inserted = True
+                break
+
+        if not inserted:
+            sizes.append(order_adding_flavor_size['elem'])
+
+    return sizes
+
+
+def build_order_adding_flavors_table(order_adding):
+    table = {}
+
+    sizes = []
+    for order_adding_flavor in order_adding['flavors']:
+        sizes = insert_order_adding_flavor_sizes(sizes, order_adding_flavor)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
+    table['sizes'] = sizes
+
+    return table
+
+
+def build_order_adding_flavor_sizes_columns(sizes, order_adding_flavor):
+    columns = []
+    for size in sizes:
+        present = False
+        for order_adding_flavor_size in order_adding_flavor['sizes']:
+            if size['name'] == order_adding_flavor_size['elem']['name']:
+                present = True
+                break
+
+        if present:
+            columns.append(order_adding_flavor_size)
+        else:
+            columns.append(None)
+
+    return columns
+
+
+def fill_order_adding_tables(order_adding):
+    if 'flavors' in order_adding and order_adding['flavors']:
+        flavors_table = build_order_adding_flavors_table(order_adding)
+        order_adding['flavors_table'] = flavors_table
+
+        for order_adding_flavor in order_adding['flavors']:
+            order_adding_flavor['size_columns'] = build_order_adding_flavor_sizes_columns(
+                sizes=flavors_table['sizes'], order_adding_flavor=order_adding_flavor
+            )
+
+
+def fill_order_elem_tables(order_elem):
+    for order_adding in order_elem['addings']:
+        order_adding = fill_order_adding_tables(order_adding)
+    
+    return order_elem
+
+
+def fill_order_item_tables(order_item):
+    if 'flavor' in order_item and order_item['flavor']:
+        order_elem = order_item['flavor']
+        order_elem = fill_order_elem_tables(order_elem)
+        order_item['flavor'] = order_elem
+
+    elif 'type' in order_item and order_item['type']:
+        order_elem = order_item['type']
+        order_elem = fill_order_elem_tables(order_elem)
+        order_item['type'] = order_elem
+
+    elif 'dish' in order_item and order_item['dish']:
+        order_elem = order_item['dish']
+        order_elem = fill_order_elem_tables(order_elem)
+        order_item['dish'] = order_elem
+
+    elif 'menu' in order_item and order_item['menu']:
+        order_elem = order_item['menu']
+        order_elem = fill_order_elem_tables(order_elem)
+        order_item['menu'] = order_elem
+
+    return order_item
+
+
+
+    if 'dishes' in elem and elem['dishes']:
+        lista = []
+        for dish in elem['dishes']:
+            e = fill_menu_elem_tables(dish)
+            lista.append(e)
+        elem['dishes'] = lista
+
+    if 'types' in elem and elem['types']:
+        lista = []
+        for type in elem['types']:
+            e = fill_menu_elem_tables(type)
+            lista.append(e)
+        elem['types'] = lista
+
+    if 'flavors' in elem and elem['flavors']:
+        flavors_table = build_menu_elem_flavors_table(elem)
+        elem['flavors_table'] = flavors_table
+
+        for flavor in elem['flavors']:
+            flavor['size_columns'] = build_menu_elem_sizes_columns(
+                sizes=flavors_table['sizes'], elem=flavor
+            )
+
+    return elem
+
+
 def order_item(request, order_item_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
@@ -717,6 +830,7 @@ def order_item(request, order_item_id):
     currencies = pages_basic_data['currencies']
 
     order_item = to_dict(order_item_object, language=language, currency=currency)
+    order_item = fill_order_item_tables(order_item)
     order_item = fill_order_item_price(order_item)
 
     """"

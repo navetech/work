@@ -604,22 +604,54 @@ class OrderSize(models.Model):
         return dict
 
 
+class OrderAddingFlavorSize(models.Model):
+    elem = models.ForeignKey(
+        Size, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='elem_OrderAddigFlavorSize_related'
+    )
+
+    selected = models.BooleanField(default=False)
+
+    def cancel(self):
+        self.delete()
+
+    def __str__(self):
+        return (
+            f'{self.elem}, '
+        )
+
+    def to_dict(self, **settings):
+        dict = {}
+
+        dict['id'] = self.id
+
+        dict['elem'] = menu_elem_to_dict(
+            dict, self.elem, **settings
+        )
+
+        dict['selected'] = self.selected
+
+        return dict
+
+
 class OrderAddingFlavor(models.Model):
     elem = models.ForeignKey(
         AddingFlavor, blank=True, null=True, on_delete=models.CASCADE,
         related_name='elem_OrderAddigFlavor_related'
     )
 
-    size = models.ForeignKey(
-        OrderSize, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='size_OrderAddingFlavor_related'
+    sizes = models.ManyToManyField(
+        OrderAddingFlavorSize, blank=True,
+        related_name='sizes_OrderAddingFlavor_related'
     )
+
+    sizes_selection_count = models.IntegerField(default=0, blank=True)
 
     selected = models.BooleanField(default=False)
 
     def cancel(self):
-        if self.size:
-            self.size.cancel()
+        for size in self.sizes.all():
+            size.cancel()
 
         self.delete()
 
@@ -637,7 +669,9 @@ class OrderAddingFlavor(models.Model):
             dict, self.elem, **settings
         )
 
-        dict['size'] = to_dict(self.size, **settings)
+        dict['sizes'] = to_dict_list(self.sizes, **settings)
+
+        dict['sizes_selection_count'] = self.sizes_selection_count
 
         dict['selected'] = self.selected
 
@@ -939,10 +973,31 @@ class HistoricOrder(models.Model):
 """
 
 
-def create_order_adding_flavor(adding_flavor, selected):
-    order_elem = OrderAddingFlavor(elem=adding_flavor, selected=selected)
+def create_order_adding_flavor_size(order_adding_flavor_size, selected):
+    order_elem = OrderAddingFlavorSize(elem=order_adding_flavor_size, selected=selected)
     if order_elem:
         order_elem.save()
+
+    return order_elem
+
+
+def create_order_adding_flavor(adding_flavor, selected):
+    order_elem = OrderAddingFlavor(elem=adding_flavor, selected=selected, sizes_selection_count=0)
+    if order_elem:
+        order_elem.save()
+
+        sizes = adding_flavor.sizes.all()
+        for size in sizes:
+            if selected:
+                if size == sizes[0]:
+                    order_elem.sizes_selection_count += 1
+                    order_elem.save()
+                else:
+                    selected = False
+                
+            order_adding_flavor_size = create_order_adding_flavor_size(size, selected)
+            order_elem.flavors.add(order_adding_flavor_size)
+            order_elem.save()
 
     return order_elem
 
