@@ -639,6 +639,8 @@ class OrderAddingFlavor(models.Model):
 
         dict['size'] = to_dict(self.size, **settings)
 
+        dict['selected'] = self.selected
+
         return dict
 
 
@@ -652,6 +654,8 @@ class OrderAdding(models.Model):
         OrderAddingFlavor, blank=True,
         related_name='flavors_OrderAdding_related'
     )
+
+    flavors_selection_count = models.IntegerField(default=0, blank=True)
 
     def cancel(self):
         for flavor in self.flavors.all():
@@ -674,6 +678,8 @@ class OrderAdding(models.Model):
         )
 
         dict['flavors'] = to_dict_list(self.flavors, **settings)
+
+        dict['flavors_selection_count'] = self.flavors_selection_count
 
         return dict
 
@@ -942,7 +948,7 @@ def create_order_adding_flavor(adding_flavor, selected):
 
 
 def create_order_adding(adding):
-    order_elem = OrderAdding(elem=adding)
+    order_elem = OrderAdding(elem=adding, flavors_selection_count=0)
     if order_elem:
         order_elem.save()
 
@@ -950,6 +956,8 @@ def create_order_adding(adding):
         for flavor in flavors:
             if flavor.special and adding.only_special_flavors:
                 selected = True
+                order_elem.flavors_selection_count += 1
+                order_elem.save()
             else:
                 selected = False
                 

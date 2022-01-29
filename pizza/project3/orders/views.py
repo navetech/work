@@ -27,10 +27,10 @@ from .models import menu_elem_to_dict
 from .models import get_order_item_by_user, create_order_item_for_user
 
 from .models import Order, OrderItem
+from .models import OrderAdding, OrderAddingFlavor
 """
 from .models import OrderMenu, OrderDish, OrderType
 from .models import OrderFlavor, OrderSize
-from .models import OrderAdding, OrderAddingFlavor
 """
 
 from django.http import JsonResponse
@@ -490,21 +490,17 @@ def alter_order(request):
     if request.method != "POST":
         return HttpResponseRedirect(reverse("index"))
     else:
-        order_item_id = request.POST["order-item-id"]
-
         post_keys = request.POST.keys()
 
-        """
+        if "order-item-id" in post_keys:
+            order_item_id = request.POST["order-item-id"]
+        else:
+            order_item_id = None
+
         if "order-adding-id" in post_keys:
             order_adding_id = request.POST["order-adding-id"]
         else:
             order_adding_id = None
-
-        if "order-adding-size-id" in post_keys:
-            order_adding_size_id = request.POST["order-adding-size-id"]
-        else:
-            order_adding_size_id = None
-        """
 
         if "order-adding-flavor-id" in post_keys:
             order_adding_flavor_id = request.POST["order-adding-flavor-id"]
@@ -516,31 +512,36 @@ def alter_order(request):
             order_adding_flavor_size_id = request.POST["order-adding-flavor-size-id"]
         else:
             order_adding_flavor_size_id = None
+        """
 
         order_item_id = None if order_item_id == 'None' else order_item_id
 
         order_adding_id = (
             None if order_adding_id == 'None' else order_adding_id
         )
-        order_adding_size_id = (
-            None if order_adding_size_id == 'None' else order_adding_size_id
-        )
         order_adding_flavor_id = (
             None if order_adding_flavor_id == 'None' else order_adding_flavor_id
         )
+        """
         order_adding_flavor_size_id = (
             None if order_adding_flavor_size_id == 'None' else order_adding_flavor_size_id
         )
         """
+        print(order_item_id)
+        print(order_adding_id)
+        print(order_adding_flavor_id)
 
         order_item = OrderItem.objects.filter(id=order_item_id).first()
 
-        """
         order_adding = OrderAdding.objects.filter(id=order_adding_id).first()
-        order_adding_size = OrderSize.objects.filter(id=order_adding_size_id).first()
-        order_adding_flavor = OrderFlavor.objects.filter(id=order_adding_flavor_id).first()
+        order_adding_flavor = OrderAddingFlavor.objects.filter(id=order_adding_flavor_id).first()
+        """
         order_adding_flavor_size = OrderSize.objects.filter(id=order_adding_flavor_size_id).first()
         """
+
+        print(order_item)
+        print(order_adding)
+        print(order_adding_flavor)
 
         if request.POST["submit"] == 'inc-order-item-count':
             order_item.count += 1
@@ -548,6 +549,37 @@ def alter_order(request):
         elif request.POST["submit"] == 'dec-order-item-count':
             order_item.count -= 1
             order_item.save()
+
+        elif request.POST["submit"] == 'order-adding-flavor-select':
+            limit = order_adding.elem.flavors_selection_limit
+
+            if order_adding_flavor.selected:
+                print('selected')
+                if (
+                    not limit or limit.min is None
+                    or
+                    order_adding.flavors_selection_count > limit.min
+                ):
+                    print('xxxxselected')
+                    order_adding_flavor.selected = False
+                    order_adding_flavor.save()
+                    order_adding.flavors_selection_count -= 1
+                    order_adding.save()
+            else:
+                print('unselected')
+                if (
+                    not limit or limit.max is None
+                    or limit.max < 0
+                    or (
+                        (limit.min is not None) and limit.max < limit.min
+                    )
+                    or order_adding.flavors_selection_count < limit.max
+                ):
+                    print('xxxx unselected')
+                    order_adding_flavor.selected = True
+                    order_adding_flavor.save()
+                    order_adding.flavors_selection_count += 1
+                    order_adding.save()
 
         """
         elif request.POST["submit"] == 'inc-adding-count':
