@@ -1,70 +1,47 @@
-<li class="list-group-item ln-container01">
-    <h5>{{ order_adding.menu.short_name.translated.words }}</h6>
-    <h5>{{ order_adding.menu.long_name.translated.words }}</h6>
+<li class="list-group-item ln-container02">
+    <h4>{{ order_adding.elem.short_name.translated.words }}</h4>
+    <h4>{{ order_adding.elem.full_name }}</h4>
 
-    <ul class="list-group pt-4">
-        {% if order_adding.flavors %}
-            <li class="list-group-item ln-container02">
-                <table style="width:100%">
-                    {% if order_adding.flavors_columns.sizes %}
+    {% if order_adding.flavors %}
+        <table style="width:100%">
+            {% if order_adding.elem.only_special_flavors %}
+                {% for order_adding_flavor in order_adding.flavors %}
+                    {% if order_adding_flavor.selected %}
                         <tr>
-                            {% for order_adding_flavor_size in order_adding.flavors_columns.sizes %}
-                                <th></th>
-                                <th></th>
-                                <th>{{ order_adding_flavor_size.menu.short_name.translated.words }}</th>
-                            {% endfor %}
+                            <td>
+                                {{ order_adding_flavor.elem.name.translated.words }}
+                                {{ order_adding_flavor.elem.full_name }}
+                            </td>
                         </tr>
                     {% endif %}
-        
+                {% endfor %}
+            {% else %}
+                <div class="ln-group-divider"></div>
+                <form action="{% url 'alter_order' %}" method="post">
+                    {% csrf_token %}
+                    <input type="checkbox" id="vehicle1" name="vehicle1" value="Bike">
+                    <label for="vehicle1"> I have a bike</label><br>
+                    <input type="checkbox" id="vehicle2" name="vehicle2" value="Car">
+                    <label for="vehicle2"> I have a car</label><br>
+                    <input type="checkbox" id="vehicle3" name="vehicle3" value="Boat">
+                    <label for="vehicle3"> I have a boat</label>
                     {% for order_adding_flavor in order_adding.flavors %}
-                        {% include "orders/order-item-adding-flavor.html" %}
+                        <tr>
+                            <td>
+                                {% if order_adding_flavor.selected %}
+                                    <input type='checkbox' checked id={{ order_adding_flavor.id }} name='order-adding-flavor-id' value={{ order_adding_flavor.id|default:None }}>
+                                {% else %}
+                                    <input type='checkbox' id={{ order_adding_flavor.id }} name='order-adding-flavor-id' value={{ order_adding_flavor.id|default:None }}>
+                                {% endif %}
+                                <label for={{ order_adding_flavor.id }}>
+                                    {{ order_adding_flavor.elem.name.translated.words }}
+                                    {{ order_adding_flavor.elem.full_name }}
+                                </label>
+                            </td>
+                        </tr>
                     {% endfor %}
-                </table>
-            </li>
-        {% endif %}
-
-        {% if order_adding.sizes %}
-            <li class="list-group-item ln-container02">
-                <table style="width:100%">
-                    <tr>
-                        {% for order_adding_size in order_adding.sizes %}
-                            <th>{{ order_adding_size.menu.short_name.translated.words }}</th>
-                            <th></th>
-                        {% endfor %}
-                    </tr>
-        
-                    <tr>
-                        {% for order_adding_size in order_adding.sizes %}
-                            <td>
-                                {{ order_adding_size.menu.quantity.converted.value|floatformat:2 }}
-                                {{ order_adding_size.menu.quantity.converted.unit }}
-                            </td>
-                            
-                            <td>
-                                <div class="ln-group-divider"></div>
-                                <form action="{% url 'alter_order' %}" method="post">
-                                    {% csrf_token %}
-                                    <input type='text' style='display:none' name='order-dish-id' value={{ order_dish.id|default:None }}>
-                                    <input type='text' style='display:none' name='order-type-id' value={{ order_type.id|default:None }}>
-                                    <input type='text' style='display:none' name='order-flavor-id' value={{ order_flavor.id|default:None }}>
-                                    <input type='text' style='display:none' name='order-size-id' value={{ order_size.id|default:None }}>
-
-                                    <input type='text' style='display:none' name='order-adding-size-id' value={{ order_adding_size.id|default:None }}>
-
-                                    <button type="submit" name="submit" value="dec-adding-size-count">-</button>
-                                    <span>{{ order_adding_size.count }}</span>
-                                    <button type="submit" name="submit" value="inc-adding-size-count">+</button>
-                                </form>
-                            </td>
-                        {% endfor %}
-                    </tr>
-                </table>
-            </li>
-        {% endif %}
-
-        {% if order_adding.plain %}
-            {% include "orders/order-item-adding-plain.html" %}
-        {% endif %}
-
-    </ul>
+                </form>
+            {% endif %}
+        </table>
+    {% endif %}
 </li>

@@ -492,9 +492,9 @@ def alter_order(request):
     else:
         order_item_id = request.POST["order-item-id"]
 
-        """
         post_keys = request.POST.keys()
 
+        """
         if "order-adding-id" in post_keys:
             order_adding_id = request.POST["order-adding-id"]
         else:
@@ -504,12 +504,14 @@ def alter_order(request):
             order_adding_size_id = request.POST["order-adding-size-id"]
         else:
             order_adding_size_id = None
+        """
 
         if "order-adding-flavor-id" in post_keys:
             order_adding_flavor_id = request.POST["order-adding-flavor-id"]
         else:
             order_adding_flavor_id = None
 
+        """
         if "order-adding-flavor-size-id" in post_keys:
             order_adding_flavor_size_id = request.POST["order-adding-flavor-size-id"]
         else:

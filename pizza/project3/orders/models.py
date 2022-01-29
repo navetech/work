@@ -615,6 +615,8 @@ class OrderAddingFlavor(models.Model):
         related_name='size_OrderAddingFlavor_related'
     )
 
+    selected = models.BooleanField(default=False)
+
     def cancel(self):
         if self.size:
             self.size.cancel()
@@ -931,8 +933,8 @@ class HistoricOrder(models.Model):
 """
 
 
-def create_order_adding_flavor(adding_flavor):
-    order_elem = OrderAddingFlavor(elem=adding_flavor)
+def create_order_adding_flavor(adding_flavor, selected):
+    order_elem = OrderAddingFlavor(elem=adding_flavor, selected=selected)
     if order_elem:
         order_elem.save()
 
@@ -943,13 +945,17 @@ def create_order_adding(adding):
     order_elem = OrderAdding(elem=adding)
     if order_elem:
         order_elem.save()
-        if adding.only_special_flavors:
-            flavors = adding.flavors_set.flavors.all()
-            for flavor in flavors:
-                if flavor.special:
-                    order_adding_flavor = create_order_adding_flavor(flavor)
-                    order_elem.flavors.add(order_adding_flavor)
-                    order_elem.save()
+
+        flavors = adding.flavors_set.flavors.all()
+        for flavor in flavors:
+            if flavor.special and adding.only_special_flavors:
+                selected = True
+            else:
+                selected = False
+                
+            order_adding_flavor = create_order_adding_flavor(flavor, selected)
+            order_elem.flavors.add(order_adding_flavor)
+            order_elem.save()
 
     return order_elem
 
@@ -1082,6 +1088,7 @@ def create_order_item(
 
     if menu or dish or type or flavor or size:
         order_item = OrderItem(
+            count=1,
             menu=menu, dish=dish, type=type,
             flavor=flavor, size=size
         )
