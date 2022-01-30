@@ -669,15 +669,16 @@ def calc_order_adding_flavor_price(order_adding_flavor):
     unit = None
 
     if order_adding_flavor['selected']:
-        if order_adding_flavor['elem']['quantity']:
-            value += order_adding_flavor['elem']['quantity']['converted']['value']
-            unit = order_adding_flavor['elem']['quantity']['converted']['unit']
-
-        for order_adding_flavor_size in order_adding_flavor['sizes']:
-            prc = calc_order_adding_flavor_size_price(order_adding_flavor_size)
-            value += prc['value']
-            if prc['unit']:
-                unit = prc['unit']
+        if order_adding_flavor['sizes_quantities_count'] < 1:
+            if order_adding_flavor['elem']['quantity']:
+                value += order_adding_flavor['elem']['quantity']['converted']['value']
+                unit = order_adding_flavor['elem']['quantity']['converted']['unit']
+        else:
+            for order_adding_flavor_size in order_adding_flavor['sizes']:
+                prc = calc_order_adding_flavor_size_price(order_adding_flavor_size)
+                value += prc['value']
+                if prc['unit']:
+                    unit = prc['unit']
 
     price = {
         'value': value,
@@ -777,12 +778,58 @@ def insert_order_adding_flavor_sizes(sizes, order_adding_flavor):
     return sizes
 
 
+def insert_order_adding_flavor_special_sizes(sizes, order_adding_flavor):
+    special_count = 0
+    for order_adding_flavor_size in order_adding_flavor['sizes']:
+        if order_adding_flavor_size['elem']['special']:
+            special_count += 1
+            inserted = False
+            for size in sizes:
+                if size['name'] == order_adding_flavor_size['elem']['name']:
+                    inserted = True
+                    break
+
+            if not inserted:
+                sizes.append(order_adding_flavor_size['elem'])
+    print(special_count)
+
+    if special_count < 1:
+        for order_adding_flavor_size in order_adding_flavor['sizes']:
+            print(order_adding_flavor_size['selected'])
+            if order_adding_flavor_size['selected']:
+                inserted = False
+                for size in sizes:
+                    if size['name'] == order_adding_flavor_size['elem']['name']:
+                        inserted = True
+                        break
+
+                if not inserted:
+                    sizes.append(order_adding_flavor_size['elem'])
+
+    return sizes
+
+
 def build_order_adding_flavors_table(order_adding):
     table = {}
 
     sizes = []
     for order_adding_flavor in order_adding['flavors']:
         sizes = insert_order_adding_flavor_sizes(sizes, order_adding_flavor)
+
+    sizes.sort(key=lambda size: size['sort_number'], reverse=False)
+    table['sizes'] = sizes
+
+    return table
+
+
+def build_order_adding_special_flavors_table(order_adding):
+    table = {}
+
+    sizes = []
+    for order_adding_flavor in order_adding['flavors']:
+        if order_adding_flavor['elem']['special']:
+            sizes = insert_order_adding_flavor_special_sizes(sizes, order_adding_flavor)
+            print(sizes)
 
     sizes.sort(key=lambda size: size['sort_number'], reverse=False)
     table['sizes'] = sizes
@@ -818,10 +865,41 @@ def fill_order_adding_tables(order_adding):
         flavors_table = build_order_adding_flavors_table(order_adding)
         order_adding['flavors_table'] = flavors_table
 
+        special_flavors_table = build_order_adding_special_flavors_table(order_adding)
+        order_adding['special_flavors_table'] = special_flavors_table
+
         for order_adding_flavor in order_adding['flavors']:
             order_adding_flavor['size_columns'] = build_order_adding_flavor_sizes_columns(
                 sizes=flavors_table['sizes'], order_adding_flavor=order_adding_flavor
             )
+
+            if order_adding_flavor['elem']['special']:
+                order_adding_flavor['special_size_columns'] = build_order_adding_flavor_sizes_columns(
+                    sizes=special_flavors_table['sizes'], order_adding_flavor=order_adding_flavor
+                )
+
+            sizes_quantities_count = 0
+            for order_adding_flavor_size in order_adding_flavor['size_columns']:
+                if (
+                    'quantity' in order_adding_flavor_size['elem'] 
+                    and 
+                    order_adding_flavor_size['elem']['quantity']
+                ):
+                    sizes_quantities_count += 1
+
+            order_adding_flavor['sizes_quantities_count'] = sizes_quantities_count
+
+            special_sizes_quantities_count = 0
+            if order_adding_flavor['elem']['special']:
+                for order_adding_flavor_size in order_adding_flavor['special_size_columns']:
+                    if (
+                        'quantity' in order_adding_flavor_size['elem'] 
+                        and 
+                        order_adding_flavor_size['elem']['quantity']
+                    ):
+                        special_sizes_quantities_count += 1
+
+            order_adding_flavor['special_sizes_quantities_count'] = special_sizes_quantities_count
 
 
 def fill_order_elem_tables(order_elem):
@@ -913,6 +991,7 @@ def fill_order_price(order):
         }
 
     for order_item in order['items']:
+        order_item = fill_order_item_tables(order_item)
         order_item = fill_order_item_price(order_item)
 
         price['value'] += order_item['price']['value']

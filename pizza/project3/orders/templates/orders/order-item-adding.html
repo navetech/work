@@ -2,17 +2,23 @@
     <h4>{{ order_adding.elem.short_name.translated.words }}</h4>
     <h4>{{ order_adding.elem.full_name }}</h4>
 
+    {{ order_adding.elem.quantity.converted.value|floatformat:2 }}
+    {{ order_adding.elem.quantity.converted.unit }}
+
     {% if order_adding.flavors %}
         <table style="width:100%">
-            {% if order_adding.elem.only_special_flavors %}
+            {% if order_adding.elem.only_special_selection %}
+                <tr>
+                    <th></th>
+                    <th></th>
+                    {% for size in order_adding.special_flavors_table.sizes %}
+                        {% include "orders/order-item-table-size-header.html" %}
+                    {% endfor %}
+                </tr>
+
                 {% for order_adding_flavor in order_adding.flavors %}
                     {% if order_adding_flavor.selected %}
-                        <tr>
-                            <td>
-                                {{ order_adding_flavor.elem.name.translated.words }}
-                                {{ order_adding_flavor.elem.full_name }}
-                            </td>
-                        </tr>
+                        {% include "orders/order-item-table-adding-special-flavor-line.html" %}
                     {% endif %}
                 {% endfor %}
             {% else %}

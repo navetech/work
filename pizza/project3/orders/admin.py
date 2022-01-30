@@ -7,6 +7,7 @@ from .models import Setting
 from .models import CountLimit
 
 from .models import Size
+from .models import AddingFlavorSize
 from .models import AddingFlavor
 from .models import AddingFlavorSet
 from .models import Adding
@@ -31,6 +32,7 @@ admin.site.register(Setting)
 admin.site.register(CountLimit)
 
 admin.site.register(Size)
+admin.site.register(AddingFlavorSize)
 admin.site.register(AddingFlavor)
 admin.site.register(AddingFlavorSet)
 admin.site.register(Adding)
