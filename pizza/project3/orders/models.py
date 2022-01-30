@@ -264,6 +264,18 @@ class CountLimit(models.Model):
         return dict
 
 
+def build_elem_full_name(elem, container_dict):
+    full_name = elem.name.words
+
+    if container_dict:
+        if 'full_name' in container_dict:
+            full_name += (
+                ' ' + container_dict['full_name']
+            )
+
+    return full_name
+
+
 class MenuElementDefinitionFields(models.Model):
     sort_number = models.FloatField(default=0)
 
@@ -320,15 +332,10 @@ class MenuElementDefinitionFields(models.Model):
         dict['long_name'] = to_dict(self.long_name, **settings)
         dict['description'] = to_dict(self.description, **settings)
 
-        dict['full_name'] = self.name.words
+        dict['full_name'] = build_elem_full_name(self, container_dict)
 
         if container_dict:
             dict['container'] = container_dict
-
-            if 'full_name' in container_dict:
-                dict['full_name'] += (
-                    ' ' + container_dict['full_name']
-                )
 
         return dict
 
@@ -441,7 +448,7 @@ class Adding(MenuElementFields):
             self, container_dict, **settings
         )
 
-        dict['flavors_set'] = menu_elem_to_dict(
+        dict['flavors_set'] = elem_to_dict(
             dict, self.flavors_set, **settings
         )
 
@@ -556,7 +563,7 @@ class Menu(MenuFields):
     pass
 
 
-def menu_elem_to_dict(container_dict, object, **settings):
+def elem_to_dict(container_dict, object, **settings):
     if object:
         dict = object.to_dict(container_dict, **settings)
     else:
@@ -572,7 +579,20 @@ def menu_elems_to_dict_list(
 
     objects = manager.all().order_by(*order_by_field_names)
     for object in objects:
-        dict = menu_elem_to_dict(container_dict, object, **settings)
+        dict = elem_to_dict(container_dict, object, **settings)
+        dict_list.append(dict)
+
+    return dict_list
+
+
+def order_item_elems_to_dict_list(
+    container_dict, manager, **settings
+):
+    dict_list = []
+
+    objects = manager.all()
+    for object in objects:
+        dict = elem_to_dict(container_dict, object, **settings)
         dict_list.append(dict)
 
     return dict_list
@@ -592,12 +612,17 @@ class OrderSize(models.Model):
             f'{self.elem}, '
         )
 
-    def to_dict(self, **settings):
+    def to_dict(self, container_dict=None, **settings):
         dict = {}
 
         dict['id'] = self.id
 
-        dict['elem'] = menu_elem_to_dict(
+        dict['full_name'] = build_elem_full_name(self.elem, container_dict)
+
+        if container_dict:
+            dict['container'] = container_dict
+
+        dict['elem'] = elem_to_dict(
             dict, self.elem, **settings
         )
 
@@ -620,12 +645,17 @@ class OrderAddingFlavorSize(models.Model):
             f'{self.elem}, '
         )
 
-    def to_dict(self, **settings):
+    def to_dict(self, container_dict=None, **settings):
         dict = {}
 
         dict['id'] = self.id
 
-        dict['elem'] = menu_elem_to_dict(
+        dict['full_name'] = build_elem_full_name(self.elem, container_dict)
+
+        if container_dict:
+            dict['container'] = container_dict
+
+        dict['elem'] = elem_to_dict(
             dict, self.elem, **settings
         )
 
@@ -660,16 +690,23 @@ class OrderAddingFlavor(models.Model):
             f'{self.elem}, '
         )
 
-    def to_dict(self, **settings):
+    def to_dict(self, container_dict=None, **settings):
         dict = {}
 
         dict['id'] = self.id
 
-        dict['elem'] = menu_elem_to_dict(
+        dict['full_name'] = build_elem_full_name(self.elem, container_dict)
+
+        if container_dict:
+            dict['container'] = container_dict
+
+        dict['elem'] = elem_to_dict(
             dict, self.elem, **settings
         )
 
-        dict['sizes'] = to_dict_list(self.sizes, **settings)
+        dict['sizes'] = order_item_elems_to_dict_list(
+            dict, self.sizes,  **settings
+        )
 
         dict['sizes_selection_count'] = self.sizes_selection_count
 
@@ -702,16 +739,23 @@ class OrderAdding(models.Model):
             f'{self.elem}, '
         )
 
-    def to_dict(self, **settings):
+    def to_dict(self, container_dict=None, **settings):
         dict = {}
 
         dict['id'] = self.id
 
-        dict['elem'] = menu_elem_to_dict(
+        dict['full_name'] = build_elem_full_name(self.elem, container_dict)
+
+        if container_dict:
+            dict['container'] = container_dict
+
+        dict['elem'] = elem_to_dict(
             dict, self.elem, **settings
         )
 
-        dict['flavors'] = to_dict_list(self.flavors, **settings)
+        dict['flavors'] = order_item_elems_to_dict_list(
+            dict, self.flavors,  **settings
+        )
 
         dict['flavors_selection_count'] = self.flavors_selection_count
 
@@ -740,16 +784,23 @@ class OrderFlavor(models.Model):
             f'{self.elem}, '
         )
 
-    def to_dict(self, **settings):
+    def to_dict(self, container_dict=None, **settings):
         dict = {}
 
         dict['id'] = self.id
 
-        dict['elem'] = menu_elem_to_dict(
+        dict['full_name'] = build_elem_full_name(self.elem, container_dict)
+
+        if container_dict:
+            dict['container'] = container_dict
+
+        dict['elem'] = elem_to_dict(
             dict, self.elem, **settings
         )
 
-        dict['addings'] = to_dict_list(self.addings, **settings)
+        dict['addings'] = order_item_elems_to_dict_list(
+            dict, self.addings,  **settings
+        )
 
         return dict
 
@@ -776,16 +827,23 @@ class OrderType(models.Model):
             f'{self.elem}, '
         )
 
-    def to_dict(self, **settings):
+    def to_dict(self, container_dict=None, **settings):
         dict = {}
 
         dict['id'] = self.id
 
-        dict['elem'] = menu_elem_to_dict(
+        dict['full_name'] = build_elem_full_name(self.elem, container_dict)
+
+        if container_dict:
+            dict['container'] = container_dict
+
+        dict['elem'] = elem_to_dict(
             dict, self.elem, **settings
         )
 
-        dict['addings'] = to_dict_list(self.addings, **settings)
+        dict['addings'] = order_item_elems_to_dict_list(
+            dict, self.addings,  **settings
+        )
 
         return dict
 
@@ -812,16 +870,23 @@ class OrderDish(models.Model):
             f'{self.proprio}, '
         )
 
-    def to_dict(self, **settings):
+    def to_dict(self, container_dict=None, **settings):
         dict = {}
 
         dict['id'] = self.id
 
-        dict['elem'] = menu_elem_to_dict(
+        dict['full_name'] = build_elem_full_name(self.elem, container_dict)
+
+        if container_dict:
+            dict['container'] = container_dict
+
+        dict['elem'] = elem_to_dict(
             dict, self.proprio, **settings
         )
 
-        dict['addings'] = to_dict_list(self.addings, **settings)
+        dict['addings'] = order_item_elems_to_dict_list(
+            dict, self.addings,  **settings
+        )
 
         return dict
 
@@ -848,16 +913,23 @@ class OrderMenu(models.Model):
             f'{self.elem}, '
         )
 
-    def to_dict(self, **settings):
+    def to_dict(self, container_dict=None, **settings):
         dict = {}
 
         dict['id'] = self.id
 
-        dict['elem'] = menu_elem_to_dict(
+        dict['full_name'] = build_elem_full_name(self.elem, container_dict)
+
+        if container_dict:
+            dict['container'] = container_dict
+
+        dict['elem'] = elem_to_dict(
             dict, self.elem, **settings
         )
 
-        dict['addings'] = to_dict_list(self.addings, **settings)
+        dict['addings'] = order_item_elems_to_dict_list(
+            dict, self.addings,  **settings
+        )
 
         return dict
 
@@ -996,7 +1068,7 @@ def create_order_adding_flavor(adding_flavor, selected):
                     selected = False
                 
             order_adding_flavor_size = create_order_adding_flavor_size(size, selected)
-            order_elem.flavors.add(order_adding_flavor_size)
+            order_elem.sizes.add(order_adding_flavor_size)
             order_elem.save()
 
     return order_elem

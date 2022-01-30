@@ -22,12 +22,12 @@ from .models import UserSetting
 
 from .models import Menu
 
-from .models import menu_elem_to_dict
+from .models import elem_to_dict
 
 from .models import get_order_item_by_user, create_order_item_for_user
 
 from .models import Order, OrderItem
-from .models import OrderAdding, OrderAddingFlavor
+from .models import OrderAdding, OrderAddingFlavor, OrderAddingFlavorSize
 """
 from .models import OrderMenu, OrderDish, OrderType
 from .models import OrderFlavor, OrderSize
@@ -188,6 +188,8 @@ def build_menu_elem_flavors_table(elem):
 
 def build_menu_elem_sizes_columns(sizes, elem):
     columns = []
+    not_empty_columns_count = 0
+
     for size in sizes:
         present = False
         for elem_size in elem['sizes']:
@@ -197,8 +199,12 @@ def build_menu_elem_sizes_columns(sizes, elem):
 
         if present:
             columns.append(elem_size)
+            not_empty_columns_count += 1
         else:
             columns.append(None)
+
+    if not_empty_columns_count < 1:
+        columns = []
 
     return columns
 
@@ -360,7 +366,7 @@ def fill_sub_globals(elem):
 def build_menu(**settings):
     menu_object = Menu.objects.first()
     container_dict = {}
-    menu = menu_elem_to_dict(container_dict, menu_object, **settings)
+    menu = elem_to_dict(container_dict, menu_object, **settings)
 
     menu = fill_menu_elem_tables(menu)
 
@@ -507,12 +513,10 @@ def alter_order(request):
         else:
             order_adding_flavor_id = None
 
-        """
         if "order-adding-flavor-size-id" in post_keys:
             order_adding_flavor_size_id = request.POST["order-adding-flavor-size-id"]
         else:
             order_adding_flavor_size_id = None
-        """
 
         order_item_id = None if order_item_id == 'None' else order_item_id
 
@@ -522,26 +526,15 @@ def alter_order(request):
         order_adding_flavor_id = (
             None if order_adding_flavor_id == 'None' else order_adding_flavor_id
         )
-        """
+
         order_adding_flavor_size_id = (
             None if order_adding_flavor_size_id == 'None' else order_adding_flavor_size_id
         )
-        """
-        print(order_item_id)
-        print(order_adding_id)
-        print(order_adding_flavor_id)
 
         order_item = OrderItem.objects.filter(id=order_item_id).first()
-
         order_adding = OrderAdding.objects.filter(id=order_adding_id).first()
         order_adding_flavor = OrderAddingFlavor.objects.filter(id=order_adding_flavor_id).first()
-        """
-        order_adding_flavor_size = OrderSize.objects.filter(id=order_adding_flavor_size_id).first()
-        """
-
-        print(order_item)
-        print(order_adding)
-        print(order_adding_flavor)
+        order_adding_flavor_size = OrderAddingFlavorSize.objects.filter(id=order_adding_flavor_size_id).first()
 
         if request.POST["submit"] == 'inc-order-item-count':
             order_item.count += 1
@@ -554,19 +547,16 @@ def alter_order(request):
             limit = order_adding.elem.flavors_selection_limit
 
             if order_adding_flavor.selected:
-                print('selected')
                 if (
                     not limit or limit.min is None
                     or
                     order_adding.flavors_selection_count > limit.min
                 ):
-                    print('xxxxselected')
                     order_adding_flavor.selected = False
                     order_adding_flavor.save()
                     order_adding.flavors_selection_count -= 1
                     order_adding.save()
             else:
-                print('unselected')
                 if (
                     not limit or limit.max is None
                     or limit.max < 0
@@ -575,55 +565,65 @@ def alter_order(request):
                     )
                     or order_adding.flavors_selection_count < limit.max
                 ):
-                    print('xxxx unselected')
                     order_adding_flavor.selected = True
                     order_adding_flavor.save()
                     order_adding.flavors_selection_count += 1
                     order_adding.save()
 
-        """
-        elif request.POST["submit"] == 'inc-adding-count':
-            order_adding.count += 1
-            order_adding.save()
-        elif request.POST["submit"] == 'dec-adding-count':
-            if order_adding.count > 0:
-                order_adding.count -= 1
-                order_adding.save()
 
-        elif request.POST["submit"] == 'inc-adding-size-count':
-            order_adding_size.count += 1
-            order_adding_size.save()
-        elif request.POST["submit"] == 'dec-adding-size-count':
-            if order_adding_size.count > 0:
-                order_adding_size.count -= 1
-                order_adding_size.save()
+        elif request.POST["submit"] == 'order-adding-flavor-size-select':
+            limit = order_adding.elem.flavors_selection_limit
 
-        elif request.POST["submit"] == 'inc-adding-flavor-count':
-            order_adding_flavor.count += 1
-            order_adding_flavor.save()
-        elif request.POST["submit"] == 'dec-adding-flavor-count':
-            if order_adding_flavor.count > 0:
-                order_adding_flavor.count -= 1
-                order_adding_flavor.save()
+            if order_adding_flavor_size.selected:
+                if (
+                    not limit or limit.min is None
+                    or
+                    order_adding.flavors_selection_count > limit.min
+                ):
+                    order_adding_flavor_size.selected = False
+                    order_adding_flavor_size.save()
+                    order_adding_flavor.sizes_selection_count -= 1
+                    order_adding_flavor.save()
 
-        elif request.POST["submit"] == 'inc-adding-flavor-size-count':
-            order_adding_flavor_size.count += 1
-            order_adding_flavor_size.save()
-        elif request.POST["submit"] == 'dec-adding-flavor-size-count':
-            if order_adding_flavor_size.count > 0:
-                order_adding_flavor_size.count -= 1
-                order_adding_flavor_size.save()
+                    if order_adding_flavor.sizes_selection_count < 1:
+                        order_adding_flavor.selected = False
+                        order_adding_flavor.save()
 
-        check = order_dish.check_count()
-        if check['count'] > 0:
-            return HttpResponseRedirect(reverse(
-                    'order_item', args=[order_dish.id]
-                )
-            )
-        else:
-            order_dish.cancel()
-            return HttpResponseRedirect(reverse('cart'))
-        """
+                    order_adding.flavors_selection_count -= 1
+                    order_adding.save()
+            else:
+                for size in order_adding_flavor.sizes.all():
+                    if size.selected:
+                        size.selected = False 
+                        size.save()
+                        order_adding_flavor.sizes_selection_count -= 1
+                        order_adding_flavor.save()
+
+                        if order_adding_flavor.sizes_selection_count < 1:
+                            order_adding_flavor.selected = False
+                            order_adding_flavor.save()
+
+                        order_adding.flavors_selection_count -= 1
+                        order_adding.save()
+
+                if (
+                    not limit or limit.max is None
+                    or limit.max < 0
+                    or (
+                        (limit.min is not None) and limit.max < limit.min
+                    )
+                    or order_adding.flavors_selection_count < limit.max
+                ):
+                    order_adding_flavor_size.selected = True
+                    order_adding_flavor_size.save()
+                    order_adding_flavor.sizes_selection_count += 1
+                    order_adding_flavor.save()
+
+                    order_adding_flavor.selected = True
+                    order_adding_flavor.save()
+
+                    order_adding.flavors_selection_count += 1
+                    order_adding.save()
 
         return HttpResponseRedirect(reverse(
             'order_item', args=[order_item.id]
@@ -632,8 +632,74 @@ def alter_order(request):
 
 
 def calc_order_size_price(order_size):
-    value = order_size['elem']['quantity']['converted']['value']
-    unit = order_size['elem']['quantity']['converted']['unit']
+    value = 0
+    unit = None
+
+    if order_size['elem']['quantity']:
+        value += order_size['elem']['quantity']['converted']['value']
+        unit = order_size['elem']['quantity']['converted']['unit']
+
+    price = {
+        'value': value,
+        'unit': unit,
+        }
+
+    return price
+
+
+def calc_order_adding_flavor_size_price(order_adding_flavor_size):
+    value = 0
+    unit = None
+
+    if order_adding_flavor_size['selected']:
+        if order_adding_flavor_size['elem']['quantity']:
+            value += order_adding_flavor_size['elem']['quantity']['converted']['value']
+            unit = order_adding_flavor_size['elem']['quantity']['converted']['unit']
+
+    price = {
+        'value': value,
+        'unit': unit,
+        }
+
+    return price
+
+
+def calc_order_adding_flavor_price(order_adding_flavor):
+    value = 0
+    unit = None
+
+    if order_adding_flavor['selected']:
+        if order_adding_flavor['elem']['quantity']:
+            value += order_adding_flavor['elem']['quantity']['converted']['value']
+            unit = order_adding_flavor['elem']['quantity']['converted']['unit']
+
+        for order_adding_flavor_size in order_adding_flavor['sizes']:
+            prc = calc_order_adding_flavor_size_price(order_adding_flavor_size)
+            value += prc['value']
+            if prc['unit']:
+                unit = prc['unit']
+
+    price = {
+        'value': value,
+        'unit': unit,
+        }
+
+    return price
+
+
+def calc_order_adding_price(order_adding):
+    value = 0
+    unit = None
+
+    if order_adding['elem']['quantity']:
+        value += order_adding['elem']['quantity']['converted']['value']
+        unit = order_adding['elem']['quantity']['converted']['unit']
+
+    for order_adding_flavor in order_adding['flavors']:
+        prc = calc_order_adding_flavor_price(order_adding_flavor)
+        value += prc['value']
+        if prc['unit']:
+            unit = prc['unit']
 
     price = {
         'value': value,
@@ -644,8 +710,18 @@ def calc_order_size_price(order_size):
 
 
 def calc_order_elem_price(order_elem):
-    value = order_elem['elem']['quantity']['converted']['value']
-    unit = order_elem['elem']['quantity']['converted']['unit']
+    value = 0
+    unit = None
+
+    if order_elem['elem']['quantity']:
+        value += order_elem['elem']['quantity']['converted']['value']
+        unit = order_elem['elem']['quantity']['converted']['unit']
+
+    for order_adding in order_elem['addings']:
+        prc = calc_order_adding_price(order_adding)
+        value += prc['value']
+        if prc['unit']:
+            unit = prc['unit']
 
     price = {
         'value': value,
@@ -716,6 +792,8 @@ def build_order_adding_flavors_table(order_adding):
 
 def build_order_adding_flavor_sizes_columns(sizes, order_adding_flavor):
     columns = []
+    not_empty_columns_count = 0
+
     for size in sizes:
         present = False
         for order_adding_flavor_size in order_adding_flavor['sizes']:
@@ -725,8 +803,12 @@ def build_order_adding_flavor_sizes_columns(sizes, order_adding_flavor):
 
         if present:
             columns.append(order_adding_flavor_size)
+            not_empty_columns_count += 1
         else:
             columns.append(None)
+
+    if not_empty_columns_count < 1:
+        columns = []
 
     return columns
 
@@ -773,33 +855,6 @@ def fill_order_item_tables(order_item):
     return order_item
 
 
-
-    if 'dishes' in elem and elem['dishes']:
-        lista = []
-        for dish in elem['dishes']:
-            e = fill_menu_elem_tables(dish)
-            lista.append(e)
-        elem['dishes'] = lista
-
-    if 'types' in elem and elem['types']:
-        lista = []
-        for type in elem['types']:
-            e = fill_menu_elem_tables(type)
-            lista.append(e)
-        elem['types'] = lista
-
-    if 'flavors' in elem and elem['flavors']:
-        flavors_table = build_menu_elem_flavors_table(elem)
-        elem['flavors_table'] = flavors_table
-
-        for flavor in elem['flavors']:
-            flavor['size_columns'] = build_menu_elem_sizes_columns(
-                sizes=flavors_table['sizes'], elem=flavor
-            )
-
-    return elem
-
-
 def order_item(request, order_item_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
@@ -832,20 +887,6 @@ def order_item(request, order_item_id):
     order_item = to_dict(order_item_object, language=language, currency=currency)
     order_item = fill_order_item_tables(order_item)
     order_item = fill_order_item_price(order_item)
-
-    """"
-    order_item_dict = calc_order_item_price(order_item_dict)
-    order_item = fill_order_item_prices(order_item)
-
-    order_item_dict = put_columns_to_order_item(order_item_dict)
-    order_item = fill_order_item_tables(order_item)
-
-    menu = menu_elem_to_dict(container_dict, menu_object, **settings)
-
-    menu = fill_menu_elem_tables(menu)
-
-    menu = fill_sub_globals(menu)
-    """
 
     context = {
         'settings': settings,
@@ -932,7 +973,7 @@ def clear_cart(request):
 
     return HttpResponseRedirect(reverse('cart'))
 
-
+"""
 def calc_order_price(order):
     value = 0
     unit = None
@@ -1101,7 +1142,7 @@ def calc_order_adding_price(order_adding):
     order_adding['price'] = price
 
     return price
-
+"""
 
 def success(request):
     if not request.user.is_authenticated:
@@ -1189,7 +1230,7 @@ def create_checkout_session(request):
     except Exception as e:
         return JsonResponse(error=str(e))
 
-
+"""
 def put_columns_to_order_dish(order_dish):
     types_columns = {}
     put_order_types(types_columns, order_dish)
@@ -1259,3 +1300,4 @@ def put_order_sizes(columns, order_table):
 
         if not inserted:
             columns.append(size)
+"""
