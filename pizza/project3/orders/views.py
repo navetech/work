@@ -949,6 +949,24 @@ def fill_order_item_tables(order_item):
     return order_item
 
 
+def fill_order_item(order_item):
+    order_item = fill_order_item_tables(order_item)
+    order_item = fill_order_item_price(order_item)
+
+    return order_item
+
+
+def build_order_item(order_item_object, language, currency):
+    if order_item_object:
+        order_item = to_dict(order_item_object, language=language, currency=currency)
+        if order_item:
+            order_item = fill_order_item(order_item)
+    else:
+        order_item = {}
+
+    return order_item
+
+
 def order_item(request, order_item_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
@@ -978,9 +996,13 @@ def order_item(request, order_item_id):
     languages = pages_basic_data['languages']
     currencies = pages_basic_data['currencies']
 
+    order_item = build_order_item(order_item_object, language=language, currency=currency)
+
+    """
     order_item = to_dict(order_item_object, language=language, currency=currency)
     order_item = fill_order_item_tables(order_item)
     order_item = fill_order_item_price(order_item)
+    """
 
     context = {
         'settings': settings,
@@ -1007,13 +1029,33 @@ def fill_order_price(order):
         }
 
     for order_item in order['items']:
-        order_item = fill_order_item_tables(order_item)
-        order_item = fill_order_item_price(order_item)
-
         price['value'] += order_item['price']['value']
         price['unit'] = order_item['price']['unit']
 
     order['price'] = price
+
+    return order
+
+
+def fill_order(order):
+    order = fill_order_price(order)
+
+    return order
+
+
+def build_order(user, status, language, currency):
+    order_object = Order.objects.filter(user=user, status=status).first()
+    if not order_object:
+        order = {}
+    elif order_object.items.count() < 1:
+        order_object.cancel()
+        order = {}
+    else:
+        order = to_dict(order_object, language=language, currency=currency)
+        for order_item in order['items']:
+            order_item = fill_order_item(order_item)
+
+        order = fill_order(order)
 
     return order
 
@@ -1033,6 +1075,9 @@ def cart(request):
 
     user = request.user
     status='InCart'
+    order = build_order(user, status, language=language, currency=currency)
+
+    """
     order_object = Order.objects.filter(user=user, status=status).first()
     if not order_object:
         order = {}
@@ -1040,8 +1085,9 @@ def cart(request):
         order_object.cancel()
         order = {}
     else:
-            order = to_dict(order_object, language=language, currency=currency)
-            order = fill_order_price(order)
+        order = to_dict(order_object, language=language, currency=currency)
+        order = fill_order_price(order)
+    """
 
     context = {
         'settings': settings,

@@ -17,10 +17,12 @@ def to_dict(object, **settings):
 def to_dict_list(manager, *order_by_field_names, **settings):
     dict_list = []
 
-    objects = manager.all().order_by(*order_by_field_names)
-    for object in objects:
-        dict = to_dict(object, **settings)
-        dict_list.append(dict)
+    if manager:
+        objects = manager.all().order_by(*order_by_field_names)
+        for object in objects:
+            dict = to_dict(object, **settings)
+            if dict:
+                dict_list.append(dict)
 
     return dict_list
 

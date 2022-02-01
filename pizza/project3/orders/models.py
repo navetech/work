@@ -277,6 +277,50 @@ def build_elem_full_name(elem, container_dict):
     return full_name
 
 
+def elem_to_dict(container_dict, object, **settings):
+    if object:
+        dict = object.to_dict(container_dict, **settings)
+    else:
+        dict = {}
+
+    return dict
+
+
+def elems_to_dict_list(
+    container_dict, manager, *order_by_field_names, **settings
+):
+    dict_list = []
+
+    if manager:
+        objects = manager.all().order_by(*order_by_field_names)
+        for object in objects:
+            dict = elem_to_dict(container_dict, object, **settings)
+            if dict:
+                dict_list.append(dict)
+
+    return dict_list
+
+
+def order_item_elems_to_dict_list(
+    container_dict, manager, **settings
+):
+    dict_list = elems_to_dict_list(
+        container_dict, manager, 'elem__sort_number', **settings
+    )
+
+    return dict_list
+
+    """
+    dict_list = []
+
+    objects = manager.all().order_by('elem__sort_number')
+    for object in objects:
+        dict = elem_to_dict(container_dict, object, **settings)
+        dict_list.append(dict)
+
+    return dict_list
+    """
+
 class MenuElementDefinitionFields(models.Model):
     sort_number = models.FloatField(default=0)
 
@@ -419,7 +463,7 @@ class AddingFlavor(MenuElementFields):
 
         dict['special'] = self.special
 
-        dict['sizes'] = menu_elems_to_dict_list(
+        dict['sizes'] = elems_to_dict_list(
             dict, self.sizes, 'sort_number', **settings
         )
 
@@ -437,7 +481,7 @@ class AddingFlavorSet(MenuElementDefinitionFields):
             self, container_dict, **settings
         )
 
-        dict['flavors'] = menu_elems_to_dict_list(
+        dict['flavors'] = elems_to_dict_list(
             dict, self.flavors, 'sort_number', **settings
         )
 
@@ -501,10 +545,10 @@ class FlavorFields(MenuElementFields):
             self, container_dict, **settings
         )
 
-        dict['sizes'] = menu_elems_to_dict_list(
+        dict['sizes'] = elems_to_dict_list(
             dict, self.sizes, 'sort_number', **settings
         )
-        dict['addings'] = menu_elems_to_dict_list(
+        dict['addings'] = elems_to_dict_list(
             dict, self.addings, 'sort_number', **settings
         )
 
@@ -527,7 +571,7 @@ class TypeFields(FlavorFields):
     def to_dict(self, container_dict=None, **settings):
         dict = FlavorFields.to_dict(self, container_dict, **settings)
 
-        dict['flavors'] = menu_elems_to_dict_list(
+        dict['flavors'] = elems_to_dict_list(
             dict, self.flavors, 'sort_number', **settings
         )
 
@@ -550,7 +594,7 @@ class DishFields(TypeFields):
     def to_dict(self, container_dict=None, **settings):
         dict = TypeFields.to_dict(self, container_dict, **settings)
 
-        dict['types'] = menu_elems_to_dict_list(
+        dict['types'] = elems_to_dict_list(
             dict, self.types, 'sort_number', **settings
         )
 
@@ -573,7 +617,7 @@ class MenuFields(DishFields):
     def to_dict(self, container_dict=None, **settings):
         dict = DishFields.to_dict(self, container_dict, **settings)
 
-        dict['dishes'] = menu_elems_to_dict_list(
+        dict['dishes'] = elems_to_dict_list(
             dict, self.dishes, 'sort_number', **settings
         )
 
@@ -582,41 +626,6 @@ class MenuFields(DishFields):
 
 class Menu(MenuFields):
     pass
-
-
-def elem_to_dict(container_dict, object, **settings):
-    if object:
-        dict = object.to_dict(container_dict, **settings)
-    else:
-        dict = {}
-
-    return dict
-
-
-def menu_elems_to_dict_list(
-    container_dict, manager, *order_by_field_names, **settings
-):
-    dict_list = []
-
-    objects = manager.all().order_by(*order_by_field_names)
-    for object in objects:
-        dict = elem_to_dict(container_dict, object, **settings)
-        dict_list.append(dict)
-
-    return dict_list
-
-
-def order_item_elems_to_dict_list(
-    container_dict, manager, **settings
-):
-    dict_list = []
-
-    objects = manager.all().order_by('elem__sort_number')
-    for object in objects:
-        dict = elem_to_dict(container_dict, object, **settings)
-        dict_list.append(dict)
-
-    return dict_list
 
 
 class OrderSize(models.Model):
