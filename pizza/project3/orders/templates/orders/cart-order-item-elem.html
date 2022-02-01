@@ -29,6 +29,9 @@
                     <button type="submit" name="submit" value="dec-order-item-count">-</button>
                     <span>{{ order_item.count }}</span>
                     <button type="submit" name="submit" value="inc-order-item-count">+</button>
+                    
+                    {{ order_item.price.value|floatformat:2 }}
+                    {{ order_item.price.unit }}
                 </form>
             </td>
         </tr>

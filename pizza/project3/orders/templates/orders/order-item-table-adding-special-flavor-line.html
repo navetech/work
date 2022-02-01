@@ -3,12 +3,19 @@
         {{ order_adding_flavor.elem.name.translated.words }}
         {{ order_adding_flavor.elem.full_name }}
     </td>
+    
+    <td>
+        {{ order_adding_flavor.price.value|floatformat:2 }}
+        {{ order_adding_flavor.price.unit }}
+    </td>
 
+    {% comment %}
     <td>
         {% if order_adding_flavor.special_sizes_quantities_count < 1 %}
             {{ order_adding_flavor.elem.quantity.converted.value|floatformat:2 }} {{ order_adding_flavor.elem.quantity.converted.unit }}
         {% endif %}
     </td>
+    {% endcomment %}
 
     {% for order_adding_flavor_size in order_adding_flavor.special_size_columns %}
         <td>

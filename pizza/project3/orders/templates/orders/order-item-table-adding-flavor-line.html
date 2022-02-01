@@ -4,11 +4,12 @@
         {{ order_adding_flavor.elem.full_name }}
     </td>
 
+    {% comment %}
     <td>
-        {{ order_adding_flavor.price.value|floatformat:2 }} {{ order_adding_flavor.price.unit }}
+        {{ order_adding_flavor.price.value|floatformat:2 }}
+        {{ order_adding_flavor.price.unit }}
     </td>
 
-    {% comment %}
     {% if order_adding_flavor.sizes_selection_count < 1 %}
         <td>
             {{ order_adding_flavor.elem.quantity.converted.value|floatformat:2 }} {{ order_adding_flavor.elem.quantity.converted.unit }}
@@ -47,9 +48,17 @@
                         <span>&ensp;</span>
                         {% endif %}
                 </button>
+
+                    {{ order_adding_flavor.price.value|floatformat:2 }}
+                    {{ order_adding_flavor.price.unit }}
             </form>
         </td>
     {% else %}
+        <td>
+            {{ order_adding_flavor.price.value|floatformat:2 }}
+            {{ order_adding_flavor.price.unit }}
+        </td>
+
         {% for order_adding_flavor_size in order_adding_flavor.size_columns %}
             {% if order_adding_flavor_size %}
                 <td>
@@ -69,20 +78,17 @@
                                 <span>&ensp;</span>
                                 {% endif %}
                         </button>
+
+                        {{ order_adding_flavor_size.elem.quantity.converted.value|floatformat:2 }} {{ order_adding_flavor_size.elem.quantity.converted.unit }}
                     </form>
                 </td>
-
-                <td>
-                    {{ order_adding_flavor_size.elem.quantity.converted.value|floatformat:2 }} {{ order_adding_flavor_size.elem.quantity.converted.unit }}
-                </td>
-                
+               
                 {% comment %}
                 <td>
                     {{ order_adding_flavor_size.price.value|floatformat:2 }} {{ order_adding_flavor_size.price.unit }}
                 </td>
                 {% endcomment %}
             {% else %}
-                <td></td>
                 <td></td>
             {% endif %}
         {% endfor %}

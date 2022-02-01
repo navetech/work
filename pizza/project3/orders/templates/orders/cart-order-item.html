@@ -1,8 +1,4 @@
 <li class="list-group-item ln-container01">
-    Item Price
-    {{ order_item.price.value|floatformat:2 }}
-    {{ order_item.price.unit }}
-
     <ul class="list-group pt-4">
         {% if order_item.size %}
             {% include "orders/cart-order-item-elem.html" with order_elem=order_item.size %}
