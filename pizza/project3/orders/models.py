@@ -235,12 +235,13 @@ class CountLimit(models.Model):
     max = models.IntegerField(default=-1, blank=True)
 
     def clean(self):
-        if self.min < 0:
+        if not self.min or self.min < 0:
             self.min = 0
 
-        if self.max >= 0:
-            if self.max < self.min:
-                self.max = self.min
+        if (self.max and self.max < 0) or (not self.max and self.max != 0):
+            self.max = -1
+        elif self.max < self.min:
+            self.max = self.min
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -452,7 +453,7 @@ class Adding(MenuElementFields):
     only_special_selection = models.BooleanField(default=False)
 
     flavors_selection_limit = models.ForeignKey(
-        CountLimit, blank=True, null=True, on_delete=models.CASCADE,
+        CountLimit, blank=True, null=True, on_delete=models.SET_NULL,
         related_name='flavors_selection_limit_Adding_related'
     )
 

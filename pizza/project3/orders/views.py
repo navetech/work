@@ -489,6 +489,32 @@ def put_order(request):
         )
 
 
+def get_adding_flavors_selection_limit(order_adding):
+    min = 0
+    max = -1
+
+    limit = order_adding.flavors_selection_limit
+
+    if not limit or limit.min is None or limit.min < 0:
+        min = 0
+    else:
+        min = limit.min
+
+    if not limit or limit.max is None or limit.max < 0:
+        max = -1
+    elif limit.max >= min:
+        max = limit.max
+    else:
+        max = min
+
+    flavors_selection_limit = {
+        'min': min,
+        'max': max,
+    }
+
+    return flavors_selection_limit
+
+
 def alter_order(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("index"))
@@ -544,26 +570,18 @@ def alter_order(request):
             order_item.save()
 
         elif request.POST["submit"] == 'order-adding-flavor-select':
-            limit = order_adding.elem.flavors_selection_limit
+            limit = get_adding_flavors_selection_limit(order_adding.elem)
 
             if order_adding_flavor.selected:
-                if (
-                    not limit or limit.min is None
-                    or
-                    order_adding.flavors_selection_count > limit.min
-                ):
-                    order_adding_flavor.selected = False
-                    order_adding_flavor.save()
-                    order_adding.flavors_selection_count -= 1
-                    order_adding.save()
+                order_adding_flavor.selected = False
+                order_adding_flavor.save()
+                order_adding.flavors_selection_count -= 1
+                order_adding.save()
             else:
                 if (
-                    not limit or limit.max is None
-                    or limit.max < 0
-                    or (
-                        (limit.min is not None) and limit.max < limit.min
-                    )
-                    or order_adding.flavors_selection_count < limit.max
+                    limit['max'] < 0
+                    or
+                    order_adding.flavors_selection_count < limit['max']
                 ):
                     order_adding_flavor.selected = True
                     order_adding_flavor.save()
@@ -572,25 +590,20 @@ def alter_order(request):
 
 
         elif request.POST["submit"] == 'order-adding-flavor-size-select':
-            limit = order_adding.elem.flavors_selection_limit
+            limit = get_adding_flavors_selection_limit(order_adding.elem)
 
             if order_adding_flavor_size.selected:
-                if (
-                    not limit or limit.min is None
-                    or
-                    order_adding.flavors_selection_count > limit.min
-                ):
-                    order_adding_flavor_size.selected = False
-                    order_adding_flavor_size.save()
-                    order_adding_flavor.sizes_selection_count -= 1
+                order_adding_flavor_size.selected = False
+                order_adding_flavor_size.save()
+                order_adding_flavor.sizes_selection_count -= 1
+                order_adding_flavor.save()
+
+                if order_adding_flavor.sizes_selection_count < 1:
+                    order_adding_flavor.selected = False
                     order_adding_flavor.save()
 
-                    if order_adding_flavor.sizes_selection_count < 1:
-                        order_adding_flavor.selected = False
-                        order_adding_flavor.save()
-
-                    order_adding.flavors_selection_count -= 1
-                    order_adding.save()
+                order_adding.flavors_selection_count -= 1
+                order_adding.save()
             else:
                 for size in order_adding_flavor.sizes.all():
                     if size.selected:
@@ -607,12 +620,9 @@ def alter_order(request):
                         order_adding.save()
 
                 if (
-                    not limit or limit.max is None
-                    or limit.max < 0
-                    or (
-                        (limit.min is not None) and limit.max < limit.min
-                    )
-                    or order_adding.flavors_selection_count < limit.max
+                    limit['max'] < 0
+                    or
+                    order_adding.flavors_selection_count < limit['max']
                 ):
                     order_adding_flavor_size.selected = True
                     order_adding_flavor_size.save()
@@ -880,11 +890,14 @@ def fill_order_adding_tables(order_adding):
 
             sizes_quantities_count = 0
             for order_adding_flavor_size in order_adding_flavor['size_columns']:
-                if (
-                    'quantity' in order_adding_flavor_size['elem'] 
-                    and 
-                    order_adding_flavor_size['elem']['quantity']
-                ):
+                if order_adding_flavor_size:
+                    if (
+                        'quantity' not in order_adding_flavor_size['elem'] 
+                        or 
+                        not order_adding_flavor_size['elem']['quantity']
+                    ):
+                        order_adding_flavor_size['elem']['quantity'] = order_adding_flavor['elem']['quantity']
+
                     sizes_quantities_count += 1
 
             order_adding_flavor['sizes_quantities_count'] = sizes_quantities_count
@@ -892,11 +905,14 @@ def fill_order_adding_tables(order_adding):
             special_sizes_quantities_count = 0
             if order_adding_flavor['elem']['special']:
                 for order_adding_flavor_size in order_adding_flavor['special_size_columns']:
-                    if (
-                        'quantity' in order_adding_flavor_size['elem'] 
-                        and 
-                        order_adding_flavor_size['elem']['quantity']
-                    ):
+                    if order_adding_flavor_size:
+                        if (
+                            not 'quantity' in order_adding_flavor_size['elem'] 
+                            or
+                            not order_adding_flavor_size['elem']['quantity']
+                        ):
+                            order_adding_flavor_size['elem']['quantity'] = order_adding_flavor['elem']['quantity']
+
                         special_sizes_quantities_count += 1
 
             order_adding_flavor['special_sizes_quantities_count'] = special_sizes_quantities_count
