@@ -640,7 +640,7 @@ def alter_order(request):
             )
         )
 
-
+"""
 def calc_order_size_price(order_size):
     value = 0
     unit = None
@@ -655,72 +655,107 @@ def calc_order_size_price(order_size):
         }
 
     return price
+"""
 
-
-def calc_order_adding_flavor_size_price(order_adding_flavor_size):
+def fill_order_adding_flavor_size_price(order_adding_flavor_size, container_quantity):
     value = 0
+
     unit = None
+    if order_adding_flavor_size['elem']['quantity']:
+        unit = order_adding_flavor_size['elem']['quantity']['converted']['unit']
 
     if order_adding_flavor_size['selected']:
         if order_adding_flavor_size['elem']['quantity']:
             value += order_adding_flavor_size['elem']['quantity']['converted']['value']
             unit = order_adding_flavor_size['elem']['quantity']['converted']['unit']
+        else:
+            if container_quantity:
+                value += container_quantity['converted']['value']
+                unit = container_quantity['converted']['unit']
 
     price = {
         'value': value,
         'unit': unit,
         }
 
-    return price
+    order_adding_flavor_size['price'] = price
+
+    return order_adding_flavor_size
 
 
-def calc_order_adding_flavor_price(order_adding_flavor):
+def fill_order_adding_flavor_price(order_adding_flavor, container_quantity):
     value = 0
+
     unit = None
+    if order_adding_flavor['elem']['quantity']:
+        unit = order_adding_flavor['elem']['quantity']['converted']['unit']
 
     if order_adding_flavor['selected']:
-        if order_adding_flavor['sizes_quantities_count'] < 1:
+        if len(order_adding_flavor['sizes']) < 1:
             if order_adding_flavor['elem']['quantity']:
                 value += order_adding_flavor['elem']['quantity']['converted']['value']
                 unit = order_adding_flavor['elem']['quantity']['converted']['unit']
+            else:
+                if container_quantity:
+                    value += container_quantity['converted']['value']
+                    unit = container_quantity['converted']['unit']
         else:
+            if order_adding_flavor['elem']['quantity']:
+                container_quantity = order_adding_flavor['elem']['quantity']
+
             for order_adding_flavor_size in order_adding_flavor['sizes']:
-                prc = calc_order_adding_flavor_size_price(order_adding_flavor_size)
-                value += prc['value']
-                if prc['unit']:
-                    unit = prc['unit']
+                order_adding_flavor_size = fill_order_adding_flavor_size_price(
+                    order_adding_flavor_size, container_quantity
+                )
+
+                value += order_adding_flavor_size['price']['value']
+                if order_adding_flavor_size['price']['unit']:
+                    unit = order_adding_flavor_size['price']['unit']
 
     price = {
         'value': value,
         'unit': unit,
         }
 
-    return price
+    order_adding_flavor['price'] = price
+
+    return order_adding_flavor
 
 
-def calc_order_adding_price(order_adding):
+def fill_order_adding_price(order_adding):
     value = 0
-    unit = None
 
+    unit = None
     if order_adding['elem']['quantity']:
-        value += order_adding['elem']['quantity']['converted']['value']
         unit = order_adding['elem']['quantity']['converted']['unit']
 
-    for order_adding_flavor in order_adding['flavors']:
-        prc = calc_order_adding_flavor_price(order_adding_flavor)
-        value += prc['value']
-        if prc['unit']:
-            unit = prc['unit']
+    if len(order_adding['flavors']) < 1:
+        if order_adding['elem']['quantity']:
+            value += order_adding['elem']['quantity']['converted']['value']
+            unit = order_adding['elem']['quantity']['converted']['unit']
+    else:
+        container_quantity = order_adding['elem']['quantity']
+
+        for order_adding_flavor in order_adding['flavors']:
+            order_adding_flavor = fill_order_adding_flavor_price(
+                order_adding_flavor, container_quantity
+            )
+
+            value += order_adding_flavor['price']['value']
+            if order_adding_flavor['price']['unit']:
+                unit = order_adding_flavor['price']['unit']
 
     price = {
         'value': value,
         'unit': unit,
         }
 
-    return price
+    order_adding['price'] = price
+
+    return order_adding
 
 
-def calc_order_elem_price(order_elem):
+def fill_order_elem_price(order_elem):
     value = 0
     unit = None
 
@@ -729,20 +764,23 @@ def calc_order_elem_price(order_elem):
         unit = order_elem['elem']['quantity']['converted']['unit']
 
     for order_adding in order_elem['addings']:
-        prc = calc_order_adding_price(order_adding)
-        value += prc['value']
-        if prc['unit']:
-            unit = prc['unit']
+        order_adding = fill_order_adding_price(order_adding)
+
+        value += order_adding['price']['value']
+        if order_adding['price']['unit']:
+            unit = order_adding['price']['unit']
 
     price = {
         'value': value,
         'unit': unit,
         }
 
-    return price
+    order_elem['price'] = price
+
+    return order_elem
     
 
-def calc_order_item_price(order_item):
+def fill_order_item_price(order_item):
     value = 0
     unit = None
 
@@ -752,23 +790,37 @@ def calc_order_item_price(order_item):
         }
 
     if order_item['size']:
-        price = calc_order_size_price(order_item['size'])
+        order_elem = order_item['size']
+        order_elem = fill_order_elem_price(order_elem)
+        price = order_elem['price']
+        order_item['size'] = order_elem
+
     elif order_item['flavor']:
-        price = calc_order_elem_price(order_item['flavor'])
+        order_elem = order_item['flavor']
+        order_elem = fill_order_elem_price(order_elem)
+        price = order_elem['price']
+        order_item['flavor'] = order_elem
+
     elif order_item['type']:
-        price = calc_order_elem_price(order_item['type'])
+        order_elem = order_item['type']
+        order_elem = fill_order_elem_price(order_elem)
+        price = order_elem['price']
+        order_item['type'] = order_elem
+
     elif order_item['dish']:
-        price = calc_order_elem_price(order_item['dish'])
+        order_elem = order_item['dish']
+        order_elem = fill_order_elem_price(order_elem)
+        price = order_elem['price']
+        order_item['dish'] = order_elem
+
     elif order_item['menu']:
-        price = calc_order_elem_price(order_item['menu'])
+        order_elem = order_item['menu']
+        order_elem = fill_order_elem_price(order_elem)
+        price = order_elem['price']
+        order_item['menu'] = order_elem
 
     price['value'] *= order_item['count']
 
-    return price
-
-
-def fill_order_item_price(order_item):
-    price = calc_order_item_price(order_item)
     order_item['price'] = price
 
     return order_item

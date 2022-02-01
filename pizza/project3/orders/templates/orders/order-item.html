@@ -8,21 +8,30 @@
 {% block main %}
     <h3>{{ settings.order_page_header.translated.words }}</h3>
 
-    <table style="width:100%" class="table">
-        <tr>
-            <th>Item Price</th>
-        <tr>
-        <tr>
-            <td>
-                {{ order_item.price.value|floatformat:2 }}
-                {{ order_item.price.unit }}
-            </td>
-        <tr>
-    </table>
-
     <a class="btn btn-secondary" role="button" href="{% url 'cart' %}">Show Cart</a>
 
     <ul class="list-group pt-4">
+        <li class="list-group-item ln-container01">
+            <table style="width:100%">
+                <tr>
+                    <td>
+                        <div class="ln-group-divider"></div>
+                        <form action="{% url 'alter_order' %}" method="post">
+                            {{ order_item.price.value|floatformat:2 }}
+                            {{ order_item.price.unit }}
+
+                            {% csrf_token %}
+                            <input type='text' style='display:none' name='order-item-id' value={{ order_item.id|default:None }}>
+                            
+                            <button type="submit" name="submit" value="dec-order-item-count">-</button>
+                            <span>{{ order_item.count }}</span>
+                            <button type="submit" name="submit" value="inc-order-item-count">+</button>
+                        </form>
+                    </td>
+                </tr>
+            </table>
+        </li>
+        
         {% if order_item.size %}
             {% include "orders/order-item-elem.html" with order_elem=order_item.size %}
         {% elif order_item.flavor %}

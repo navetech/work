@@ -16,20 +16,12 @@
             </td>
 
             <td>
-                {{ order_elem.elem.quantity.converted.value|floatformat:2 }}
-                {{ order_elem.elem.quantity.converted.unit }}
+                {{ order_elem.elem.quantity.converted.value|floatformat:2 }} {{ order_elem.elem.quantity.converted.unit }}
             </td>
 
             <td>
-                <div class="ln-group-divider"></div>
-                <form action="{% url 'alter_order' %}" method="post">
-                    {% csrf_token %}
-                    <input type='text' style='display:none' name='order-item-id' value={{ order_item.id|default:None }}>
-                    
-                    <button type="submit" name="submit" value="dec-order-item-count">-</button>
-                    <span>{{ order_item.count }}</span>
-                    <button type="submit" name="submit" value="inc-order-item-count">+</button>
-                </form>
+                {{ order_elem.price.value|floatformat:2 }}
+                {{ order_elem.price.unit }}
             </td>
         </tr>
     </table>
