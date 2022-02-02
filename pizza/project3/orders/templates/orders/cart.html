@@ -16,19 +16,46 @@
     <h3>{{ settings.cart_page_header.translated.words }}</h3>
 
     {% if order.items %}
+        {% if order.status.ready %}
+            Ready
+        {% else %}
+            Not Ready
+        {% endif %}
+
+        <span id="total-price">{{order.price.value|floatformat:2 }}</span>
+        {{ order.price.unit }}
+
+        <br>
+
+    {% comment %}
         <table style="width:100%" class="table">
             <tr>
+                <th>Status</th>
                 <th>Total Price</th>
             <tr>
+
             <tr>
+                <td>
+                    {% if order.status.ready %}
+                        Ready
+                    {% else %}
+                        Not Ready
+                    {% endif %}
+                </td>
+    
                 <td>
                     <span id="total-price">{{order.price.value|floatformat:2 }}</span>
                     {{ order.price.unit }}
                 </td>
             <tr>
         </table>
+        {% endcomment %}
 
-        <button type="button" id="checkout-button" class="btn btn-secondary">Checkout</button>
+        {% if order.status.ready %}
+            <button type="button" id="checkout-button" class="btn btn-secondary">Checkout</button>
+        {% else %}
+            <button disabled type="button" id="checkout-button" class="btn btn-secondary">Checkout</button>
+        {% endif %}
 
         <a class="btn btn-secondary" href="{% url 'clear_cart' %}" role="button">Clear Cart</a>
 

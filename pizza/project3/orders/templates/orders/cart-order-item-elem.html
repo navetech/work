@@ -16,6 +16,14 @@
             </td>
 
             <td>
+                {% if order_item.status.ready %}
+                    Ready
+                {% else %}
+                    Not Ready
+                {% endif %}
+            </td>
+
+            <td>
                 {{ order_elem.elem.quantity.converted.value|floatformat:2 }}
                 {{ order_elem.elem.quantity.converted.unit }}
             </td>

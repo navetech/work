@@ -824,6 +824,121 @@ def fill_order_item_price(order_item):
     return order_item
 
 
+def get_order_adding_flavors_selection_limit(order_adding):
+    min = 0
+    max = -1
+
+    limit = order_adding['elem']['flavors_selection_limit']
+
+    if not limit or limit['min'] is None or limit['min'] < 0:
+        min = 0
+    else:
+        min = limit['min']
+
+    if not limit or limit['max'] is None or limit['max'] < 0:
+        max = -1
+    elif limit['max'] >= min:
+        max = limit['max']
+    else:
+        max = min
+
+    flavors_selection_limit = {
+        'min': min,
+        'max': max,
+    }
+
+    return flavors_selection_limit
+
+
+def fill_order_adding_status(order_adding):
+    ready = True
+
+    limit = get_order_adding_flavors_selection_limit(order_adding)
+
+    if order_adding['flavors_selection_count'] < limit['min']:
+        selections_deficiency = True
+    else:
+        selections_deficiency = False
+
+    if order_adding['flavors_selection_count'] > limit['max']:
+        selections_excess = True
+    else:
+        selections_excess = False
+
+    if selections_deficiency or selections_excess:
+        ready = False
+
+    status = {
+        'ready': ready,
+        'selections_deficiency': selections_deficiency,
+        'selections_excess': selections_excess,
+        }
+
+    order_adding['status'] = status
+
+    return order_adding
+
+
+def fill_order_elem_status(order_elem):
+    ready = True
+
+    for order_adding in order_elem['addings']:
+        order_adding = fill_order_adding_status(order_adding)
+
+        if not order_adding['status']['ready']:
+            ready = order_adding['status']['ready']
+
+    status = {
+        'ready': ready,
+        }
+
+    order_elem['status'] = status
+
+    return order_elem
+
+
+def fill_order_item_status(order_item):
+    ready = True
+
+    status = {
+        'ready': ready,
+        }
+
+    if order_item['size']:
+        order_elem = order_item['size']
+        order_elem = fill_order_elem_status(order_elem)
+        status = order_elem['status']
+        order_item['size'] = order_elem
+
+    elif order_item['flavor']:
+        order_elem = order_item['flavor']
+        order_elem = fill_order_elem_status(order_elem)
+        status = order_elem['status']
+        order_item['flavor'] = order_elem
+
+    elif order_item['type']:
+        order_elem = order_item['type']
+        order_elem = fill_order_elem_status(order_elem)
+        status = order_elem['status']
+        order_item['type'] = order_elem
+
+    elif order_item['dish']:
+        order_elem = order_item['dish']
+        order_elem = fill_order_elem_status(order_elem)
+        status = order_elem['status']
+        order_item['dish'] = order_elem
+
+    elif order_item['menu']:
+        order_elem = order_item['menu']
+        order_elem = fill_order_elem_status(order_elem)
+        status = order_elem['status']
+        order_item['menu'] = order_elem
+
+    order_item['status'] = status
+
+    return order_item
+
+
 def insert_order_adding_flavor_sizes(sizes, order_adding_flavor):
     for order_adding_flavor_size in order_adding_flavor['sizes']:
         inserted = False
@@ -1004,6 +1119,7 @@ def fill_order_item_tables(order_item):
 
 def fill_order_item(order_item):
     order_item = fill_order_item_tables(order_item)
+    order_item = fill_order_item_status(order_item)
     order_item = fill_order_item_price(order_item)
 
     return order_item
@@ -1090,8 +1206,25 @@ def fill_order_price(order):
     return order
 
 
+def fill_order_status(order):
+    ready = True
+
+    for order_item in order['items']:
+        if not order_item['status']['ready']:
+            ready = order_item['status']['ready']
+
+    status = {
+        'ready': ready,
+        }
+
+    order['status'] = status
+
+    return order
+
+
 def fill_order(order):
     order = fill_order_price(order)
+    order = fill_order_status(order)
 
     return order
 

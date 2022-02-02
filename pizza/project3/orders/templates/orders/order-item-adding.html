@@ -2,18 +2,16 @@
     <h4>{{ order_adding.elem.short_name.translated.words }}</h4>
     <h4>{{ order_adding.elem.full_name }}</h4>
 
+    {% if order_adding.status.ready %}
+        Ready
+    {% elif order_adding.status.selections_deficiency %}
+        Choose More Options
+    {% elif order_adding.status.selections_excess %}
+        Choose Less Options
+    {% endif %}
+
     {{ order_adding.price.value|floatformat:2 }}
     {{ order_adding.price.unit }}
-
-    {% comment %}
-    {% if order_adding.flavors_selection_count < 1 %}
-        {{ order_adding.elem.quantity.converted.value|floatformat:2 }}
-        {{ order_adding.elem.quantity.converted.unit }}
-    {% else %}
-        {{ order_adding.price.value|floatformat:2 }}
-        {{ order_adding.price.unit }}
-    {% endif %}
-    {% endcomment %}
 
     {% if order_adding.flavors %}
         {% if order_adding.elem.only_special_selection %}
