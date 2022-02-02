@@ -663,15 +663,14 @@ def fill_order_adding_flavor_size_price(order_adding_flavor_size, container_quan
     unit = None
     if order_adding_flavor_size['elem']['quantity']:
         unit = order_adding_flavor_size['elem']['quantity']['converted']['unit']
+    elif container_quantity:
+        order_adding_flavor_size['elem']['quantity'] = container_quantity
+        unit = order_adding_flavor_size['elem']['quantity']['converted']['unit']
 
     if order_adding_flavor_size['selected']:
         if order_adding_flavor_size['elem']['quantity']:
             value += order_adding_flavor_size['elem']['quantity']['converted']['value']
             unit = order_adding_flavor_size['elem']['quantity']['converted']['unit']
-        else:
-            if container_quantity:
-                value += container_quantity['converted']['value']
-                unit = container_quantity['converted']['unit']
 
     price = {
         'value': value,
@@ -689,28 +688,27 @@ def fill_order_adding_flavor_price(order_adding_flavor, container_quantity):
     unit = None
     if order_adding_flavor['elem']['quantity']:
         unit = order_adding_flavor['elem']['quantity']['converted']['unit']
+    elif container_quantity:
+        order_adding_flavor['elem']['quantity'] = container_quantity
+        unit = order_adding_flavor['elem']['quantity']['converted']['unit']
 
-    if order_adding_flavor['selected']:
-        if len(order_adding_flavor['sizes']) < 1:
+    if len(order_adding_flavor['sizes']) < 1:
+        if order_adding_flavor['selected']:
             if order_adding_flavor['elem']['quantity']:
                 value += order_adding_flavor['elem']['quantity']['converted']['value']
                 unit = order_adding_flavor['elem']['quantity']['converted']['unit']
-            else:
-                if container_quantity:
-                    value += container_quantity['converted']['value']
-                    unit = container_quantity['converted']['unit']
-        else:
-            if order_adding_flavor['elem']['quantity']:
-                container_quantity = order_adding_flavor['elem']['quantity']
+    else:
+        if order_adding_flavor['elem']['quantity']:
+            container_quantity = order_adding_flavor['elem']['quantity']
 
-            for order_adding_flavor_size in order_adding_flavor['sizes']:
-                order_adding_flavor_size = fill_order_adding_flavor_size_price(
-                    order_adding_flavor_size, container_quantity
-                )
+        for order_adding_flavor_size in order_adding_flavor['sizes']:
+            order_adding_flavor_size = fill_order_adding_flavor_size_price(
+                order_adding_flavor_size, container_quantity
+            )
 
-                value += order_adding_flavor_size['price']['value']
-                if order_adding_flavor_size['price']['unit']:
-                    unit = order_adding_flavor_size['price']['unit']
+            value += order_adding_flavor_size['price']['value']
+            if order_adding_flavor_size['price']['unit']:
+                unit = order_adding_flavor_size['price']['unit']
 
     price = {
         'value': value,
@@ -940,6 +938,8 @@ def fill_order_adding_tables(order_adding):
                     sizes=special_flavors_table['sizes'], order_adding_flavor=order_adding_flavor
                 )
 
+            """
+
             sizes_quantities_count = 0
             for order_adding_flavor_size in order_adding_flavor['size_columns']:
                 if order_adding_flavor_size:
@@ -968,6 +968,7 @@ def fill_order_adding_tables(order_adding):
                         special_sizes_quantities_count += 1
 
             order_adding_flavor['special_sizes_quantities_count'] = special_sizes_quantities_count
+            """
 
 
 def fill_order_elem_tables(order_elem):

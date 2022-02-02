@@ -4,32 +4,10 @@
         {{ order_adding_flavor.elem.full_name }}
     </td>
 
-    {% comment %}
     <td>
         {{ order_adding_flavor.price.value|floatformat:2 }}
         {{ order_adding_flavor.price.unit }}
     </td>
-
-    {% if order_adding_flavor.sizes_selection_count < 1 %}
-        <td>
-            {{ order_adding_flavor.elem.quantity.converted.value|floatformat:2 }} {{ order_adding_flavor.elem.quantity.converted.unit }}
-        </td>
-    {% else %}
-        <td>
-            {{ order_adding_flavor.price.value|floatformat:2 }} {{ order_adding_flavor.price.unit }}
-        </td>
-    {% endif %}
-    {% endcomment %}
-
-
-
-        {% comment %}
-        <td>
-            {% if order_adding_flavor.sizes_quantities_count < 1 %}
-                {{ order_adding_flavor.elem.quantity.converted.value|floatformat:2 }} {{ order_adding_flavor.elem.quantity.converted.unit }}
-            {% endif %}
-        </td>
-        {% endcomment %}
 
     {% if not order_adding_flavor.size_columns %}
         <td>
@@ -49,15 +27,12 @@
                         {% endif %}
                 </button>
 
-                    {{ order_adding_flavor.price.value|floatformat:2 }}
-                    {{ order_adding_flavor.price.unit }}
+                {{ order_adding_flavor.elem.quantity.converted.value|floatformat:2 }}
+                {{ order_adding_flavor.elem.quantity.converted.unit }}
             </form>
         </td>
     {% else %}
-        <td>
-            {{ order_adding_flavor.price.value|floatformat:2 }}
-            {{ order_adding_flavor.price.unit }}
-        </td>
+        <td></td>
 
         {% for order_adding_flavor_size in order_adding_flavor.size_columns %}
             {% if order_adding_flavor_size %}
@@ -79,15 +54,10 @@
                                 {% endif %}
                         </button>
 
-                        {{ order_adding_flavor_size.elem.quantity.converted.value|floatformat:2 }} {{ order_adding_flavor_size.elem.quantity.converted.unit }}
+                        {{ order_adding_flavor_size.elem.quantity.converted.value|floatformat:2 }}
+                        {{ order_adding_flavor_size.elem.quantity.converted.unit }}
                     </form>
                 </td>
-               
-                {% comment %}
-                <td>
-                    {{ order_adding_flavor_size.price.value|floatformat:2 }} {{ order_adding_flavor_size.price.unit }}
-                </td>
-                {% endcomment %}
             {% else %}
                 <td></td>
             {% endif %}
