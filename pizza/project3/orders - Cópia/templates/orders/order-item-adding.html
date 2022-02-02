@@ -1,0 +1,75 @@
+<li class="list-group-item ln-container02">
+    <h4>{{ order_adding.elem.short_name.translated.words }}</h4>
+    <h4>{{ order_adding.elem.full_name }}</h4>
+
+    {% if order_adding.status.ready %}
+        Ready
+    {% elif order_adding.status.selections_deficiency %}
+        Choose More Options
+    {% elif order_adding.status.selections_excess %}
+        Choose Less Options
+    {% endif %}
+
+    {{ order_adding.price.value|floatformat:2 }}
+    {{ order_adding.price.unit }}
+
+    {% if order_adding.flavors %}
+        {% if order_adding.elem.only_special_selection %}
+            <table style="width:100%">
+                <tr>
+                    <th></th>
+                    <th></th>
+                    {% for size in order_adding.special_flavors_table.sizes %}
+                        {% include "orders/order-item-table-special-size-header.html" %}
+                    {% endfor %}
+                </tr>
+
+                {% for order_adding_flavor in order_adding.flavors %}
+                    {% if order_adding_flavor.selected %}
+                        {% include "orders/order-item-table-adding-special-flavor-line.html" %}
+                    {% endif %}
+                {% endfor %}
+            </table>
+        {% else %}
+            {% if order_adding.elem.flavors_selection_limit.max == 0 %}
+            {% else %}
+                {% if not order_adding.elem.flavors_selection_limit %}
+                    <h6>Choose or not any options</h6>
+                {% else %}
+                    {% if order_adding.elem.flavors_selection_limit.max > 0 %}
+                        {% if order_adding.elem.flavors_selection_limit.min == order_adding.elem.flavors_selection_limit.max %}
+                            <h6>Choose {{ order_adding.elem.flavors_selection_limit.min }} option(s)</h6>
+                        {% else %}
+                            {% if order_adding.elem.flavors_selection_limit.min > 0 %}
+                                <h6>Choose from {{ order_adding.elem.flavors_selection_limit.min }} up to {{ order_adding.elem.flavors_selection_limit.max }} options</h6>
+                            {% else %}
+                                <h6>Choose up to {{ order_adding.elem.flavors_selection_limit.max }} options</h6>
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                        {% if order_adding.elem.flavors_selection_limit.min > 0 %}
+                            <h6>Choose at least {{ order_adding.elem.flavors_selection_limit.min }} option(s)</h6>
+                        {% else %}
+                            <h6>Choose or not any options</h6>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+
+                <table style="width:100%">
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        {% for size in order_adding.flavors_table.sizes %}
+                            {% include "orders/order-item-table-size-header.html" %}
+                        {% endfor %}
+                    </tr>
+
+                    {% for order_adding_flavor in order_adding.flavors %}
+                        {% include "orders/order-item-table-adding-flavor-line.html" %}
+                    {% endfor %}
+                </table>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+</li>

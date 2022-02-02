@@ -1,0 +1,70 @@
+<h3>{{ menu.name.translated.words }}</h3>
+<h3>{{ menu.full_name }}</h3>
+
+{% if menu.quantity %}
+    <form action="{% url 'put_order' %}" method="post">
+        {% csrf_token %}
+
+        {% include "orders/menu-form-inputs.html" %}
+        
+        <button type="submit" name="submit">
+            {{ menu.quantity.converted.value|floatformat:2 }} {{ menu.quantity.converted.unit }}
+        </button>
+    </form>
+{% endif %}
+
+{% if menu.sizes %}
+    <ul class="list-group pt-4">
+        {% for size in menu.sizes %}
+            {% include "orders/menu-size.html" %}
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% if menu.flavors %}
+    <table style="width:100%">
+        <tr>
+            <th></th>
+            <th></th>
+            {% for size in menu.flavors_table.sizes %}
+                {% include "orders/menu-table-size-header.html" %}
+            {% endfor %}
+        </tr>
+
+        {% for flavor in menu.flavors %}
+            {% include "orders/menu-table-flavor-line.html" %}
+        {% endfor %}
+    </table>
+{% endif %}
+
+{% if menu.types %}
+    <ul class="list-group pt-4">
+        {% for type in menu.types %}
+            {% include "orders/menu-type.html" %}
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% if menu.dishes %}
+    <ul class="list-group pt-4">
+        {% for dish in menu.dishes %}
+            {% include "orders/menu-dish.html" %}
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% if menu.addings %}
+    <ul class="list-group pt-4">
+        {% for adding in menu.addings %}
+            {% include "orders/menu-adding.html" %}
+        {% endfor %}
+    </ul>
+{% endif %}
+    
+{% if menu.globals %}
+    <ul class="list-group pt-4">
+        {% for global in menu.globals %}
+            {% include "orders/menu-global.html" %}
+        {% endfor %}
+    </ul>
+{% endif %}

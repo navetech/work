@@ -1,0 +1,20 @@
+{% extends "orders/base.html" %}
+
+
+{% block title %}
+    Unregister
+{% endblock %}
+
+{% block main %}
+    <h1>Unregister</h1>
+    <ul class="list-group ln-group-width-auto">
+        <li class="list-group-item ln-container01">
+            <form action="{% url 'unregister' %}" method="post">
+                {% csrf_token %}
+                <div class="ln-group-divider"></div>
+                <button class="btn btn-secondary" type="submit" name="confirm-cancel" value="cancel">Cancel</button>
+                <button class="btn btn-dark" type="submit" name="confirm-cancel" value="confirm">Confirm</button>
+            </form>
+        </li>
+    </ul>
+{% endblock %}

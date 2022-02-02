@@ -1,0 +1,48 @@
+{% extends "orders/base.html" %}
+
+
+{% block title %}
+    {{ settings.order_page_title.translated.words }}
+{% endblock %}
+
+{% block main %}
+    <h3>{{ settings.order_page_header.translated.words }}</h3>
+
+    <table style="width:100%" class="table">
+        <tr>
+            <th>Item Price</th>
+        <tr>
+        <tr>
+            <td>
+                {{order_dish.price.value|floatformat:2 }}
+                {{ order_dish.price.unit }}
+            </td>
+        <tr>
+    </table>
+
+    <a class="btn btn-secondary" role="button" href="{% url 'cart' %}">Show Cart</a>
+
+    <ul class="list-group pt-4">
+        {% for order_type in order_dish.types %}
+            {% include "orders/order-item-type.html" %}
+        {% endfor %}
+
+        {% for order_flavor in order_dish.flavors %}
+            {% include "orders/order-item-flavor.html" %}
+        {% endfor %}
+
+        {% for order_size in order_dish.sizes %}
+            {% include "orders/order-item-size.html" %}
+        {% endfor %}
+
+        {% if order_dish.plain %}
+            {% include "orders/order-item-dish-plain.html" %}
+        {% endif %}
+
+        {% if order_dish.menu.addings_count.max != 0 %}
+            {% for order_adding in order_dish.addings %}
+                {% include "orders/order-item-adding.html" %}
+            {% endfor %}
+        {% endif %}
+    </ul>
+{% endblock %}
