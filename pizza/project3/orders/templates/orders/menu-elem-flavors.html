@@ -1,0 +1,15 @@
+{% if elem.flavors %}
+    <table style="width:100%">
+        <tr>
+            <th></th>
+            <th></th>
+            {% for size in elem.flavors_table.sizes %}
+                {% include "orders/menu-table-size-header.html" %}
+            {% endfor %}
+        </tr>
+
+        {% for flavor in elem.flavors %}
+            {% include "orders/menu-table-flavor-line.html" %}
+        {% endfor %}
+    </table>
+{% endif %}

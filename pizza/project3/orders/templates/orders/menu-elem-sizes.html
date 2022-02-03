@@ -1,0 +1,7 @@
+{% if elem.sizes %}
+    <ul class="list-group pt-4">
+        {% for size in elem.sizes %}
+            {% include "orders/menu-size.html" %}
+        {% endfor %}
+    </ul>
+{% endif %}

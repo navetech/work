@@ -1,0 +1,7 @@
+{% if elem.dishes %}
+    <ul class="list-group pt-4">
+        {% for dish in elem.dishes %}
+            {% include "orders/menu-dish.html" %}
+        {% endfor %}
+    </ul>
+{% endif %}
