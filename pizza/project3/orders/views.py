@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+# from django.http import HttpResponse
 # from django.shortcuts import render
 
 # Create your views here.
@@ -30,10 +30,6 @@ from .models import get_order_item_by_user, create_order_item_for_user
 
 from .models import Order, OrderItem
 from .models import OrderAdding, OrderAddingFlavor, OrderAddingFlavorSize
-"""
-from .models import OrderMenu, OrderDish, OrderType
-from .models import OrderFlavor, OrderSize
-"""
 
 from django.http import JsonResponse
 
@@ -440,8 +436,6 @@ def select_currency(request, currency_id):
 
 
 def put_order(request):
-    print('//////////////////////')
-    print('put_order')
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("index"))
 
@@ -460,8 +454,6 @@ def put_order(request):
         flavor_id = None if flavor_id == 'None' else flavor_id
         size_id = None if size_id == 'None' else size_id
 
-        print('put_order 2')
-        print('//////////////////////')
         user = request.user
         order_status = 'InCart'
 
@@ -470,9 +462,7 @@ def put_order(request):
             flavor_id, size_id,
             user, order_status
         )
-        print('output get_order_item_by_user')
-        print(order_item)
-        print('-------------------------------')
+
         if not order_item:
             order_item = create_order_item_for_user(
                 menu_id, dish_id, type_id,
@@ -490,6 +480,7 @@ def put_order(request):
             )
         )
 
+
 def get_adding_flavors_selection_limit(adding):
     limit = adding.flavors_selection_limit
 
@@ -497,33 +488,6 @@ def get_adding_flavors_selection_limit(adding):
 
     return flavors_selection_limit
 
-
-"""
-def get_adding_flavors_selection_limit(order_adding):
-    min = 0
-    max = -1
-
-    limit = order_adding.flavors_selection_limit
-
-    if not limit or limit.min is None or limit.min < 0:
-        min = 0
-    else:
-        min = limit.min
-
-    if not limit or limit.max is None or limit.max < 0:
-        max = -1
-    elif limit.max >= min:
-        max = limit.max
-    else:
-        max = min
-
-    flavors_selection_limit = {
-        'min': min,
-        'max': max,
-    }
-
-    return flavors_selection_limit
-"""
 
 def alter_order(request):
     if not request.user.is_authenticated:
@@ -550,7 +514,9 @@ def alter_order(request):
             order_adding_flavor_id = None
 
         if "order-adding-flavor-size-id" in post_keys:
-            order_adding_flavor_size_id = request.POST["order-adding-flavor-size-id"]
+            order_adding_flavor_size_id = (
+                request.POST["order-adding-flavor-size-id"]
+            )
         else:
             order_adding_flavor_size_id = None
 
@@ -560,17 +526,23 @@ def alter_order(request):
             None if order_adding_id == 'None' else order_adding_id
         )
         order_adding_flavor_id = (
-            None if order_adding_flavor_id == 'None' else order_adding_flavor_id
+            None if order_adding_flavor_id ==
+            'None' else order_adding_flavor_id
         )
 
         order_adding_flavor_size_id = (
-            None if order_adding_flavor_size_id == 'None' else order_adding_flavor_size_id
+            None if order_adding_flavor_size_id ==
+            'None' else order_adding_flavor_size_id
         )
 
         order_item = OrderItem.objects.filter(id=order_item_id).first()
         order_adding = OrderAdding.objects.filter(id=order_adding_id).first()
-        order_adding_flavor = OrderAddingFlavor.objects.filter(id=order_adding_flavor_id).first()
-        order_adding_flavor_size = OrderAddingFlavorSize.objects.filter(id=order_adding_flavor_size_id).first()
+        order_adding_flavor = OrderAddingFlavor.objects.filter(
+            id=order_adding_flavor_id
+        ).first()
+        order_adding_flavor_size = OrderAddingFlavorSize.objects.filter(
+            id=order_adding_flavor_size_id
+        ).first()
 
         if request.POST["submit"] == 'inc-order-item-count':
             order_item.count += 1
@@ -598,7 +570,6 @@ def alter_order(request):
                     order_adding.flavors_selection_count += 1
                     order_adding.save()
 
-
         elif request.POST["submit"] == 'order-adding-flavor-size-select':
             limit = get_adding_flavors_selection_limit(order_adding.elem)
 
@@ -617,7 +588,7 @@ def alter_order(request):
             else:
                 for size in order_adding_flavor.sizes.all():
                     if size.selected:
-                        size.selected = False 
+                        size.selected = False
                         size.save()
                         order_adding_flavor.sizes_selection_count -= 1
                         order_adding_flavor.save()
@@ -650,37 +621,33 @@ def alter_order(request):
             )
         )
 
-"""
-def calc_order_size_price(order_size):
-    value = 0
-    unit = None
 
-    if order_size['elem']['quantity']:
-        value += order_size['elem']['quantity']['converted']['value']
-        unit = order_size['elem']['quantity']['converted']['unit']
-
-    price = {
-        'value': value,
-        'unit': unit,
-        }
-
-    return price
-"""
-
-def fill_order_adding_flavor_size_price(order_adding_flavor_size, container_quantity):
+def fill_order_adding_flavor_size_price(
+    order_adding_flavor_size, container_quantity
+):
     value = 0
 
     unit = None
     if order_adding_flavor_size['elem']['quantity']:
-        unit = order_adding_flavor_size['elem']['quantity']['converted']['unit']
+        unit = (
+            order_adding_flavor_size['elem']['quantity']['converted']['unit']
+        )
     elif container_quantity:
         order_adding_flavor_size['elem']['quantity'] = container_quantity
-        unit = order_adding_flavor_size['elem']['quantity']['converted']['unit']
+        unit = (
+            order_adding_flavor_size['elem']['quantity']['converted']['unit']
+        )
 
-    if order_adding_flavor_size['selected']:
-        if order_adding_flavor_size['elem']['quantity']:
-            value += order_adding_flavor_size['elem']['quantity']['converted']['value']
-            unit = order_adding_flavor_size['elem']['quantity']['converted']['unit']
+    if (
+        order_adding_flavor_size['selected'] and
+        order_adding_flavor_size['elem']['quantity']
+    ):
+        value += (
+            order_adding_flavor_size['elem']['quantity']['converted']['value']
+        )
+        unit = (
+            order_adding_flavor_size['elem']['quantity']['converted']['unit']
+        )
 
     price = {
         'value': value,
@@ -702,11 +669,17 @@ def fill_order_adding_flavor_price(order_adding_flavor, container_quantity):
         order_adding_flavor['elem']['quantity'] = container_quantity
         unit = order_adding_flavor['elem']['quantity']['converted']['unit']
 
-    if len(order_adding_flavor['sizes']) < 1:
-        if order_adding_flavor['selected']:
-            if order_adding_flavor['elem']['quantity']:
-                value += order_adding_flavor['elem']['quantity']['converted']['value']
-                unit = order_adding_flavor['elem']['quantity']['converted']['unit']
+    if (
+        len(order_adding_flavor['sizes']) < 1 and
+        order_adding_flavor['selected'] and
+        order_adding_flavor['elem']['quantity']
+    ):
+        value += (
+            order_adding_flavor['elem']['quantity']['converted']['value']
+        )
+        unit = (
+            order_adding_flavor['elem']['quantity']['converted']['unit']
+        )
     else:
         if order_adding_flavor['elem']['quantity']:
             container_quantity = order_adding_flavor['elem']['quantity']
@@ -786,7 +759,7 @@ def fill_order_elem_price(order_elem):
     order_elem['price'] = price
 
     return order_elem
-    
+
 
 def fill_order_item_price(order_item):
     value = 0
@@ -834,34 +807,6 @@ def fill_order_item_price(order_item):
     return order_item
 
 
-"""
-def get_adding_flavors_selection_limit(adding):
-    min = 0
-    max = -1
-
-    limit = order_adding['elem']['flavors_selection_limit']
-
-    if not limit or limit['min'] is None or limit['min'] < 0:
-        min = 0
-    else:
-        min = limit['min']
-
-    if not limit or limit['max'] is None or limit['max'] < 0:
-        max = -1
-    elif limit['max'] >= min:
-        max = limit['max']
-    else:
-        max = min
-
-    flavors_selection_limit = {
-        'min': min,
-        'max': max,
-    }
-
-    return flavors_selection_limit
-"""
-
-
 def fill_order_adding_status(order_adding):
     ready = True
 
@@ -873,7 +818,10 @@ def fill_order_adding_status(order_adding):
     else:
         selections_deficiency = False
 
-    if limit['max'] >= 0 and order_adding['flavors_selection_count'] > limit['max']:
+    if (
+        limit['max'] >= 0 and
+        order_adding['flavors_selection_count'] > limit['max']
+    ):
         selections_excess = True
     else:
         selections_excess = False
@@ -979,15 +927,16 @@ def insert_order_adding_flavor_special_sizes(sizes, order_adding_flavor):
 
             if not inserted:
                 sizes.append(order_adding_flavor_size['elem'])
-    print(special_count)
 
     if special_count < 1:
         for order_adding_flavor_size in order_adding_flavor['sizes']:
-            print(order_adding_flavor_size['selected'])
             if order_adding_flavor_size['selected']:
                 inserted = False
                 for size in sizes:
-                    if size['name'] == order_adding_flavor_size['elem']['name']:
+                    if (
+                        size['name'] ==
+                        order_adding_flavor_size['elem']['name']
+                    ):
                         inserted = True
                         break
 
@@ -1016,8 +965,9 @@ def build_order_adding_special_flavors_table(order_adding):
     sizes = []
     for order_adding_flavor in order_adding['flavors']:
         if order_adding_flavor['elem']['special']:
-            sizes = insert_order_adding_flavor_special_sizes(sizes, order_adding_flavor)
-            print(sizes)
+            sizes = insert_order_adding_flavor_special_sizes(
+                sizes, order_adding_flavor
+            )
 
     sizes.sort(key=lambda size: size['sort_number'], reverse=False)
     table['sizes'] = sizes
@@ -1053,56 +1003,34 @@ def fill_order_adding_tables(order_adding):
         flavors_table = build_order_adding_flavors_table(order_adding)
         order_adding['flavors_table'] = flavors_table
 
-        special_flavors_table = build_order_adding_special_flavors_table(order_adding)
+        special_flavors_table = (
+            build_order_adding_special_flavors_table(
+                order_adding
+            )
+        )
         order_adding['special_flavors_table'] = special_flavors_table
 
         for order_adding_flavor in order_adding['flavors']:
-            order_adding_flavor['size_columns'] = build_order_adding_flavor_sizes_columns(
-                sizes=flavors_table['sizes'], order_adding_flavor=order_adding_flavor
+            order_adding_flavor['size_columns'] = (
+                build_order_adding_flavor_sizes_columns(
+                    sizes=flavors_table['sizes'],
+                    order_adding_flavor=order_adding_flavor
+                )
             )
 
             if order_adding_flavor['elem']['special']:
-                order_adding_flavor['special_size_columns'] = build_order_adding_flavor_sizes_columns(
-                    sizes=special_flavors_table['sizes'], order_adding_flavor=order_adding_flavor
+                order_adding_flavor['special_size_columns'] = (
+                    build_order_adding_flavor_sizes_columns(
+                        sizes=special_flavors_table['sizes'],
+                        order_adding_flavor=order_adding_flavor
+                    )
                 )
-
-            """
-
-            sizes_quantities_count = 0
-            for order_adding_flavor_size in order_adding_flavor['size_columns']:
-                if order_adding_flavor_size:
-                    if (
-                        'quantity' not in order_adding_flavor_size['elem'] 
-                        or 
-                        not order_adding_flavor_size['elem']['quantity']
-                    ):
-                        order_adding_flavor_size['elem']['quantity'] = order_adding_flavor['elem']['quantity']
-
-                    sizes_quantities_count += 1
-
-            order_adding_flavor['sizes_quantities_count'] = sizes_quantities_count
-
-            special_sizes_quantities_count = 0
-            if order_adding_flavor['elem']['special']:
-                for order_adding_flavor_size in order_adding_flavor['special_size_columns']:
-                    if order_adding_flavor_size:
-                        if (
-                            not 'quantity' in order_adding_flavor_size['elem'] 
-                            or
-                            not order_adding_flavor_size['elem']['quantity']
-                        ):
-                            order_adding_flavor_size['elem']['quantity'] = order_adding_flavor['elem']['quantity']
-
-                        special_sizes_quantities_count += 1
-
-            order_adding_flavor['special_sizes_quantities_count'] = special_sizes_quantities_count
-            """
 
 
 def fill_order_elem_tables(order_elem):
     for order_adding in order_elem['addings']:
         order_adding = fill_order_adding_tables(order_adding)
-    
+
     return order_elem
 
 
@@ -1140,7 +1068,9 @@ def fill_order_item(order_item):
 
 def build_order_item(order_item_object, language, currency):
     if order_item_object:
-        order_item = to_dict(order_item_object, language=language, currency=currency)
+        order_item = to_dict(
+            order_item_object, language=language, currency=currency
+        )
         if order_item:
             order_item = fill_order_item(order_item)
     else:
@@ -1178,13 +1108,9 @@ def order_item(request, order_item_id):
     languages = pages_basic_data['languages']
     currencies = pages_basic_data['currencies']
 
-    order_item = build_order_item(order_item_object, language=language, currency=currency)
-
-    """
-    order_item = to_dict(order_item_object, language=language, currency=currency)
-    order_item = fill_order_item_tables(order_item)
-    order_item = fill_order_item_price(order_item)
-    """
+    order_item = build_order_item(
+        order_item_object, language=language, currency=currency
+    )
 
     context = {
         'settings': settings,
@@ -1273,20 +1199,8 @@ def cart(request):
     currencies = pages_basic_data['currencies']
 
     user = request.user
-    status='InCart'
+    status = 'InCart'
     order = build_order(user, status, language=language, currency=currency)
-
-    """
-    order_object = Order.objects.filter(user=user, status=status).first()
-    if not order_object:
-        order = {}
-    elif order_object.items.count() < 1:
-        order_object.cancel()
-        order = {}
-    else:
-        order = to_dict(order_object, language=language, currency=currency)
-        order = fill_order_price(order)
-    """
 
     context = {
         'settings': settings,
@@ -1306,190 +1220,20 @@ def clear_cart(request):
         return HttpResponseRedirect(reverse('index'))
 
     user = request.user
-    status='InCart'
+    status = 'InCart'
     orders = Order.objects.filter(user=user, status=status).all()
     for order in orders:
         order.cancel()
 
     return HttpResponseRedirect(reverse('cart'))
 
-"""
-def calc_order_price(order):
-    value = 0
-    unit = None
-
-    for order_dish in order['dishes']:
-        p = calc_order_dish_price(order_dish)
-        value += p['value']
-        unit = p['unit']
-
-    price = {
-        'value': value,
-        'unit': unit,
-    }
-
-    order['price'] = price
-
-    return price
-
-
-def calc_plain_order_object_price(order_object):
-    if order_object['plain']:
-        if 'quantity' in order_object['menu'].keys():
-            if 'converted' in order_object['menu']['quantity']:
-                value = (
-                    order_object['count'] *
-                    order_object['menu']['quantity']['converted']['value']
-                )
-                unit = order_object['menu']['quantity']['converted']['unit']
-
-                price = {
-                    'value': value,
-                    'unit': unit,
-                }
-
-                return price
-
-    return None
-
-
-def calc_order_dish_price(order_dish):
-    value = 0
-    unit = None
-
-    for order_type in order_dish['types']:
-        p = calc_order_type_price(order_type)
-        value += p['value']
-        unit = p['unit']
-
-    for order_flavor in order_dish['flavors']:
-        p = calc_order_flavor_price(order_flavor)
-        value += p['value']
-        unit = p['unit']
-
-    for order_adding in order_dish['addings']:
-        p = calc_order_adding_price(order_adding)
-        value += p['value']
-        unit = p['unit']
-
-    for order_size in order_dish['sizes']:
-        p = calc_order_size_price(order_size)
-        value += p['value']
-        unit = p['unit']
-
-    p = calc_plain_order_object_price(order_dish)
-    if p:
-        value += p['value']
-        unit = p['unit']
-
-    price = {
-        'value': value,
-        'unit': unit,
-    }
-
-    order_dish['price'] = price
-
-    return price
-
-
-def calc_order_type_price(order_type):
-    value = 0
-    unit = None
-
-    for order_flavor in order_type['flavors']:
-        p = calc_order_flavor_price(order_flavor)
-        value += p['value']
-        unit = p['unit']
-
-    for order_adding in order_type['addings']:
-        p = calc_order_adding_price(order_adding)
-        value += p['value']
-        unit = p['unit']
-
-    for order_size in order_type['sizes']:
-        p = calc_order_size_price(order_size)
-        value += p['value']
-        unit = p['unit']
-
-    p = calc_plain_order_object_price(order_type)
-    if p:
-        value += p['value']
-        unit = p['unit']
-
-    price = {
-        'value': value,
-        'unit': unit,
-    }
-
-    order_type['price'] = price
-
-    return price
-
-
-def calc_order_flavor_price(order_flavor):
-    value = 0
-    unit = None
-
-    for order_adding in order_flavor['addings']:
-        p = calc_order_adding_price(order_adding)
-        value += p['value']
-        unit = p['unit']
-
-    for order_size in order_flavor['sizes']:
-        p = calc_order_size_price(order_size)
-        value += p['value']
-        unit = p['unit']
-
-    p = calc_plain_order_object_price(order_flavor)
-    if p:
-        value += p['value']
-        unit = p['unit']
-
-    price = {
-        'value': value,
-        'unit': unit,
-    }
-
-    order_flavor['price'] = price
-
-    return price
-
-
-def calc_order_adding_price(order_adding):
-    value = 0
-    unit = None
-
-    for order_flavor in order_adding['flavors']:
-        p = calc_order_flavor_price(order_flavor)
-        value += p['value']
-        unit = p['unit']
-
-    for order_size in order_adding['sizes']:
-        p = calc_order_size_price(order_size)
-        value += p['value']
-        unit = p['unit']
-
-    p = calc_plain_order_object_price(order_adding)
-    if p:
-        value += p['value']
-        unit = p['unit']
-
-    price = {
-        'value': value,
-        'unit': unit,
-    }
-
-    order_adding['price'] = price
-
-    return price
-"""
 
 def success(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
 
     user = request.user
-    status='InCart'
+    status = 'InCart'
     orders = Order.objects.filter(user=user, status=status).all()
     for order in orders:
         order.cancel()
@@ -1569,75 +1313,3 @@ def create_checkout_session(request):
         return JsonResponse({'id': checkout_session.id})
     except Exception as e:
         return JsonResponse(error=str(e))
-
-"""
-def put_columns_to_order_dish(order_dish):
-    types_columns = {}
-    put_order_types(types_columns, order_dish)
-    order_dish['types_columns'] = types_columns
-
-    flavors_columns = {}
-    put_order_flavors(flavors_columns, order_dish)
-    order_dish['flavors_columns'] = flavors_columns
-
-    addings_columns = {}
-    put_order_addings(addings_columns, order_dish)
-    order_dish['addings_columns'] = addings_columns
-
-
-def put_order_types(columns, order_table):
-    sizes = []
-    for type in order_table['types']:
-        flavors_columns = {}
-        put_order_flavors(flavors_columns, type)
-        type['flavors_columns'] = flavors_columns
-
-        addings_columns = {}
-        put_order_addings(addings_columns, type)
-        type['addings_columns'] = addings_columns
-
-        put_order_sizes(sizes, type)
-
-    sizes.sort(key=lambda size: size['menu']['sort_number'], reverse=False)
-    columns['sizes'] = sizes
-
-
-def put_order_flavors(columns, order_table):
-    sizes = []
-    for flavor in order_table['flavors']:
-        addings_columns = {}
-        put_order_addings(addings_columns, flavor)
-        flavor['addings_columns'] = addings_columns
-
-        put_order_sizes(sizes, flavor)
-
-    sizes.sort(key=lambda size: size['menu']['sort_number'], reverse=False)
-    columns['sizes'] = sizes
-
-
-def put_order_addings(columns, order_table):
-    sizes = []
-    for adding in order_table['addings']:
-        flavors_columns = {}
-        put_order_flavors(flavors_columns, adding)
-        adding['flavors_columns'] = flavors_columns
-
-        put_order_sizes(sizes, adding)
-
-    sizes.sort(key=lambda size: size['menu']['sort_number'], reverse=False)
-    columns['sizes'] = sizes
-
-
-def put_order_sizes(columns, order_table):
-    for size in order_table['sizes']:
-        inserted = False
-        for column in columns:
-            column_short_name = column['menu']['short_name']
-            size_short_name = size['menu']['short_name']
-            if column_short_name == size_short_name:
-                inserted = True
-                break
-
-        if not inserted:
-            columns.append(size)
-"""

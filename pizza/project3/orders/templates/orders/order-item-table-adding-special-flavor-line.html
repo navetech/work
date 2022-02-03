@@ -4,13 +4,6 @@
         {{ order_adding_flavor.elem.full_name }}
     </td>
 
-    {% comment %}
-    <td>
-        {{ order_adding_flavor.price.value|floatformat:2 }}
-        {{ order_adding_flavor.price.unit }}
-    </td>
-    {% endcomment %}
-
     <td>
         {% if not order_adding_flavor.special_size_columns %}
             {{ order_adding_flavor.elem.quantity.converted.value|floatformat:2 }}

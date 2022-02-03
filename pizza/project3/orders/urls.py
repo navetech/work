@@ -2,8 +2,10 @@ from django.urls import path
 
 from . import views
 
+"""
 urlpatterns = [
 ]
+"""
 
 urlpatterns = [
     path("", views.index, name="index"),
@@ -43,7 +45,4 @@ urlpatterns = [
     ),
     path('success', views.success, name='success'),
     path('cancel', views.cancel, name='cancel'),
-
-
-
 ]

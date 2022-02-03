@@ -8,7 +8,8 @@
         {% include "orders/menu-form-inputs.html" %}
         
         <button type="submit" name="submit">
-            {{ menu.quantity.converted.value|floatformat:2 }} {{ menu.quantity.converted.unit }}
+            {{ menu.quantity.converted.value|floatformat:2 }}
+            {{ menu.quantity.converted.unit }}
         </button>
     </form>
 {% endif %}

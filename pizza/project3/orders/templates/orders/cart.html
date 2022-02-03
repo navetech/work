@@ -27,30 +27,6 @@
 
         <br>
 
-    {% comment %}
-        <table style="width:100%" class="table">
-            <tr>
-                <th>Status</th>
-                <th>Total Price</th>
-            <tr>
-
-            <tr>
-                <td>
-                    {% if order.status.ready %}
-                        Ready
-                    {% else %}
-                        Not Ready
-                    {% endif %}
-                </td>
-    
-                <td>
-                    <span id="total-price">{{order.price.value|floatformat:2 }}</span>
-                    {{ order.price.unit }}
-                </td>
-            <tr>
-        </table>
-        {% endcomment %}
-
         {% if order.status.ready %}
             <button type="button" id="checkout-button" class="btn btn-secondary">Checkout</button>
         {% else %}

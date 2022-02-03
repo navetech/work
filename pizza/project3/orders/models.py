@@ -240,7 +240,7 @@ def adjust_count_limit_dict(limit):
         else:
             min = 0
 
-        if not 'max' in limit:
+        if 'max' not in limit:
             max = -1
         else:
             if limit['max']:
@@ -265,11 +265,10 @@ def adjust_count_limit_dict(limit):
 
 def adjust_count_limit(limit_obj):
     limit = to_dict(limit_obj)
-    
+
     count_limit = adjust_count_limit_dict(limit)
 
     return count_limit
-
 
 
 class CountLimit(models.Model):
@@ -281,16 +280,6 @@ class CountLimit(models.Model):
 
         self.min = limit['min']
         self.max = limit['max']
-
-        """
-        if not self.min or self.min < 0:
-            self.min = 0
-
-        if (self.max and self.max < 0) or (not self.max and self.max != 0):
-            self.max = -1
-        elif self.max < self.min:
-            self.max = self.min
-        """
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -359,16 +348,6 @@ def order_item_elems_to_dict_list(
 
     return dict_list
 
-    """
-    dict_list = []
-
-    objects = manager.all().order_by('elem__sort_number')
-    for object in objects:
-        dict = elem_to_dict(container_dict, object, **settings)
-        dict_list.append(dict)
-
-    return dict_list
-    """
 
 class MenuElementDefinitionFields(models.Model):
     sort_number = models.FloatField(default=0)
@@ -396,7 +375,6 @@ class MenuElementDefinitionFields(models.Model):
         full_name = first_name
 
         app_label = self._meta.app_label
-#        modelos = apps.get_app_config(app_label).get_models()
         modelos = apps.get_models()
         for modelo in modelos:
             model_name = modelo._meta.model_name
@@ -1125,7 +1103,9 @@ class HistoricOrder(models.Model):
 
 
 def create_order_adding_flavor_size(order_adding_flavor_size, selected):
-    order_elem = OrderAddingFlavorSize(elem=order_adding_flavor_size, selected=selected)
+    order_elem = OrderAddingFlavorSize(
+        elem=order_adding_flavor_size, selected=selected
+    )
     if order_elem:
         order_elem.save()
 
@@ -1133,35 +1113,38 @@ def create_order_adding_flavor_size(order_adding_flavor_size, selected):
 
 
 def create_order_adding_flavor(adding_flavor, selected):
-    order_elem = OrderAddingFlavor(elem=adding_flavor, selected=selected, sizes_selection_count=0)
+    order_elem = OrderAddingFlavor(
+        elem=adding_flavor, selected=selected,
+        sizes_selection_count=0
+    )
     if order_elem:
         order_elem.save()
 
         adding_flavor_sizes = adding_flavor.sizes.all()
         for adding_flavor_size in adding_flavor_sizes:
-            if adding_flavor_size.special and order_elem.selected and order_elem.sizes_selection_count < 1:
+            if (
+                adding_flavor_size.special and
+                order_elem.selected and
+                order_elem.sizes_selection_count < 1
+            ):
                 order_elem.sizes_selection_count += 1
                 order_elem.save()
                 size_selected = True
             else:
                 size_selected = False
-                
-            order_adding_flavor_size = create_order_adding_flavor_size(adding_flavor_size, size_selected)
+
+            order_adding_flavor_size = create_order_adding_flavor_size(
+                adding_flavor_size, size_selected
+            )
             order_elem.sizes.add(order_adding_flavor_size)
             order_elem.save()
-
-        print('ddddddddddddddddddd')
-        print(order_elem.selected)
-        print(order_elem.sizes_selection_count)
-        print(order_elem.sizes.count())
 
         if order_elem.selected and order_elem.sizes_selection_count < 1:
             if order_elem.sizes.count() > 0:
                 order_adding_flavor_size = order_elem.sizes.first()
                 order_adding_flavor_size.selected = True
                 order_adding_flavor_size.save()
-                print(order_adding_flavor_size)
-                
+
                 order_elem.sizes_selection_count += 1
                 order_elem.save()
 
@@ -1171,13 +1154,16 @@ def create_order_adding_flavor(adding_flavor, selected):
 def create_order_adding(adding):
     order_elem = None
 
-    if  not adding.flavors_set:
+    if not adding.flavors_set:
         return order_elem
 
     if adding.flavors_set.flavors.count() < 1:
         return order_elem
 
-    if adding.flavors_selection_limit and adding.flavors_selection_limit.max == 0:
+    if (
+        adding.flavors_selection_limit and
+        adding.flavors_selection_limit.max == 0
+    ):
         return order_elem
 
     order_elem = OrderAdding(elem=adding, flavors_selection_count=0)
@@ -1193,8 +1179,10 @@ def create_order_adding(adding):
                     order_elem.save()
                 else:
                     selected = False
-                    
-                order_adding_flavor = create_order_adding_flavor(adding_flavor, selected)
+
+                order_adding_flavor = create_order_adding_flavor(
+                    adding_flavor, selected
+                )
                 order_elem.flavors.add(order_adding_flavor)
                 order_elem.save()
 
@@ -1232,16 +1220,9 @@ def create_order_size(size_id):
 def create_order_item(
     menu_id, dish_id, type_id, flavor_id, size_id
 ):
-    print('create_order_item')
     menu = create_order_elem(menu_id, Menu, OrderMenu)
-#    menu = create_order_menu(menu_id)
-    print('menu')
-    print(menu)
-#    dish = create_order_dish(dish_id)
     dish = create_order_elem(dish_id, Dish, OrderDish)
-#    type = create_order_type(type_id)
     type = create_order_elem(type_id, Type, OrderType)
-#    flavor = create_order_flavor(flavor_id)
     flavor = create_order_elem(flavor_id, Flavor, OrderFlavor)
     size = create_order_size(size_id)
 
@@ -1251,10 +1232,7 @@ def create_order_item(
             menu=menu, dish=dish, type=type,
             flavor=flavor, size=size
         )
-        print(order_item)
         order_item.save()
-        print('order_item')
-        print(order_item)
     else:
         order_item = None
 
@@ -1265,31 +1243,21 @@ def create_order_item_for_user(
         menu_id, dish_id, type_id, flavor_id, size_id,
         user, status='InCart'
 ):
-    print('create_order_item_for_user')
     order_item = create_order_item(
         menu_id, dish_id, type_id, flavor_id, size_id
     )
     if order_item:
-        print('output create_order_item_for_user')
-        print(order_item)
         order = Order.objects.filter(user=user, status=status).first()
-        print(order)
         if order:
-            print('order')
             order.items.add(order_item)
             order.save()
-            print(order)
         else:
-            print('no order')
             order = Order(user=user, status=status)
             if order:
                 order.save()
-                print('create order')
                 order.items.add(order_item)
                 order.save()
-                print(order)
             else:
-                print('cancel order_item')
                 order_item.cancel()
                 order_item = None
 
@@ -1343,20 +1311,13 @@ def get_order_item(
         order
 ):
     items = order.items.all()
-    print('items')
-    print(items)
     founds = []
     for item in items:
-        print('item')
-        print(item)
         if is_the_order_item(
             menu_id, dish_id, type_id, flavor_id, size_id,
             item
         ):
             founds.append(item)
-
-    print('founds')    
-    print(len(founds))
 
     if len(founds) > 0:
         order_item = founds[0]
@@ -1371,8 +1332,6 @@ def get_order_item_by_user(
         user, status='InCart'
 ):
     order = Order.objects.filter(user=user, status=status).first()
-    print('order')
-    print(order)
     if order:
         order_item = get_order_item(
             menu_id, dish_id, type_id, flavor_id, size_id,
@@ -1382,25 +1341,3 @@ def get_order_item_by_user(
         order_item = None
 
     return order_item
-
-
-def check_objects_counts(objects, range=None):
-    count = 0
-    in_range = True
-
-    for object in objects:
-        check = object.check_count(range)
-        count += check['count']
-        if not check['in_range']:
-            in_range = False
-
-    if range:
-        if count < range.min:
-            in_range = False
-        elif range.max >= 0 and count > range.max:
-            in_range = False
-
-    return {
-        'count': count,
-        'in_range': in_range,
-    }

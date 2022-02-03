@@ -9,7 +9,8 @@
             {% include "orders/menu-form-inputs.html" %}
             
             <button type="submit" name="submit">
-                {{ size.quantity.converted.value|floatformat:2 }} {{ size.quantity.converted.unit }}
+                {{ size.quantity.converted.value|floatformat:2 }}
+                {{ size.quantity.converted.unit }}
             </button>
         </form>
     {% endif %}
