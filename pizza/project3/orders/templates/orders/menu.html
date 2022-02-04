@@ -2,7 +2,11 @@
 
 
 {% block title %}
-    {{ menu.name.translated.words }}
+    {% if settings.menu_label %}}
+        {{ settings.menu_label.translated.words }}
+    {% else %}
+        Menu
+    {% endif %}
 {% endblock %}
 
 {% block main %}

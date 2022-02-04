@@ -28,104 +28,89 @@ class Setting(models.Model):
         related_name='product_name_Setting_related'
     )
 
-    prod_navbar_menu = models.ForeignKey(
+    menu_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='prod_navbar_menu_Setting_related'
+        related_name='menu_label_Setting_related'
     )
 
-    prod_navbar_cart = models.ForeignKey(
+    cart_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='prod_navbar_cart_Setting_related'
+        related_name='cart_label_Setting_related'
     )
 
-    prod_navbar_register = models.ForeignKey(
+    register_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='prod_navbar_register_Setting_related'
+        related_name='register_label_Setting_related'
     )
 
-    prod_navbar_unregister = models.ForeignKey(
+    unregister_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='prod_navbar_unregister_Setting_related'
+        related_name='unregister_label_Setting_related'
     )
 
-    prod_navbar_login = models.ForeignKey(
+    login_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='prod_navbar_login_Setting_related'
+        related_name='login_label_Setting_related'
     )
 
-    prod_navbar_logout = models.ForeignKey(
+    logout_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='prod_navbar_logout_Setting_related'
+        related_name='logout_label_Setting_related'
     )
 
-    pages_items_header = models.ForeignKey(
+    items_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='pages_items_header_Setting_related'
+        related_name='items_label_Setting_related'
     )
 
-    pages_no_items_header = models.ForeignKey(
+    no_items_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='pages_no_items_header_Setting_related'
+        related_name='no_items_label_Setting_related'
     )
 
-    pages_status_ready = models.ForeignKey(
+    ready_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='pages_status_ready_Setting_related'
+        related_name='ready_label_Setting_related'
     )
 
-    pages_status_not_ready = models.ForeignKey(
+    not_ready_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='pages_status_not_ready_Setting_related'
+        related_name='not_ready_label_Setting_related'
     )
 
-    pages_checkout_label = models.ForeignKey(
+    checkout_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='pages_checkout_label_Setting_related'
+        related_name='checkout_label_Setting_related'
     )
 
-    pages_clear_cart_label = models.ForeignKey(
+    clear_cart_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='pages_clear_cart_label_Setting_related'
+        related_name='clear_cart_label_Setting_related'
     )
 
-    menu_page_title = models.ForeignKey(
+    show_cart_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='menu_page_title_Setting_related'
+        related_name='show_cart_label_Setting_related'
     )
 
-    menu_page_header = models.ForeignKey(
+    menus_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='menu_page_header_Setting_related'
+        related_name='menus_label_Setting_related'
     )
 
-    order_page_title = models.ForeignKey(
+    order_item_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='order_page_title_Setting_related'
+        related_name='order_item_page_label_Setting_related'
     )
 
-    order_page_header = models.ForeignKey(
+    cart_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='order_page_header_Setting_related'
+        related_name='cart_label_Setting_related'
     )
 
-    cart_page_title = models.ForeignKey(
+    success_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='cart_page_title_Setting_related'
-    )
-
-    cart_page_header = models.ForeignKey(
-        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='cart_page_header_Setting_related'
-    )
-
-    success_page_title = models.ForeignKey(
-        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='success_page_title_Setting_related'
-    )
-
-    success_page_header = models.ForeignKey(
-        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='success_page_header_Setting_related'
+        related_name='success_label_Setting_related'
     )
 
     success_page_contents_01 = models.ForeignKey(
@@ -138,14 +123,9 @@ class Setting(models.Model):
         related_name='success_page_contents_02_Setting_related'
     )
 
-    cancel_page_title = models.ForeignKey(
+    cancel_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='cancel_page_title_Setting_related'
-    )
-
-    cancel_page_header = models.ForeignKey(
-        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='cancel_page_header_Setting_related'
+        related_name='cancel_label_Setting_related'
     )
 
     cancel_page_contents = models.ForeignKey(
@@ -167,54 +147,50 @@ class Setting(models.Model):
         dict['product_title'] = to_dict(self.product_title, **settings)
         dict['product_name'] = to_dict(self.product_name, **settings)
 
-        dict['prod_navbar_menu'] = to_dict(self.prod_navbar_menu, **settings)
-        dict['prod_navbar_cart'] = to_dict(self.prod_navbar_cart, **settings)
-        dict['prod_navbar_register'] = to_dict(self.prod_navbar_register, **settings)
-        dict['prod_navbar_unregister'] = to_dict(self.prod_navbar_unregister, **settings)
-        dict['prod_navbar_login'] = to_dict(self.prod_navbar_login, **settings)
-        dict['prod_navbar_logout'] = to_dict(self.prod_navbar_logout, **settings)
+        dict['menu_label'] = to_dict(self.menu_label, **settings)
+        dict['cart_label'] = to_dict(self.cart_label, **settings)
+        dict['register_label'] = to_dict(self.register_label, **settings)
+        dict['unregister_label'] = to_dict(self.unregister_labelunregister_label, **settings)
+        dict['login_label'] = to_dict(self.login_label, **settings)
+        dict['logout_label'] = to_dict(self.logout_label, **settings)
 
-        dict['pages_items_header'] = to_dict(
-            self.pages_items_header, **settings
+        dict['items_label'] = to_dict(
+            self.items_label, **settings
         )
-        dict['pages_no_items_header'] = to_dict(
-            self.pages_no_items_header, **settings
+        dict['no_items_label'] = to_dict(
+            self.no_items_label, **settings
         )
-        dict['pages_status_ready'] = to_dict(
-            self.pages_status_ready, **settings
+        dict['ready_label'] = to_dict(
+            self.ready_label, **settings
         )
-        dict['pages_status_not_ready'] = to_dict(
-            self.pages_status_not_ready, **settings
+        dict['not_ready_label'] = to_dict(
+            self.not_ready_label, **settings
         )
-        dict['pages_checkout_label'] = to_dict(
-            self.pages_checkout_label, **settings
+        dict['checkout_label'] = to_dict(
+            self.checkout_label, **settings
         )
-        dict['pages_clear_cart_label'] = to_dict(
-            self.pages_clear_cart_label, **settings
+        dict['clear_cart_label'] = to_dict(
+            self.clear_cart_label, **settings
+        )
+        dict['show_cart_label'] = to_dict(
+            self.show_cart_label, **settings
+        )
+        dict['menus_label'] = to_dict(self.menus_label, **settings)
+        dict['order_item_label'] = to_dict(self.order_item_label, **settings)
+        dict['cart_label'] = to_dict(self.cart_page_title, **settings)
+
+        dict['success_label'] = to_dict(
+            self.success_label, **settings
         )
 
-        dict['menu_page_title'] = to_dict(self.menu_page_title, **settings)
-        dict['menu_page_header'] = to_dict(self.menu_page_header, **settings)
-        dict['order_page_title'] = to_dict(self.order_page_title, **settings)
-        dict['order_page_header'] = to_dict(self.order_page_header, **settings)
-        dict['cart_page_title'] = to_dict(self.cart_page_title, **settings)
-        dict['cart_page_header'] = to_dict(self.cart_page_header, **settings)
-        dict['success_page_title'] = to_dict(
-            self.success_page_title, **settings
-        )
-        dict['success_page_header'] = to_dict(
-            self.success_page_header, **settings
-        )
         dict['success_page_contents_01'] = to_dict(
             self.success_page_contents_01, **settings
         )
         dict['success_page_contents_02'] = to_dict(
             self.success_page_contents_02, **settings
         )
-        dict['cancel_page_title'] = to_dict(self.cancel_page_title, **settings)
-        dict['cancel_page_header'] = to_dict(
-            self.cancel_page_header, **settings
-        )
+        
+        dict['cancel_label'] = to_dict(self.cancel_label, **settings)
         dict['cancel_page_contents'] = to_dict(
             self.cancel_page_contents, **settings
         )

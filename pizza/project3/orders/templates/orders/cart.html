@@ -8,8 +8,8 @@
 
 
 {% block title %}
-    {% if settings.cart_page_title %}}
-        {{ settings.cart_page_title.translated.words }}
+    {% if settings.cart_label %}}
+        {{ settings.cart_label.translated.words }}
     {% else %}
         Cart
     {% endif %}
@@ -17,22 +17,22 @@
 
 
 {% block main %}
-    {% if settings.cart_page_header %}}
-        <h3>{{ settings.cart_page_header.translated.words }}</h3>
+    {% if settings.cart_label %}}
+        <h3>{{ settings.cart_label.translated.words }}</h3>
     {% else %}
         <h3>Cart</h3>
     {% endif %}
 
     {% if order.items %}
         {% if order.status.ready %}
-            {% if settings.pages_status_ready %}}
-                {{ settings.pages_status_ready.translated.words }}
+            {% if settings.ready_label %}}
+                {{ settings.ready_label.translated.words }}
             {% else %}
                 Ready
             {% endif %}
         {% else %}
-            {% if settings.pages_status_not_ready %}}
-                {{ settings.pages_status_not_ready.translated.words }}
+            {% if settings.not_ready_label %}}
+                {{ settings.not_ready_label.translated.words }}
             {% else %}
                 Not Ready
             {% endif %}
@@ -45,16 +45,16 @@
 
         {% if order.status.ready %}
             <button type="button" id="checkout-button" class="btn btn-secondary">
-                {% if settings.pages_checkout_label %}}
-                    {{ settings.pages_checkout_label.translated.words }}
+                {% if settings.checkout_label %}}
+                    {{ settings.checkout_label.translated.words }}
                 {% else %}
                     Checkout
                 {% endif %}
             </button>
         {% else %}
             <button disabled type="button" id="checkout-button" class="btn btn-secondary">
-                {% if settings.pages_checkout_label %}}
-                    {{ settings.pages_checkout_label.translated.words }}
+                {% if settings.checkout_label %}}
+                    {{ settings.checkout_label.translated.words }}
                 {% else %}
                     Checkout
                 {% endif %}
@@ -62,15 +62,15 @@
         {% endif %}
 
         <a class="btn btn-secondary" href="{% url 'clear_cart' %}" role="button">
-            {% if settings.pages_clear_cart_label %}}
-                {{ settings.pages_clear_cart_label.translated.words }}
+            {% if settings.clear_cart_label %}}
+                {{ settings.clear_cart_label.translated.words }}
             {% else %}
                 Clear Cart
             {% endif %}
         </a>
 
-        {% if settings.pages_items_header %}}
-            <h4>{{ settings.pages_items_header.translated.words }}</h4>
+        {% if settings.items_label %}}
+            <h4>{{ settings.items_label.translated.words }}</h4>
         {% else %}
             <h4>Items</h4>
         {% endif %}
@@ -82,8 +82,8 @@
         </ul>
 
     {% else %}
-        {% if settings.pages_no_items_header %}}
-            <h4>{{ settings.pages_no_items_header.translated.words }}</h4>
+        {% if settings.no_items_label %}}
+            <h4>{{ settings.no_items_label.translated.words }}</h4>
         {% else %}
             <h4>No Items</h4>
         {% endif %}

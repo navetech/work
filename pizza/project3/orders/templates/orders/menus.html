@@ -2,11 +2,19 @@
 
 
 {% block title %}
-    {{ settings.menu_page_title.translated.words }}
+    {% if settings.menus_label %}}
+        {{ settings.menus_label.translated.words }}
+    {% else %}
+        Menus
+    {% endif %}
 {% endblock %}
 
 {% block main %}
-    <h2>{{ settings.menu_page_header.translated.words }}</h2>
+    {% if settings.menus_label %}}
+        <h2>{{ settings.menus_label.translated.words }}</h2>
+    {% else %}
+        Menus
+    {% endif %}
 
     {% if menus %}
         <ul class="list-group pt-4">
