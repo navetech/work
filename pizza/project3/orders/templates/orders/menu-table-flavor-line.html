@@ -5,18 +5,7 @@
     {% for size in flavor.size_columns %}
         {% if size %}
             <td>
-                {% if size.quantity %}
-                    <form action="{% url 'put_order' %}" method="post">
-                        {% csrf_token %}
-            
-                        {% include "orders/menu-form-inputs.html" %}
-                        
-                        <button type="submit" name="submit">
-                            {{ size.quantity.converted.value|floatformat:2 }}
-                            {{ size.quantity.converted.unit }}
-                        </button>
-                    </form>
-                {% endif %}
+                {% include "orders/menu-elem-quantity.html" with elem=size %}
             </td>
 
             <td>{{ size.name.translated.words }}</td>
@@ -28,18 +17,7 @@
         {% endif %}
     {% empty %}
         <td>
-            {% if flavor.quantity %}
-                <form action="{% url 'put_order' %}" method="post">
-                    {% csrf_token %}
-
-                    {% include "orders/menu-form-inputs.html" %}
-
-                    <button type="submit" name="submit">
-                        {{ flavor.quantity.converted.value|floatformat:2 }}
-                        {{ flavor.quantity.converted.unit }}
-                    </button>
-                </form>
-            {% endif %}
+            {% include "orders/menu-elem-quantity.html" with elem=flavor %}
         </td>
     {% endfor %}
 </tr>

@@ -21,7 +21,13 @@
     {% endif %}
 
     <title>
-        {{ settings.product_title.translated.words }}: {% block title %}{% endblock %}
+        {% if settings.product_title %}}
+            {{ settings.product_title.translated.words }}
+        {% else %}
+            Rest
+        {% endif %}
+
+        : {% block title %}{% endblock %}
     </title>
 {% endblock %}
 
@@ -31,11 +37,23 @@
         {% if user.is_authenticated %}
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% url 'menu' %}">Menu</a>
+                <a class="nav-link active" aria-current="page" href="{% url 'menu' %}">
+                    {% if settings.prod_navbar_menu %}}
+                        {{ settings.prod_navbar_menu.translated.words }}
+                    {% else %}
+                        Menu
+                    {% endif %}
+                </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% url 'cart' %}">Cart</a>
+                <a class="nav-link active" aria-current="page" href="{% url 'cart' %}">
+                    {% if settings.prod_navbar_cart %}}
+                        {{ settings.prod_navbar_cart.translated.words }}
+                    {% else %}
+                        Cart
+                    {% endif %}
+                </a>
             </li>
         </ul>
 
@@ -45,7 +63,11 @@
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                 {% for language in languages %}
-                    <li><a class="dropdown-item" href="{% url 'select_language' language.id %}">{{ language.name.words }}</a></li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'select_language' language.id %}">
+                            {{ language.name.words }}
+                        </a>
+                    </li>
                 {% endfor %}
             </ul>
         </div>
@@ -56,7 +78,11 @@
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
                 {% for currency in currencies %}
-                    <li><a class="dropdown-item" href="{% url 'select_currency' currency.id %}">{{ currency.name.translated.words }}</a></li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'select_currency' currency.id %}">
+                            {{ currency.name.translated.words }}
+                        </a>
+                    </li>
                 {% endfor %}
             </ul>
         </div>
@@ -66,24 +92,59 @@
                     {{ user.username }}
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
-                    <li><a class="dropdown-item" href="{% url 'unregister' %}">Unregister</a></li>
-                    <li><a class="dropdown-item" href="{% url 'logout' %}">Log Out</a></li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'unregister' %}">
+                            {% if settings.prod_navbar_unregister %}}
+                                {{ settings.prod_navbar_unregister.translated.words }}
+                            {% else %}
+                                Unregister
+                            {% endif %}
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item" href="{% url 'logout' %}">
+                            {% if settings.prod_navbar_logout %}}
+                                {{ settings.prod_navbar_logout.translated.words }}
+                            {% else %}
+                                Log Out
+                            {% endif %}
+                        </a>
+                    </li>
                 </ul>
             </div>
 
             <ul class="navbar-nav mb-2">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{% url 'logout' %}">LogOut</a>
+                    <a class="nav-link active" aria-current="page" href="{% url 'logout' %}">
+                        {% if settings.prod_navbar_logout %}}
+                            {{ settings.prod_navbar_logout.translated.words }}
+                        {% else %}
+                            Log Out
+                        {% endif %}
+                    </a>
                 </li>
             </ul>
         {% else %}
             <ul class="navbar-nav mb-2">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{% url 'register' %}">Register</a>
+                    <a class="nav-link active" aria-current="page" href="{% url 'register' %}">
+                        {% if settings.prod_navbar_register %}}
+                        {{ settings.prod_navbar_register.translated.words }}
+                    {% else %}
+                        Register
+                    {% endif %}
+                    </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{% url 'login' %}">Log In</a>
+                    <a class="nav-link active" aria-current="page" href="{% url 'login' %}">
+                        {% if settings.prod_navbar_login %}}
+                            {{ settings.prod_navbar_login.translated.words }}
+                        {% else %}
+                            Log In
+                        {% endif %}
+                    </a>
                 </li>
             </ul>
         {% endif %}
@@ -92,7 +153,11 @@
 
 
 {% block product_name %}
-    {{ settings.product_name.translated.words }}
+    {% if settings.product_name %}}
+        {{ settings.product_name.translated.words }}
+    {% else %}
+        Rest
+    {% endif %}
 {% endblock %}
 
 

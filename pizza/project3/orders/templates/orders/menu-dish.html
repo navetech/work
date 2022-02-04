@@ -2,64 +2,16 @@
     <h4>{{ dish.name.translated.words }}</h4>
     <h4>{{ dish.full_name }}</h4>
 
-    {% if dish.quantity %}
-        <form action="{% url 'put_order' %}" method="post">
-            {% csrf_token %}
+    {% include "orders/menu-elem-quantity.html" with elem=dish %}
 
-            {% include "orders/menu-form-inputs.html" %}
-            
-            <button type="submit" name="submit">
-                {{ dish.quantity.converted.value|floatformat:2 }} {{ dish.quantity.converted.unit }}
-            </button>
-        </form>
-    {% endif %}
-
-    {% if dish.sizes %}
-        <ul class="list-group pt-4">
-            {% for size in dish.sizes %}
-                {% include "orders/menu-size.html" %}
-            {% endfor %}
-        </ul>
-    {% endif %}
+    {% include "orders/menu-elem-sizes.html" with elem=dish %}
     
-    {% if dish.flavors %}
-        <table style="width:100%">
-            <tr>
-                <th></th>
-                <th></th>
-                {% for size in dish.flavors_table.sizes %}
-                    {% include "orders/menu-table-size-header.html" %}
-                {% endfor %}
-            </tr>
-
-            {% for flavor in dish.flavors %}
-                {% include "orders/menu-table-flavor-line.html" %}
-            {% endfor %}
-        </table>
-    {% endif %}
-
-    {% if dish.types %}
-        <ul class="list-group pt-4">
-            {% for type in dish.types %}
-                {% include "orders/menu-type.html" %}
-            {% endfor %}
-        </ul>
-    {% endif %}
+    {% include "orders/menu-elem-flavors.html" with elem=dish %}
     
-    {% if dish.addings %}
-        <ul class="list-group pt-4">
-            {% for adding in dish.addings %}
-                {% include "orders/menu-adding.html" %}
-            {% endfor %}
-        </ul>
-    {% endif %}
-        
-    {% if dish.globals %}
-        <ul class="list-group pt-4">
-            {% for global in dish.globals %}
-                {% include "orders/menu-global.html" %}
-            {% endfor %}
-        </ul>
-    {% endif %}
-</li>
+    {% include "orders/menu-elem-types.html" with elem=dish %}
+    
+    {% include "orders/menu-elem-addings.html" with elem=dish %}
+    
+    {% include "orders/menu-elem-globals.html" with elem=dish %}
+    </li>
 

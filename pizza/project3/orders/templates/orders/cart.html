@@ -8,18 +8,34 @@
 
 
 {% block title %}
-    {{ settings.cart_page_title.translated.words }}
+    {% if settings.cart_page_title %}}
+        {{ settings.cart_page_title.translated.words }}
+    {% else %}
+        Cart
+    {% endif %}
 {% endblock %}
 
 
 {% block main %}
-    <h3>{{ settings.cart_page_header.translated.words }}</h3>
+    {% if settings.cart_page_header %}}
+        <h3>{{ settings.cart_page_header.translated.words }}</h3>
+    {% else %}
+        <h3>Cart</h3>
+    {% endif %}
 
     {% if order.items %}
         {% if order.status.ready %}
-            Ready
+            {% if settings.pages_status_ready %}}
+                {{ settings.pages_status_ready.translated.words }}
+            {% else %}
+                Ready
+            {% endif %}
         {% else %}
-            Not Ready
+            {% if settings.pages_status_not_ready %}}
+                {{ settings.pages_status_not_ready.translated.words }}
+            {% else %}
+                Not Ready
+            {% endif %}
         {% endif %}
 
         <span id="total-price">{{order.price.value|floatformat:2 }}</span>
@@ -28,14 +44,36 @@
         <br>
 
         {% if order.status.ready %}
-            <button type="button" id="checkout-button" class="btn btn-secondary">Checkout</button>
+            <button type="button" id="checkout-button" class="btn btn-secondary">
+                {% if settings.pages_checkout_label %}}
+                    {{ settings.pages_checkout_label.translated.words }}
+                {% else %}
+                    Checkout
+                {% endif %}
+            </button>
         {% else %}
-            <button disabled type="button" id="checkout-button" class="btn btn-secondary">Checkout</button>
+            <button disabled type="button" id="checkout-button" class="btn btn-secondary">
+                {% if settings.pages_checkout_label %}}
+                    {{ settings.pages_checkout_label.translated.words }}
+                {% else %}
+                    Checkout
+                {% endif %}
+            </button>
         {% endif %}
 
-        <a class="btn btn-secondary" href="{% url 'clear_cart' %}" role="button">Clear Cart</a>
+        <a class="btn btn-secondary" href="{% url 'clear_cart' %}" role="button">
+            {% if settings.pages_clear_cart_label %}}
+                {{ settings.pages_clear_cart_label.translated.words }}
+            {% else %}
+                Clear Cart
+            {% endif %}
+        </a>
 
-        <h4>{{ settings.pages_items_header.translated.words }}</h4>
+        {% if settings.pages_items_header %}}
+            <h4>{{ settings.pages_items_header.translated.words }}</h4>
+        {% else %}
+            <h4>Items</h4>
+        {% endif %}
 
         <ul class="list-group pt-4">
             {% for order_item in order.items %}
@@ -44,7 +82,11 @@
         </ul>
 
     {% else %}
-        <h4>{{ settings.pages_no_items_header.translated.words }}</h4>
+        {% if settings.pages_no_items_header %}}
+            <h4>{{ settings.pages_no_items_header.translated.words }}</h4>
+        {% else %}
+            <h4>No Items</h4>
+        {% endif %}
     {% endif %}
 {% endblock %}
 
