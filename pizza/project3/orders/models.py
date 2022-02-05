@@ -18,11 +18,6 @@ from quantities.models import Setting as QuantitySetting
 
 
 class Setting(models.Model):
-    product_title = models.ForeignKey(
-        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='product_title_Setting_related'
-    )
-
     product_name = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
         related_name='product_name_Setting_related'
@@ -103,11 +98,6 @@ class Setting(models.Model):
         related_name='order_item_page_label_Setting_related'
     )
 
-    cart_label = models.ForeignKey(
-        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='cart_label_Setting_related'
-    )
-
     success_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
         related_name='success_label_Setting_related'
@@ -135,7 +125,6 @@ class Setting(models.Model):
 
     def __str__(self):
         return (
-            f'{self.product_title}, '
             f'{self.product_name}, '
         )
 
@@ -144,44 +133,27 @@ class Setting(models.Model):
 
         dict['id'] = self.id
 
-        dict['product_title'] = to_dict(self.product_title, **settings)
         dict['product_name'] = to_dict(self.product_name, **settings)
 
         dict['menu_label'] = to_dict(self.menu_label, **settings)
         dict['cart_label'] = to_dict(self.cart_label, **settings)
+
         dict['register_label'] = to_dict(self.register_label, **settings)
         dict['unregister_label'] = to_dict(self.unregister_labelunregister_label, **settings)
         dict['login_label'] = to_dict(self.login_label, **settings)
         dict['logout_label'] = to_dict(self.logout_label, **settings)
 
-        dict['items_label'] = to_dict(
-            self.items_label, **settings
-        )
-        dict['no_items_label'] = to_dict(
-            self.no_items_label, **settings
-        )
-        dict['ready_label'] = to_dict(
-            self.ready_label, **settings
-        )
-        dict['not_ready_label'] = to_dict(
-            self.not_ready_label, **settings
-        )
-        dict['checkout_label'] = to_dict(
-            self.checkout_label, **settings
-        )
-        dict['clear_cart_label'] = to_dict(
-            self.clear_cart_label, **settings
-        )
-        dict['show_cart_label'] = to_dict(
-            self.show_cart_label, **settings
-        )
+        dict['items_label'] = to_dict(self.items_label, **settings)
+        dict['no_items_label'] = to_dict(self.no_items_label, **settings)
+        dict['ready_label'] = to_dict(self.ready_label, **settings)
+        dict['not_ready_label'] = to_dict(self.not_ready_label, **settings)
+        dict['checkout_label'] = to_dict(self.checkout_label, **settings)
+        dict['clear_cart_label'] = to_dict(self.clear_cart_label, **settings)
+        dict['show_cart_label'] = to_dict(self.show_cart_label, **settings)
         dict['menus_label'] = to_dict(self.menus_label, **settings)
         dict['order_item_label'] = to_dict(self.order_item_label, **settings)
-        dict['cart_label'] = to_dict(self.cart_page_title, **settings)
-
-        dict['success_label'] = to_dict(
-            self.success_label, **settings
-        )
+        
+        dict['success_label'] = to_dict(self.success_label, **settings)
 
         dict['success_page_contents_01'] = to_dict(
             self.success_page_contents_01, **settings
@@ -191,6 +163,7 @@ class Setting(models.Model):
         )
         
         dict['cancel_label'] = to_dict(self.cancel_label, **settings)
+
         dict['cancel_page_contents'] = to_dict(
             self.cancel_page_contents, **settings
         )
