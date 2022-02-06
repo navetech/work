@@ -73,6 +73,56 @@ class Setting(models.Model):
         related_name='not_ready_label_Setting_related'
     )
 
+    choose_more_options_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='choose_more_options_label_Setting_related'
+    )
+
+    choose_less_options_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='choose_less_options_label_Setting_related'
+    )
+
+    choose_or_not_options_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='choose_or_not_options_label_Setting_related'
+    )
+
+    choose_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='choose_label_Setting_related'
+    )
+
+    choose_from_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='choose_from_label_Setting_related'
+    )
+
+    choose_up_to_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='choose_up_to_label_Setting_related'
+    )
+
+    choose_at_least_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='choose_at_least_label_Setting_related'
+    )
+
+    up_to_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='up_to_label_Setting_related'
+    )
+
+    option_s_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='option_s_label_Setting_related'
+    )
+
+    options_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='options_label_Setting_related'
+    )
+
     checkout_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
         related_name='checkout_label_Setting_related'
@@ -139,14 +189,28 @@ class Setting(models.Model):
         dict['cart_label'] = to_dict(self.cart_label, **settings)
 
         dict['register_label'] = to_dict(self.register_label, **settings)
-        dict['unregister_label'] = to_dict(self.unregister_labelunregister_label, **settings)
+        dict['unregister_label'] = to_dict(self.unregister_label, **settings)
         dict['login_label'] = to_dict(self.login_label, **settings)
         dict['logout_label'] = to_dict(self.logout_label, **settings)
 
         dict['items_label'] = to_dict(self.items_label, **settings)
         dict['no_items_label'] = to_dict(self.no_items_label, **settings)
+
         dict['ready_label'] = to_dict(self.ready_label, **settings)
         dict['not_ready_label'] = to_dict(self.not_ready_label, **settings)
+        dict['choose_more_options_label'] = to_dict(self.choose_more_options_label, **settings)
+        dict['choose_less_options_label'] = to_dict(self.choose_less_options_label, **settings)
+
+        dict['choose_or_not_options_label'] = to_dict(self.choose_or_not_options_label, **settings)
+        dict['choose_label'] = to_dict(self.choose_label, **settings)
+        dict['choose_from_label'] = to_dict(self.choose_from_label, **settings)
+        dict['choose_up_to_label'] = to_dict(self.choose_up_to_label, **settings)
+        dict['choose_at_least_label'] = to_dict(self.choose_at_least_label, **settings)
+        
+        dict['up_to_label'] = to_dict(self.up_to_label, **settings)
+        dict['option_s_label'] = to_dict(self.option_s_label, **settings)
+        dict['options_label'] = to_dict(self.options_label, **settings)
+        
         dict['checkout_label'] = to_dict(self.checkout_label, **settings)
         dict['clear_cart_label'] = to_dict(self.clear_cart_label, **settings)
         dict['show_cart_label'] = to_dict(self.show_cart_label, **settings)

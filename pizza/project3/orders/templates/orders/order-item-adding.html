@@ -3,11 +3,25 @@
     <h4>{{ order_adding.elem.full_name }}</h4>
 
     {% if order_adding.status.ready %}
-        Ready
+        {% if settings.ready_label %}}
+            {{ settings.ready_label.translated.words }}
+        {% else %}
+            Ready
+        {% endif %}
+
     {% elif order_adding.status.selections_deficiency %}
-        Choose More Options
+        {% if settings.choose_more_options_label %}}
+            {{ settings.choose_more_options_label.translated.words }}
+        {% else %}
+            Choose More Options
+        {% endif %}
+
     {% elif order_adding.status.selections_excess %}
-        Choose Less Options
+        {% if settings.choose_less_options_label %}}
+            {{ settings.choose_less_options_label.translated.words }}
+        {% else %}
+            Choose Less Options
+        {% endif %}
     {% endif %}
 
     {{ order_adding.price.value|floatformat:2 }}
@@ -34,23 +48,99 @@
             {% if order_adding.elem.flavors_selection_limit.max == 0 %}
             {% else %}
                 {% if not order_adding.elem.flavors_selection_limit %}
-                    <h6>Choose or not any options</h6>
+                    <h6>
+                        {% if settings.choose_or_not_options_label %}}
+                            {{ settings.choose_or_not_options_label.translated.words }}
+                        {% else %}
+                            Choose or not any options
+                        {% endif %}
+                    </h6>
                 {% else %}
                     {% if order_adding.elem.flavors_selection_limit.max > 0 %}
                         {% if order_adding.elem.flavors_selection_limit.min == order_adding.elem.flavors_selection_limit.max %}
-                            <h6>Choose {{ order_adding.elem.flavors_selection_limit.min }} option(s)</h6>
+                            <h6>
+                                {% if settings.choose_label %}}
+                                    {{ settings.choose_label.translated.words }}
+                                {% else %}
+                                    Choose
+                                {% endif %}
+
+                                {{ order_adding.elem.flavors_selection_limit.min }}
+
+                                {% if settings.option_s_label %}}
+                                    {{ settings.option_s_label.translated.words }}
+                                {% else %}
+                                    option(s)
+                                {% endif %}
+                            </h6>
                         {% else %}
                             {% if order_adding.elem.flavors_selection_limit.min > 0 %}
-                                <h6>Choose from {{ order_adding.elem.flavors_selection_limit.min }} up to {{ order_adding.elem.flavors_selection_limit.max }} options</h6>
+                                <h6>
+                                    {% if settings.choose_from_label %}}
+                                        {{ settings.choose_from_label.translated.words }}
+                                    {% else %}
+                                        Choose from
+                                    {% endif %}
+                                    
+                                    {{ order_adding.elem.flavors_selection_limit.min }
+                                    
+                                    {% if settings.up_to_label %}}
+                                        {{ settings.up_to_label.translated.words }}
+                                    {% else %}
+                                        up to
+                                    {% endif %}
+                                    
+                                    {{ order_adding.elem.flavors_selection_limit.max }}
+
+                                    {% if settings.options_label %}}
+                                        {{ settings.options_label.translated.words }}
+                                    {% else %}
+                                        options
+                                    {% endif %}
+                                </h6>
                             {% else %}
-                                <h6>Choose up to {{ order_adding.elem.flavors_selection_limit.max }} options</h6>
+                                <h6>
+                                    {% if settings.choose_up_to_label %}}
+                                        {{ settings.choose_up_to_label.translated.words }}
+                                    {% else %}
+                                        Choose up to
+                                    {% endif %}
+
+                                    {{ order_adding.elem.flavors_selection_limit.max }}
+
+                                    {% if settings.options_label %}}
+                                        {{ settings.options_label.translated.words }}
+                                    {% else %}
+                                        options
+                                    {% endif %}
+                                </h6>
                             {% endif %}
                         {% endif %}
                     {% else %}
                         {% if order_adding.elem.flavors_selection_limit.min > 0 %}
-                            <h6>Choose at least {{ order_adding.elem.flavors_selection_limit.min }} option(s)</h6>
+                            <h6>
+                                {% if settings.choose_at_least_label %}}
+                                    {{ settings.choose_at_least_label.translated.words }}
+                                {% else %}
+                                    Choose at least
+                                {% endif %}
+                                
+                                {{ order_adding.elem.flavors_selection_limit.min }}
+                                
+                                {% if settings.option_s_label %}}
+                                    {{ settings.option_s_label.translated.words }}
+                                {% else %}
+                                    option(s)
+                                {% endif %}
+                            </h6>
                         {% else %}
-                            <h6>Choose or not any options</h6>
+                            <h6>
+                                {% if settings.choose_or_not_options_label %}}
+                                    {{ settings.choose_or_not_options_label.translated.words }}
+                                {% else %}
+                                    Choose or not any options
+                                {% endif %}
+                            </h6>
                         {% endif %}
                     {% endif %}
                 {% endif %}

@@ -14,7 +14,8 @@
     {% for order_adding_flavor_size in order_adding_flavor.special_size_columns %}
         <td>
             {% if order_adding_flavor_size %}
-                {{ order_adding_flavor_size.elem.quantity.converted.value|floatformat:2 }} {{ order_adding_flavor_size.elem.quantity.converted.unit }}
+                {{ order_adding_flavor_size.elem.quantity.converted.value|floatformat:2 }}
+                {{ order_adding_flavor_size.elem.quantity.converted.unit }}
             {% endif %}
         </td>
     {% endfor %}

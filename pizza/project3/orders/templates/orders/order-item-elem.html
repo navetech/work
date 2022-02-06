@@ -17,9 +17,17 @@
 
             <td>
                 {% if order_item.status.ready %}
-                    Ready
+                    {% if settings.ready_label %}}
+                        {{ settings.ready_label.translated.words }}
+                    {% else %}
+                        Ready
+                    {% endif %}
                 {% else %}
-                    Not Ready
+                    {% if settings.not_ready_label %}}
+                        {{ settings.not_ready_label.translated.words }}
+                    {% else %}
+                        Not Ready
+                    {% endif %}
                 {% endif %}
             </td>
 
