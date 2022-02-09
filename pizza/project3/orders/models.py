@@ -53,6 +53,26 @@ class Setting(models.Model):
         related_name='logout_label_Setting_related'
     )
 
+    username_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='username_label_Setting_related'
+    )
+
+    password_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='password_label_Setting_related'
+    )
+
+    cancel_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='cancel_label_Setting_related'
+    )
+
+    confirm_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='confirm_label_Setting_related'
+    )
+
     items_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
         related_name='items_label_Setting_related'
@@ -148,9 +168,9 @@ class Setting(models.Model):
         related_name='order_item_page_label_Setting_related'
     )
 
-    success_label = models.ForeignKey(
+    success_page_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='success_label_Setting_related'
+        related_name='success_page_label_Setting_related'
     )
 
     success_page_contents_01 = models.ForeignKey(
@@ -163,9 +183,9 @@ class Setting(models.Model):
         related_name='success_page_contents_02_Setting_related'
     )
 
-    cancel_label = models.ForeignKey(
+    cancel_page_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='cancel_label_Setting_related'
+        related_name='cancel_page_label_Setting_related'
     )
 
     cancel_page_contents = models.ForeignKey(
@@ -193,6 +213,11 @@ class Setting(models.Model):
         dict['login_label'] = to_dict(self.login_label, **settings)
         dict['logout_label'] = to_dict(self.logout_label, **settings)
 
+        dict['username_label'] = to_dict(self.username_label, **settings)
+        dict['password_label'] = to_dict(self.password_label, **settings)
+        dict['cancel_label'] = to_dict(self.cancel_label, **settings)
+        dict['confirm_label'] = to_dict(self.confirm_label, **settings)
+
         dict['items_label'] = to_dict(self.items_label, **settings)
         dict['no_items_label'] = to_dict(self.no_items_label, **settings)
 
@@ -217,8 +242,7 @@ class Setting(models.Model):
         dict['menus_label'] = to_dict(self.menus_label, **settings)
         dict['order_item_label'] = to_dict(self.order_item_label, **settings)
         
-        dict['success_label'] = to_dict(self.success_label, **settings)
-
+        dict['success_page_label'] = to_dict(self.success_page_label, **settings)
         dict['success_page_contents_01'] = to_dict(
             self.success_page_contents_01, **settings
         )
@@ -226,8 +250,7 @@ class Setting(models.Model):
             self.success_page_contents_02, **settings
         )
         
-        dict['cancel_label'] = to_dict(self.cancel_label, **settings)
-
+        dict['cancel_page_label'] = to_dict(self.cancel_page_label, **settings)
         dict['cancel_page_contents'] = to_dict(
             self.cancel_page_contents, **settings
         )
