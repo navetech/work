@@ -495,7 +495,7 @@ def menus(request):
     languages = pages_basic_data['languages']
     currencies = pages_basic_data['currencies']
 
-    menu_objects = Menu.objects.all()
+    menu_objects = Menu.objects.all().order_by('sort_number')
 
     if menu_objects.count() == 1:
         menu_object = menu_objects.first()
