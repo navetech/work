@@ -472,7 +472,7 @@ def build_menu(**settings):
     return menu
 
 
-def menu(request):
+def menu(request, menu_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
 

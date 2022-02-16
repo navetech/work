@@ -20,7 +20,15 @@
         <ul class="list-group pt-4">
             {% for menu in menus %}
                 <li class="list-group-item ln-container01">
+
+                    <a class="btn btn-secondary" href="{% url 'menu' menu.id %}" role="button">
+                        { menu.name.translated.words }}
+                        {{ menu.full_name }}
+                    </a>
+
+                    {% comment %}
                     {% include "orders/menu-menu.html" %}
+                    {% endcomment %}
                 </li>
             {% endfor %}
         </ul>
