@@ -13,6 +13,7 @@ urlpatterns = [
     path("logout", views.logout_view, name="logout"),
     path("register", views.register_view, name="register"),
     path("unregister", views.unregister_view, name="unregister"),
+    path("menus", views.menus, name="menus"),
     path("menu/<menu_id>", views.menu, name="menu"),
     path(
         "select-language/<language_id>", views.select_language,

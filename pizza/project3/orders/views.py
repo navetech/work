@@ -41,7 +41,18 @@ def index(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
     else:
-        return HttpResponseRedirect(reverse('menu'))
+        return HttpResponseRedirect(reverse('menus'))
+
+
+def set_user_language(user, language):
+    user_settings = UserSetting.objects.filter(user=user).first()
+
+    if not user_settings:
+        user_settings = UserSetting(user=user, language=language)
+    else:
+        user_settings.language = language
+
+    user_settings.save()
 
 
 def login_view(request):
@@ -460,8 +471,7 @@ def fill_sub_globals(elem):
     return elem
 
 
-def build_menu(**settings):
-    menu_object = Menu.objects.first()
+def build_menu(menu_object, **settings):
     container_dict = {}
     menu = elem_to_dict(container_dict, menu_object, **settings)
 
@@ -472,7 +482,7 @@ def build_menu(**settings):
     return menu
 
 
-def menu(request, menu_id):
+def menus(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('index'))
 
@@ -485,7 +495,62 @@ def menu(request, menu_id):
     languages = pages_basic_data['languages']
     currencies = pages_basic_data['currencies']
 
-    menu = build_menu(language=language, currency=currency)
+    menu_objects = Menu.objects.all()
+
+    if menu_objects.count() == 1:
+        menu_object = menu_objects.first()
+        menu_id = menu_object.id
+
+        return HttpResponseRedirect(reverse('menu', args=[menu_id]))
+
+    menus = []
+
+    for menu_object in menu_objects:
+        menu = build_menu(menu_object, language=language, currency=currency)
+        menus.append(menu)
+
+    context = {
+        'settings': settings,
+        'user_settings': user_settings,
+        'language': language,
+        'languages': languages,
+        'currencies': currencies,
+        'menus': menus,
+    }
+
+    request.session['page'] = reverse('menus')
+
+    return render(request, 'orders/menus.html', context)
+
+
+def menu(request, menu_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('index'))
+
+    menu_id = None if menu_id == 'None' else menu_id
+
+    if menu_id is None:
+        if 'menu' in request.session and request.session['menu']:
+            menu_id = request.session['menu']
+            if menu_id is None:
+                return HttpResponseRedirect(reverse('menus'))
+        else:
+            return HttpResponseRedirect(reverse('menus'))
+
+    request.session['menu'] = menu_id
+
+    pages_basic_data = get_pages_basic_data(request)
+
+    language = pages_basic_data['language']
+    currency = pages_basic_data['currency']
+    user_settings = pages_basic_data['user_settings']
+    settings = pages_basic_data['settings']
+    languages = pages_basic_data['languages']
+    currencies = pages_basic_data['currencies']
+
+    menu_object = Menu.objects.filter(id=menu_id).first()
+
+    menu = build_menu(menu_object, language=language, currency=currency)
 
     context = {
         'settings': settings,
@@ -496,20 +561,9 @@ def menu(request, menu_id):
         'menu': menu,
     }
 
-    request.session['page'] = reverse('menu')
+    request.session['page'] = reverse('menu', args=[menu_id])
 
     return render(request, 'orders/menu.html', context)
-
-
-def set_user_language(user, language):
-    user_settings = UserSetting.objects.filter(user=user).first()
-
-    if not user_settings:
-        user_settings = UserSetting(user=user, language=language)
-    else:
-        user_settings.language = language
-
-    user_settings.save()
 
 
 def select_language(request, language_id):

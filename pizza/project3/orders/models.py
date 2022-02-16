@@ -23,6 +23,11 @@ class Setting(models.Model):
         related_name='product_name_Setting_related'
     )
 
+    home_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='home_label_Setting_related'
+    )
+
     menu_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
         related_name='menu_label_Setting_related'
@@ -210,6 +215,7 @@ class Setting(models.Model):
 
         dict['product_name'] = to_dict(self.product_name, **settings)
 
+        dict['home_label'] = to_dict(self.home_label, **settings)
         dict['menu_label'] = to_dict(self.menu_label, **settings)
         dict['cart_label'] = to_dict(self.cart_label, **settings)
 

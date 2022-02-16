@@ -37,7 +37,17 @@
         {% if user.is_authenticated %}
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="{% url 'menu' %}">
+                <a class="nav-link active" aria-current="page" href="/">
+                    {% if settings.home_label %}}
+                        {{ settings.home_label.translated.words }}
+                    {% else %}
+                        Home
+                    {% endif %}
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'menu' None %}">
                     {% if settings.menu_label %}}
                         {{ settings.menu_label.translated.words }}
                     {% else %}
