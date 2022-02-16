@@ -48,20 +48,63 @@ def login_view(request):
     if request.method == 'GET':
         if request.user.is_authenticated:
             return HttpResponseRedirect(reverse('index'))
+    
+        pages_basic_data = get_pages_basic_data(request)
 
-        return render(request, 'orders/login.html', {'message': None})
+        language = pages_basic_data['language']
+        settings = pages_basic_data['settings']
+        languages = pages_basic_data['languages']
+
+        message = None
+        context = {
+            'message': message,
+            'settings': settings,
+            'language': language,
+            'languages': languages,
+        }
+
+        request.session['page'] = reverse('login')
+
+        return render(request, 'orders/login.html', context)
 
     username = request.POST['username']
     password = request.POST['password']
     user = authenticate(request, username=username, password=password)
+
     if user is not None:
         login(request, user)
+
+        if 'language' in request.session and request.session['language']:
+            language_id = request.session['language']
+            language = Language.objects.filter(id=language_id).first()
+
+            if language:
+                set_user_language(user=user, language=language)
+
         return HttpResponseRedirect(reverse('index'))
+
     else:
-        return render(
-            request, 'orders/login.html',
-            {'message': 'Invalid credentials.'}
-        )
+        pages_basic_data = get_pages_basic_data(request)
+
+        language = pages_basic_data['language']
+        settings = pages_basic_data['settings']
+        languages = pages_basic_data['languages']
+
+        if 'invalid_credentials_label' in settings and settings['invalid_credentials_label']:
+            message = settings['invalid_credentials_label']['translated']['words']
+        else:
+            message = 'Invalid credentials.'
+
+        context = {
+            'message': message,
+            'settings': settings,
+            'language': language,
+            'languages': languages,
+        }
+
+        request.session['page'] = reverse('login')
+
+        return render(request, 'orders/login.html', context)
 
 
 def logout_view(request):
@@ -74,21 +117,53 @@ def register_view(request):
         if request.user.is_authenticated:
             return HttpResponseRedirect(reverse('index'))
 
-        return render(
-            request, 'orders/register.html',
-            {'message': None}
-        )
+        pages_basic_data = get_pages_basic_data(request)
+
+        language = pages_basic_data['language']
+        settings = pages_basic_data['settings']
+        languages = pages_basic_data['languages']
+
+        message = None
+        context = {
+            'message': message,
+            'settings': settings,
+            'language': language,
+            'languages': languages,
+        }
+
+        request.session['page'] = reverse('register')
+
+        return render(request, 'orders/register.html', context)
 
     username = request.POST['username']
     password = request.POST['password']
     user = User.objects.filter(username=username)
     if len(user) < 1:
         user = User.objects.create_user(username=username, password=password)
+
         if user is None:
-            return render(
-                request, 'orders/register.html',
-                {'message': 'Invalid credentials.'}
-            )
+            pages_basic_data = get_pages_basic_data(request)
+
+            language = pages_basic_data['language']
+            settings = pages_basic_data['settings']
+            languages = pages_basic_data['languages']
+
+            if 'invalid_credentials_label' in settings and settings['invalid_credentials_label']:
+                message = settings['invalid_credentials_label']['translated']['words']
+            else:
+                message = 'Invalid credentials.'
+
+            context = {
+                'message': message,
+                'settings': settings,
+                'language': language,
+                'languages': languages,
+            }
+
+        request.session['page'] = reverse('register')
+
+        return render(request, 'orders/register.html', context)
+
     else:
         user = user[0]
         user.is_active = True
@@ -97,6 +172,13 @@ def register_view(request):
 
     login(request, user)
 
+    if 'language' in request.session and request.session['language']:
+        language_id = request.session['language']
+        language = Language.objects.filter(id=language_id).first()
+
+        if language:
+            set_user_language(user=user, language=language)
+
     return HttpResponseRedirect(reverse('index'))
 
 
@@ -104,7 +186,22 @@ def unregister_view(request):
     if request.method == 'GET':
         if not request.user.is_authenticated:
             return HttpResponseRedirect(reverse('index'))
-        return render(request, 'orders/unregister.html')
+            
+        pages_basic_data = get_pages_basic_data(request)
+
+        language = pages_basic_data['language']
+        settings = pages_basic_data['settings']
+        languages = pages_basic_data['languages']
+
+        context = {
+            'settings': settings,
+            'language': language,
+            'languages': languages,
+        }
+
+        request.session['page'] = reverse('unregister')
+
+        return render(request, 'orders/unregister.html', context)
 
     if request.POST['confirm-cancel'] == 'confirm':
         request.user.is_active = False
@@ -115,23 +212,25 @@ def unregister_view(request):
 
 
 def get_pages_basic_data(request):
-    user_settings = UserSetting.get_first(user=request.user)
-    if user_settings:
-        if user_settings.language:
-            language = user_settings.language
-        else:
-            language = None
-
-        if user_settings.currency:
-            currency = user_settings.currency
-        else:
-            currency = None
-
-        user_settings_dict = to_dict(user_settings, language=language)
+    if 'language' in request.session and request.session['language']:
+        language_id = request.session['language']
+        language = Language.objects.filter(id=language_id).first()
     else:
         language = None
-        currency = None
-        user_settings_dict = {}
+
+    currency = None
+    user_settings_dict = {}
+
+    if request.user.is_authenticated:
+        user_settings = UserSetting.get_first(user=request.user)
+        if user_settings:
+            if user_settings.language:
+                language = user_settings.language
+
+            if user_settings.currency:
+                currency = user_settings.currency
+
+            user_settings_dict = to_dict(user_settings, language=language)
 
     settings = Setting.objects.first()
     if settings:
@@ -391,6 +490,7 @@ def menu(request):
     context = {
         'settings': settings,
         'user_settings': user_settings,
+        'language': language,
         'languages': languages,
         'currencies': currencies,
         'menu': menu,
@@ -401,19 +501,25 @@ def menu(request):
     return render(request, 'orders/menu.html', context)
 
 
-def select_language(request, language_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("index"))
+def set_user_language(user, language):
+    user_settings = UserSetting.objects.filter(user=user).first()
 
-    language = Language.objects.filter(id=language_id).first()
-
-    user_settings = UserSetting.objects.filter(user=request.user).first()
     if not user_settings:
-        user_settings = UserSetting(user=request.user, language=language)
+        user_settings = UserSetting(user=user, language=language)
     else:
         user_settings.language = language
 
     user_settings.save()
+
+
+def select_language(request, language_id):
+    language = Language.objects.filter(id=language_id).first()
+
+    if language:
+        request.session['language'] = language_id
+
+        if request.user.is_authenticated:
+            set_user_language(user=request.user, language=language)
 
     return HttpResponseRedirect(request.session['page'])
 
@@ -1115,6 +1221,7 @@ def order_item(request, order_item_id):
     context = {
         'settings': settings,
         'user_settings': user_settings,
+        'language': language,
         'languages': languages,
         'currencies': currencies,
         'order_item': order_item,
@@ -1205,6 +1312,7 @@ def cart(request):
     context = {
         'settings': settings,
         'user_settings': user_settings,
+        'language': language,
         'languages': languages,
         'currencies': currencies,
         'order': order,
@@ -1240,6 +1348,7 @@ def success(request):
 
     pages_basic_data = get_pages_basic_data(request)
 
+    language = pages_basic_data['language']
     user_settings = pages_basic_data['user_settings']
     settings = pages_basic_data['settings']
     languages = pages_basic_data['languages']
@@ -1248,6 +1357,7 @@ def success(request):
     context = {
         'settings': settings,
         'user_settings': user_settings,
+        'language': language,
         'languages': languages,
         'currencies': currencies,
     }
@@ -1263,6 +1373,7 @@ def cancel(request):
 
     pages_basic_data = get_pages_basic_data(request)
 
+    language = pages_basic_data['language']
     user_settings = pages_basic_data['user_settings']
     settings = pages_basic_data['settings']
     languages = pages_basic_data['languages']
@@ -1271,6 +1382,7 @@ def cancel(request):
     context = {
         'settings': settings,
         'user_settings': user_settings,
+        'language': language,
         'languages': languages,
         'currencies': currencies,
     }

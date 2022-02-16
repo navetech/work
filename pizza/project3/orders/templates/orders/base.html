@@ -59,13 +59,13 @@
 
         <div class="dropstart me-2">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                {{ user_settings.language.name.words }}
+                {{ language.name.words }}
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                {% for language in languages %}
+                {% for lang in languages %}
                     <li>
-                        <a class="dropdown-item" href="{% url 'select_language' language.id %}">
-                            {{ language.name.words }}
+                        <a class="dropdown-item" href="{% url 'select_language' lang.id %}">
+                            {{ lang.name.words }}
                         </a>
                     </li>
                 {% endfor %}
@@ -147,6 +147,21 @@
                     </a>
                 </li>
             </ul>
+
+            <div class="dropstart me-2">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    {{ language.name.words }}
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    {% for lang in languages %}
+                        <li>
+                            <a class="dropdown-item" href="{% url 'select_language' lang.id %}">
+                                {{ lang.name.words }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
         {% endif %}
     </div>
 {% endblock %}

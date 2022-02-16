@@ -73,6 +73,11 @@ class Setting(models.Model):
         related_name='confirm_label_Setting_related'
     )
 
+    invalid_credentials_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='invalid_credentials_label_Setting_related'
+    )
+
     items_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
         related_name='items_label_Setting_related'
@@ -217,6 +222,7 @@ class Setting(models.Model):
         dict['password_label'] = to_dict(self.password_label, **settings)
         dict['cancel_label'] = to_dict(self.cancel_label, **settings)
         dict['confirm_label'] = to_dict(self.confirm_label, **settings)
+        dict['invalid_credentials_label'] = to_dict(self.invalid_credentials_label, **settings)
 
         dict['items_label'] = to_dict(self.items_label, **settings)
         dict['no_items_label'] = to_dict(self.no_items_label, **settings)
