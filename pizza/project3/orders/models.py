@@ -228,40 +228,54 @@ class Setting(models.Model):
         dict['password_label'] = to_dict(self.password_label, **settings)
         dict['cancel_label'] = to_dict(self.cancel_label, **settings)
         dict['confirm_label'] = to_dict(self.confirm_label, **settings)
-        dict['invalid_credentials_label'] = to_dict(self.invalid_credentials_label, **settings)
+        dict['invalid_credentials_label'] = to_dict(
+            self.invalid_credentials_label, **settings
+        )
 
         dict['items_label'] = to_dict(self.items_label, **settings)
         dict['no_items_label'] = to_dict(self.no_items_label, **settings)
 
         dict['ready_label'] = to_dict(self.ready_label, **settings)
         dict['not_ready_label'] = to_dict(self.not_ready_label, **settings)
-        dict['choose_more_options_label'] = to_dict(self.choose_more_options_label, **settings)
-        dict['choose_less_options_label'] = to_dict(self.choose_less_options_label, **settings)
+        dict['choose_more_options_label'] = to_dict(
+            self.choose_more_options_label, **settings
+        )
+        dict['choose_less_options_label'] = to_dict(
+            self.choose_less_options_label, **settings
+        )
 
-        dict['choose_or_not_options_label'] = to_dict(self.choose_or_not_options_label, **settings)
+        dict['choose_or_not_options_label'] = to_dict(
+            self.choose_or_not_options_label, **settings
+        )
         dict['choose_label'] = to_dict(self.choose_label, **settings)
         dict['choose_from_label'] = to_dict(self.choose_from_label, **settings)
-        dict['choose_up_to_label'] = to_dict(self.choose_up_to_label, **settings)
-        dict['choose_at_least_label'] = to_dict(self.choose_at_least_label, **settings)
-        
+        dict['choose_up_to_label'] = to_dict(
+            self.choose_up_to_label, **settings
+        )
+        dict['choose_at_least_label'] = to_dict(
+            self.choose_at_least_label, **settings
+        )
+
         dict['up_to_label'] = to_dict(self.up_to_label, **settings)
         dict['option_s_label'] = to_dict(self.option_s_label, **settings)
         dict['options_label'] = to_dict(self.options_label, **settings)
-        
+
         dict['checkout_label'] = to_dict(self.checkout_label, **settings)
         dict['clear_cart_label'] = to_dict(self.clear_cart_label, **settings)
         dict['show_cart_label'] = to_dict(self.show_cart_label, **settings)
         dict['menus_label'] = to_dict(self.menus_label, **settings)
         dict['order_item_label'] = to_dict(self.order_item_label, **settings)
-        
-        dict['success_page_label'] = to_dict(self.success_page_label, **settings)
+
+        dict['success_page_label'] = to_dict(
+            self.success_page_label, **settings
+        )
         dict['success_page_contents_01'] = to_dict(
             self.success_page_contents_01, **settings
         )
         dict['success_page_contents_02'] = to_dict(
             self.success_page_contents_02, **settings
         )
-        
+
         dict['cancel_page_label'] = to_dict(self.cancel_page_label, **settings)
         dict['cancel_page_contents'] = to_dict(
             self.cancel_page_contents, **settings

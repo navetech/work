@@ -18,6 +18,6 @@ class Iso_639_LanguageCode(models.Model):
             f'{self.iso_639_1_code}, '
             f'{self.iso_639_2_code}, '
             f'{self.english_name}, '
-            #f'{self.french_name}, '
-            #f'{self.german_name}, '
+            # f'{self.french_name}, '
+            # f'{self.german_name}, '
         )

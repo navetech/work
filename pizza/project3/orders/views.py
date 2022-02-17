@@ -59,7 +59,7 @@ def login_view(request):
     if request.method == 'GET':
         if request.user.is_authenticated:
             return HttpResponseRedirect(reverse('index'))
-    
+
         pages_basic_data = get_pages_basic_data(request)
 
         language = pages_basic_data['language']
@@ -101,8 +101,15 @@ def login_view(request):
         settings = pages_basic_data['settings']
         languages = pages_basic_data['languages']
 
-        if 'invalid_credentials_label' in settings and settings['invalid_credentials_label']:
-            message = settings['invalid_credentials_label']['translated']['words']
+        if (
+            'invalid_credentials_label' in settings
+            and
+            settings['invalid_credentials_label']
+        ):
+            inv_cred_lab = settings['invalid_credentials_label']
+            message = (
+                inv_cred_lab['translated']['words']
+            )
         else:
             message = 'Invalid credentials.'
 
@@ -159,8 +166,15 @@ def register_view(request):
             settings = pages_basic_data['settings']
             languages = pages_basic_data['languages']
 
-            if 'invalid_credentials_label' in settings and settings['invalid_credentials_label']:
-                message = settings['invalid_credentials_label']['translated']['words']
+            if (
+                'invalid_credentials_label' in settings
+                and
+                settings['invalid_credentials_label']
+            ):
+                inv_cred_lab = settings['invalid_credentials_label']
+                message = (
+                    inv_cred_lab['translated']['words']
+                )
             else:
                 message = 'Invalid credentials.'
 
@@ -197,7 +211,7 @@ def unregister_view(request):
     if request.method == 'GET':
         if not request.user.is_authenticated:
             return HttpResponseRedirect(reverse('index'))
-            
+
         pages_basic_data = get_pages_basic_data(request)
 
         language = pages_basic_data['language']

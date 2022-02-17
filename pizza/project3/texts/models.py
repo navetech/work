@@ -133,7 +133,7 @@ class Language(models.Model):
         )
 
     def to_dict(self, **settings):
-        dict= {}
+        dict = {}
 
         dict['id'] = self.id
 
