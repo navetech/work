@@ -155,11 +155,11 @@ def register_view(request):
 
     username = request.POST['username']
     password = request.POST['password']
-    user = User.objects.filter(username=username)
-    if len(user) < 1:
+    user = User.objects.filter(username=username).first()
+    if not user:
         user = User.objects.create_user(username=username, password=password)
 
-        if user is None:
+        if not user:
             pages_basic_data = get_pages_basic_data(request)
 
             language = pages_basic_data['language']
@@ -185,12 +185,11 @@ def register_view(request):
                 'languages': languages,
             }
 
-        request.session['page'] = reverse('register')
+            request.session['page'] = reverse('register')
 
-        return render(request, 'orders/register.html', context)
+            return render(request, 'orders/register.html', context)
 
     else:
-        user = user[0]
         user.is_active = True
         user.set_password(password)
         user.save()
@@ -229,8 +228,14 @@ def unregister_view(request):
         return render(request, 'orders/unregister.html', context)
 
     if request.POST['confirm-cancel'] == 'confirm':
-        request.user.is_active = False
-        request.user.save()
+        user = request.user
+
+        orders = Order.objects.filter(user=user).all()
+        for order in orders:
+            order.cancel()
+
+        user.is_active = False
+        user.save()
         logout(request)
 
     return HttpResponseRedirect(reverse('index'))
@@ -918,12 +923,13 @@ def fill_order_elem_price(order_elem):
         value += order_elem['elem']['quantity']['converted']['value']
         unit = order_elem['elem']['quantity']['converted']['unit']
 
-    for order_adding in order_elem['addings']:
-        order_adding = fill_order_adding_price(order_adding)
+    if 'addings' in order_elem and order_elem['addings']:
+        for order_adding in order_elem['addings']:
+            order_adding = fill_order_adding_price(order_adding)
 
-        value += order_adding['price']['value']
-        if order_adding['price']['unit']:
-            unit = order_adding['price']['unit']
+            value += order_adding['price']['value']
+            if order_adding['price']['unit']:
+                unit = order_adding['price']['unit']
 
     price = {
         'value': value,
@@ -1017,11 +1023,12 @@ def fill_order_adding_status(order_adding):
 def fill_order_elem_status(order_elem):
     ready = True
 
-    for order_adding in order_elem['addings']:
-        order_adding = fill_order_adding_status(order_adding)
+    if 'addings' in order_elem and order_elem['addings']:
+        for order_adding in order_elem['addings']:
+            order_adding = fill_order_adding_status(order_adding)
 
-        if not order_adding['status']['ready']:
-            ready = order_adding['status']['ready']
+            if not order_adding['status']['ready']:
+                ready = order_adding['status']['ready']
 
     status = {
         'ready': ready,

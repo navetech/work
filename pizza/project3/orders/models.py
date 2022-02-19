@@ -1042,7 +1042,7 @@ class OrderDish(models.Model):
 
     def __str__(self):
         return (
-            f'{self.proprio}, '
+            f'{self.elem}, '
         )
 
     def to_dict(self, container_dict=None, **settings):
@@ -1056,7 +1056,7 @@ class OrderDish(models.Model):
             dict['container'] = container_dict
 
         dict['elem'] = elem_to_dict(
-            dict, self.proprio, **settings
+            dict, self.elem, **settings
         )
 
         dict['addings'] = order_item_elems_to_dict_list(
