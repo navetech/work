@@ -1020,7 +1020,7 @@ def fill_order_adding_status(order_adding):
     return order_adding
 
 
-def fill_order_elem_status(order_elem):
+def get_order_elem_addings_status(order_elem):
     ready = True
 
     if 'addings' in order_elem and order_elem['addings']:
@@ -1034,9 +1034,44 @@ def fill_order_elem_status(order_elem):
         'ready': ready,
         }
 
+    return status
+
+
+def fill_order_elem_status(order_elem):
+    status = get_order_elem_addings_status(order_elem)
+
     order_elem['status'] = status
 
     return order_elem
+
+
+def fill_order_size_status(order_size, order_item):
+    ready = True
+
+    status = {
+        'ready': ready,
+        }
+
+    if order_item['flavor']:
+        order_elem = order_item['flavor']
+        status = get_order_elem_addings_status(order_elem)
+
+    elif order_item['type']:
+        order_elem = order_item['type']
+        status = get_order_elem_addings_status(order_elem)
+
+    elif order_item['dish']:
+        order_elem = order_item['dish']
+        status = get_order_elem_addings_status(order_elem)
+
+    elif order_item['menu']:
+        order_elem = order_item['menu']
+        status = get_order_elem_addings_status(order_elem)
+
+
+    order_size['status'] = status
+
+    return order_size
 
 
 def fill_order_item_status(order_item):
@@ -1047,10 +1082,10 @@ def fill_order_item_status(order_item):
         }
 
     if order_item['size']:
-        order_elem = order_item['size']
-        order_elem = fill_order_elem_status(order_elem)
-        status = order_elem['status']
-        order_item['size'] = order_elem
+        order_size = order_item['size']
+        order_size = fill_order_size_status(order_size, order_item)
+        status = order_size['status']
+        order_item['size'] = order_size
 
     elif order_item['flavor']:
         order_elem = order_item['flavor']

@@ -24,7 +24,7 @@ This project has the following main features:
 
 - **Logout**: Logged in users can log out of the site.
 
-- **Unregistration:** Users can unregister from the website. Once unregistered, all the user's logins are canceled; all the orders placed by them are canceled too.
+- **Unregistration:** Users can unregister from the website.
 
 - **Menu Update:** Using Django Admin resources, site administrators (restaurant owners) can add, update and remove items on the menus.
 
