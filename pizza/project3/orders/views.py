@@ -394,8 +394,10 @@ def build_globals(elem):
     if 'addings' in elem and elem['addings']:
         for adding in elem['addings']:
             if 'flavors_set' in adding and adding['flavors_set']:
-                if adding['flavors_set'] not in globals:
-                    globals.append(adding['flavors_set'])
+                flavors_set = adding['flavors_set']
+
+                if flavors_set not in globals:
+                    globals.append(flavors_set)
 
     globals = add_sub_globals(globals, elem)
 
@@ -409,16 +411,21 @@ def build_globals(elem):
 
 def prune_elem_globals(elem, container_globals):
     if 'globals' in elem and elem['globals']:
+        elem_globals = elem['globals'].copy()
 
         if 'addings' in elem and elem['addings']:
             for adding in elem['addings']:
                 if 'flavors_set' in adding and adding['flavors_set']:
-                    if adding['flavors_set'] in elem['globals']:
-                        elem['globals'].remove(adding['flavors_set'])
+                    flavors_set = adding['flavors_set']
+
+                    if flavors_set in elem_globals:
+                        elem['globals'].remove(flavors_set)
 
         if container_globals:
+            elem_globals = elem['globals'].copy()
+
             for container_global in container_globals:
-                if container_global in elem['globals']:
+                if container_global in elem_globals:
                     elem['globals'].remove(container_global)
 
         elem['globals'].sort(
@@ -431,6 +438,9 @@ def prune_elem_globals(elem, container_globals):
 
 def prune_sub_globals(elem):
     if 'globals' in elem:
+        container_globals = None
+        # elem = prune_elem_globals(elem, container_globals)
+
         container_globals = elem['globals']
     else:
         container_globals = None
@@ -496,7 +506,7 @@ def build_menu(menu_object, **settings):
 
     menu = fill_menu_elem_tables(menu)
 
-    menu = fill_sub_globals(menu)
+    menu = fill_globals(menu)
 
     return menu
 
