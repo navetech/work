@@ -1,7 +1,10 @@
 <tr>
     <td>
         {{ order_adding_flavor.elem.name.translated.words }}
-        {{ order_adding_flavor.elem.full_name }}
+
+        {% if order_adding_flavor.elem.special %}
+            (Special)
+        {% endif %}
     </td>
 
     <td>

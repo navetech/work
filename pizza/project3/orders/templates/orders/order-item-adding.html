@@ -1,26 +1,27 @@
 <li class="list-group-item ln-container02">
-    <h4>{{ order_adding.elem.short_name.translated.words }}</h4>
-    <h4>{{ order_adding.elem.full_name }}</h4>
+    <h4>{{ order_adding.elem.name.translated.words }}</h4>
 
-    {% if order_adding.status.ready %}
-        {% if settings.ready_label %}}
-            {{ settings.ready_label.translated.words }}
-        {% else %}
-            Ready
-        {% endif %}
+    {% if not order_adding.elem.only_special_selection %}
+        {% if order_adding.status.ready %}
+            {% if settings.ready_label %}}
+                {{ settings.ready_label.translated.words }}
+            {% else %}
+                Ready
+            {% endif %}
 
-    {% elif order_adding.status.selections_deficiency %}
-        {% if settings.choose_more_options_label %}}
-            {{ settings.choose_more_options_label.translated.words }}
-        {% else %}
-            Choose More Options
-        {% endif %}
+        {% elif order_adding.status.selections_deficiency %}
+            {% if settings.choose_more_options_label %}}
+                {{ settings.choose_more_options_label.translated.words }}
+            {% else %}
+                Choose More Options
+            {% endif %}
 
-    {% elif order_adding.status.selections_excess %}
-        {% if settings.choose_less_options_label %}}
-            {{ settings.choose_less_options_label.translated.words }}
-        {% else %}
-            Choose Less Options
+        {% elif order_adding.status.selections_excess %}
+            {% if settings.choose_less_options_label %}}
+                {{ settings.choose_less_options_label.translated.words }}
+            {% else %}
+                Choose Less Options
+            {% endif %}
         {% endif %}
     {% endif %}
 
