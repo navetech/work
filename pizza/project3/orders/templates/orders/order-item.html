@@ -26,7 +26,7 @@
 
     <ul class="list-group pt-4">
         {% if order_item.size %}
-            {% include "orders/order-item-size.html" with order_elem=order_item.size %}
+            {% include "orders/order-item-elem.html" with order_elem=order_item.size %}
         {% elif order_item.flavor %}
             {% include "orders/order-item-elem.html" with order_elem=order_item.flavor %}
         {% elif order_item.type %}

@@ -1,5 +1,13 @@
 <li class="list-group-item ln-container01">
     {% include "orders/order-item-elem-body.html" %}
 
-    {% include "orders/order-item-elem-addings.html" %}
+    {% if order_item.flavor.addings %}
+        {% include "orders/order-item-elem-addings.html" with order_elem=order_item.flavor %}
+    {% elif order_item.type.addings %}
+        {% include "orders/order-item-elem-addings.html" with order_elem=order_item.type %}
+    {% elif order_item.dish.addings %}
+        {% include "orders/order-item-elem-addings.html" with order_elem=order_item.dish %}
+    {% elif order_item.menu.addings %}
+        {% include "orders/order-item-elem-addings.html" with order_elem=order_item.menu %}
+    {% endif %}
 </li>

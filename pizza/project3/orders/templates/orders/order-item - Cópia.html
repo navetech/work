@@ -2,17 +2,31 @@
 
 
 {% block title %}
-    {{ settings.order_page_title.translated.words }}
+    {% if settings.order_item_label %}}
+        {{ settings.order_item_label.translated.words }}
+    {% else %}
+        Order Item
+    {% endif %}
 {% endblock %}
 
 {% block main %}
-    <h3>{{ settings.order_page_header.translated.words }}</h3>
+    {% if settings.order_item_label %}}
+        <h3>{{ settings.order_item_label.translated.words }}</h3>
+    {% else %}
+        <h3>Order Item</h3>
+    {% endif %}
 
-    <a class="btn btn-secondary" role="button" href="{% url 'cart' %}">Show Cart</a>
+    <a class="btn btn-secondary" role="button" href="{% url 'cart' %}">
+        {% if settings.show_cart_label %}}
+            {{ settings.show_cart_label.translated.words }}
+        {% else %}
+            Show Cart
+        {% endif %}
+    </a>
 
     <ul class="list-group pt-4">
         {% if order_item.size %}
-            {% include "orders/order-item-elem.html" with order_elem=order_item.size %}
+            {% include "orders/order-item-size.html" with order_elem=order_item.size %}
         {% elif order_item.flavor %}
             {% include "orders/order-item-elem.html" with order_elem=order_item.flavor %}
         {% elif order_item.type %}

@@ -5,7 +5,7 @@
         <td>
             {% if order_elem.elem.img.path %}
                 <figure>
-                    <img src="{% static order_elem.elem.img.path %}" alt="{{ order_elem.elem.long_name.translated.words }} Image">
+                    <img style="max-width:15%;height:auto;" class="img-thumbnail" src="{% static order_elem.elem.img.path %}" alt="{{ order_elem.elem.long_name.translated.words }} Image">
                     <figcaption>{{ order_elem.elem.long_name.translated.words }}</figcaption>
                 </figure>
             {% else %}

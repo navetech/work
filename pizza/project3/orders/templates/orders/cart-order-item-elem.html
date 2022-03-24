@@ -4,17 +4,18 @@
     <table style="width:100%">
         <tr>
             <td>
-                <figure>
-                    <img src="{% static order_elem.elem.img.path %}" alt="{{ order_elem.elem.full_name }} Image">
-                    <figcaption>{{ order_elem.elem.full_name }}</figcaption>
-                </figure>
+                <a class="nav-link active" aria-current="page" href="{% url 'order_item' order_item.id %}">
+                    {% if order_elem.elem.img.path %}
+                        <figure>
+                            <img style="max-width:15%;height:auto;" class="img-thumbnail" src="{% static order_elem.elem.img.path %}" alt="{{ order_elem.elem.long_name.translated.words }} Image">
+                            <figcaption>{{ order_elem.elem.long_name.translated.words }}</figcaption>
+                        </figure>
+                    {% else %}
+                        {{ order_elem.elem.long_name.translated.words }}
+                    {% endif %}
+                </a>
             </td>
-
-            <td>
-                {{ order_elem.elem.short_name.translated.words }}
-                {{ order_elem.elem.full_name }}
-            </td>
-
+    
             <td>
                 {% if order_item.status.ready %}
                     Ready
