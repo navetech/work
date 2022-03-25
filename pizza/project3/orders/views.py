@@ -937,6 +937,20 @@ def fill_order_elem_price(order_elem):
         value += order_elem['elem']['quantity']['converted']['value']
         unit = order_elem['elem']['quantity']['converted']['unit']
 
+    price = {
+        'value': value,
+        'unit': unit,
+        }
+
+    order_elem['price'] = price
+
+    return order_elem
+
+
+def fill_order_elem_addings_price(order_elem):
+    value = 0
+    unit = None
+
     if 'addings' in order_elem and order_elem['addings']:
         for order_adding in order_elem['addings']:
             order_adding = fill_order_adding_price(order_adding)
@@ -950,7 +964,7 @@ def fill_order_elem_price(order_elem):
         'unit': unit,
         }
 
-    order_elem['price'] = price
+    order_elem['addings_price'] = price
 
     return order_elem
 
@@ -965,36 +979,70 @@ def fill_order_item_price(order_item):
         }
 
     if order_item['size']:
-        order_elem = order_item['size']
-        order_elem = fill_order_elem_price(order_elem)
-        price = order_elem['price']
-        order_item['size'] = order_elem
+        order_item['size'] = fill_order_elem_price(order_item['size'])
+        price = order_item['size']['price']
 
     elif order_item['flavor']:
-        order_elem = order_item['flavor']
-        order_elem = fill_order_elem_price(order_elem)
-        price = order_elem['price']
-        order_item['flavor'] = order_elem
+        order_item['flavor'] = fill_order_elem_price(order_item['flavor'])
+        price = order_item['flavor']['price']
 
     elif order_item['type']:
-        order_elem = order_item['type']
-        order_elem = fill_order_elem_price(order_elem)
-        price = order_elem['price']
-        order_item['type'] = order_elem
+        order_item['type'] = fill_order_elem_price(order_item['type'])
+        price = order_item['type']['price']
 
     elif order_item['dish']:
-        order_elem = order_item['dish']
-        order_elem = fill_order_elem_price(order_elem)
-        price = order_elem['price']
-        order_item['dish'] = order_elem
+        order_item['dish'] = fill_order_elem_price(order_item['dish'])
+        price = order_item['dish']['price']
 
     elif order_item['menu']:
-        order_elem = order_item['menu']
-        order_elem = fill_order_elem_price(order_elem)
-        price = order_elem['price']
-        order_item['menu'] = order_elem
+        order_item['menu'] = fill_order_elem_price(order_item['menu'])
+        price = order_item['menu']['price']
 
-    price['value'] *= order_item['count']
+    value = price['value']
+
+    if (
+        order_item['flavor'] and
+        'addings' in order_item['flavor'] and
+        order_item['flavor']['addings']
+    ):
+        order_item['flavor'] = (
+            fill_order_elem_addings_price(order_item['flavor'])
+        )
+        value += order_item['flavor']['addings_price']['value']
+
+    elif (
+        order_item['type'] and
+        'addings' in order_item['type'] and
+        order_item['type']['addings']
+    ):
+        order_item['type'] = (
+            fill_order_elem_addings_price(order_item['type'])
+        )
+        value += order_item['type']['addings_price']['value']
+
+    elif (
+        order_item['dish'] and
+        'addings' in order_item['dish'] and
+        order_item['dish']['addings']
+    ):
+        order_item['dish'] = (
+            fill_order_elem_addings_price(order_item['dish'])
+        )
+        value += order_item['dish']['addings_price']['value']
+
+    elif (
+        order_item['menu'] and
+        'addings' in order_item['menu'] and
+        order_item['menu']['addings']
+    ):
+        order_item['menu'] = (
+            fill_order_elem_addings_price(order_item['menu'])
+        )
+        value += order_item['menu']['addings_price']['value']
+
+    value *= order_item['count']
+
+    price['value'] = value
 
     order_item['price'] = price
 
@@ -1051,40 +1099,44 @@ def get_order_elem_addings_status(order_elem):
     return status
 
 
-def fill_order_elem_status(order_elem):
-    status = get_order_elem_addings_status(order_elem)
-
-    order_elem['status'] = status
-
-    return order_elem
-
-
-def fill_order_size_status(order_size, order_item):
+def fill_order_elem_status(order_elem, order_item):
     ready = True
 
     status = {
         'ready': ready,
         }
 
-    if order_item['flavor']:
-        order_elem = order_item['flavor']
-        status = get_order_elem_addings_status(order_elem)
+    if (
+        order_item['flavor'] and
+        'addings' in order_item['flavor'] and
+        order_item['flavor']['addings']
+    ):
+        status = get_order_elem_addings_status(order_item['flavor'])
 
-    elif order_item['type']:
-        order_elem = order_item['type']
-        status = get_order_elem_addings_status(order_elem)
+    elif (
+        order_item['type'] and
+        'addings' in order_item['type'] and
+        order_item['type']['addings']
+    ):
+        status = get_order_elem_addings_status(order_item['type'])
 
-    elif order_item['dish']:
-        order_elem = order_item['dish']
-        status = get_order_elem_addings_status(order_elem)
+    elif (
+        order_item['dish'] and
+        'addings' in order_item['dish'] and
+        order_item['dish']['addings']
+    ):
+        status = get_order_elem_addings_status(order_item['dish'])
 
-    elif order_item['menu']:
-        order_elem = order_item['menu']
-        status = get_order_elem_addings_status(order_elem)
+    elif (
+        order_item['menu'] and
+        'addings' in order_item['menu'] and
+        order_item['menu']['addings']
+    ):
+        status = get_order_elem_addings_status(order_item['menu'])
 
-    order_size['status'] = status
+    order_elem['status'] = status
 
-    return order_size
+    return order_elem
 
 
 def fill_order_item_status(order_item):
@@ -1095,34 +1147,34 @@ def fill_order_item_status(order_item):
         }
 
     if order_item['size']:
-        order_size = order_item['size']
-        order_size = fill_order_size_status(order_size, order_item)
-        status = order_size['status']
-        order_item['size'] = order_size
+        order_item['size'] = (
+            fill_order_elem_status(order_item['size'], order_item)
+        )
+        status = order_item['size']['status']
 
     elif order_item['flavor']:
-        order_elem = order_item['flavor']
-        order_elem = fill_order_elem_status(order_elem)
-        status = order_elem['status']
-        order_item['flavor'] = order_elem
+        order_item['flavor'] = (
+            fill_order_elem_status(order_item['flavor'], order_item)
+        )
+        status = order_item['flavor']['status']
 
     elif order_item['type']:
-        order_elem = order_item['type']
-        order_elem = fill_order_elem_status(order_elem)
-        status = order_elem['status']
-        order_item['type'] = order_elem
+        order_item['type'] = (
+            fill_order_elem_status(order_item['type'], order_item)
+        )
+        status = order_item['type']['status']
 
     elif order_item['dish']:
-        order_elem = order_item['dish']
-        order_elem = fill_order_elem_status(order_elem)
-        status = order_elem['status']
-        order_item['dish'] = order_elem
+        order_item['dish'] = (
+            fill_order_elem_status(order_item['dish'], order_item)
+        )
+        status = order_item['dish']['status']
 
     elif order_item['menu']:
-        order_elem = order_item['menu']
-        order_elem = fill_order_elem_status(order_elem)
-        status = order_elem['status']
-        order_item['menu'] = order_elem
+        order_item['menu'] = (
+            fill_order_elem_status(order_item['menu'], order_item)
+        )
+        status = order_item['menu']['status']
 
     order_item['status'] = status
 
