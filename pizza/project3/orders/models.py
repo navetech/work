@@ -1220,9 +1220,9 @@ class HistoricOrder(models.Model):
 """
 
 
-def create_order_adding_flavor_size(order_adding_flavor_size, selected):
+def create_order_adding_flavor_size(adding_flavor_size, selected):
     order_elem = OrderAddingFlavorSize(
-        elem=order_adding_flavor_size, selected=selected
+        elem=adding_flavor_size, selected=selected
     )
     if order_elem:
         order_elem.save()

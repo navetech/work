@@ -1307,34 +1307,53 @@ def fill_order_adding_tables(order_adding):
                     )
                 )
 
+    return order_adding
 
-def fill_order_elem_tables(order_elem):
-    for order_adding in order_elem['addings']:
-        order_adding = fill_order_adding_tables(order_adding)
+
+def fill_order_elem_addings_tables(order_elem):
+    if 'addings' in order_elem and order_elem['addings']:
+        for order_adding in order_elem['addings']:
+            order_adding = fill_order_adding_tables(order_adding)
 
     return order_elem
 
 
 def fill_order_item_tables(order_item):
-    if 'flavor' in order_item and order_item['flavor']:
-        order_elem = order_item['flavor']
-        order_elem = fill_order_elem_tables(order_elem)
-        order_item['flavor'] = order_elem
+    if (
+        'flavor' in order_item and order_item['flavor'] and
+        'addings' in order_item['flavor'] and
+        order_item['flavor']['addings']
+    ):
+        order_item['flavor'] = (
+            fill_order_elem_addings_tables(order_item['flavor'])
+        )
 
-    elif 'type' in order_item and order_item['type']:
-        order_elem = order_item['type']
-        order_elem = fill_order_elem_tables(order_elem)
-        order_item['type'] = order_elem
+    elif (
+        'type' in order_item and order_item['type'] and
+        'addings' in order_item['type'] and
+        order_item['type']['addings']
+    ):
+        order_item['type'] = (
+            fill_order_elem_addings_tables(order_item['type'])
+        )
 
-    elif 'dish' in order_item and order_item['dish']:
-        order_elem = order_item['dish']
-        order_elem = fill_order_elem_tables(order_elem)
-        order_item['dish'] = order_elem
+    elif (
+        'dish' in order_item and order_item['dish'] and
+        'addings' in order_item['dish'] and
+        order_item['dish']['addings']
+    ):
+        order_item['dish'] = (
+            fill_order_elem_addings_tables(order_item['dish'])
+        )
 
-    elif 'menu' in order_item and order_item['menu']:
-        order_elem = order_item['menu']
-        order_elem = fill_order_elem_tables(order_elem)
-        order_item['menu'] = order_elem
+    elif (
+        'menu' in order_item and order_item['menu'] and
+        'addings' in order_item['menu'] and
+        order_item['menu']['addings']
+    ):
+        order_item['menu'] = (
+            fill_order_elem_addings_tables(order_item['menu'])
+        )
 
     return order_item
 
