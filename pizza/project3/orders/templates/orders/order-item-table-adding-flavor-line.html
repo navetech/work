@@ -32,6 +32,8 @@
             </form>
         </td>
     {% else %}
+        <td></td>
+        
         {% for order_adding_flavor_size in order_adding_flavor.size_columns %}
             {% if order_adding_flavor_size %}
                 <td>

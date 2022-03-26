@@ -1,17 +1,21 @@
 <tr>
     <td>{{ flavor.name.translated.words }}</td>
 
-    {% for size in flavor.size_columns %}
-        {% if size %}
-            <td>
-                {% include "orders/menu-elem-quantity.html" with elem=size %}
-            </td>
-        {% else %}
-            <td></td>
-        {% endif %}
-    {% empty %}
+    {% if not flavor.size_columns %}
         <td>
             {% include "orders/menu-elem-quantity.html" with elem=flavor %}
         </td>
-    {% endfor %}
+    {% else %}
+        <td></td>
+
+        {% for size in flavor.size_columns %}
+            {% if size %}
+                <td>
+                    {% include "orders/menu-elem-quantity.html" with elem=size %}
+                </td>
+            {% else %}
+                <td></td>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
 </tr>

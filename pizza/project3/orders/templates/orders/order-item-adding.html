@@ -35,9 +35,14 @@
             <table style="width:100%">
                 <tr>
                     <th></th>
-                    {% for size in order_adding.special_flavors_table.sizes %}
-                        {% include "orders/order-item-table-special-size-header.html" %}
-                    {% endfor %}
+
+                    {% if order_adding.special_flavors_table.sizes %}
+                        <th></th>
+
+                        {% for size in order_adding.special_flavors_table.sizes %}
+                            {% include "orders/order-item-table-special-size-header.html" %}
+                        {% endfor %}
+                    {% endif %}
                 </tr>
 
                 {% for order_adding_flavor in order_adding.flavors %}
@@ -150,9 +155,14 @@
                 <table style="width:100%">
                     <tr>
                         <th></th>
-                        {% for size in order_adding.flavors_table.sizes %}
-                            {% include "orders/order-item-table-size-header.html" %}
-                        {% endfor %}
+
+                        {% if order_adding.flavors_table.sizes %}
+                            <th></th>
+
+                            {% for size in order_adding.flavors_table.sizes %}
+                                {% include "orders/order-item-table-size-header.html" %}
+                            {% endfor %}
+                        {% endif %}
                     </tr>
 
                     {% for order_adding_flavor in order_adding.flavors %}
