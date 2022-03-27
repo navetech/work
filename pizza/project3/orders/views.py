@@ -365,17 +365,16 @@ def fill_menu_elem_tables(elem):
 
 def remove_globals_elem(globals, globals_elem):
     if 'id' in globals_elem and globals_elem['id'] is not None:
-        to_remove = False
+        elem_to_remove = None
 
         for elem in globals:
             if 'id' in elem and elem['id'] is not None:
                 if elem['id'] == globals_elem['id']:
-                    to_remove = True
+                    elem_to_remove = elem
                     break
 
-        if to_remove:
-            if globals_elem in globals:
-                globals.remove(globals_elem)
+        if elem_to_remove:
+            globals.remove(elem)
 
     return globals
 
