@@ -374,7 +374,8 @@ def remove_globals_elem(globals, globals_elem):
                     break
 
         if to_remove:
-            globals.remove(globals_elem)
+            if globals_elem in globals:
+                globals.remove(globals_elem)
 
     return globals
 
