@@ -2,7 +2,7 @@
 
 
 {% block title %}
-    {% if settings.login_label %}}
+    {% if settings.login_label %}
         {{ settings.login_label.translated.words }}
     {% else %}
         Log In
@@ -11,7 +11,7 @@
 
 {% block main %}
     <h1>
-        {% if settings.login_label %}}
+        {% if settings.login_label %}
             {{ settings.login_label.translated.words }}
         {% else %}
             Log In
@@ -32,7 +32,7 @@
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="username">
-                        {% if settings.username_label %}}
+                        {% if settings.username_label %}
                             {{ settings.username_label.translated.words }}
                         {% else %}
                             Username
@@ -42,7 +42,7 @@
                     <input required autofocus autocomplete="on" class="form-control" id= "username" name="username" placeholder="Username" type="text">
 
                     <label for="password">
-                        {% if settings.password_label %}}
+                        {% if settings.password_label %}
                             {{ settings.password_label.translated.words }}
                         {% else %}
                             Password
@@ -53,7 +53,7 @@
                 </div>
 
                 <button class="btn btn-dark" type="submit">
-                    {% if settings.login_label %}}
+                    {% if settings.login_label %}
                         {{ settings.login_label.translated.words }}
                     {% else %}
                         Log In

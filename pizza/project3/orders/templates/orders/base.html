@@ -21,7 +21,7 @@
     {% endif %}
 
     <title>
-        {% if settings.product_name %}}
+        {% if settings.product_name %}
             {{ settings.product_name.translated.words }}
         {% else %}
             Rest
@@ -38,7 +38,7 @@
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="/">
-                    {% if settings.home_label %}}
+                    {% if settings.home_label %}
                         {{ settings.home_label.translated.words }}
                     {% else %}
                         Home
@@ -48,7 +48,7 @@
 
             <li class="nav-item">
                 <a class="nav-link active" aria-current="page"" href="{% url 'menu' None %}">
-                    {% if settings.menu_label %}}
+                    {% if settings.menu_label %}
                         {{ settings.menu_label.translated.words }}
                     {% else %}
                         Menu
@@ -58,7 +58,7 @@
 
             <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="{% url 'cart' %}">
-                    {% if settings.cart_label %}}
+                    {% if settings.cart_label %}
                         {{ settings.cart_label.translated.words }}
                     {% else %}
                         Cart
@@ -104,7 +104,7 @@
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
                     <li>
                         <a class="dropdown-item" href="{% url 'unregister' %}">
-                            {% if settings.unregister_label %}}
+                            {% if settings.unregister_label %}
                                 {{ settings.unregister_label.translated.words }}
                             {% else %}
                                 Unregister
@@ -114,7 +114,7 @@
 
                     <li>
                         <a class="dropdown-item" href="{% url 'logout' %}">
-                            {% if settings.logout_label %}}
+                            {% if settings.logout_label %}
                                 {{ settings.logout_label.translated.words }}
                             {% else %}
                                 Log Out
@@ -127,7 +127,7 @@
             <ul class="navbar-nav mb-2">
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="{% url 'logout' %}">
-                        {% if settings.logout_label %}}
+                        {% if settings.logout_label %}
                             {{ settings.logout_label.translated.words }}
                         {% else %}
                             Log Out
@@ -139,7 +139,7 @@
             <ul class="navbar-nav mb-2">
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="{% url 'register' %}">
-                        {% if settings.register_label %}}
+                        {% if settings.register_label %}
                         {{ settings.register_label.translated.words }}
                     {% else %}
                         Register
@@ -149,7 +149,7 @@
 
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="{% url 'login' %}">
-                        {% if settings.login_label %}}
+                        {% if settings.login_label %}
                             {{ settings.login_label.translated.words }}
                         {% else %}
                             Log In
@@ -178,7 +178,7 @@
 
 
 {% block product_name %}
-    {% if settings.product_name %}}
+    {% if settings.product_name %}
         {{ settings.product_name.translated.words }}
     {% else %}
         Rest

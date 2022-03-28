@@ -2,7 +2,7 @@
 
 
 {% block title %}
-    {% if settings.unregister_label %}}
+    {% if settings.unregister_label %}
         {{ settings.unregister_label.translated.words }}
     {% else %}
         Unregister
@@ -11,7 +11,7 @@
 
 {% block main %}
     <h1>
-        {% if settings.unregister_label %}}
+        {% if settings.unregister_label %}
             {{ settings.unregister_label.translated.words }}
         {% else %}
             Unregister
@@ -24,7 +24,7 @@
                 {% csrf_token %}
                 <div class="ln-group-divider"></div>
                 <button class="btn btn-secondary" type="submit" name="confirm-cancel" value="cancel">
-                    {% if settings.cancel_label %}}
+                    {% if settings.cancel_label %}
                         {{ settings.cancel_label.translated.words }}
                     {% else %}
                         Cancel
@@ -32,7 +32,7 @@
                 </button>
 
                 <button class="btn btn-dark" type="submit" name="confirm-cancel" value="confirm">
-                    {% if settings.confirm_label %}}
+                    {% if settings.confirm_label %}
                         {{ settings.confirm_label.translated.words }}
                     {% else %}
                         Confirm
