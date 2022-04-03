@@ -15,13 +15,13 @@
 
         <td>
             {% if order_item.status.ready %}
-                {% if settings.ready_label %}}
+                {% if settings.ready_label %}
                     {{ settings.ready_label.translated.words }}
                 {% else %}
                     Ready
                 {% endif %}
             {% else %}
-                {% if settings.not_ready_label %}}
+                {% if settings.not_ready_label %}
                     {{ settings.not_ready_label.translated.words }}
                 {% else %}
                     Not Ready

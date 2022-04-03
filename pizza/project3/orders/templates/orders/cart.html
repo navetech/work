@@ -8,7 +8,7 @@
 
 
 {% block title %}
-    {% if settings.cart_label %}}
+    {% if settings.cart_label %}
         {{ settings.cart_label.translated.words }}
     {% else %}
         Cart
@@ -17,7 +17,7 @@
 
 
 {% block main %}
-    {% if settings.cart_label %}}
+    {% if settings.cart_label %}
         <h3>{{ settings.cart_label.translated.words }}</h3>
     {% else %}
         <h3>Cart</h3>
@@ -25,13 +25,13 @@
 
     {% if order.items %}
         {% if order.status.ready %}
-            {% if settings.ready_label %}}
+            {% if settings.ready_label %}
                 {{ settings.ready_label.translated.words }}
             {% else %}
                 Ready
             {% endif %}
         {% else %}
-            {% if settings.not_ready_label %}}
+            {% if settings.not_ready_label %}
                 {{ settings.not_ready_label.translated.words }}
             {% else %}
                 Not Ready
@@ -45,7 +45,7 @@
 
         {% if order.status.ready %}
             <button type="button" id="checkout-button" class="btn btn-secondary">
-                {% if settings.checkout_label %}}
+                {% if settings.checkout_label %}
                     {{ settings.checkout_label.translated.words }}
                 {% else %}
                     Checkout
@@ -53,7 +53,7 @@
             </button>
         {% else %}
             <button disabled type="button" id="checkout-button" class="btn btn-secondary">
-                {% if settings.checkout_label %}}
+                {% if settings.checkout_label %}
                     {{ settings.checkout_label.translated.words }}
                 {% else %}
                     Checkout
@@ -62,14 +62,14 @@
         {% endif %}
 
         <a class="btn btn-secondary" href="{% url 'clear_cart' %}" role="button">
-            {% if settings.clear_cart_label %}}
+            {% if settings.clear_cart_label %}
                 {{ settings.clear_cart_label.translated.words }}
             {% else %}
                 Clear Cart
             {% endif %}
         </a>
 
-        {% if settings.items_label %}}
+        {% if settings.items_label %}
             <h4>{{ settings.items_label.translated.words }}</h4>
         {% else %}
             <h4>Items</h4>
@@ -82,7 +82,7 @@
         </ul>
 
     {% else %}
-        {% if settings.no_items_label %}}
+        {% if settings.no_items_label %}
             <h4>{{ settings.no_items_label.translated.words }}</h4>
         {% else %}
             <h4>No Items</h4>

@@ -2,7 +2,7 @@
 
 
 {% block title %}
-    {% if settings.order_item_label %}}
+    {% if settings.order_item_label %}
         {{ settings.order_item_label.translated.words }}
     {% else %}
         Order Item
@@ -10,14 +10,14 @@
 {% endblock %}
 
 {% block main %}
-    {% if settings.order_item_label %}}
+    {% if settings.order_item_label %}
         <h3>{{ settings.order_item_label.translated.words }}</h3>
     {% else %}
         <h3>Order Item</h3>
     {% endif %}
 
     <a class="btn btn-secondary" role="button" href="{% url 'cart' %}">
-        {% if settings.show_cart_label %}}
+        {% if settings.show_cart_label %}
             {{ settings.show_cart_label.translated.words }}
         {% else %}
             Show Cart

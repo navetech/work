@@ -2,7 +2,7 @@
 
 
 {% block title %}
-    {% if settings.menus_label %}}
+    {% if settings.menus_label %}
         {{ settings.menus_label.translated.words }}
     {% else %}
         Menus
@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block main %}
-    {% if settings.menus_label %}}
+    {% if settings.menus_label %}
         <h2>{{ settings.menus_label.translated.words }}</h2>
     {% else %}
         Menus
