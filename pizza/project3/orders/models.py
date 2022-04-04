@@ -93,6 +93,11 @@ class Setting(models.Model):
         related_name='no_items_label_Setting_related'
     )
 
+    special_label = models.ForeignKey(
+        Phrase, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='special_label_Setting_related'
+    )
+
     ready_label = models.ForeignKey(
         Phrase, blank=True, null=True, on_delete=models.SET_NULL,
         related_name='ready_label_Setting_related'
@@ -235,6 +240,8 @@ class Setting(models.Model):
         dict['items_label'] = to_dict(self.items_label, **settings)
         dict['no_items_label'] = to_dict(self.no_items_label, **settings)
 
+        dict['special_label'] = to_dict(self.special_label, **settings)
+
         dict['ready_label'] = to_dict(self.ready_label, **settings)
         dict['not_ready_label'] = to_dict(self.not_ready_label, **settings)
         dict['choose_more_options_label'] = to_dict(
@@ -243,7 +250,6 @@ class Setting(models.Model):
         dict['choose_less_options_label'] = to_dict(
             self.choose_less_options_label, **settings
         )
-
         dict['choose_or_not_options_label'] = to_dict(
             self.choose_or_not_options_label, **settings
         )

@@ -3,7 +3,15 @@
         {{ order_adding_flavor.elem.name.translated.words }}
 
         {% if order_adding_flavor.elem.special %}
-            (Special)
+            (
+
+            {% if settings.special_label %}
+                {{ settings.special_label.translated.words }}
+            {% else %}
+                Special
+            {% endif %}
+        
+            )
         {% endif %}
     </td>
 
