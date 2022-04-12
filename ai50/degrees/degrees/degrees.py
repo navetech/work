@@ -93,7 +93,60 @@ def shortest_path(source, target):
     """
 
     # TODO
-    raise NotImplementedError
+    # raise NotImplementedError
+
+    initial_state = source
+    goal_state = target
+
+    goal_node = first_search(initial_state, goal_state)
+    if not goal_node:
+        return None
+
+    path = []
+    node = goal_node
+    while node.state != initial_state:
+        path.append((node.action, node.state))
+        node = node.parent
+
+    path.reverse()
+
+    return path
+
+
+def expand(node):
+    nodes = set()
+
+    neighbors = neighbors_for_person(person_id=node.state)
+    for movie_id, person_id in neighbors:
+        node_to_add = Node(state=person_id, parent=node, action=movie_id)
+        nodes.add(node_to_add)
+
+    return nodes
+
+
+def first_search(initial_state, goal_state):
+    initial_node = Node(state=initial_state, parent=None, action=None)
+    frontier = QueueFrontier()
+    explored_nodes = set()
+    reachable_nodes = set([initial_node])
+
+    while True:
+        for node in reachable_nodes:
+            if node.state == goal_state:
+                return node
+            elif not frontier.contains_state(node.state):
+                if (
+                    not
+                    any(node2.state == node.state for node2 in explored_nodes)
+                ):
+                    frontier.add(node)
+
+        if frontier.empty():
+            return None
+
+        node = frontier.remove()
+        explored_nodes.add(node)
+        reachable_nodes = expand(node)
 
 
 def person_id_for_name(name):
