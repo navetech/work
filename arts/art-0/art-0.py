@@ -18,6 +18,35 @@ def build_rotation(theta):
         )
 
 
+def build_translation(tx, ty):
+    return np.array([tx, ty])
+
+
+def build_scale(Sx, Sy):
+    return np.array([[Sx, 0], [0, Sy]])
+
+
+def build_reflexion_on_Xaxis():
+    return np.array([[1, 0], [0, -1]])
+
+
+def build_reflexion_on_Yaxis():
+    return np.array([[-1, 0], [0, 1]])
+
+
+def build_reflexion_on_X_and_Yaxis():
+    return np.array([[-1, 0], [0, -1]])
+
+
+# Shearing (distorção, deslizamento)
+def build_shearing__on_Xdirection(Shx):
+    return np.array([[1, Shx], [0, 1]])
+
+
+def build_shearing__on_Ydirection(Shy):
+    return np.array([[1, 0], [Shy, 1]])
+
+
 def main():
     if len(sys.argv) != 1 and len(sys.argv) != 5:
         sys.exit(
