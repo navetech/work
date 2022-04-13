@@ -4,85 +4,116 @@ import math
 import numpy as np
 from PIL import Image
 
-from util import Point, build_frame, merge_frame
+
+def generatrix(t):
+    return np.array([t, t])
+
+
+def build_rotation(theta):
+    return np.array(
+        [
+            [math.cos(theta), - math.sin(theta)],
+            [math.sin(theta), math.cos(theta)]
+        ]
+        )
 
 
 def main():
-    if len(sys.argv) != 2 and len(sys.argv) != 3 :
-        sys.exit("Usage: python art-0.py number-of-points [period]")
+    if len(sys.argv) != 1 and len(sys.argv) != 5:
+        sys.exit(
+            "Usage: python art-0.py [num-points] [period] [width] [height]"
+            )
 
-    N = sys.argv[1] if len(sys.argv) >= 2 else 64
-    N = int(N)
-    T = sys.argv[2] if len(sys.argv) == 3 else 36
-    T = int(T)
+    num_points = sys.argv[1] if len(sys.argv) >= 2 else 64
+    num_points = int(num_points)
+    period = sys.argv[2] if len(sys.argv) >= 3 else 36
+    period = int(period)
+    width = sys.argv[3] if len(sys.argv) >= 4 else 256
+    width = int(width)
+    height = sys.argv[4] if len(sys.argv) >= 5 else 256
+    height = int(height)
 
-    # Build generatrix
-    generatrix_points = []
-    for i in range(0, N):
-        point = Point(x=i, y=i)
-        generatrix_points.append(point)
+    min_dimension = min(width, height)
+    scale = min_dimension / 2
+    scale_matrix = np.array(
+        [
+            [scale, 0],
+            [0, scale]]
+        )
 
-    half_width = len(generatrix_points)
-    half_height = len(generatrix_points)
+    points = np.empty([2, num_points])
+    for n in range(num_points):
+        point = generatrix(n / num_points)
+        point = np.dot(scale_matrix, point)
+        points[0][n] = point[0]
+        points[1][n] = point[1]
 
-    width = half_width * 2
-    height = half_height * 2
+    frames_images = []
+    frame_array = None
 
-    frames = []
+    opposite_y = np.array([[1, 0], [0, -1]])
+    translation = np.array([width / 2, height / 2])
 
-    merged_frames = []
-
-    merged_frame_array = None
-
-    for  t in range(0, T):
+    for t in range(period):
         frame_points = []
 
-        for point in generatrix_points:
-            transformed_point = point.transform(t, T)
+        for n in range(num_points):
+            point = np.array([points[0][n], points[1][n]])
 
-            shifted_point = transformed_point.shift(half_width, half_height)
-            frame_points.append(shifted_point)
+            theta = ((2 * math.pi) * t) / period
+            transformation = build_rotation(theta)
+            point = np.dot(transformation, point)
 
-        frame = build_frame(frame_points, width, height, background_color=0)
-        frames.append(frame)
+            point = np.dot(opposite_y, point)
+            point = np.add(translation, point)
 
-        merged_frame = merge_frame(merged_frame_array, frame_points, width, height, background_color=0)
-        merged_frames.append(merged_frame['img'])
-        merged_frame_array = merged_frame['array']
+            frame_points.append(
+                {'x': point[0], 'y': point[1]}
+                )
 
-    img = Image.fromarray(merged_frame_array)
-    img.save('testgrey.png')
+        frame = build_frame(
+            frame_array, frame_points,
+            width, height, bg_color=0
+            )
+        frame_array = frame['array']
+        frames_images.append(frame['image'])
 
-    merged_frame_array = None
+    img = Image.fromarray(frame_array)
+    img.save('art-0.png')
 
-    for  t in range(0, T):
-        frame_points = []
-
-        for point in generatrix_points:
-            transformed_point = point.transform(t, T)
-
-            shifted_point = transformed_point.shift(half_width, half_height)
-            frame_points.append(shifted_point)
-
-        frame = build_frame(frame_points, width, height, background_color=255)
-        frames.append(frame)
-
-        merged_frame = merge_frame(merged_frame_array, frame_points, width, height, background_color=255)
-        merged_frames.append(merged_frame['img'])
-        merged_frame_array = merged_frame['array']
-
-    frame_one = frames[0]
-    """
-    frame_one.save("circle.gif", format="GIF", append_images=frames,
-                   save_all=True, duration=100, loop=0)
-    """
-    frame_one.save("circle.gif", format="GIF", append_images=frames,
-                   save_all=True, duration=100, loop=1)
+    frame_one = frames_images[0]
+    frame_one.save(
+        "art-0.gif", format="GIF", append_images=frames_images,
+        save_all=True, duration=100, loop=0
+        )
 
 
-    frame_one = merged_frames[0]
-    frame_one.save("circle2.gif", format="GIF", append_images=merged_frames,
-                   save_all=True, duration=100, loop=1)
+def build_frame(merged_frame_array, frame_points, width, height, bg_color=0):
+    if merged_frame_array is None:
+        merged_frame_array = np.empty([height, width], dtype=np.uint8)
+        for y in range(0, height):
+            for x in range(0, width):
+                merged_frame_array[y, x] = bg_color
+
+    frame_array = np.empty([height, width], dtype=np.uint8)
+    for y in range(0, height):
+        for x in range(0, width):
+            frame_array[y, x] = bg_color
+
+    for point in frame_points:
+        x = int(point['x'])
+        y = int(point['y'])
+
+        if x >= 0 and y >= 0 and x < width and y < height:
+            frame_array[y, x] = 255 - frame_array[y, x]
+            merged_frame_array[y, x] = 255 - merged_frame_array[y, x]
+
+    img = Image.fromarray(frame_array)
+
+    return {
+        'image': img,
+        'array': merged_frame_array
+        }
 
 
 if __name__ == "__main__":
