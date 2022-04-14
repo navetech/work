@@ -164,6 +164,19 @@ def minimax(board):
     """
     # raise NotImplementedError
 
+    # Uses minimax basic algorithm
+    # return minimax_basic(board)
+
+    # Uses minimax Alpha-Beta Pruning algorithm
+    return minimax_alpha_beta_pruning(board)
+
+
+def minimax_basic(board):
+    """
+    Returns the optimal action for the current player on the board.
+    """
+    # raise NotImplementedError
+
     if terminal(board):
         return None
 
@@ -175,7 +188,7 @@ def minimax(board):
         value = -math.inf
 
         for act in acts:
-            val = min_value(result(board,act))
+            val = min_value_basic(result(board,act))
             if val > value:
                 value = val
                 action = act
@@ -184,7 +197,7 @@ def minimax(board):
         value = math.inf
 
         for act in acts:
-            val = max_value(result(board,act))
+            val = max_value_basic(result(board,act))
             if val < value:
                 value = val
                 action = act
@@ -192,7 +205,7 @@ def minimax(board):
     return action
 
 
-def min_value(board):
+def min_value_basic(board):
     if terminal(board):
         return utility(board)
 
@@ -200,12 +213,12 @@ def min_value(board):
     acts = actions(board)
 
     for act in acts:
-        value = min(value, max_value(result(board,act)))
+        value = min(value, max_value_basic(result(board,act)))
 
     return value
 
 
-def max_value(board):
+def max_value_basic(board):
     if terminal(board):
         return utility(board)
 
@@ -213,6 +226,76 @@ def max_value(board):
     acts = actions(board)
 
     for act in acts:
-        value = max(value, min_value(result(board,act)))
+        value = max(value, min_value_basic(result(board,act)))
+
+    return value
+
+
+def minimax_alpha_beta_pruning(board):
+    """
+    Returns the optimal action for the current player on the board.
+    """
+    # raise NotImplementedError
+
+    if terminal(board):
+        return None
+
+    action = None
+    acts = actions(board)
+    play = player(board)
+
+    if play == X:
+        value = -math.inf
+
+        for act in acts:
+            val = min_value_alpha_beta_pruning(result(board,act), value)
+            if val > value:
+                value = val
+                action = act
+
+    elif play == O:
+        value = math.inf
+
+        for act in acts:
+            val = max_value_alpha_beta_pruning(result(board,act), value)
+            if val < value:
+                value = val
+                action = act
+        
+    return action
+
+
+def min_value_alpha_beta_pruning(board, last_value):
+    if terminal(board):
+        return utility(board)
+
+    value = math.inf
+    acts = actions(board)
+
+    for act in acts:
+        val = max_value_alpha_beta_pruning(result(board,act), value)
+
+        if val <= last_value:
+            return val
+        elif val < value:
+            value = val
+
+    return value
+
+
+def max_value_alpha_beta_pruning(board, last_value):
+    if terminal(board):
+        return utility(board)
+
+    value = -math.inf
+    acts = actions(board)
+
+    for act in acts:
+        val = min_value_alpha_beta_pruning(result(board,act), value)
+
+        if val >= last_value:
+            return val
+        elif val > value:
+            value = val
 
     return value
