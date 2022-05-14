@@ -31,8 +31,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-#    'languages',
-
     'first625words.apps.First625WordsConfig',
 
     'django.contrib.admin',

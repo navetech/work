@@ -2,17 +2,21 @@ from django.db import models
 
 # Create your models here.
 
-# from languages.models import Iso_639_LanguageCode
-
 
 class Theme(models.Model):
     name = models.CharField(max_length=256)
 
     sort_number = models.FloatField(default=0)
 
+    def __str__(self):
+        return (
+            f'{self.name}',
+            f'{self.sort_number}',
+        )
+
 
 class BaseWord(models.Model):
-    name = models.CharField(max_length=256)
+    text = models.CharField(max_length=256)
 
     theme = models.ForeignKey(
         Theme, blank=True, null=True, on_delete=models.CASCADE,
@@ -28,12 +32,11 @@ class WordGroup(models.Model):
     grouping_key = models.CharField(max_length=512)
 
 
-class Meaning(models.Model):
-    class Meta:
-        abstract = True
+class Image(models.Model):
+    link = models.URLField(max_length=1024)
 
 
-class Word(Meaning):
+class Word(models.Model):
     base_word = models.ForeignKey(
         BaseWord, blank=True, null=True, on_delete=models.CASCADE,
         related_name='base_word_Word_related'
@@ -44,18 +47,10 @@ class Word(Meaning):
         related_name='group_Word_related'
     )
 
-
-
-
-class Language(models.Model):
-    name = models.CharField(max_length=256)
-
-    """
-    code = models.ForeignKey(
-        Iso_639_LanguageCode, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='code_Language_related'
+    images = models.ManyToManyField(
+        Image, blank=True,
+        related_name='images_Word_related'
     )
-    """
 
 
 class TransliterationSystem(models.Model):
@@ -64,11 +59,6 @@ class TransliterationSystem(models.Model):
 
 class PronunciationSpelling(models.Model):
     text = models.TextField()
-
-    language = models.ForeignKey(
-        Language, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='language_PronunciationSpelling_related'
-    )
 
     system = models.ForeignKey(
         TransliterationSystem, blank=True, null=True, on_delete=models.CASCADE,
@@ -92,6 +82,10 @@ class Spelling(models.Model):
         Pronunciation, blank=True, null=True, on_delete=models.CASCADE,
         related_name='pronunciation_Spelling_related'
     )
+
+
+class Language(models.Model):
+    name = models.CharField(max_length=256)
 
 
 class PhraseDefinition(models.Model):
