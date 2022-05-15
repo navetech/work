@@ -10,8 +10,9 @@ class Theme(models.Model):
 
     def __str__(self):
         return (
-            f'{self.name}',
-            f'{self.sort_number}',
+            f'{self.name}'
+            +  ', ' +
+            f'{self.sort_number}'
         )
 
 
@@ -24,6 +25,15 @@ class BaseWord(models.Model):
     )
 
     sort_number = models.FloatField(default=0)
+
+    def __str__(self):
+        return (
+            f'{self.text}'
+            +  ', ' +
+            f'{self.theme.name}'
+            +  ', ' +
+            f'{self.sort_number}'
+        )
 
 
 class WordGroup(models.Model):
