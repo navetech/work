@@ -1,7 +1,8 @@
 import os
 import csv
 
-from first625words.models import BaseWord
+from first625words.models import Word
+from first625words.models import Image
 
 from . import themes
 from . import helpers

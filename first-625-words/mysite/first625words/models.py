@@ -41,6 +41,13 @@ class WordGroup(models.Model):
 
     grouping_key = models.CharField(max_length=512)
 
+    def __str__(self):
+        return (
+            f'{self.name}'
+            +  ', ' +
+            f'{self.grouping_key}'
+        )
+
 
 class Image(models.Model):
     link = models.URLField(max_length=1024)
