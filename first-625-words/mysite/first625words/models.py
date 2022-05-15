@@ -39,13 +39,11 @@ class BaseWord(models.Model):
 class WordGroup(models.Model):
     name = models.CharField(max_length=512)
 
-    grouping_key = models.CharField(max_length=512)
-
     def __str__(self):
         return (
             f'{self.name}'
             +  ', ' +
-            f'{self.grouping_key}'
+            f'{self.id}'
         )
 
 
@@ -59,10 +57,7 @@ class Word(models.Model):
         related_name='base_word_Word_related'
     )
 
-    group = models.ForeignKey(
-        WordGroup, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='group_Word_related'
-    )
+    grouping = models.CharField(max_length=512, default='')
 
     images = models.ManyToManyField(
         Image, blank=True,
