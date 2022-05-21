@@ -3,14 +3,19 @@ import csv
 
 from first625words.models import BaseWord
 
-from . import themes
 from . import helpers
+
+from . import themes
 
 from .settings import BASE_WORDS_LIMIT_MAX_BY_THEME
 from .settings import SORT_NUMBER_DEFAULT
 from .settings import BASE_WORD_TEXT_COLUMN
 from .settings import SORT_NUMBER_INC_DEFAULT
 from .settings import DATA_FILE_NAME_ENDING_BASE_WORDS
+
+
+def get_data_all():
+    return BaseWord.objects.all()
 
 
 def get_data(text=None, theme=None):
@@ -28,7 +33,7 @@ def get_data(text=None, theme=None):
 
 
 def clear_data_all():
-    d = BaseWord.objects.all()
+    d = get_data_all()
     d.delete()
 
 
@@ -46,14 +51,10 @@ def import_data(path=None):
     themes_ = themes.get_data_all()
 
     for theme in themes_:
-        import_data_by_theme_name(name=theme.name, path=path)
+        import_data_by_theme(theme=theme, path=path)
 
 
-def import_data_by_theme_name(name, path=None):
-    theme = themes.get_data(name=name).first()
-    if not theme:
-        return
-
+def import_data_by_theme(theme, path=None):
     target_path = build_target_path(theme=theme, path=path)
     if not os.path.isfile(target_path):
         return

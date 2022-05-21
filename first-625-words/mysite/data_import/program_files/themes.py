@@ -11,19 +11,17 @@ from .settings import SORT_NUMBER_INC_DEFAULT
 from .settings import DATA_FILE_NAME_THEMES
 
 
-def clear_data_all():
-    d = Theme.objects.all()
-    d.delete()
-
-
 def get_data_all():
-    d = Theme.objects.all()
-    return d
+    return Theme.objects.all()
 
 
 def get_data(name):
-    d = Theme.objects.filter(name=name)
-    return d
+    return Theme.objects.filter(name=name)
+
+
+def clear_data_all():
+    d = get_data_all()
+    d.delete()
 
 
 def insert_data(name, sort_number):

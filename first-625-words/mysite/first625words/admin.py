@@ -4,7 +4,6 @@ from django.contrib import admin
 
 from .models import Theme
 from .models import BaseWord
-from .models import WordGroup
 from .models import Image
 from .models import Word
 from .models import TransliterationSystem
@@ -19,7 +18,6 @@ from .models import Phrase
 
 admin.site.register(Theme)
 admin.site.register(BaseWord)
-admin.site.register(WordGroup)
 admin.site.register(Image)
 admin.site.register(Word)
 admin.site.register(TransliterationSystem)

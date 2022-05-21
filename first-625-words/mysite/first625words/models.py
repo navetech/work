@@ -36,17 +36,6 @@ class BaseWord(models.Model):
         )
 
 
-class WordGroup(models.Model):
-    name = models.CharField(max_length=512)
-
-    def __str__(self):
-        return (
-            f'{self.name}'
-            +  ', ' +
-            f'{self.id}'
-        )
-
-
 class Image(models.Model):
     link = models.URLField(max_length=1024)
 
@@ -59,10 +48,21 @@ class Word(models.Model):
 
     grouping = models.CharField(max_length=512, default='')
 
+    grouping_key = models.CharField(max_length=512, default='')
+
     images = models.ManyToManyField(
         Image, blank=True,
         related_name='images_Word_related'
     )
+
+    def __str__(self):
+        return (
+            f'{self.base_word}'
+            +  ', ' +
+            f'{self.grouping}'
+            +  ', ' +
+            f'{self.grouping_key}'
+        )
 
 
 class TransliterationSystem(models.Model):
