@@ -9,14 +9,13 @@ from . import themes
 from . import base_words
 from . import words
 
-from .settings import BASE_WORD_COLUMN
-from .settings import BASE_WORD_HEADER
-from .settings import GROUPING_COLUMN
-from .settings import GROUPING_HEADER
-from .settings import GROUPING_KEY_COLUMN
-from .settings import GROUPING_KEY_HEADER
-
 from .settings import DATA_FILE_NAME_ENDING_WORDS_IMAGES
+from .settings import IMAGE_BASE_WORD_COLUMN
+from .settings import IMAGE_BASE_WORD_HEADER
+from .settings import IMAGE_GROUPING_COLUMN
+from .settings import IMAGE_GROUPING_HEADER
+from .settings import IMAGE_GROUPING_KEY_COLUMN
+from .settings import IMAGE_GROUPING_KEY_HEADER
 from .settings import IMAGE_COLUMN
 from .settings import IMAGE_HEADER
 
@@ -73,24 +72,25 @@ def import_data_by_theme(theme, path=None):
         rows = csv.reader(file)
 
         for row in rows:
-            image_link = helpers.get_cell_data_from_row(
-                row=row, row_column=IMAGE_COLUMN, column_header=IMAGE_HEADER
-                )
+            image_link = row[IMAGE_COLUMN]
+            if image_link == IMAGE_HEADER:
+                word_prev = None
+                return
 
             if not image_link:
-                base_word_prev = None
+                word_prev = None
                 return
 
             row_column = {
-                'base_word': BASE_WORD_COLUMN,
-                'grouping': GROUPING_COLUMN,
-                'grouping_key': GROUPING_KEY_COLUMN
+                'base_word': IMAGE_BASE_WORD_COLUMN,
+                'grouping': IMAGE_GROUPING_COLUMN,
+                'grouping_key': IMAGE_GROUPING_KEY_COLUMN
             }
 
             column_header = {
-                'base_word': BASE_WORD_HEADER,
-                'grouping': GROUPING_HEADER,
-                'grouping_key': GROUPING_KEY_HEADER
+                'base_word': IMAGE_BASE_WORD_HEADER,
+                'grouping': IMAGE_GROUPING_HEADER,
+                'grouping_key': IMAGE_GROUPING_KEY_HEADER
             }
 
             word = words.get_data_from_row(
@@ -103,59 +103,6 @@ def import_data_by_theme(theme, path=None):
 
             if word is None:
                 return
-
-
-
-            base_word = base_words.get_data_from_row(
-                row=row,
-                row_column=BASE_WORD_COLUMN, column_header=BASE_WORD_HEADER,
-                theme=theme, data_prev=base_word_prev
-                )
-
-            base_word_prev = base_word
-
-            if base_word is None:
-                return
-
-            grouping = helpers.get_cell_data_from_row(
-                row=row, row_column=GROUPING_COLUMN, column_header=GROUPING_HEADER
-                )
-            
-            if grouping is None:
-                base_word_prev = None
-                return
-
-            grouping_key = helpers.get_cell_data_from_row(
-                row=row, row_column=GROUPING_KEY_COLUMN, column_header=GROUPING_KEY_HEADER
-                )
-            
-            if grouping_key is None:
-                base_word_prev = None
-                return
-
-            if grouping_key and not grouping:
-                base_word_prev = None
-                return
-
-            if grouping:
-                word = get_data(
-                    base_word=base_word,
-                    grouping=grouping, grouping_key=grouping_key
-                    ).first()
-            else:
-                if word_prev:
-                    word = word_prev
-                else:
-                    base_word_prev = None
-                    return
-
-            if not word:
-                word = words.insert_data(
-                    base_word=base_word,
-                    grouping=grouping, grouping_key=grouping_key
-                    )
-
-            word_prev = word
 
             word_images = word.images.all()
 

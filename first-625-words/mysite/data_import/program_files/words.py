@@ -45,7 +45,7 @@ def insert_data(base_word, grouping, grouping_key):
 
 
 def get_data_from_row(
-    row, row_column, column_header,
+    row, column, column_header,
     theme=None, word_prev=None
     ):
 
@@ -56,7 +56,7 @@ def get_data_from_row(
 
     base_word = base_words.get_data_from_row(
         row=row,
-        row_column=row_column['base_word'],
+        column=column['base_word'],
         column_header=column_header['base_word'],
         theme=theme, base_word_prev=base_word_prev
         )
@@ -64,26 +64,16 @@ def get_data_from_row(
     if base_word is None:
         return None
 
-    grouping = helpers.get_cell_data_from_row(
-        row=row,
-        row_column=row_column['grouping'],
-        column_header=column_header['grouping'],
-        )
-
-    if grouping is None:
+    grouping = row[column['grouping']]
+    if grouping == column_header['grouping']:
         return None
 
-    grouping_key = helpers.get_cell_data_from_row(
-        row=row,
-        row_column=row_column['grouping_key'],
-        column_header=column_header['grouping_key'],
-        )
-
-    if grouping_key is None:
+    grouping_key = row[column['grouping_key']]
+    if grouping_key == column_header['grouping_key']:
         return None
 
     if grouping_key and not grouping:
-        return
+        return None
 
     word = get_data(
         base_word=base_word,
@@ -91,20 +81,13 @@ def get_data_from_row(
         ).first()
 
     if not word:
-        if xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-    else:
-        if word_prev:
+        if word_prev and base_word == word_prev.base_word and not grouping:
             word = word_prev
         else:
-            base_word_prev = None
-            return
-
-    if not word:
-        word = words.insert_data(
-            base_word=base_word,
-            grouping=grouping, grouping_key=grouping_key
-            )
+            word = insert_data(
+                base_word=base_word,
+                grouping=grouping, grouping_key=grouping_key
+                )
 
     return word
 

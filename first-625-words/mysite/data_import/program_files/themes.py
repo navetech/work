@@ -1,4 +1,3 @@
-import os
 import csv
 
 from first625words.models import Theme
@@ -8,9 +7,9 @@ from . import helpers
 from .settings import SORT_NUMBER_DEFAULT
 from .settings import SORT_NUMBER_INC_DEFAULT
 
-from .settings import DATA_FILE_NAME_THEMES
-from .settings import THEME_NAME_COLUMN
-from .settings import THEME_NAME_HEADER
+from .settings import THEMES_FILE_NAME
+from .settings import THEME_COLUMN
+from .settings import THEME_HEADER
 
 
 def get_data_all():
@@ -32,8 +31,10 @@ def insert_data(name, sort_number):
 
 
 def import_data(path=None):
-    target_path = build_target_path(path=path)
-    if not os.path.isfile(target_path):
+    base_name = THEMES_FILE_NAME
+
+    target_path = helpers.build_target_path(base_name=base_name, path=path)
+    if target_path is None:
         return
 
     clear_data_all()
@@ -44,12 +45,12 @@ def import_data(path=None):
         count = SORT_NUMBER_DEFAULT
         
         for row in rows:
-            name = row[THEME_NAME_COLUMN]
-            if not name:
-                return
+            name = helpers.get_cell_from_row(
+                row=row, column=THEME_COLUMN, column_header=THEME_HEADER
+            )
 
-            if name == THEME_NAME_HEADER:
-                return
+            if not name:
+                continue
 
             print(name, count)
 
@@ -59,11 +60,3 @@ def import_data(path=None):
                 insert_data(name=name, sort_number=count)
 
             count += SORT_NUMBER_INC_DEFAULT
-
-
-def build_target_path(path):
-    base_name = DATA_FILE_NAME_THEMES
-
-    target_path = helpers.build_target_path(base_name=base_name, path=path)
-
-    return target_path

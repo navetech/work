@@ -1,4 +1,3 @@
-import os
 import csv
 
 from first625words.models import BaseWord
@@ -10,9 +9,9 @@ from . import themes
 from .settings import SORT_NUMBER_DEFAULT
 from .settings import SORT_NUMBER_INC_DEFAULT
 
-from .settings import DATA_FILE_NAME_ENDING_BASE_WORDS
-from .settings import BASE_WORD_TEXT_COLUMN
-from .settings import BASE_WORD_TEXT_HEADER
+from .settings import BASE_WORDS_FILE_NAME_ENDING
+from .settings import BASE_WORD_COLUMN
+from .settings import BASE_WORD_HEADER
 
 from .settings import BASE_WORDS_LIMIT_MAX_BY_THEME
 
@@ -58,8 +57,10 @@ def import_data(path=None):
 
 
 def import_data_by_theme(theme, path=None):
-    target_path = build_target_path(theme=theme, path=path)
-    if not os.path.isfile(target_path):
+    base_name = f'{theme.name.lower()}{BASE_WORDS_FILE_NAME_ENDING}'
+
+    target_path = helpers.build_target_path(base_name=base_name, path=path)
+    if target_path is None:
         return
 
     clear_data(theme=theme)
@@ -72,12 +73,12 @@ def import_data_by_theme(theme, path=None):
          ) + SORT_NUMBER_DEFAULT
 
         for row in rows:
-            text = row[BASE_WORD_TEXT_COLUMN]
-            if not text:
-                return
+            text = helpers.get_cell_from_row(
+                row=row, column=BASE_WORD_COLUMN, column_header=BASE_WORD_HEADER
+            )
 
-            if text == BASE_WORD_TEXT_HEADER:
-                return
+            if not text:
+                continue
 
             print(text, theme.name, count)
 
@@ -89,27 +90,20 @@ def import_data_by_theme(theme, path=None):
             count += SORT_NUMBER_INC_DEFAULT
 
 
-def build_target_path(theme, path):
-    base_name = f'{theme.name.lower()}{DATA_FILE_NAME_ENDING_BASE_WORDS}'
-
-    target_path = helpers.build_target_path(base_name=base_name, path=path)
-
-    return target_path
-
-
 def get_data_from_row(
-    row, row_column, column_header,
+    row, column, column_header,
     theme=None, base_word_prev=None
     ):
 
-    base_word_text = helpers.get_cell_data_from_row(
-        row=row, row_column=row_column, column_header=column_header
-        )
+    base_word_text = helpers.get_cell_from_row(
+        row=row, column=column, column_header=column_header
+    )
+
+    if base_word_text is None:
+        return None
 
     if base_word_text:
         base_word = get_data(text=base_word_text, theme=theme).first()
-    elif base_word_text is None:
-        base_word = None
     else:
         base_word = base_word_prev
 

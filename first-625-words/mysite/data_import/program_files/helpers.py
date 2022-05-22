@@ -3,7 +3,7 @@ import os
 from .settings import DATA_FILES_DIR
 
 
-def build_target_path(base_name, path):
+def build_target_path(base_name, path=None):
     if path:
         target_path = os.path.join(path, base_name)
     else:
@@ -11,13 +11,20 @@ def build_target_path(base_name, path):
         t_p = os.path.join(target_dir, base_name)
         target_path = os.path.normpath(t_p)
 
+    if not os.path.isfile(target_path):
+        print(f'Is not a file: {target_path}')
+        return None
+
     return target_path
 
 
-def get_cell_data_from_row(row, row_column, column_header):
-    cell_data = row[row_column]
+def get_cell_from_row(row, column, column_header):
+    if len(row) <= column:
+        return None 
 
-    if cell_data == column_header:
-        cell_data = None
+    cell = row[column]
+    if cell == column_header:
+        return None
+    else:
+        return cell 
 
-    return cell_data
