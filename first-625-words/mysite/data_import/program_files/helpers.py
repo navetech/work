@@ -12,3 +12,12 @@ def build_target_path(base_name, path):
         target_path = os.path.normpath(t_p)
 
     return target_path
+
+
+def get_cell_data_from_row(row, row_column, column_header):
+    cell_data = row[row_column]
+
+    if cell_data == column_header:
+        cell_data = None
+
+    return cell_data

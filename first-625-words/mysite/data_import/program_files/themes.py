@@ -6,9 +6,11 @@ from first625words.models import Theme
 from . import helpers
 
 from .settings import SORT_NUMBER_DEFAULT
-from .settings import THEME_NAME_COLUMN
 from .settings import SORT_NUMBER_INC_DEFAULT
+
 from .settings import DATA_FILE_NAME_THEMES
+from .settings import THEME_NAME_COLUMN
+from .settings import THEME_NAME_HEADER
 
 
 def get_data_all():
@@ -43,6 +45,11 @@ def import_data(path=None):
         
         for row in rows:
             name = row[THEME_NAME_COLUMN]
+            if not name:
+                return
+
+            if name == THEME_NAME_HEADER:
+                return
 
             print(name, count)
 

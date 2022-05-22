@@ -7,11 +7,14 @@ from . import helpers
 
 from . import themes
 
-from .settings import BASE_WORDS_LIMIT_MAX_BY_THEME
 from .settings import SORT_NUMBER_DEFAULT
-from .settings import BASE_WORD_TEXT_COLUMN
 from .settings import SORT_NUMBER_INC_DEFAULT
+
 from .settings import DATA_FILE_NAME_ENDING_BASE_WORDS
+from .settings import BASE_WORD_TEXT_COLUMN
+from .settings import BASE_WORD_TEXT_HEADER
+
+from .settings import BASE_WORDS_LIMIT_MAX_BY_THEME
 
 
 def get_data_all():
@@ -70,6 +73,11 @@ def import_data_by_theme(theme, path=None):
 
         for row in rows:
             text = row[BASE_WORD_TEXT_COLUMN]
+            if not text:
+                return
+
+            if text == BASE_WORD_TEXT_HEADER:
+                return
 
             print(text, theme.name, count)
 
@@ -87,3 +95,22 @@ def build_target_path(theme, path):
     target_path = helpers.build_target_path(base_name=base_name, path=path)
 
     return target_path
+
+
+def get_data_from_row(
+    row, row_column, column_header,
+    theme=None, base_word_prev=None
+    ):
+
+    base_word_text = helpers.get_cell_data_from_row(
+        row=row, row_column=row_column, column_header=column_header
+        )
+
+    if base_word_text:
+        base_word = get_data(text=base_word_text, theme=theme).first()
+    elif base_word_text is None:
+        base_word = None
+    else:
+        base_word = base_word_prev
+
+    return base_word

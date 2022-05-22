@@ -9,16 +9,16 @@ from . import themes
 from . import base_words
 from . import words
 
-from .settings import WORD_BASE_WORD_COLUMN
-from .settings import WORD_BASE_WORD_HEADER
-from .settings import WORD_GROUPING_COLUMN
-from .settings import WORD_GROUPING_HEADER
-from .settings import WORD_GROUPING_KEY_COLUMN
-from .settings import WORD_GROUPING_KEY_HEADER
+from .settings import BASE_WORD_COLUMN
+from .settings import BASE_WORD_HEADER
+from .settings import GROUPING_COLUMN
+from .settings import GROUPING_HEADER
+from .settings import GROUPING_KEY_COLUMN
+from .settings import GROUPING_KEY_HEADER
 
-from .settings import WORD_IMAGE_COLUMN
-from .settings import WORD_IMAGE_HEADER
 from .settings import DATA_FILE_NAME_ENDING_WORDS_IMAGES
+from .settings import IMAGE_COLUMN
+from .settings import IMAGE_HEADER
 
 
 def get_data_all():
@@ -67,44 +67,69 @@ def import_data_by_theme(theme, path=None):
 
     clear_data_by_theme(theme=theme)
 
-    base_word_prev = None
     word_prev = None
 
     with open(target_path) as file:
         rows = csv.reader(file)
 
         for row in rows:
-            image_link = row[WORD_IMAGE_COLUMN]
-            if not image_link or image_link == WORD_IMAGE_HEADER:
+            image_link = helpers.get_cell_data_from_row(
+                row=row, row_column=IMAGE_COLUMN, column_header=IMAGE_HEADER
+                )
+
+            if not image_link:
                 base_word_prev = None
                 return
 
+            row_column = {
+                'base_word': BASE_WORD_COLUMN,
+                'grouping': GROUPING_COLUMN,
+                'grouping_key': GROUPING_KEY_COLUMN
+            }
 
-            base_word_text = row[WORD_BASE_WORD_COLUMN]
-            if base_word_text == WORD_BASE_WORD_HEADER:
-                base_word_prev = None
+            column_header = {
+                'base_word': BASE_WORD_HEADER,
+                'grouping': GROUPING_HEADER,
+                'grouping_key': GROUPING_KEY_HEADER
+            }
+
+            word = words.get_data_from_row(
+                row=row,
+                row_column=row_column, column_header=column_header,
+                theme=theme, word_prev=word_prev
+                )
+
+            word_prev = word
+
+            if word is None:
                 return
 
-            if base_word_text:
-                base_word = base_words.get_data(text=base_word_text, theme=theme).first()
-                if not base_word:
-                    base_word_prev = None
-                    return
 
-            elif not base_word_prev:
-                return
-            else:
-                base_word = base_word_prev
+
+            base_word = base_words.get_data_from_row(
+                row=row,
+                row_column=BASE_WORD_COLUMN, column_header=BASE_WORD_HEADER,
+                theme=theme, data_prev=base_word_prev
+                )
 
             base_word_prev = base_word
 
-            grouping = row[WORD_GROUPING_COLUMN]
-            if grouping == WORD_GROUPING_HEADER:
+            if base_word is None:
+                return
+
+            grouping = helpers.get_cell_data_from_row(
+                row=row, row_column=GROUPING_COLUMN, column_header=GROUPING_HEADER
+                )
+            
+            if grouping is None:
                 base_word_prev = None
                 return
 
-            grouping_key = row[WORD_GROUPING_KEY_COLUMN]
-            if grouping_key == WORD_GROUPING_KEY_HEADER:
+            grouping_key = helpers.get_cell_data_from_row(
+                row=row, row_column=GROUPING_KEY_COLUMN, column_header=GROUPING_KEY_HEADER
+                )
+            
+            if grouping_key is None:
                 base_word_prev = None
                 return
 
@@ -112,17 +137,17 @@ def import_data_by_theme(theme, path=None):
                 base_word_prev = None
                 return
 
-            if not base_word_text and not grouping and not grouping_key:
+            if grouping:
+                word = get_data(
+                    base_word=base_word,
+                    grouping=grouping, grouping_key=grouping_key
+                    ).first()
+            else:
                 if word_prev:
                     word = word_prev
                 else:
                     base_word_prev = None
                     return
-            else:
-                word = get_data(
-                    base_word=base_word,
-                    grouping=grouping, grouping_key=grouping_key
-                    ).first()
 
             if not word:
                 word = words.insert_data(
