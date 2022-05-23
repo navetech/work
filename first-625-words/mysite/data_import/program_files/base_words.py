@@ -48,6 +48,8 @@ def insert_data(text, theme, sort_number):
     d = BaseWord(text=text, theme=theme, sort_number=sort_number)
     d.save()
 
+    return d
+
 
 def import_data(path=None):
     themes_ = themes.get_data_all()
@@ -80,12 +82,11 @@ def import_data_by_theme(theme, path=None):
             if not text:
                 continue
 
-            print(text, theme.name, count)
+            base_word = get_data(text=text, theme=theme)
+            if not base_word:
+                base_word = insert_data(text=text, theme=theme, sort_number=count)
 
-            d = get_data(text=text, theme=theme)
-
-            if not d:
-                insert_data(text=text, theme=theme, sort_number=count)
+            print(base_word.text, base_word.theme.name, base_word.sort_number)
 
             count += SORT_NUMBER_INC_DEFAULT
 

@@ -43,6 +43,8 @@ def insert_data(base_word, grouping, grouping_key):
 
     d.save()
 
+    return d
+
 
 def get_data_from_row(
     row, column, column_header,
@@ -64,12 +66,22 @@ def get_data_from_row(
     if base_word is None:
         return None
 
-    grouping = row[column['grouping']]
-    if grouping == column_header['grouping']:
+    grouping = helpers.get_cell_from_row(
+        row=row,
+        column=column['grouping'],
+        column_header=column_header['grouping']
+    )
+
+    if grouping is None:
         return None
 
-    grouping_key = row[column['grouping_key']]
-    if grouping_key == column_header['grouping_key']:
+    grouping_key = helpers.get_cell_from_row(
+        row=row,
+        column=column['grouping_key'],
+        column_header=column_header['grouping_key']
+    )
+
+    if grouping_key is None:
         return None
 
     if grouping_key and not grouping:

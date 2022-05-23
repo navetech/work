@@ -9,7 +9,7 @@ from . import themes
 from . import base_words
 from . import words
 
-from .settings import DATA_FILE_NAME_ENDING_WORDS_IMAGES
+from .settings import WORDS_IMAGES_FILE_NAME_ENDING
 from .settings import IMAGE_BASE_WORD_COLUMN
 from .settings import IMAGE_BASE_WORD_HEADER
 from .settings import IMAGE_GROUPING_COLUMN
@@ -51,6 +51,8 @@ def insert_data(link):
     d = Image(link=link)
     d.save()
 
+    return d
+
 
 def import_data(path=None):
     themes_ = themes.get_data_all()
@@ -60,8 +62,10 @@ def import_data(path=None):
 
 
 def import_data_by_theme(theme, path=None):
-    target_path = build_target_path(theme=theme, path=path)
-    if not os.path.isfile(target_path):
+    base_name = f'{theme.name.lower()}{WORDS_IMAGES_FILE_NAME_ENDING}'
+
+    target_path = helpers.build_target_path(base_name=base_name, path=path)
+    if target_path is None:
         return
 
     clear_data_by_theme(theme=theme)
@@ -72,16 +76,15 @@ def import_data_by_theme(theme, path=None):
         rows = csv.reader(file)
 
         for row in rows:
-            image_link = row[IMAGE_COLUMN]
-            if image_link == IMAGE_HEADER:
-                word_prev = None
-                return
+            image_link = helpers.get_cell_from_row(
+                row=row, column=IMAGE_COLUMN, column_header=IMAGE_HEADER
+            )
 
             if not image_link:
                 word_prev = None
-                return
+                continue
 
-            row_column = {
+            column = {
                 'base_word': IMAGE_BASE_WORD_COLUMN,
                 'grouping': IMAGE_GROUPING_COLUMN,
                 'grouping_key': IMAGE_GROUPING_KEY_COLUMN
@@ -95,14 +98,15 @@ def import_data_by_theme(theme, path=None):
 
             word = words.get_data_from_row(
                 row=row,
-                row_column=row_column, column_header=column_header,
+                column=column, column_header=column_header,
                 theme=theme, word_prev=word_prev
                 )
 
+
             word_prev = word
 
-            if word is None:
-                return
+            if not word:
+                continue
 
             word_images = word.images.all()
 
@@ -110,15 +114,9 @@ def import_data_by_theme(theme, path=None):
             if not image:
                 image = insert_data(link=image_link)
 
+            print(word.base_word.text, word.grouping, word.grouping_key, image.link)
+
             if image in word_images:
-                return
+                continue
             
-            word_images.add(image)
-
-
-def build_target_path(theme, path):
-    base_name = f'{theme.name.lower()}{DATA_FILE_NAME_ENDING_WORDS_IMAGES}'
-
-    target_path = helpers.build_target_path(base_name=base_name, path=path)
-
-    return target_path
+            word.images.add(image)

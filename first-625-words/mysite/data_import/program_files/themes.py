@@ -29,6 +29,8 @@ def insert_data(name, sort_number):
     d = Theme(name=name, sort_number=sort_number)
     d.save()
 
+    return d
+
 
 def import_data(path=None):
     base_name = THEMES_FILE_NAME
@@ -52,11 +54,10 @@ def import_data(path=None):
             if not name:
                 continue
 
-            print(name, count)
+            theme = get_data(name=name)
+            if not theme:
+                theme = insert_data(name=name, sort_number=count)
 
-            d = get_data(name=name)
-
-            if not d:
-                insert_data(name=name, sort_number=count)
+            print(theme.name, theme.sort_number)
 
             count += SORT_NUMBER_INC_DEFAULT

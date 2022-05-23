@@ -39,6 +39,11 @@ class BaseWord(models.Model):
 class Image(models.Model):
     link = models.URLField(max_length=1024)
 
+    def __str__(self):
+        return (
+            f'{self.link}'
+        )
+
 
 class Word(models.Model):
     base_word = models.ForeignKey(
