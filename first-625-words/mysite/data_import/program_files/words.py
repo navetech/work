@@ -1,4 +1,3 @@
-import os
 import csv
 
 from first625words.models import Word
@@ -84,7 +83,14 @@ def get_data_from_row(
     if grouping_key is None:
         return None
 
-    if grouping_key and not grouping:
+    str_grouping = str(grouping)
+    str_grouping_key = str(grouping_key)
+
+    if (
+        str_grouping_key and not str_grouping_key.isspace()
+        and
+        (not str_grouping or str_grouping.isspace())
+    ):
         return None
 
     word = get_data(
@@ -93,7 +99,11 @@ def get_data_from_row(
         ).first()
 
     if not word:
-        if word_prev and base_word == word_prev.base_word and not grouping:
+        if (
+            word_prev and base_word == word_prev.base_word
+            and
+            (not str_grouping or str_grouping.isspace())
+        ):
             word = word_prev
         else:
             word = insert_data(

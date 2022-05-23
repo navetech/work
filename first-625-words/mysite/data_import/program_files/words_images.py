@@ -1,4 +1,3 @@
-import os
 import csv
 
 from first625words.models import Image
@@ -9,7 +8,9 @@ from . import themes
 from . import base_words
 from . import words
 
-from .settings import WORDS_IMAGES_FILE_NAME_ENDING
+from .settings import DATA_FILES_EXTENSION
+
+from .settings import WORDS_IMAGES_FILE_NAME_ROOT
 from .settings import IMAGE_BASE_WORD_COLUMN
 from .settings import IMAGE_BASE_WORD_HEADER
 from .settings import IMAGE_GROUPING_COLUMN
@@ -33,7 +34,7 @@ def clear_data_all():
     d.delete()
 
 
-def clear_data_by_theme(theme=None):
+def clear_data_by_theme(theme):
     base_words_ = base_words.get_data(theme=theme)
 
     for base_word in base_words_:
@@ -64,7 +65,9 @@ def import_data(path=None):
 
 
 def import_data_by_theme(theme, path=None):
-    base_name = f'{theme.name.lower()}{WORDS_IMAGES_FILE_NAME_ENDING}'
+    base_name = f'{theme.name.lower()}'
+    base_name += f'-{WORDS_IMAGES_FILE_NAME_ROOT}'
+    base_name += f'{DATA_FILES_EXTENSION}'
 
     target_path = helpers.build_target_path(base_name=base_name, path=path)
     if target_path is None:
@@ -106,24 +109,20 @@ def import_data_by_theme(theme, path=None):
                 theme=theme, word_prev=word_prev
                 )
 
-
             word_prev = word
 
             if not word:
                 continue
 
-            word_images = word.images.all()
-
             image = get_data(link=image_link).first()
             if not image:
                 image = insert_data(link=image_link)
 
+            word_images = word.images.all()
+            if not image in word_images:
+                word.images.add(image)
+
             print()
             print(word.base_word.text, word.grouping, word.grouping_key, image.link)
-
-            if image in word_images:
-                continue
-            
-            word.images.add(image)
 
     print()

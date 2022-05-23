@@ -4,7 +4,9 @@ from first625words.models import Language
 
 from . import helpers
 
-from .settings import LANGUAGES_FILE_NAME
+from .settings import DATA_FILES_EXTENSION
+
+from .settings import LANGUAGES_FILE_NAME_ROOT
 from .settings import LANGUAGE_COLUMN
 from .settings import LANGUAGE_HEADER
 
@@ -32,8 +34,8 @@ def insert_data(name):
 def import_data(path=None):
     print()
 
-
-    base_name = LANGUAGES_FILE_NAME
+    base_name = f'{LANGUAGES_FILE_NAME_ROOT}'
+    base_name += f'{DATA_FILES_EXTENSION}'
 
     target_path = helpers.build_target_path(base_name=base_name, path=path)
     if target_path is None:

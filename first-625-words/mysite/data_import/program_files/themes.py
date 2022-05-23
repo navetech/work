@@ -7,7 +7,9 @@ from . import helpers
 from .settings import SORT_NUMBER_DEFAULT
 from .settings import SORT_NUMBER_INC_DEFAULT
 
-from .settings import THEMES_FILE_NAME
+from .settings import DATA_FILES_EXTENSION
+
+from .settings import THEMES_FILE_NAME_ROOT
 from .settings import THEME_COLUMN
 from .settings import THEME_HEADER
 
@@ -35,8 +37,8 @@ def insert_data(name, sort_number):
 def import_data(path=None):
     print()
 
-
-    base_name = THEMES_FILE_NAME
+    base_name = f'{THEMES_FILE_NAME_ROOT}'
+    base_name += f'{DATA_FILES_EXTENSION}'
 
     target_path = helpers.build_target_path(base_name=base_name, path=path)
     if target_path is None:
