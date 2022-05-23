@@ -49,14 +49,14 @@ def clear_data_by_theme_and_language(theme, language):
 
             for phrase in phrases_:
                 spelling = phrase.spelling
-                if spelling.language == language:
+                if spelling and spelling.language == language:
                     phrase.spelling = None
                     phrase.save()
                     spelling.delete()
 
                 alt_spellings = phrase.alt_spellings.all()
                 for spelling in alt_spellings:
-                    if spelling.language == language:
+                    if spelling and spelling.language == language:
                         phrase.alt_spellings.remove(spelling)
                         spelling.delete()
 
@@ -113,6 +113,7 @@ def import_data_by_theme_and_language(theme, language, path=None):
 
             if spelling_text is None:
                 word_prev = None
+                spelling_prev = None
                 continue
 
             alt_spelling_text = helpers.get_cell_from_row(
@@ -121,8 +122,8 @@ def import_data_by_theme_and_language(theme, language, path=None):
 
             if alt_spelling_text is None:
                 word_prev = None
+                spelling_prev = None
                 continue
-
 
             str_spelling_text = str(spelling_text)
             str_alt_spelling_text = str(alt_spelling_text)
@@ -133,6 +134,7 @@ def import_data_by_theme_and_language(theme, language, path=None):
                 (not str_alt_spelling_text or str_alt_spelling_text.isspace())
             ):
                 word_prev = None
+                spelling_prev = None
                 continue
 
             column = {
@@ -156,6 +158,7 @@ def import_data_by_theme_and_language(theme, language, path=None):
             word_prev = word
 
             if not word:
+                spelling_prev = None
                 continue
 
             spelling = get_data(text=spelling_text, language=language).first()
@@ -168,7 +171,7 @@ def import_data_by_theme_and_language(theme, language, path=None):
                 ):
                     spelling = spelling_prev
                 else:
-                    spelling = insert_data(spelling_text, language=language).first()
+                    spelling = insert_data(text=spelling_text, language=language)
             
             spelling_prev = spelling
 
@@ -176,23 +179,24 @@ def import_data_by_theme_and_language(theme, language, path=None):
             if not phrase:
                 phrase = phrases.insert_data(word=word, spelling=spelling)
 
-            if str_alt_spelling_text and not str_alt_spelling_text.isspace():
-                alt_spelling = get_data(text=alt_spelling_text, language=language).first()
-
-                if not alt_spelling:
-                    alt_spelling = insert_data(alt_spelling_text, language=language).first()
-
-                alt_spellings = phrase.alt_spellings.all()
-                if not alt_spelling in alt_spellings:
-                    phrase.alt_spellings.add(alt_spelling)
-
             print()
             print(
                 word.base_word.text, word.grouping, word.grouping_key,
                 spelling.text, end=' '
                 )
-            if alt_spelling:
+
+            if str_alt_spelling_text and not str_alt_spelling_text.isspace():
+                alt_spelling = get_data(text=alt_spelling_text, language=language).first()
+
+                if not alt_spelling:
+                    alt_spelling = insert_data(text=alt_spelling_text, language=language)
+
+                alt_spellings = phrase.alt_spellings.all()
+                if not alt_spelling in alt_spellings:
+                    phrase.alt_spellings.add(alt_spelling)
+
                 print(alt_spelling.text)
+                
             print()
 
     print()

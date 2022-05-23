@@ -23,15 +23,15 @@ def get_data_all():
 
 
 def get_data(text=None, theme=None):
-    if text is None:
-        if theme is None:
-            d = None
+    if text is not None:
+        if theme:
+            d = BaseWord.objects.filter(text=text, theme=theme)
         else:
-            d = BaseWord.objects.filter(theme=theme)
-    elif theme is None:
-        d = BaseWord.objects.filter(text=text)
+            d = BaseWord.objects.filter(text=text)
+    elif theme:
+        d = BaseWord.objects.filter(theme=theme)
     else:
-        d = BaseWord.objects.filter(text=text, theme=theme)
+        d = None
 
     return d
 

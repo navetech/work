@@ -139,6 +139,13 @@ class Spelling(models.Model):
         related_name='examples_Spelling_related'
     )
 
+    def __str__(self):
+        return (
+            f'{self.text}'
+            +  ', ' +
+            f'{self.language}'
+        )
+
 
 class Phrase(models.Model):
     word = models.ForeignKey(
@@ -155,3 +162,10 @@ class Phrase(models.Model):
         Spelling, blank=True,
         related_name='alt_spellings_Phrase_related'
     )
+
+    def __str__(self):
+        return (
+            f'{self.word}'
+            +  ', ' +
+            f'{self.spelling}'
+        )
