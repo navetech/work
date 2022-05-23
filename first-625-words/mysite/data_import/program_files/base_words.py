@@ -52,6 +52,8 @@ def insert_data(text, theme, sort_number):
 
 
 def import_data(path=None):
+    print()
+
     themes_ = themes.get_data_all()
 
     for theme in themes_:
@@ -67,6 +69,8 @@ def import_data_by_theme(theme, path=None):
 
     clear_data(theme=theme)
 
+    print()
+
     with open(target_path) as file:
         rows = csv.reader(file)
         
@@ -79,16 +83,19 @@ def import_data_by_theme(theme, path=None):
                 row=row, column=BASE_WORD_COLUMN, column_header=BASE_WORD_HEADER
             )
 
-            if not text:
+            if text is None or not str(text) or str(text).isspace():
                 continue
 
             base_word = get_data(text=text, theme=theme)
             if not base_word:
                 base_word = insert_data(text=text, theme=theme, sort_number=count)
 
+            print()
             print(base_word.text, base_word.theme.name, base_word.sort_number)
 
             count += SORT_NUMBER_INC_DEFAULT
+
+    print()
 
 
 def get_data_from_row(
@@ -103,7 +110,7 @@ def get_data_from_row(
     if base_word_text is None:
         return None
 
-    if base_word_text:
+    if str(base_word_text) and not str(base_word_text).isspace():
         base_word = get_data(text=base_word_text, theme=theme).first()
     else:
         base_word = base_word_prev

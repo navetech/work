@@ -55,6 +55,8 @@ def insert_data(link):
 
 
 def import_data(path=None):
+    print()
+
     themes_ = themes.get_data_all()
 
     for theme in themes_:
@@ -72,6 +74,8 @@ def import_data_by_theme(theme, path=None):
 
     word_prev = None
 
+    print()
+
     with open(target_path) as file:
         rows = csv.reader(file)
 
@@ -80,7 +84,7 @@ def import_data_by_theme(theme, path=None):
                 row=row, column=IMAGE_COLUMN, column_header=IMAGE_HEADER
             )
 
-            if not image_link:
+            if image_link is None or not str(image_link) or str(image_link).isspace():
                 word_prev = None
                 continue
 
@@ -114,9 +118,12 @@ def import_data_by_theme(theme, path=None):
             if not image:
                 image = insert_data(link=image_link)
 
+            print()
             print(word.base_word.text, word.grouping, word.grouping_key, image.link)
 
             if image in word_images:
                 continue
             
             word.images.add(image)
+
+    print()

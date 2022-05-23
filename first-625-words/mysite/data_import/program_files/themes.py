@@ -33,6 +33,9 @@ def insert_data(name, sort_number):
 
 
 def import_data(path=None):
+    print()
+
+
     base_name = THEMES_FILE_NAME
 
     target_path = helpers.build_target_path(base_name=base_name, path=path)
@@ -40,6 +43,8 @@ def import_data(path=None):
         return
 
     clear_data_all()
+
+    print()
 
     with open(target_path) as file:
         rows = csv.reader(file)
@@ -51,13 +56,17 @@ def import_data(path=None):
                 row=row, column=THEME_COLUMN, column_header=THEME_HEADER
             )
 
-            if not name:
+            if name is None or not str(name) or str(name).isspace():
                 continue
 
             theme = get_data(name=name)
             if not theme:
                 theme = insert_data(name=name, sort_number=count)
 
+            print()
             print(theme.name, theme.sort_number)
 
             count += SORT_NUMBER_INC_DEFAULT
+
+    print()
+

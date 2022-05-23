@@ -12,18 +12,18 @@ def build_target_path(base_name, path=None):
         target_path = os.path.normpath(t_p)
 
     if not os.path.isfile(target_path):
-        print(f'Is not a file: {target_path}')
+        # print(f'Is not a file: {target_path}')
         return None
 
     return target_path
 
 
-def get_cell_from_row(row, column, column_header):
+def get_cell_from_row(row, column, column_header=None):
     if len(row) <= column:
-        return None 
+        return '' 
 
     cell = row[column]
-    if cell == column_header:
+    if column_header is not None and cell == column_header:
         return None
     else:
         return cell 
