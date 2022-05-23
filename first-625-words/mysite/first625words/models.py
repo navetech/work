@@ -70,6 +70,15 @@ class Word(models.Model):
         )
 
 
+class Language(models.Model):
+    name = models.CharField(max_length=256)
+
+    def __str__(self):
+        return (
+            f'{self.name}'
+        )
+
+
 class TransliterationSystem(models.Model):
     name = models.CharField(max_length=256)
 
@@ -92,32 +101,43 @@ class Pronunciation(models.Model):
     )
 
 
-class Spelling(models.Model):
-    text = models.TextField()
-
-    pronunciation = models.ForeignKey(
-        Pronunciation, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='pronunciation_Spelling_related'
-    )
-
-
-class Language(models.Model):
-    name = models.CharField(max_length=256)
-
-
-class PhraseDefinition(models.Model):
+class Definition(models.Model):
     text = models.TextField()
 
     language = models.ForeignKey(
         Language, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='language_PhraseDefinition_related'
+        related_name='language_Definition_related'
     )
 
 
-class PhraseExample(models.Model):
+class Example(models.Model):
     text = models.TextField()
 
     credits = models.TextField()
+
+
+class Spelling(models.Model):
+    text = models.TextField()
+
+    language = models.ForeignKey(
+        Language, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='language_Spelling_related'
+    )
+
+    pronunciations = models.ManyToManyField(
+        Pronunciation, blank=True,
+        related_name='pronunciations_Spelling_related'
+    )
+
+    definitions = models.ManyToManyField(
+        Definition, blank=True,
+        related_name='definitions_Spelling_related'
+    )
+
+    examples = models.ManyToManyField(
+        Example, blank=True,
+        related_name='examples_Spelling_related'
+    )
 
 
 class Phrase(models.Model):
@@ -126,22 +146,12 @@ class Phrase(models.Model):
         related_name='word_Phrase_related'
     )
 
-    language = models.ForeignKey(
-        Language, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='language_Phrase_related'
+    spelling = models.ForeignKey(
+        Spelling, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='spelling_Phrase_related'
     )
 
-    spellings = models.ManyToManyField(
+    alt_spellings = models.ManyToManyField(
         Spelling, blank=True,
-        related_name='spellings_Phrase_related'
-    )
-
-    definitions = models.ManyToManyField(
-        PhraseDefinition, blank=True,
-        related_name='definitions_Phrase_related'
-    )
-
-    examples = models.ManyToManyField(
-        PhraseExample, blank=True,
-        related_name='examples_Phrase_related'
+        related_name='alt_spellings_Phrase_related'
     )
