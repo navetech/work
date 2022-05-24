@@ -58,7 +58,7 @@ def get_data_from_row(
         theme=theme, base_word_prev=base_word_prev
         )
 
-    if base_word is None:
+    if not base_word:
         return None
 
     grouping = helpers.get_cell_from_row(

@@ -10,6 +10,7 @@ from .settings import SORT_NUMBER_DEFAULT
 from .settings import SORT_NUMBER_INC_DEFAULT
 
 from .settings import DATA_FILES_EXTENSION
+from .settings import DATA_FILES_FILE_NAME_ROOTS_SEPARATOR
 
 from .settings import BASE_WORDS_FILE_NAME_ROOT
 from .settings import BASE_WORD_COLUMN
@@ -63,8 +64,9 @@ def import_data(path=None):
 
 
 def import_data_by_theme(theme, path=None):
-    base_name = f'{theme.name.lower()}'
-    base_name += f'-{BASE_WORDS_FILE_NAME_ROOT}'
+    base_name = f'{BASE_WORDS_FILE_NAME_ROOT}'
+    base_name += f'{DATA_FILES_FILE_NAME_ROOTS_SEPARATOR}'
+    base_name += f'{theme.name.lower()}'
     base_name += f'{DATA_FILES_EXTENSION}'
 
     target_path = helpers.build_target_path(base_name=base_name, path=path)

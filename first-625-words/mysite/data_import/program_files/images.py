@@ -9,8 +9,11 @@ from . import base_words
 from . import words
 
 from .settings import DATA_FILES_EXTENSION
+from .settings import DATA_FILES_FILE_NAME_ROOTS_SEPARATOR
 
-from .settings import WORDS_IMAGES_FILE_NAME_ROOT
+from .settings import WORDS_FILE_NAME_ROOT
+
+from .settings import IMAGES_FILE_NAME_ROOT
 from .settings import IMAGE_BASE_WORD_COLUMN
 from .settings import IMAGE_BASE_WORD_HEADER
 from .settings import IMAGE_GROUPING_COLUMN
@@ -65,8 +68,11 @@ def import_data_for_words(path=None):
 
 
 def import_data_for_words_by_theme(theme, path=None):
-    base_name = f'{theme.name.lower()}'
-    base_name += f'-{WORDS_IMAGES_FILE_NAME_ROOT}'
+    base_name = f'{IMAGES_FILE_NAME_ROOT}'
+    base_name += f'{DATA_FILES_FILE_NAME_ROOTS_SEPARATOR}'
+    base_name += f'{WORDS_FILE_NAME_ROOT}'
+    base_name += f'{DATA_FILES_FILE_NAME_ROOTS_SEPARATOR}'
+    base_name += f'{theme.name.lower()}'
     base_name += f'{DATA_FILES_EXTENSION}'
 
     target_path = helpers.build_target_path(base_name=base_name, path=path)
