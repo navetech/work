@@ -11,7 +11,7 @@ class Theme(models.Model):
     def __str__(self):
         return (
             f'{self.name}'
-            +  ', ' +
+            + ', ' +
             f'{self.sort_number}'
         )
 
@@ -29,9 +29,9 @@ class BaseWord(models.Model):
     def __str__(self):
         return (
             f'{self.text}'
-            +  ', ' +
+            + ', ' +
             f'{self.theme.name}'
-            +  ', ' +
+            + ', ' +
             f'{self.sort_number}'
         )
 
@@ -63,9 +63,9 @@ class Word(models.Model):
     def __str__(self):
         return (
             f'{self.base_word}'
-            +  ', ' +
+            + ', ' +
             f'{self.grouping}'
-            +  ', ' +
+            + ', ' +
             f'{self.grouping_key}'
         )
 
@@ -142,7 +142,7 @@ class Spelling(models.Model):
     def __str__(self):
         return (
             f'{self.text}'
-            +  ', ' +
+            + ', ' +
             f'{self.language}'
         )
 
@@ -166,6 +166,6 @@ class Phrase(models.Model):
     def __str__(self):
         return (
             f'{self.word}'
-            +  ', ' +
+            + ', ' +
             f'{self.spelling}'
         )

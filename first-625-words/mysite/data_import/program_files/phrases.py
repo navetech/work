@@ -1,5 +1,3 @@
-import csv
-
 from first625words.models import Phrase
 
 

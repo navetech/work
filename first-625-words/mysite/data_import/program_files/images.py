@@ -87,7 +87,10 @@ def import_data_for_words_by_theme(theme, path=None):
                 row=row, column=IMAGE_COLUMN, column_header=IMAGE_HEADER
             )
 
-            if image_link is None or not str(image_link) or str(image_link).isspace():
+            if (
+                image_link is None or
+                not str(image_link) or str(image_link).isspace()
+            ):
                 word_prev = None
                 continue
 
@@ -119,10 +122,13 @@ def import_data_for_words_by_theme(theme, path=None):
                 image = insert_data(link=image_link)
 
             word_images = word.images.all()
-            if not image in word_images:
+            if image not in word_images:
                 word.images.add(image)
 
             print()
-            print(word.base_word.text, word.grouping, word.grouping_key, image.link)
+            print(
+                word.base_word.text, word.grouping,
+                word.grouping_key, image.link
+                )
 
     print()

@@ -23,7 +23,7 @@ def get_data_all():
 
 
 def get_data(text=None, theme=None):
-    if text is not None:
+    if text is not None and str(text) and not str(text).isspace():
         if theme:
             d = BaseWord.objects.filter(text=text, theme=theme)
         else:
@@ -77,14 +77,15 @@ def import_data_by_theme(theme, path=None):
 
     with open(target_path) as file:
         rows = csv.reader(file)
-        
+
         count = (
             theme.sort_number * BASE_WORDS_LIMIT_MAX_BY_THEME
          ) + SORT_NUMBER_DEFAULT
 
         for row in rows:
             text = helpers.get_cell_from_row(
-                row=row, column=BASE_WORD_COLUMN, column_header=BASE_WORD_HEADER
+                row=row, column=BASE_WORD_COLUMN,
+                column_header=BASE_WORD_HEADER
             )
 
             if text is None or not str(text) or str(text).isspace():
@@ -92,7 +93,9 @@ def import_data_by_theme(theme, path=None):
 
             base_word = get_data(text=text, theme=theme)
             if not base_word:
-                base_word = insert_data(text=text, theme=theme, sort_number=count)
+                base_word = insert_data(
+                    text=text, theme=theme, sort_number=count
+                    )
 
             print()
             print(base_word.text, base_word.theme.name, base_word.sort_number)
@@ -103,9 +106,7 @@ def import_data_by_theme(theme, path=None):
 
 
 def get_data_from_row(
-    row, column, column_header,
-    theme=None, base_word_prev=None
-    ):
+        row, column, column_header, theme=None, base_word_prev=None):
 
     base_word_text = helpers.get_cell_from_row(
         row=row, column=column, column_header=column_header

@@ -8,6 +8,9 @@ from . import themes
 from . import base_words
 from . import words
 from . import languages
+from . import translit_systems
+from . import pronunc_spellings
+from . import pronunciations
 from . import phrases
 
 from .settings import DATA_FILES_EXTENSION
@@ -30,18 +33,30 @@ from .settings import PRONUNCIATION_SPELLING_COLUMN
 from .settings import PRONUNCIATION_SPELLING_HEADER
 from .settings import PRONUNCIATION_SOUND_COLUMN
 from .settings import PRONUNCIATION_SOUND_HEADER
-from .settings import PRONUNCIATION_PRONUNCIATION_SPELLING_COLUMN
-from .settings import PRONUNCIATION_PRONUNCIATION_SPELLING_HEADER
-from .settings import PRONUNCIATION_PRONUNCIATION_SPELLING_LANGUAGE_COLUMN
-from .settings import PRONUNCIATION_PRONUNCIATION_SPELLING_LANGUAGE_HEADER
+from .settings import PRONUNCIATION_PRONUNC_SPELL_COLUMN
+from .settings import PRONUNCIATION_PRONUNC_SPELL_HEADER
+from .settings import PRONUNCIATION_PRONUNC_SPELL_LANG_COLUMN
+from .settings import PRONUNCIATION_PRONUNC_SPELL_LANG_HEADER
 
 
 def get_data_all():
     return Spelling.objects.all()
 
 
-def get_data(text, language):
-    return Spelling.objects.filter(text=text, language=language)
+def get_data(text=None, language=None):
+    if text is not None and str(text) and not str(text).isspace():
+        if language:
+            d = Spelling.objects.filter(
+                text=text, language=language
+                )
+        else:
+            d = Spelling.objects.filter(text=text)
+    elif language:
+        d = Spelling.objects.filter(language=language)
+    else:
+        d = None
+
+    return d
 
 
 def clear_data_all():
@@ -94,7 +109,9 @@ def import_data_for_words_by_theme(theme, path=None):
     languages_ = languages.get_data_all()
 
     for language in languages_:
-        import_data_for_words_by_theme_and_language(theme=theme, language=language, path=path)
+        import_data_for_words_by_theme_and_language(
+            theme=theme, language=language, path=path
+            )
 
 
 def import_data_for_words_by_theme_and_language(theme, language, path=None):
@@ -128,7 +145,8 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
                 continue
 
             alt_spelling_text = helpers.get_cell_from_row(
-                row=row, column=SPELLING_ALT_COLUMN, column_header=SPELLING_ALT_HEADER
+                row=row, column=SPELLING_ALT_COLUMN,
+                column_header=SPELLING_ALT_HEADER
             )
 
             if alt_spelling_text is None:
@@ -182,8 +200,10 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
                 ):
                     spelling = spelling_prev
                 else:
-                    spelling = insert_data(text=spelling_text, language=language)
-            
+                    spelling = insert_data(
+                        text=spelling_text, language=language
+                        )
+
             spelling_prev = spelling
 
             phrase = phrases.get_data(word=word, spelling=spelling).first()
@@ -197,17 +217,21 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
                 )
 
             if str_alt_spelling_text and not str_alt_spelling_text.isspace():
-                alt_spelling = get_data(text=alt_spelling_text, language=language).first()
+                alt_spelling = get_data(
+                    text=alt_spelling_text, language=language
+                    ).first()
 
                 if not alt_spelling:
-                    alt_spelling = insert_data(text=alt_spelling_text, language=language)
+                    alt_spelling = insert_data(
+                        text=alt_spelling_text, language=language
+                        )
 
                 alt_spellings = phrase.alt_spellings.all()
-                if not alt_spelling in alt_spellings:
+                if alt_spelling not in alt_spellings:
                     phrase.alt_spellings.add(alt_spelling)
 
                 print(alt_spelling.text)
-                
+
             print()
 
     print()
@@ -225,18 +249,18 @@ def clear_pronunciations_by_theme_and_language(theme, language):
             for phrase in phrases_:
                 spelling = phrase.spelling
                 if spelling and spelling.language == language:
-                    pronunciations = spelling.pronunciations.all()
+                    pronunciations_ = spelling.pronunciations.all()
 
-                    for pronunciation in pronunciations:
+                    for pronunciation in pronunciations_:
                         spelling.pronunciations.remove(pronunciation)
                         pronunciation.delete()
 
                 alt_spellings = phrase.alt_spellings.all()
                 for spelling in alt_spellings:
                     if spelling and spelling.language == language:
-                        pronunciations = spelling.pronunciations.all()
+                        pronunciations_ = spelling.pronunciations.all()
 
-                        for pronunciation in pronunciations:
+                        for pronunciation in pronunciations_:
                             spelling.pronunciations.remove(pronunciation)
                             pronunciation.delete()
 
@@ -256,7 +280,9 @@ def import_pronunciations_by_theme(theme, path=None):
     languages_ = languages.get_data_all()
 
     for language in languages_:
-        import_pronunciations_by_theme_and_language(theme=theme, language=language, path=path)
+        import_pronunciations_by_theme_and_language(
+            theme=theme, language=language, path=path
+            )
 
 
 def import_pronunciations_by_theme_and_language(theme, language, path=None):
@@ -299,8 +325,8 @@ def import_pronunciations_by_theme_and_language(theme, language, path=None):
                 continue
 
             pronunc_spell_text = helpers.get_cell_from_row(
-                row=row, column=PRONUNCIATION_PRONUNCIATION_SPELLING_COLUMN,
-                column_header=PRONUNCIATION_PRONUNCIATION_SPELLING_HEADER
+                row=row, column=PRONUNCIATION_PRONUNC_SPELL_COLUMN,
+                column_header=PRONUNCIATION_PRONUNC_SPELL_HEADER
             )
 
             if pronunc_spell_text is None:
@@ -308,8 +334,8 @@ def import_pronunciations_by_theme_and_language(theme, language, path=None):
                 continue
 
             pronunc_spell_lang_name = helpers.get_cell_from_row(
-                row=row, column=PRONUNCIATION_PRONUNCIATION_SPELLING_LANGUAGE_COLUMN,
-                column_header=PRONUNCIATION_PRONUNCIATION_SPELLING_LANGUAGE_HEADER
+                row=row, column=PRONUNCIATION_PRONUNC_SPELL_LANG_COLUMN,
+                column_header=PRONUNCIATION_PRONUNC_SPELL_LANG_HEADER
             )
 
             if pronunc_spell_lang_name is None:
@@ -323,24 +349,48 @@ def import_pronunciations_by_theme_and_language(theme, language, path=None):
             if (
                 (not str_pronunc_sound or str_pronunc_sound.isspace())
                 and
-                (not str_pronunc_spell_text or str_pronunc_spell_text.isspace())
+                (
+                    not str_pronunc_spell_text
+                    or
+                    str_pronunc_spell_text.isspace()
+                )
                 and
-                (not str_pronunc_spell_lang_name or str_pronunc_spell_lang_name.isspace())
+                (
+                    not str_pronunc_spell_lang_name
+                    or
+                    str_pronunc_spell_lang_name.isspace()
+                )
             ):
                 spelling_prev = None
                 continue
 
             if (
                 (
-                    (str_pronunc_spell_text and not str_pronunc_spell_text.isspace())
+                    (
+                        str_pronunc_spell_text
+                        and
+                        not str_pronunc_spell_text.isspace()
+                    )
                     and
-                    (not str_pronunc_spell_lang_name or str_pronunc_spell_lang_name.isspace())
+                    (
+                        not str_pronunc_spell_lang_name
+                        or
+                        str_pronunc_spell_lang_name.isspace()
+                    )
                 )
                 or
                 (
-                    (not str_pronunc_spell_text or str_pronunc_spell_text.isspace())
+                    (
+                        not str_pronunc_spell_text
+                        or
+                        str_pronunc_spell_text.isspace()
+                    )
                     and
-                    (str_pronunc_spell_lang_name and not str_pronunc_spell_lang_name.isspace())
+                    (
+                        str_pronunc_spell_lang_name
+                        and
+                        not str_pronunc_spell_lang_name.isspace()
+                    )
                 )
             ):
                 spelling_prev = None
@@ -358,38 +408,45 @@ def import_pronunciations_by_theme_and_language(theme, language, path=None):
                 ):
                     spelling = spelling_prev
                 else:
-                    spelling = insert_data(text=spelling_text, language=language)
-            
+                    spelling = insert_data(
+                        text=spelling_text, language=language
+                        )
+
             spelling_prev = spelling
 
             pronunc_spell = None
 
             if (
-                (str_pronunc_spell_lang_name and not str_pronunc_spell_lang_name.isspace())
-                and
-                (str_pronunc_spell_text and not str_pronunc_spell_text.isspace())
-            ):
-                pronunc_spell_lang = (
-                    transliteration_systems.get_data(name=pronunc_spell_lang_name).first()
+                (
+                    str_pronunc_spell_lang_name
+                    and
+                    not str_pronunc_spell_lang_name.isspace()
                 )
+                and
+                (
+                    str_pronunc_spell_text
+                    and
+                    not str_pronunc_spell_text.isspace()
+                )
+            ):
+                pronunc_spell_lang = translit_systems.get_data(
+                    name=pronunc_spell_lang_name
+                    ).first()
 
                 if not pronunc_spell_lang:
-                    pronunc_spell_lang = (
-                        transliteration_systems.insert_data(name=pronunc_spell_lang_name)
-                    )
+                    pronunc_spell_lang = translit_systems.insert_data(
+                        name=pronunc_spell_lang_name
+                        )
 
-                pronunc_spell = (
-                    pronunciation_spellings.get_data(
+                pronunc_spell = pronunc_spellings.get_data(
                         text=pronunc_spell_text, system=pronunc_spell_lang
                         ).first()
-                )
 
                 if not pronunc_spell:
-                    pronunc_spell = (
-                        pronunciation_spellings.insert_data(
-                            text=pronunc_spell_text, system=pronunc_spell_lang
+                    pronunc_spell = pronunc_spellings.insert_data(
+                            text=pronunc_spell_text,
+                            system=pronunc_spell_lang
                             )
-                    )
 
             pronunciation = pronunciations.get_data(
                 sound=pronunc_sound, spelling=pronunc_spell
@@ -400,8 +457,8 @@ def import_pronunciations_by_theme_and_language(theme, language, path=None):
                     sound=pronunc_sound, spelling=pronunc_spell
                     )
 
-            pronunciations = spelling.pronunciations.all()
-            if not pronunciation in pronunciations:
+            pronunciations_ = spelling.pronunciations.all()
+            if pronunciation not in pronunciations_:
                 spelling.pronunciations.add(pronunciation)
 
             print()

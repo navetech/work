@@ -28,4 +28,3 @@ admin.site.register(Definition)
 admin.site.register(Example)
 admin.site.register(Spelling)
 admin.site.register(Phrase)
-

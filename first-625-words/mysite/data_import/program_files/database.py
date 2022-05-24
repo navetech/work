@@ -1,7 +1,3 @@
-import csv
-
-from first625words.models import Theme
-
 from . import themes
 from . import base_words
 from . import images
@@ -33,4 +29,3 @@ def import_data(path=None):
     spellings.import_data_for_words(path)
 
     print()
-

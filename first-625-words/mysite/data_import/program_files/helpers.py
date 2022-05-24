@@ -20,11 +20,10 @@ def build_target_path(base_name, path=None):
 
 def get_cell_from_row(row, column, column_header=None):
     if len(row) <= column:
-        return '' 
+        return ''
 
     cell = row[column]
     if column_header is not None and cell == column_header:
         return None
     else:
-        return cell 
-
+        return cell

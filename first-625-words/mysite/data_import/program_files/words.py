@@ -1,5 +1,3 @@
-import csv
-
 from first625words.models import Word
 
 from . import helpers
@@ -46,9 +44,7 @@ def insert_data(base_word, grouping, grouping_key):
 
 
 def get_data_from_row(
-    row, column, column_header,
-    theme=None, word_prev=None
-    ):
+        row, column, column_header, theme=None, word_prev=None):
 
     if word_prev:
         base_word_prev = word_prev.base_word
@@ -112,4 +108,3 @@ def get_data_from_row(
                 )
 
     return word
-

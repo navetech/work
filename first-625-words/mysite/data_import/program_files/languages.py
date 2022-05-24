@@ -47,7 +47,7 @@ def import_data(path=None):
 
     with open(target_path) as file:
         rows = csv.reader(file)
-        
+
         for row in rows:
             name = helpers.get_cell_from_row(
                 row=row, column=LANGUAGE_COLUMN, column_header=LANGUAGE_HEADER
@@ -64,4 +64,3 @@ def import_data(path=None):
             print(language.name)
 
     print()
-

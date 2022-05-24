@@ -52,7 +52,7 @@ def import_data(path=None):
         rows = csv.reader(file)
 
         count = SORT_NUMBER_DEFAULT
-        
+
         for row in rows:
             name = helpers.get_cell_from_row(
                 row=row, column=THEME_COLUMN, column_header=THEME_HEADER
@@ -71,4 +71,3 @@ def import_data(path=None):
             count += SORT_NUMBER_INC_DEFAULT
 
     print()
-
