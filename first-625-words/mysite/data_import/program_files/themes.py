@@ -14,24 +14,9 @@ from .settings import THEME_COLUMN
 from .settings import THEME_HEADER
 
 
-def get_data_all():
-    return Theme.objects.all()
-
-
-def get_data(name):
-    return Theme.objects.filter(name=name)
-
-
 def clear_data_all():
-    d = get_data_all()
+    d = Theme.objects.all()
     d.delete()
-
-
-def insert_data(name, sort_number):
-    d = Theme(name=name, sort_number=sort_number)
-    d.save()
-
-    return d
 
 
 def import_data(path=None):
@@ -61,9 +46,10 @@ def import_data(path=None):
             if name is None or not str(name) or str(name).isspace():
                 continue
 
-            theme = get_data(name=name)
+            theme = Theme.objects.filter(name=name)
             if not theme:
-                theme = insert_data(name=name, sort_number=count)
+                theme = Theme(name=name, sort_number=count)
+                theme.save()
 
             print()
             print(theme.name, theme.sort_number)

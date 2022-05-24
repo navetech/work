@@ -11,24 +11,9 @@ from .settings import LANGUAGE_COLUMN
 from .settings import LANGUAGE_HEADER
 
 
-def get_data_all():
-    return Language.objects.all()
-
-
-def get_data(name):
-    return Language.objects.filter(name=name)
-
-
 def clear_data_all():
-    d = get_data_all()
+    d = Language.objects.all()
     d.delete()
-
-
-def insert_data(name):
-    d = Language(name=name)
-    d.save()
-
-    return d
 
 
 def import_data(path=None):
@@ -56,9 +41,10 @@ def import_data(path=None):
             if name is None or not str(name) or str(name).isspace():
                 continue
 
-            language = get_data(name=name)
+            language = Language.objects.filter(name=name)
             if not language:
-                language = insert_data(name=name)
+                language = Language(name=name)
+                language.save()
 
             print()
             print(language.name)

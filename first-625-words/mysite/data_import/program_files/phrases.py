@@ -5,7 +5,7 @@ def get_data_all():
     return Phrase.objects.all()
 
 
-def get_data(word=None, spelling=None):
+def get_data(word=None, spelling=None, language=None):
     if word:
         if spelling:
             d = Phrase.objects.filter(

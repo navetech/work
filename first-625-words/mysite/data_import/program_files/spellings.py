@@ -8,14 +8,14 @@ from . import themes
 from . import base_words
 from . import words
 from . import languages
-from . import translit_systems
-from . import pronunc_spellings
-from . import pronunciations
 from . import phrases
 
 from .settings import DATA_FILES_EXTENSION
+from .settings import DATA_FILES_FILE_NAME_ROOTS_SEPARATOR
 
-from .settings import WORDS_SPELLINGS_FILE_NAME_ROOT
+from .settings import WORDS_FILE_NAME_ROOT
+
+from .settings import SPELLINGS_FILE_NAME_ROOT
 from .settings import SPELLING_BASE_WORD_COLUMN
 from .settings import SPELLING_BASE_WORD_HEADER
 from .settings import SPELLING_GROUPING_COLUMN
@@ -24,9 +24,8 @@ from .settings import SPELLING_GROUPING_KEY_COLUMN
 from .settings import SPELLING_GROUPING_KEY_HEADER
 from .settings import SPELLING_COLUMN
 from .settings import SPELLING_HEADER
-from .settings import SPELLING_ALT_COLUMN
-from .settings import SPELLING_ALT_HEADER
 
+"""
 from .settings import SPELLINGS_FILE_NAME_ROOT
 from .settings import PRONUNCIATIONS_FILE_NAME_ROOT
 from .settings import PRONUNCIATION_SPELLING_COLUMN
@@ -37,24 +36,14 @@ from .settings import PRONUNCIATION_PRONUNC_SPELL_COLUMN
 from .settings import PRONUNCIATION_PRONUNC_SPELL_HEADER
 from .settings import PRONUNCIATION_PRONUNC_SPELL_LANG_COLUMN
 from .settings import PRONUNCIATION_PRONUNC_SPELL_LANG_HEADER
-
+"""
 
 def get_data_all():
     return Spelling.objects.all()
 
 
-def get_data(text=None, language=None):
-    if text is not None and str(text) and not str(text).isspace():
-        if language:
-            d = Spelling.objects.filter(
-                text=text, language=language
-                )
-        else:
-            d = Spelling.objects.filter(text=text)
-    elif language:
-        d = Spelling.objects.filter(language=language)
-    else:
-        d = None
+def get_data(text):
+    d = Spelling.objects.filter(text=text)
 
     return d
 
@@ -78,20 +67,14 @@ def clear_data_for_words_by_theme_and_language(theme, language):
         words_ = words.get_data(base_word=base_word)
 
         for word in words_:
-            phrases_ = phrases.get_data(word=word)
+            phrases_ = phrases.get_data(word=word, language=language)
 
             for phrase in phrases_:
                 spelling = phrase.spelling
-                if spelling and spelling.language == language:
+                if spelling:
                     phrase.spelling = None
                     phrase.save()
                     spelling.delete()
-
-                alt_spellings = phrase.alt_spellings.all()
-                for spelling in alt_spellings:
-                    if spelling and spelling.language == language:
-                        phrase.alt_spellings.remove(spelling)
-                        spelling.delete()
 
 
 def import_data_for_words(path=None):
@@ -115,9 +98,13 @@ def import_data_for_words_by_theme(theme, path=None):
 
 
 def import_data_for_words_by_theme_and_language(theme, language, path=None):
-    base_name = f'{theme.name.lower()}'
-    base_name += f'-{WORDS_SPELLINGS_FILE_NAME_ROOT}'
-    base_name += f'-{language.name.lower()}'
+    base_name = f'{SPELLINGS_FILE_NAME_ROOT}'
+    base_name += f'{DATA_FILES_FILE_NAME_ROOTS_SEPARATOR}'
+    base_name += f'{language.name.lower()}'
+    base_name += f'{DATA_FILES_FILE_NAME_ROOTS_SEPARATOR}'
+    base_name += f'{WORDS_FILE_NAME_ROOT}'
+    base_name += f'{DATA_FILES_FILE_NAME_ROOTS_SEPARATOR}'
+    base_name += f'{theme.name.lower()}'
     base_name += f'{DATA_FILES_EXTENSION}'
 
     target_path = helpers.build_target_path(base_name=base_name, path=path)
@@ -125,9 +112,6 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
         return
 
     clear_data_for_words_by_theme_and_language(theme=theme, language=language)
-
-    word_prev = None
-    spelling_prev = None
 
     print()
 
@@ -139,31 +123,10 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
                 row=row, column=SPELLING_COLUMN, column_header=SPELLING_HEADER
             )
 
-            if spelling_text is None:
-                word_prev = None
-                spelling_prev = None
-                continue
-
-            alt_spelling_text = helpers.get_cell_from_row(
-                row=row, column=SPELLING_ALT_COLUMN,
-                column_header=SPELLING_ALT_HEADER
-            )
-
-            if alt_spelling_text is None:
-                word_prev = None
-                spelling_prev = None
-                continue
-
-            str_spelling_text = str(spelling_text)
-            str_alt_spelling_text = str(alt_spelling_text)
-
             if (
-                (not str_spelling_text or str_spelling_text.isspace())
-                and
-                (not str_alt_spelling_text or str_alt_spelling_text.isspace())
+                spelling_text is None or
+                not str(spelling_text) or str(spelling_text).isspace()
             ):
-                word_prev = None
-                spelling_prev = None
                 continue
 
             column = {
@@ -179,64 +142,36 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
             }
 
             word = words.get_data_from_row(
-                row=row,
-                column=column, column_header=column_header,
-                theme=theme, word_prev=word_prev
+                row=row, column=column,
+                column_header=column_header, theme=theme
                 )
 
-            word_prev = word
-
             if not word:
-                spelling_prev = None
                 continue
 
-            spelling = get_data(text=spelling_text, language=language).first()
+            spelling = get_data(text=spelling_text).first()
 
             if not spelling:
-                if (
-                    spelling_prev
-                    and
-                    (not str_spelling_text or str_spelling_text.isspace())
-                ):
-                    spelling = spelling_prev
-                else:
-                    spelling = insert_data(
-                        text=spelling_text, language=language
-                        )
+                spelling = insert_data(text=spelling_text)
 
-            spelling_prev = spelling
-
-            phrase = phrases.get_data(word=word, spelling=spelling).first()
+            phrase = phrases.get_data(
+                word=word, spelling=spelling, language=language
+                ).first()
+                
             if not phrase:
-                phrase = phrases.insert_data(word=word, spelling=spelling)
+                phrase = phrases.insert_data(
+                    word=word, spelling=spelling, language=language
+                    )
 
             print()
             print(
                 word.base_word.text, word.grouping, word.grouping_key,
-                spelling.text, end=' '
+                spelling.text
                 )
-
-            if str_alt_spelling_text and not str_alt_spelling_text.isspace():
-                alt_spelling = get_data(
-                    text=alt_spelling_text, language=language
-                    ).first()
-
-                if not alt_spelling:
-                    alt_spelling = insert_data(
-                        text=alt_spelling_text, language=language
-                        )
-
-                alt_spellings = phrase.alt_spellings.all()
-                if alt_spelling not in alt_spellings:
-                    phrase.alt_spellings.add(alt_spelling)
-
-                print(alt_spelling.text)
-
-            print()
 
     print()
 
-
+"""
 def clear_pronunciations_by_theme_and_language(theme, language):
     base_words_ = base_words.get_data(theme=theme)
 
@@ -469,3 +404,4 @@ def import_pronunciations_by_theme_and_language(theme, language, path=None):
                 )
 
     print()
+"""

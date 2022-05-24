@@ -1,10 +1,9 @@
 import csv
 
 from first625words.models import BaseWord
+from first625words.models import Theme
 
 from . import helpers
-
-from . import themes
 
 from .settings import SORT_NUMBER_DEFAULT
 from .settings import SORT_NUMBER_INC_DEFAULT
@@ -19,45 +18,15 @@ from .settings import BASE_WORD_HEADER
 from .settings import BASE_WORDS_LIMIT_MAX_BY_THEME
 
 
-def get_data_all():
-    return BaseWord.objects.all()
-
-
-def get_data(text=None, theme=None):
-    if text is not None and str(text) and not str(text).isspace():
-        if theme:
-            d = BaseWord.objects.filter(text=text, theme=theme)
-        else:
-            d = BaseWord.objects.filter(text=text)
-    elif theme:
-        d = BaseWord.objects.filter(theme=theme)
-    else:
-        d = None
-
-    return d
-
-
 def clear_data_all():
-    d = get_data_all()
+    d = BaseWord.objects.all()
     d.delete()
-
-
-def clear_data(text=None, theme=None):
-    d = get_data(text=text, theme=theme)
-    d.delete()
-
-
-def insert_data(text, theme, sort_number):
-    d = BaseWord(text=text, theme=theme, sort_number=sort_number)
-    d.save()
-
-    return d
 
 
 def import_data(path=None):
     print()
 
-    themes_ = themes.get_data_all()
+    themes_ = Theme.objects.all()
 
     for theme in themes_:
         import_data_by_theme(theme=theme, path=path)
@@ -73,7 +42,8 @@ def import_data_by_theme(theme, path=None):
     if target_path is None:
         return
 
-    clear_data(theme=theme)
+    d = BaseWord.objects.filter(theme=theme)
+    d.delete()
 
     print()
 
@@ -93,11 +63,10 @@ def import_data_by_theme(theme, path=None):
             if text is None or not str(text) or str(text).isspace():
                 continue
 
-            base_word = get_data(text=text, theme=theme)
+            base_word = BaseWord.objects.filter(text=text, theme=theme)
             if not base_word:
-                base_word = insert_data(
-                    text=text, theme=theme, sort_number=count
-                    )
+                base_word = BaseWord(text=text, theme=theme, sort_number=count)
+                base_word.save()
 
             print()
             print(base_word.text, base_word.theme.name, base_word.sort_number)
@@ -118,7 +87,7 @@ def get_data_from_row(
         return None
 
     if str(base_word_text) and not str(base_word_text).isspace():
-        base_word = get_data(text=base_word_text, theme=theme).first()
+        base_word = BaseWord.objects.filter(text=base_word_text, theme=theme).first()
     else:
         base_word = base_word_prev
 

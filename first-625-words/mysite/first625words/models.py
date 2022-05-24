@@ -70,6 +70,15 @@ class Word(models.Model):
         )
 
 
+class Spelling(models.Model):
+    text = models.TextField()
+
+    def __str__(self):
+        return (
+            f'{self.text}'
+        )
+
+
 class Language(models.Model):
     name = models.CharField(max_length=256)
 
@@ -116,37 +125,6 @@ class Example(models.Model):
     credits = models.TextField()
 
 
-class Spelling(models.Model):
-    text = models.TextField()
-
-    language = models.ForeignKey(
-        Language, blank=True, null=True, on_delete=models.CASCADE,
-        related_name='language_Spelling_related'
-    )
-
-    pronunciations = models.ManyToManyField(
-        Pronunciation, blank=True,
-        related_name='pronunciations_Spelling_related'
-    )
-
-    definitions = models.ManyToManyField(
-        Definition, blank=True,
-        related_name='definitions_Spelling_related'
-    )
-
-    examples = models.ManyToManyField(
-        Example, blank=True,
-        related_name='examples_Spelling_related'
-    )
-
-    def __str__(self):
-        return (
-            f'{self.text}'
-            + ', ' +
-            f'{self.language}'
-        )
-
-
 class Phrase(models.Model):
     word = models.ForeignKey(
         Word, blank=True, null=True, on_delete=models.CASCADE,
@@ -158,9 +136,24 @@ class Phrase(models.Model):
         related_name='spelling_Phrase_related'
     )
 
-    alt_spellings = models.ManyToManyField(
-        Spelling, blank=True,
-        related_name='alt_spellings_Phrase_related'
+    language = models.ForeignKey(
+        Language, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='language_Phrase_related'
+    )
+
+    pronunciations = models.ManyToManyField(
+        Pronunciation, blank=True,
+        related_name='pronunciations_Phrase_related'
+    )
+
+    definitions = models.ManyToManyField(
+        Definition, blank=True,
+        related_name='definitions_Phrase_related'
+    )
+
+    examples = models.ManyToManyField(
+        Example, blank=True,
+        related_name='examples_Phrase_related'
     )
 
     def __str__(self):
@@ -168,4 +161,6 @@ class Phrase(models.Model):
             f'{self.word}'
             + ', ' +
             f'{self.spelling}'
+            + ', ' +
+            f'{self.language}'
         )
