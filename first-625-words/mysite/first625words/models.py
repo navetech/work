@@ -95,9 +95,9 @@ class PronunciationSpelling(models.Model):
 class Pronunciation(models.Model):
     sound = models.URLField(max_length=1024)
 
-    spellings = models.ManyToManyField(
-        PronunciationSpelling, blank=True,
-        related_name='spellings_Pronunciation_related'
+    spelling = models.ForeignKey(
+        PronunciationSpelling, blank=True, null=True, on_delete=models.CASCADE,
+        related_name='spelling_Pronunciation_related'
     )
 
 

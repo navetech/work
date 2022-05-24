@@ -34,7 +34,14 @@ def clear_data_all():
     d.delete()
 
 
-def clear_data_by_theme(theme):
+def insert_data(link):
+    d = Image(link=link)
+    d.save()
+
+    return d
+
+
+def clear_data_for_words_by_theme(theme):
     base_words_ = base_words.get_data(theme=theme)
 
     for base_word in base_words_:
@@ -48,23 +55,16 @@ def clear_data_by_theme(theme):
                 image.delete()
 
 
-def insert_data(link):
-    d = Image(link=link)
-    d.save()
-
-    return d
-
-
-def import_data(path=None):
+def import_data_for_words(path=None):
     print()
 
     themes_ = themes.get_data_all()
 
     for theme in themes_:
-        import_data_by_theme(theme=theme, path=path)
+        import_data_for_words_by_theme(theme=theme, path=path)
 
 
-def import_data_by_theme(theme, path=None):
+def import_data_for_words_by_theme(theme, path=None):
     base_name = f'{theme.name.lower()}'
     base_name += f'-{WORDS_IMAGES_FILE_NAME_ROOT}'
     base_name += f'{DATA_FILES_EXTENSION}'
@@ -73,7 +73,7 @@ def import_data_by_theme(theme, path=None):
     if target_path is None:
         return
 
-    clear_data_by_theme(theme=theme)
+    clear_data_for_words_by_theme(theme=theme)
 
     word_prev = None
 
