@@ -45,23 +45,6 @@ def clear_data_all():
     d.delete()
 
 
-def clear_data_for_words_by_theme_and_language(theme, language):
-    base_words_ = BaseWord.objects.filter(theme=theme)
-
-    for base_word in base_words_:
-        words_ = Word.objects.filter(base_word=base_word)
-
-        for word in words_:
-            phrases_ = Phrase.objects.filter(word=word, language=language)
-
-            for phrase in phrases_:
-                spelling = phrase.spelling
-                if spelling:
-                    phrase.spelling = None
-                    phrase.save()
-                    spelling.delete()
-
-
 def import_data_for_words(path=None):
     print()
 
@@ -72,8 +55,6 @@ def import_data_for_words(path=None):
 
 
 def import_data_for_words_by_theme(theme, path=None):
-    print()
-
     languages_ = Language.objects.all()
 
     for language in languages_:
@@ -83,22 +64,31 @@ def import_data_for_words_by_theme(theme, path=None):
 
 
 def import_data_for_words_by_theme_and_language(theme, language, path=None):
-    base_name = f'{SPELLINGS_FILE_NAME_ROOT}'
-    base_name += f'{DATA_FILES_FILE_NAME_ROOTS_SEPARATOR}'
-    base_name += f'{language.name.lower()}'
-    base_name += f'{DATA_FILES_FILE_NAME_ROOTS_SEPARATOR}'
-    base_name += f'{WORDS_FILE_NAME_ROOT}'
-    base_name += f'{DATA_FILES_FILE_NAME_ROOTS_SEPARATOR}'
-    base_name += f'{theme.name.lower()}'
-    base_name += f'{DATA_FILES_EXTENSION}'
+    file_exists = False
+    data_valid_in_file = False
+    data_inserted = False
+
+    base_name = SPELLINGS_FILE_NAME_ROOT
+    base_name += DATA_FILES_FILE_NAME_ROOTS_SEPARATOR
+    base_name += language.name.lower().replace(' ', '-')
+    base_name += DATA_FILES_FILE_NAME_ROOTS_SEPARATOR
+    base_name += WORDS_FILE_NAME_ROOT
+    base_name += DATA_FILES_FILE_NAME_ROOTS_SEPARATOR
+    base_name += theme.name.lower().replace(' ', '-')
+    base_name += DATA_FILES_EXTENSION
 
     target_path = helpers.build_target_path(base_name=base_name, path=path)
     if target_path is None:
+        database_modified = data_inserted
+        helpers.print_report(
+            file_name=base_name, file_exists=file_exists,
+            data_valid_in_file=data_valid_in_file,
+            database_modified=database_modified
+            )
+
         return
 
-    # clear_data_for_words_by_theme_and_language(theme=theme, language=language)
-
-    print()
+    file_exists = True
 
     with open(target_path) as file:
         rows = csv.reader(file)
@@ -126,21 +116,26 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
                 'grouping_key': SPELLING_GROUPING_KEY_HEADER
             }
 
-            word = words.get_data_from_row(
+            from_row = words.get_data_from_row(
                 row=row, column=column,
                 column_header=column_header, theme=theme
                 )
 
-            if not word:
+            if not from_row or not from_row['data']:
                 continue
+
+            word = from_row['data']
+            
+            data_inserted = data_inserted or from_row['data_inserted']
+
+            data_valid_in_file = True
 
             spelling = Spelling.objects.filter(text=spelling_text).first()
             if not spelling:
                 spelling = Spelling(text=spelling_text)
                 spelling.save()
 
-                print()
-                print('### SPELLING CREATED ###')
+                data_inserted = True
 
             phrase = Phrase.objects.filter(
                 word=word,
@@ -152,18 +147,22 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
                 phrase = Phrase(word=word, spelling=spelling, language=language)
                 phrase.save()
 
+                data_inserted = True
+
+            database_modified = data_inserted
+            if (database_modified):
+                print(
+                    word.base_word.text, word.grouping, word.grouping_key,
+                    spelling.text
+                    )
                 print()
-                print('### PHRASE CREATED ###')
 
-            print()
-
-            print()
-            print(
-                word.base_word.text, word.grouping, word.grouping_key,
-                spelling.text
-                )
-
-    print()
+    database_modified = data_inserted
+    helpers.print_report(
+        file_name=base_name, file_exists=file_exists,
+        data_valid_in_file=data_valid_in_file,
+        database_modified=database_modified
+        )
 
 """
 def clear_pronunciations_by_theme_and_language(theme, language):

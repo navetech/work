@@ -23,8 +23,8 @@ def import_data(path=None):
     data_valid_in_file = False
     data_inserted = False
 
-    base_name = f'{LANGUAGES_FILE_NAME_ROOT}'
-    base_name += f'{DATA_FILES_EXTENSION}'
+    base_name = LANGUAGES_FILE_NAME_ROOT
+    base_name += DATA_FILES_EXTENSION
 
     target_path = helpers.build_target_path(base_name=base_name, path=path)
     if target_path is None:
@@ -34,8 +34,6 @@ def import_data(path=None):
             data_valid_in_file=data_valid_in_file,
             database_modified=database_modified
             )
-            
-        print()
 
         return
 
@@ -72,5 +70,3 @@ def import_data(path=None):
         data_valid_in_file=data_valid_in_file,
         database_modified=database_modified
         )
-        
-    print()

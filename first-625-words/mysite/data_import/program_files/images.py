@@ -40,19 +40,17 @@ def import_data_for_words(path=None):
 
 
 def import_data_for_words_by_theme(theme, path=None):
-    print()
-
     file_exists = False
     data_valid_in_file = False
     data_inserted = False
     data_updated = False
 
-    base_name = f'{IMAGES_FILE_NAME_ROOT}'
-    base_name += f'{DATA_FILES_FILE_NAME_ROOTS_SEPARATOR}'
-    base_name += f'{WORDS_FILE_NAME_ROOT}'
-    base_name += f'{DATA_FILES_FILE_NAME_ROOTS_SEPARATOR}'
-    base_name += f'{theme.name.lower()}'
-    base_name += f'{DATA_FILES_EXTENSION}'
+    base_name = IMAGES_FILE_NAME_ROOT
+    base_name += DATA_FILES_FILE_NAME_ROOTS_SEPARATOR
+    base_name += WORDS_FILE_NAME_ROOT
+    base_name += DATA_FILES_FILE_NAME_ROOTS_SEPARATOR
+    base_name += theme.name.lower().replace(' ', '-')
+    base_name += DATA_FILES_EXTENSION
 
     target_path = helpers.build_target_path(base_name=base_name, path=path)
     if target_path is None:
@@ -62,8 +60,6 @@ def import_data_for_words_by_theme(theme, path=None):
             data_valid_in_file=data_valid_in_file,
             database_modified=database_modified
             )
-
-        print()
 
         return
 
@@ -98,16 +94,18 @@ def import_data_for_words_by_theme(theme, path=None):
                 'grouping_key': IMAGE_GROUPING_KEY_HEADER
             }
 
-            word = words.get_data_from_row(
+            from_row = words.get_data_from_row(
                 row=row,
                 column=column, column_header=column_header,
-                theme=theme, word_prev=word_prev
+                theme=theme, data_prev=word_prev
                 )
 
-            word_prev = word
-
-            if not word:
+            if not from_row or not from_row['data']:
                 continue
+
+            word = from_row['data']
+            
+            data_inserted = data_inserted or from_row['data_inserted']
 
             data_valid_in_file = True
 
@@ -138,5 +136,3 @@ def import_data_for_words_by_theme(theme, path=None):
         data_valid_in_file=data_valid_in_file,
         database_modified=database_modified
         )
-
-    print()

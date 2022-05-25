@@ -16,7 +16,6 @@ def build_target_path(base_name, path=None):
         target_path = os.path.normpath(t_p)
 
     if not os.path.isfile(target_path):
-        # print(f'Is not a file: {target_path}')
         return None
 
     return target_path
@@ -35,8 +34,12 @@ def get_cell_from_row(row, column, column_header=None):
 
 def print_report(file_name='', file_exists=True, data_valid_in_file=True, database_modified=True):
     if not file_exists:
-        print(f'{FILE_EXISTS_NOT}: {file_name}')
+        pass
+        # print(f'{FILE_EXISTS_NOT}: {file_name}')
+        # print()
     elif not data_valid_in_file:
         print(f'{DATA_VALID_IN_FILE_NOT}: {file_name}')
+        print()
     elif not database_modified:
         print(f'{DATABASE_MODIFIED_FOR_FILE_NOT}: {file_name}')
+        print()

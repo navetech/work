@@ -33,16 +33,14 @@ def import_data(path=None):
 
 
 def import_data_by_theme(theme, path=None):
-    print()
-
     file_exists = False
     data_valid_in_file = False
     data_inserted = False
 
-    base_name = f'{BASE_WORDS_FILE_NAME_ROOT}'
-    base_name += f'{DATA_FILES_FILE_NAME_ROOTS_SEPARATOR}'
-    base_name += f'{theme.name.lower()}'
-    base_name += f'{DATA_FILES_EXTENSION}'
+    base_name = BASE_WORDS_FILE_NAME_ROOT
+    base_name += DATA_FILES_FILE_NAME_ROOTS_SEPARATOR
+    base_name += theme.name.lower().replace(' ', '-')
+    base_name += DATA_FILES_EXTENSION
 
     target_path = helpers.build_target_path(base_name=base_name, path=path)
     if target_path is None:
@@ -52,8 +50,6 @@ def import_data_by_theme(theme, path=None):
             data_valid_in_file=data_valid_in_file,
             database_modified=database_modified
             )
-
-        print()
 
         return
 
@@ -98,22 +94,20 @@ def import_data_by_theme(theme, path=None):
         database_modified=database_modified
         )
 
-    print()
-
 
 def get_data_from_row(
-        row, column, column_header, theme=None, base_word_prev=None):
+        row, column, column_header, theme, data_prev=None):
 
-    base_word_text = helpers.get_cell_from_row(
+    text = helpers.get_cell_from_row(
         row=row, column=column, column_header=column_header
     )
 
-    if base_word_text is None:
+    if text is None:
         return None
 
-    if str(base_word_text) and not str(base_word_text).isspace():
-        base_word = BaseWord.objects.filter(text=base_word_text, theme=theme).first()
+    if str(text) and not str(text).isspace():
+        base_word = BaseWord.objects.filter(text=text, theme=theme).first()
     else:
-        base_word = base_word_prev
+        base_word = data_prev
 
     return base_word

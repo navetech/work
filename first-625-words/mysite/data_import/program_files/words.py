@@ -11,8 +11,9 @@ def clear_data_all():
 
 
 def get_data_from_row(
-        row, column, column_header, theme=None, word_prev=None):
+        row, column, column_header, theme, modify_database=True, data_prev=None):
 
+    word_prev = data_prev
     if word_prev:
         base_word_prev = word_prev.base_word
     else:
@@ -22,7 +23,7 @@ def get_data_from_row(
         row=row,
         column=column['base_word'],
         column_header=column_header['base_word'],
-        theme=theme, base_word_prev=base_word_prev
+        theme=theme, data_prev=base_word_prev
         )
 
     if not base_word:
@@ -56,6 +57,8 @@ def get_data_from_row(
     ):
         return None
 
+    data_inserted = False
+
     word = Word.objects.filter(
         base_word=base_word,
         grouping=grouping, grouping_key=grouping_key
@@ -69,13 +72,16 @@ def get_data_from_row(
         ):
             word = word_prev
         else:
-            word = Word(
-                base_word=base_word,
-                grouping=grouping, grouping_key=grouping_key
-                )
-            word.save()
+            if modify_database:
+                word = Word(
+                    base_word=base_word,
+                    grouping=grouping, grouping_key=grouping_key
+                    )
+                word.save()
 
-            print()
-            print('### WORD CREATED ###')
+                data_inserted = True
 
-    return word
+    return {
+        'data': word,
+        'data_inserted': data_inserted
+    }
