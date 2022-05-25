@@ -20,7 +20,7 @@ def clear_data_all():
 def import_data(path=None):
     print()
 
-    clear_data_all()
+    # clear_data_all()
 
     themes.import_data(path)
     base_words.import_data(path)

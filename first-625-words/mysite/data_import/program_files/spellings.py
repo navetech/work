@@ -1,14 +1,15 @@
 import csv
 
 from first625words.models import Spelling
+from first625words.models import Theme
+from first625words.models import BaseWord
+from first625words.models import Word
+from first625words.models import Language
+from first625words.models import Phrase
 
 from . import helpers
 
-from . import themes
-from . import base_words
 from . import words
-from . import languages
-from . import phrases
 
 from .settings import DATA_FILES_EXTENSION
 from .settings import DATA_FILES_FILE_NAME_ROOTS_SEPARATOR
@@ -38,36 +39,20 @@ from .settings import PRONUNCIATION_PRONUNC_SPELL_LANG_COLUMN
 from .settings import PRONUNCIATION_PRONUNC_SPELL_LANG_HEADER
 """
 
-def get_data_all():
-    return Spelling.objects.all()
-
-
-def get_data(text):
-    d = Spelling.objects.filter(text=text)
-
-    return d
-
 
 def clear_data_all():
-    d = get_data_all()
+    d = Spelling.objects.all()
     d.delete()
 
 
-def insert_data(text, language):
-    d = Spelling(text=text, language=language)
-    d.save()
-
-    return d
-
-
 def clear_data_for_words_by_theme_and_language(theme, language):
-    base_words_ = base_words.get_data(theme=theme)
+    base_words_ = BaseWord.objects.filter(theme=theme)
 
     for base_word in base_words_:
-        words_ = words.get_data(base_word=base_word)
+        words_ = Word.objects.filter(base_word=base_word)
 
         for word in words_:
-            phrases_ = phrases.get_data(word=word, language=language)
+            phrases_ = Phrase.objects.filter(word=word, language=language)
 
             for phrase in phrases_:
                 spelling = phrase.spelling
@@ -80,7 +65,7 @@ def clear_data_for_words_by_theme_and_language(theme, language):
 def import_data_for_words(path=None):
     print()
 
-    themes_ = themes.get_data_all()
+    themes_ = Theme.objects.all()
 
     for theme in themes_:
         import_data_for_words_by_theme(theme=theme, path=path)
@@ -89,7 +74,7 @@ def import_data_for_words(path=None):
 def import_data_for_words_by_theme(theme, path=None):
     print()
 
-    languages_ = languages.get_data_all()
+    languages_ = Language.objects.all()
 
     for language in languages_:
         import_data_for_words_by_theme_and_language(
@@ -111,7 +96,7 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
     if target_path is None:
         return
 
-    clear_data_for_words_by_theme_and_language(theme=theme, language=language)
+    # clear_data_for_words_by_theme_and_language(theme=theme, language=language)
 
     print()
 
@@ -149,19 +134,28 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
             if not word:
                 continue
 
-            spelling = get_data(text=spelling_text).first()
-
+            spelling = Spelling.objects.filter(text=spelling_text).first()
             if not spelling:
-                spelling = insert_data(text=spelling_text)
+                spelling = Spelling(text=spelling_text)
+                spelling.save()
 
-            phrase = phrases.get_data(
-                word=word, spelling=spelling, language=language
+                print()
+                print('### SPELLING CREATED ###')
+
+            phrase = Phrase.objects.filter(
+                word=word,
+                spelling=spelling,
+                language=language
                 ).first()
-                
+
             if not phrase:
-                phrase = phrases.insert_data(
-                    word=word, spelling=spelling, language=language
-                    )
+                phrase = Phrase(word=word, spelling=spelling, language=language)
+                phrase.save()
+
+                print()
+                print('### PHRASE CREATED ###')
+
+            print()
 
             print()
             print(

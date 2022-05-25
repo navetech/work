@@ -5,42 +5,9 @@ from . import helpers
 from . import base_words
 
 
-def get_data_all():
-    return Word.objects.all()
-
-
-def get_data(base_word=None, grouping=None, grouping_key=None):
-    if base_word is None:
-        d = None
-    elif grouping is None:
-        d = Word.objects.filter(base_word=base_word)
-    elif grouping_key is None:
-        d = Word.objects.filter(
-            base_word=base_word, grouping=grouping
-            )
-    else:
-        d = Word.objects.filter(
-            base_word=base_word,
-            grouping=grouping, grouping_key=grouping_key
-            )
-
-    return d
-
-
 def clear_data_all():
-    d = get_data_all()
+    d = Word.objects.all()
     d.delete()
-
-
-def insert_data(base_word, grouping, grouping_key):
-    d = Word(
-        base_word=base_word,
-        grouping=grouping, grouping_key=grouping_key
-        )
-
-    d.save()
-
-    return d
 
 
 def get_data_from_row(
@@ -89,7 +56,7 @@ def get_data_from_row(
     ):
         return None
 
-    word = get_data(
+    word = Word.objects.filter(
         base_word=base_word,
         grouping=grouping, grouping_key=grouping_key
         ).first()
@@ -102,9 +69,13 @@ def get_data_from_row(
         ):
             word = word_prev
         else:
-            word = insert_data(
+            word = Word(
                 base_word=base_word,
                 grouping=grouping, grouping_key=grouping_key
                 )
+            word.save()
+
+            print()
+            print('### WORD CREATED ###')
 
     return word

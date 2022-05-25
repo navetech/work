@@ -42,8 +42,10 @@ def import_data_by_theme(theme, path=None):
     if target_path is None:
         return
 
+    """
     d = BaseWord.objects.filter(theme=theme)
     d.delete()
+    """
 
     print()
 
@@ -63,10 +65,13 @@ def import_data_by_theme(theme, path=None):
             if text is None or not str(text) or str(text).isspace():
                 continue
 
-            base_word = BaseWord.objects.filter(text=text, theme=theme)
+            base_word = BaseWord.objects.filter(text=text, theme=theme).first()
             if not base_word:
                 base_word = BaseWord(text=text, theme=theme, sort_number=count)
                 base_word.save()
+
+                print()
+                print('### BASE_WORD CREATED ###')
 
             print()
             print(base_word.text, base_word.theme.name, base_word.sort_number)

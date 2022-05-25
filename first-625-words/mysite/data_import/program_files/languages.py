@@ -26,9 +26,11 @@ def import_data(path=None):
     if target_path is None:
         return
 
-    clear_data_all()
+    # clear_data_all()
 
     print()
+
+    data_inserted = False
 
     with open(target_path) as file:
         rows = csv.reader(file)
@@ -41,12 +43,20 @@ def import_data(path=None):
             if name is None or not str(name) or str(name).isspace():
                 continue
 
-            language = Language.objects.filter(name=name)
+            language = Language.objects.filter(name=name).first()
             if not language:
                 language = Language(name=name)
                 language.save()
+                data_inserted = True
+
+                print()
+                print('### LANGUAGE CREATED ###')
 
             print()
-            print(language.name)
+            if (data_inserted):
+                print(language.name)
+
+    if not data_inserted:
+        print('NO DATA INSERTED')
 
     print()

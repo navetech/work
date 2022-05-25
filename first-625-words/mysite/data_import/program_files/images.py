@@ -1,11 +1,12 @@
 import csv
 
 from first625words.models import Image
+from first625words.models import Theme
+from first625words.models import BaseWord
+from first625words.models import Word
 
 from . import helpers
 
-from . import themes
-from . import base_words
 from . import words
 
 from .settings import DATA_FILES_EXTENSION
@@ -24,31 +25,16 @@ from .settings import IMAGE_COLUMN
 from .settings import IMAGE_HEADER
 
 
-def get_data_all():
-    return Image.objects.all()
-
-
-def get_data(link):
-    return Image.objects.filter(link=link)
-
-
 def clear_data_all():
-    d = get_data_all()
+    d = Image.objects.all()
     d.delete()
 
 
-def insert_data(link):
-    d = Image(link=link)
-    d.save()
-
-    return d
-
-
 def clear_data_for_words_by_theme(theme):
-    base_words_ = base_words.get_data(theme=theme)
+    base_words_ = BaseWord.objects.filter(theme=theme)
 
     for base_word in base_words_:
-        words_ = words.get_data(base_word=base_word)
+        words_ = Word.objects.filter(base_word=base_word)
 
         for word in words_:
             images = word.images.all()
@@ -61,7 +47,7 @@ def clear_data_for_words_by_theme(theme):
 def import_data_for_words(path=None):
     print()
 
-    themes_ = themes.get_data_all()
+    themes_ = Theme.objects.all()
 
     for theme in themes_:
         import_data_for_words_by_theme(theme=theme, path=path)
@@ -79,7 +65,7 @@ def import_data_for_words_by_theme(theme, path=None):
     if target_path is None:
         return
 
-    clear_data_for_words_by_theme(theme=theme)
+    # clear_data_for_words_by_theme(theme=theme)
 
     word_prev = None
 
@@ -123,13 +109,20 @@ def import_data_for_words_by_theme(theme, path=None):
             if not word:
                 continue
 
-            image = get_data(link=image_link).first()
+            image = Image.objects.filter(link=image_link).first()
             if not image:
-                image = insert_data(link=image_link)
+                image = Image(link=image_link)
+                image.save()
+
+                print()
+                print('### IMAGE CREATED ###')
 
             word_images = word.images.all()
             if image not in word_images:
                 word.images.add(image)
+
+                print()
+                print('### IMAGE ADDED TO WORD ###')
 
             print()
             print(

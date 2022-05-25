@@ -29,9 +29,11 @@ def import_data(path=None):
     if target_path is None:
         return
 
-    clear_data_all()
+    # clear_data_all()
 
     print()
+
+    data_inserted = False
 
     with open(target_path) as file:
         rows = csv.reader(file)
@@ -46,14 +48,22 @@ def import_data(path=None):
             if name is None or not str(name) or str(name).isspace():
                 continue
 
-            theme = Theme.objects.filter(name=name)
+            theme = Theme.objects.filter(name=name).first()
             if not theme:
                 theme = Theme(name=name, sort_number=count)
                 theme.save()
+                data_inserted = True
+
+                print()
+                print('### THEME CREATED ###')
 
             print()
-            print(theme.name, theme.sort_number)
+            if (data_inserted):
+                print(theme.name, theme.sort_number)
 
             count += SORT_NUMBER_INC_DEFAULT
+
+    if not data_inserted:
+        print('NO DATA INSERTED')
 
     print()
