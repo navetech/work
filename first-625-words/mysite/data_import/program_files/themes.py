@@ -22,18 +22,27 @@ def clear_data_all():
 def import_data(path=None):
     print()
 
+    file_exists = False
+    data_valid_in_file = False
+    data_inserted = False
+
     base_name = f'{THEMES_FILE_NAME_ROOT}'
     base_name += f'{DATA_FILES_EXTENSION}'
 
     target_path = helpers.build_target_path(base_name=base_name, path=path)
     if target_path is None:
+        database_modified = data_inserted
+        helpers.print_report(
+            file_name=base_name, file_exists=file_exists,
+            data_valid_in_file=data_valid_in_file,
+            database_modified=database_modified
+            )
+
+        print()
+
         return
 
-    # clear_data_all()
-
-    print()
-
-    data_inserted = False
+    file_exists = True
 
     with open(target_path) as file:
         rows = csv.reader(file)
@@ -48,22 +57,27 @@ def import_data(path=None):
             if name is None or not str(name) or str(name).isspace():
                 continue
 
+            data_valid_in_file = True
+
             theme = Theme.objects.filter(name=name).first()
             if not theme:
                 theme = Theme(name=name, sort_number=count)
                 theme.save()
+
                 data_inserted = True
 
-                print()
-                print('### THEME CREATED ###')
-
-            print()
-            if (data_inserted):
+            database_modified = data_inserted
+            if (database_modified):
                 print(theme.name, theme.sort_number)
+                print()
 
             count += SORT_NUMBER_INC_DEFAULT
 
-    if not data_inserted:
-        print('NO DATA INSERTED')
-
+    database_modified = data_inserted
+    helpers.print_report(
+        file_name=base_name, file_exists=file_exists,
+        data_valid_in_file=data_valid_in_file,
+        database_modified=database_modified
+        )
+        
     print()

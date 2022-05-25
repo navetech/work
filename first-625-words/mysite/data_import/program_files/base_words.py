@@ -33,6 +33,12 @@ def import_data(path=None):
 
 
 def import_data_by_theme(theme, path=None):
+    print()
+
+    file_exists = False
+    data_valid_in_file = False
+    data_inserted = False
+
     base_name = f'{BASE_WORDS_FILE_NAME_ROOT}'
     base_name += f'{DATA_FILES_FILE_NAME_ROOTS_SEPARATOR}'
     base_name += f'{theme.name.lower()}'
@@ -40,14 +46,18 @@ def import_data_by_theme(theme, path=None):
 
     target_path = helpers.build_target_path(base_name=base_name, path=path)
     if target_path is None:
+        database_modified = data_inserted
+        helpers.print_report(
+            file_name=base_name, file_exists=file_exists,
+            data_valid_in_file=data_valid_in_file,
+            database_modified=database_modified
+            )
+
+        print()
+
         return
 
-    """
-    d = BaseWord.objects.filter(theme=theme)
-    d.delete()
-    """
-
-    print()
+    file_exists = True
 
     with open(target_path) as file:
         rows = csv.reader(file)
@@ -65,18 +75,28 @@ def import_data_by_theme(theme, path=None):
             if text is None or not str(text) or str(text).isspace():
                 continue
 
+            data_valid_in_file = True
+
             base_word = BaseWord.objects.filter(text=text, theme=theme).first()
             if not base_word:
                 base_word = BaseWord(text=text, theme=theme, sort_number=count)
                 base_word.save()
 
-                print()
-                print('### BASE_WORD CREATED ###')
+                data_inserted = True
 
-            print()
-            print(base_word.text, base_word.theme.name, base_word.sort_number)
+            database_modified = data_inserted
+            if (database_modified):
+                print(base_word.text, base_word.theme.name, base_word.sort_number)
+                print()
 
             count += SORT_NUMBER_INC_DEFAULT
+
+    database_modified = data_inserted
+    helpers.print_report(
+        file_name=base_name, file_exists=file_exists,
+        data_valid_in_file=data_valid_in_file,
+        database_modified=database_modified
+        )
 
     print()
 

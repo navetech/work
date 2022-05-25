@@ -30,20 +30,6 @@ def clear_data_all():
     d.delete()
 
 
-def clear_data_for_words_by_theme(theme):
-    base_words_ = BaseWord.objects.filter(theme=theme)
-
-    for base_word in base_words_:
-        words_ = Word.objects.filter(base_word=base_word)
-
-        for word in words_:
-            images = word.images.all()
-
-            for image in images:
-                word.images.remove(image)
-                image.delete()
-
-
 def import_data_for_words(path=None):
     print()
 
@@ -54,6 +40,13 @@ def import_data_for_words(path=None):
 
 
 def import_data_for_words_by_theme(theme, path=None):
+    print()
+
+    file_exists = False
+    data_valid_in_file = False
+    data_inserted = False
+    data_updated = False
+
     base_name = f'{IMAGES_FILE_NAME_ROOT}'
     base_name += f'{DATA_FILES_FILE_NAME_ROOTS_SEPARATOR}'
     base_name += f'{WORDS_FILE_NAME_ROOT}'
@@ -63,13 +56,20 @@ def import_data_for_words_by_theme(theme, path=None):
 
     target_path = helpers.build_target_path(base_name=base_name, path=path)
     if target_path is None:
+        database_modified = data_inserted or data_updated
+        helpers.print_report(
+            file_name=base_name, file_exists=file_exists,
+            data_valid_in_file=data_valid_in_file,
+            database_modified=database_modified
+            )
+
+        print()
+
         return
 
-    # clear_data_for_words_by_theme(theme=theme)
+    file_exists = True
 
     word_prev = None
-
-    print()
 
     with open(target_path) as file:
         rows = csv.reader(file)
@@ -109,25 +109,34 @@ def import_data_for_words_by_theme(theme, path=None):
             if not word:
                 continue
 
+            data_valid_in_file = True
+
             image = Image.objects.filter(link=image_link).first()
             if not image:
                 image = Image(link=image_link)
                 image.save()
 
-                print()
-                print('### IMAGE CREATED ###')
+                data_inserted = True
 
             word_images = word.images.all()
             if image not in word_images:
                 word.images.add(image)
 
-                print()
-                print('### IMAGE ADDED TO WORD ###')
+                data_updated = True
 
-            print()
-            print(
-                word.base_word.text, word.grouping,
-                word.grouping_key, image.link
-                )
+            database_modified = data_inserted or data_updated
+            if (database_modified):
+                print(
+                    word.base_word.text, word.grouping,
+                    word.grouping_key, image.link
+                    )
+                print()
+
+    database_modified = data_inserted or data_updated
+    helpers.print_report(
+        file_name=base_name, file_exists=file_exists,
+        data_valid_in_file=data_valid_in_file,
+        database_modified=database_modified
+        )
 
     print()
