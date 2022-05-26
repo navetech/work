@@ -1,9 +1,10 @@
 import csv
 
 from first625words.models import Phrase
+
 from first625words.models import Theme
-from first625words.models import Spelling
 from first625words.models import Language
+from first625words.models import Spelling
 
 from . import helpers
 

@@ -70,21 +70,21 @@ class Word(models.Model):
         )
 
 
-class Spelling(models.Model):
-    text = models.TextField()
-
-    def __str__(self):
-        return (
-            f'{self.text}'
-        )
-
-
 class Language(models.Model):
     name = models.CharField(max_length=256)
 
     def __str__(self):
         return (
             f'{self.name}'
+        )
+
+
+class Spelling(models.Model):
+    text = models.TextField()
+
+    def __str__(self):
+        return (
+            f'{self.text}'
         )
 
 
@@ -137,11 +137,25 @@ class Definition(models.Model):
         related_name='language_Definition_related'
     )
 
+    def __str__(self):
+        return (
+            f'{self.text}'
+            + ', ' +
+            f'{self.language}'
+        )
+
 
 class Example(models.Model):
     text = models.TextField()
 
     credits = models.TextField()
+
+    def __str__(self):
+        return (
+            f'{self.text}'
+            + ', ' +
+            f'{self.credits}'
+        )
 
 
 class Phrase(models.Model):

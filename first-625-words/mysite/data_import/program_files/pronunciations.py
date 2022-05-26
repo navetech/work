@@ -1,6 +1,7 @@
 import csv
 
 from first625words.models import Pronunciation
+
 from first625words.models import Theme
 from first625words.models import Language
 from first625words.models import TransliterationSystem
@@ -200,7 +201,7 @@ def import_data_for_phrases_by_theme_and_language(theme, language, path=None):
 
                     data_inserted = True
 
-            if sound:
+            if str_sound and not str_sound.isspace():
                 if spelling:
                     pronunciation = Pronunciation.objects.filter(
                         sound=sound, spelling=spelling
