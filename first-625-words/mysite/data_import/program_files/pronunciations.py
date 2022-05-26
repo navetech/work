@@ -1,4 +1,3 @@
-from first625words.models import Pronunciation
 import csv
 
 from first625words.models import Pronunciation
@@ -9,7 +8,7 @@ from first625words.models import PronunciationSpelling
 
 from . import helpers
 
-from . import words
+from . import phrases
 
 from .settings import DATA_FILES_EXTENSION
 from .settings import DATA_FILES_FILE_NAME_ROOTS_SEPARATOR
@@ -60,6 +59,7 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
     file_exists = False
     data_valid_in_file = False
     data_inserted = False
+    data_updated = False
 
     base_name = PRONUNCIATIONS_FILE_NAME_ROOT
     base_name += DATA_FILES_FILE_NAME_ROOTS_SEPARATOR
@@ -72,7 +72,7 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
 
     target_path = helpers.build_target_path(base_name=base_name, path=path)
     if target_path is None:
-        database_modified = data_inserted
+        database_modified = data_inserted or data_updated
         helpers.print_report(
             file_name=base_name, file_exists=file_exists,
             data_valid_in_file=data_valid_in_file,
@@ -127,7 +127,7 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
                 and
                 (not str_spell_lang or str_spell_lang.isspace())
             ):
-                spelling_prev = None
+                phrase_prev = None
                 continue
 
             if (
@@ -143,7 +143,7 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
                     (not str_spell or str_spell.isspace())
                 )
             ):
-                spelling_prev = None
+                phrase_prev = None
                 continue
 
             column = {
@@ -163,13 +163,15 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
             from_row = phrases.get_data_from_row(
                 row=row,
                 column=column, column_header=column_header,
-                theme=theme, data_prev=spelling_prev, modify_database=False
+                theme=theme, data_prev=phrase_prev
                 )
 
             if not from_row or not from_row['data']:
                 continue
 
             phrase = from_row['data']
+
+            phrase_prev = phrase
 
             data_valid_in_file = True
 
@@ -180,9 +182,7 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
                     ).first()
 
                 if not spelling_language:
-                    spelling_language = TransliterationSystem(
-                        name=spell_lang
-                        )
+                    spelling_language = TransliterationSystem(name=spell_lang)
                     spelling_language.save()
 
                     data_inserted = True
@@ -193,21 +193,69 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
                     text=spell, system=spelling_language
                     ).first()
 
-                if not spelling_language:
-                    spelling_language = TransliterationSystem(
-                        name=spell_lang
+                if not spelling:
+                    spelling = PronunciationSpelling(
+                        text=spell, system=spelling_language
                         )
-                    spelling_language.save()
+                    spelling.save()
 
                     data_inserted = True
 
-
-                pronunc_spell = pronunc_spellings.get_data(
-                        text=pronunc_spell_text, system=pronunc_spell_lang
+            if sound:
+                if spelling:
+                    pronunciation = Pronunciation.objects.filter(
+                        sound=sound, spelling=spelling
                         ).first()
 
-                if not pronunc_spell:
-                    pronunc_spell = pronunc_spellings.insert_data(
-                            text=pronunc_spell_text,
-                            system=pronunc_spell_lang
+                    if not pronunciation:
+                        pronunciation = Pronunciation(
+                            sound=sound, spelling=spelling
                             )
+                        pronunciation.save()
+
+                        data_inserted = True
+                else:
+                    pronunciation = Pronunciation.objects.filter(
+                        sound=sound
+                        ).first()
+
+                    if not pronunciation:
+                        pronunciation = Pronunciation(sound=sound)
+                        pronunciation.save()
+
+                        data_inserted = True
+            elif spelling:
+                pronunciation = Pronunciation.objects.filter(
+                    spelling=spelling
+                    ).first()
+
+                if not pronunciation:
+                    pronunciation = Pronunciation(spelling=spelling)
+                    pronunciation.save()
+
+                    data_inserted = True
+            else:
+                pronunciation = None
+
+            pronunciations_ = phrase.pronunciations.all()
+            if pronunciation not in pronunciations_:
+                phrase.pronunciations.add(pronunciation)
+
+                data_updated = True
+
+            database_modified = data_inserted or data_updated
+            if (database_modified):
+                print(
+                    phrase.word.base_word.text, phrase.word.grouping,
+                    phrase.word.grouping_key, phrase.spelling.text,
+                    sound, spell, spell_lang
+                    )
+                print()
+
+    database_modified = data_inserted or data_updated
+    helpers.print_report(
+        file_name=base_name, file_exists=file_exists,
+        data_valid_in_file=data_valid_in_file,
+        database_modified=database_modified
+        )
+

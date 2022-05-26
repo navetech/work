@@ -101,9 +101,12 @@ def import_data_for_words_by_theme(theme, path=None):
                 )
 
             if not from_row or not from_row['data']:
+                word_prev = None
                 continue
 
             word = from_row['data']
+
+            word_prev= word
             
             data_inserted = data_inserted or from_row['data_inserted']
 

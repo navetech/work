@@ -148,3 +148,49 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
         data_valid_in_file=data_valid_in_file,
         database_modified=database_modified
         )
+
+
+def get_data_from_row(
+        row, column, column_header, theme, data_prev=None):
+
+    spelling_text = helpers.get_cell_from_row(
+        row=row,
+        column=column['spelling'],
+        column_header=column_header['spelling']
+    )
+
+    if spelling_text is None:
+        return None
+
+    phrase_prev = data_prev
+    if phrase_prev:
+        word_prev = phrase_prev.word
+    else:
+        word_prev = None
+
+    column_words = {
+        'base_word': column['base_word'],
+        'grouping': column['grouping'],
+        'grouping_key': column['grouping_key']
+    }
+
+    column_header_words = {
+        'base_word': column_header['base_word'],
+        'grouping': column_header['grouping'],
+        'grouping_key': column_header['grouping_key']
+    }
+
+    from_row = words.get_data_from_row(
+        row=row,
+        column=column_words, column_header=column_header_words,
+        theme=theme, data_prev=word_prev, modify_database=False
+        )
+
+    if not from_row or not from_row['data']:
+        return None
+
+    word = from_row['data']
+
+    spelling = Spelling.objects.filter(text=spelling_text).first()
+    if not spelling:
+        return None

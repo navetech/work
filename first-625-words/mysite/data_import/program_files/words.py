@@ -13,22 +13,6 @@ def clear_data_all():
 def get_data_from_row(
         row, column, column_header, theme, data_prev=None, modify_database=True):
 
-    word_prev = data_prev
-    if word_prev:
-        base_word_prev = word_prev.base_word
-    else:
-        base_word_prev = None
-
-    base_word = base_words.get_data_from_row(
-        row=row,
-        column=column['base_word'],
-        column_header=column_header['base_word'],
-        theme=theme, data_prev=base_word_prev
-        )
-
-    if not base_word:
-        return None
-
     grouping = helpers.get_cell_from_row(
         row=row,
         column=column['grouping'],
@@ -55,6 +39,22 @@ def get_data_from_row(
         and
         (not str_grouping or str_grouping.isspace())
     ):
+        return None
+
+    word_prev = data_prev
+    if word_prev:
+        base_word_prev = word_prev.base_word
+    else:
+        base_word_prev = None
+
+    base_word = base_words.get_data_from_row(
+        row=row,
+        column=column['base_word'],
+        column_header=column_header['base_word'],
+        theme=theme, data_prev=base_word_prev
+        )
+
+    if not base_word:
         return None
 
     data_inserted = False
