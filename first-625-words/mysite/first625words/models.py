@@ -91,6 +91,11 @@ class Language(models.Model):
 class TransliterationSystem(models.Model):
     name = models.CharField(max_length=256)
 
+    def __str__(self):
+        return (
+            f'{self.name}'
+        )
+
 
 class PronunciationSpelling(models.Model):
     text = models.TextField()
@@ -100,6 +105,13 @@ class PronunciationSpelling(models.Model):
         related_name='system_PronunciationSpelling_related'
     )
 
+    def __str__(self):
+        return (
+            f'{self.text}'
+            + ', ' +
+            f'{self.system}'
+        )
+
 
 class Pronunciation(models.Model):
     sound = models.URLField(max_length=1024)
@@ -108,6 +120,13 @@ class Pronunciation(models.Model):
         PronunciationSpelling, blank=True, null=True, on_delete=models.CASCADE,
         related_name='spelling_Pronunciation_related'
     )
+
+    def __str__(self):
+        return (
+            f'{self.sound}'
+            + ', ' +
+            f'{self.spelling}'
+        )
 
 
 class Definition(models.Model):

@@ -1,10 +1,10 @@
 import os
 
-from .settings import DATA_FILES_DIR
-
 from .settings import FILE_EXISTS_NOT
 from .settings import DATA_VALID_IN_FILE_NOT
 from .settings import DATABASE_MODIFIED_FOR_FILE_NOT
+
+from .settings import DATA_FILES_DIR
 
 
 def build_target_path(base_name, path=None):

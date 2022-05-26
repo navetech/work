@@ -2,8 +2,6 @@ import csv
 
 from first625words.models import Image
 from first625words.models import Theme
-from first625words.models import BaseWord
-from first625words.models import Word
 
 from . import helpers
 
@@ -97,14 +95,17 @@ def import_data_for_words_by_theme(theme, path=None):
             from_row = words.get_data_from_row(
                 row=row,
                 column=column, column_header=column_header,
-                theme=theme, data_prev=word_prev
+                theme=theme,  insert_data=True, data_prev=word_prev
                 )
 
-            if not from_row or not from_row['data']:
+            if not from_row:
                 word_prev = None
                 continue
 
             word = from_row['data']
+            if not word:
+                word_prev = None
+                continue
 
             word_prev= word
             

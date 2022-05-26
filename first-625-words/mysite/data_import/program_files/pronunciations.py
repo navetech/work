@@ -37,25 +37,25 @@ def clear_data_all():
     d.delete()
 
 
-def import_data_for_words(path=None):
+def import_data_for_phrases(path=None):
     print()
 
     themes_ = Theme.objects.all()
 
     for theme in themes_:
-        import_data_for_words_by_theme(theme=theme, path=path)
+        import_data_for_phrases_by_theme(theme=theme, path=path)
 
 
-def import_data_for_words_by_theme(theme, path=None):
+def import_data_for_phrases_by_theme(theme, path=None):
     languages_ = Language.objects.all()
 
     for language in languages_:
-        import_data_for_words_by_theme_and_language(
+        import_data_for_phrases_by_theme_and_language(
             theme=theme, language=language, path=path
             )
 
 
-def import_data_for_words_by_theme_and_language(theme, language, path=None):
+def import_data_for_phrases_by_theme_and_language(theme, language, path=None):
     file_exists = False
     data_valid_in_file = False
     data_inserted = False
@@ -63,9 +63,9 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
 
     base_name = PRONUNCIATIONS_FILE_NAME_ROOT
     base_name += DATA_FILES_FILE_NAME_ROOTS_SEPARATOR
-    base_name += language.name.lower().replace(' ', '-')
-    base_name += DATA_FILES_FILE_NAME_ROOTS_SEPARATOR
     base_name += PHRASES_FILE_NAME_ROOT
+    base_name += DATA_FILES_FILE_NAME_ROOTS_SEPARATOR
+    base_name += language.name.lower().replace(' ', '-')
     base_name += DATA_FILES_FILE_NAME_ROOTS_SEPARATOR
     base_name += theme.name.lower().replace(' ', '-')
     base_name += DATA_FILES_EXTENSION
@@ -160,16 +160,15 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
                 'spelling': PRONUNCIATION_SPELLING_HEADER
             }
 
-            from_row = phrases.get_data_from_row(
+            phrase = phrases.get_data_from_row(
                 row=row,
                 column=column, column_header=column_header,
-                theme=theme, data_prev=phrase_prev
+                theme=theme, language=language, data_prev=phrase_prev
                 )
 
-            if not from_row or not from_row['data']:
+            if not phrase:
+                phrase_prev = None
                 continue
-
-            phrase = from_row['data']
 
             phrase_prev = phrase
 

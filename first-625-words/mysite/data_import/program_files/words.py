@@ -11,7 +11,7 @@ def clear_data_all():
 
 
 def get_data_from_row(
-        row, column, column_header, theme, data_prev=None, modify_database=True):
+        row, column, column_header, theme, insert_data, data_prev=None):
 
     grouping = helpers.get_cell_from_row(
         row=row,
@@ -57,22 +57,23 @@ def get_data_from_row(
     if not base_word:
         return None
 
-    data_inserted = False
-
     word = Word.objects.filter(
         base_word=base_word,
         grouping=grouping, grouping_key=grouping_key
         ).first()
 
+    data_inserted = False
     if not word:
         if (
             word_prev and base_word == word_prev.base_word
             and
             (not str_grouping or str_grouping.isspace())
+            and
+            (not str_grouping_key or str_grouping_key.isspace())
         ):
             word = word_prev
         else:
-            if modify_database:
+            if insert_data:
                 word = Word(
                     base_word=base_word,
                     grouping=grouping, grouping_key=grouping_key

@@ -2,8 +2,8 @@ import csv
 
 from first625words.models import Phrase
 from first625words.models import Theme
-from first625words.models import Language
 from first625words.models import Spelling
+from first625words.models import Language
 
 from . import helpers
 
@@ -102,14 +102,17 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
             }
 
             from_row = words.get_data_from_row(
-                row=row, column=column,
-                column_header=column_header, theme=theme
+                row=row,
+                column=column, column_header=column_header,
+                theme=theme, insert_data=True
                 )
 
-            if not from_row or not from_row['data']:
+            if not from_row:
                 continue
 
             word = from_row['data']
+            if not word:
+                continue
             
             data_inserted = data_inserted or from_row['data_inserted']
 
@@ -123,9 +126,7 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
                 data_inserted = True
 
             phrase = Phrase.objects.filter(
-                word=word,
-                spelling=spelling,
-                language=language
+                word=word, spelling=spelling, language=language
                 ).first()
 
             if not phrase:
@@ -151,7 +152,7 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
 
 
 def get_data_from_row(
-        row, column, column_header, theme, data_prev=None):
+        row, column, column_header, theme, language, data_prev=None):
 
     spelling_text = helpers.get_cell_from_row(
         row=row,
@@ -165,8 +166,18 @@ def get_data_from_row(
     phrase_prev = data_prev
     if phrase_prev:
         word_prev = phrase_prev.word
+        spelling_prev = phrase_prev.spelling
     else:
         word_prev = None
+        spelling_prev = None
+
+    if str(spelling_text) and not str(spelling_text).isspace():
+        spelling = Spelling.objects.filter(text=spelling_text).first()
+    else:
+        spelling = spelling_prev
+
+    if not spelling:
+        return None
 
     column_words = {
         'base_word': column['base_word'],
@@ -183,14 +194,22 @@ def get_data_from_row(
     from_row = words.get_data_from_row(
         row=row,
         column=column_words, column_header=column_header_words,
-        theme=theme, data_prev=word_prev, modify_database=False
+        theme=theme, insert_data=False, data_prev=word_prev
         )
 
-    if not from_row or not from_row['data']:
+    if not from_row:
         return None
 
     word = from_row['data']
-
-    spelling = Spelling.objects.filter(text=spelling_text).first()
-    if not spelling:
+    if not word:
         return None
+
+    phrase = Phrase.objects.filter(
+        word=word, spelling=spelling, language=language
+        ).first()
+
+    if not phrase:
+        if phrase_prev and word == phrase_prev.word and spelling == phrase_prev.spelling:
+            phrase = phrase_prev
+
+    return phrase

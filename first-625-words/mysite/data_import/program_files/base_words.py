@@ -108,6 +108,7 @@ def get_data_from_row(
     if str(text) and not str(text).isspace():
         base_word = BaseWord.objects.filter(text=text, theme=theme).first()
     else:
-        base_word = data_prev
+        base_word_prev = data_prev
+        base_word = base_word_prev
 
     return base_word
