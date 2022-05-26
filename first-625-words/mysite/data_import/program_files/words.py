@@ -11,7 +11,7 @@ def clear_data_all():
 
 
 def get_data_from_row(
-        row, column, column_header, theme, modify_database=True, data_prev=None):
+        row, column, column_header, theme, data_prev=None, modify_database=True):
 
     word_prev = data_prev
     if word_prev:
