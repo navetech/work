@@ -7,8 +7,9 @@ from . import spellings
 from . import translit_systems
 from . import pronunc_spellings
 from . import pronunciations
-from . import phrases
+from . import definitions
 from . import examples
+from . import phrases
 
 
 def clear_data_all():
@@ -21,6 +22,7 @@ def clear_data_all():
     translit_systems.clear_data_all()
     pronunc_spellings.clear_data_all()
     pronunciations.clear_data_all()
+    definitions.clear_data_all()
     examples.clear_data_all()
     phrases.clear_data_all()
 
@@ -36,4 +38,5 @@ def import_data(path=None):
     languages.import_data(path)
     phrases.import_data_for_words(path)
     pronunciations.import_data_for_phrases(path)
+    definitions.import_data_for_phrases(path)
     examples.import_data_for_phrases(path)

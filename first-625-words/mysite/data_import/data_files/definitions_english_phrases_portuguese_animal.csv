@@ -1,0 +1,60 @@
+Base Word,Grouping,Grouping Key,Spelling,Definition
+,,,,
+dog,masculine/singular,00/00,o cão,"A mammal, Canis familiaris or Canis lupus familiaris"
+dog,masculine/plural,00/01,os cães,plural of cão
+dog,feminine/singular,01/00,a cadela,A female cão
+dog,feminine/plural,01/01,as cadelas,plural of cadela
+,,,,
+dog,masculine/singular,00/00,o cachorro,synonym of cão
+dog,masculine/plural,00/01,os cachorros,plural of cachorro
+dog,feminine/singular,01/00,a cachorra,feminine of cachorro
+dog,feminine/plural,01/01,as cachorras,plural of cachorra
+,,,,
+,,,,
+cat,masculine/singular,00/00,o gato,An animal of the family Felidae
+cat,masculine/plural,00/01,os gatos,plural of gato
+cat,feminine/singular,01/00,a gata,A female gato
+cat,feminine/plural,01/01,as gatas,plural of gata
+,,,,
+fish,singular,00,o peixe,
+fish,plural,01,os peixes,
+,,,,
+bird,singular,00,o pássaro,
+bird,plural,01,os pássaros,
+,,,,
+cow,feminine/singular,00/00,a vaca,
+cow,feminine/plural,00/01,as vacas,
+cow,masculine/singular,01/00,o boi,
+cow,masculine/plural,01/01,os bois,
+cow,uncastrated_masculine/singular,02/00,o touro,
+cow,uncastrated_masculine/plural,02/01,os touros,
+,,,,
+pig,masculine/singular,00/00,o porco,
+pig,masculine/plural,00/01,os porcos,
+pig,feminine/singular,01/00,a porca,
+pig,feminine/plural,01/01,as porcas,
+,,,,
+,,,,
+mouse,masculine/singular,00/00,o rato,
+mouse,masculine/plural,00/01,os ratos,
+mouse,feminine/singular,01/00,a rata,
+mouse,feminine/plural,01/01,as ratas,
+,,,,
+mouse,feminine/singular,01/00,a ratazana,
+mouse,feminine/plural,01/01,as ratazanas,
+mouse,big_masculine/singular,02/00,a ratazana,
+mouse,big_masculine/plural,02/01,as ratazanas,
+,,,,
+,,,,
+horse,masculine/singular,00/00,o cavalo,
+horse,masculine/plural,00/01,os cavalos,
+horse,feminine/singular,01/00,a égua,
+horse,feminine/plural,01/01,as éguas,
+horse,for-breeding_masculine/singular,02/00,o garanhão,
+horse,for-breeding_masculine/plural,02/01,os garanhões,
+,,,,
+wing,singular,00,a asa,
+wing,plural,01,as asas,
+,,,,
+animal,singular,00,o animal,
+animal,plural,01,os animais,
