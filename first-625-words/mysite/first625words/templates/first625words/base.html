@@ -1,0 +1,57 @@
+{% extends "first625words/ln/ln-base.html" %}
+
+
+{% load static %}
+
+
+{% block product_head %}
+    <!-- https://favicon.io/emoji-favicons/books/ -->
+    <link href="{% static 'first625words/images/favicon.ico' %}" rel="icon">
+
+    <link href="{% static 'first625words/styles/style.css' %}" rel="stylesheet">
+
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+
+    <script src="/static/scripts/layout.js"></script>
+
+    {% block scripts %}
+    {% endblock %}
+
+    <title>
+        First625Words: {% block title %}{% endblock %}
+    </title>
+{% endblock %}
+
+
+{% block product_navbar %}
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/">
+                    Home
+                </a>
+            </li>
+        </ul>
+    </div>
+{% endblock %}
+
+
+{% block product_name %}
+    First625Words
+{% endblock %}
+
+
+{% block product_main %}
+    <main class="container p-4 my-4 ln-container00">
+        {% block main %}
+        {% endblock %}
+    </main>
+{% endblock %}
+
+
+{% block product_tail %}
+    {% block tail %}
+    {% endblock %}
+{% endblock %}
+

@@ -1,0 +1,15 @@
+<h3>{{ menu.name.translated.words }}</h3>
+
+{% include "orders/menu-elem-quantity.html" with elem=menu %}
+
+{% include "orders/menu-elem-sizes.html" with elem=menu %}
+
+{% include "orders/menu-elem-flavors.html" with elem=menu %}
+
+{% include "orders/menu-elem-types.html" with elem=menu %}
+
+{% include "orders/menu-elem-dishes.html" with elem=menu %}
+
+{% include "orders/menu-elem-addings.html" with elem=menu %}
+
+{% include "orders/menu-elem-globals.html" with elem=menu %}

@@ -1,0 +1,28 @@
+{% extends "orders/base.html" %}
+
+
+{% block title %}
+    {% if settings.cancel_page_label %}
+        {{ settings.cancel_page_label.translated.words }}
+    {% else %}
+        Checkout Canceled
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    <h3>
+        {% if settings.cancel_page_label %}
+            {{ settings.cancel_page_label.translated.words }}
+        {% else %}
+            Checkout Canceled
+        {% endif %}
+    </h3>
+
+    <h5>
+        {% if settings.cancel_page_contents %}
+            {{ settings.cancel_page_contents.translated.words }}
+        {% else %}
+            Forgot to add something to your cart? Shop around then come back to pay!
+        {% endif %}
+    </h5>
+{% endblock %}

@@ -1,0 +1,15 @@
+<li class="list-group-item ln-container01">
+    <ul class="list-group pt-4">
+        {% if order_item.size %}
+            {% include "orders/cart-order-item-elem.html" with order_elem=order_item.size %}
+        {% elif order_item.flavor %}
+            {% include "orders/cart-order-item-elem.html" with order_elem=order_item.flavor %}
+        {% elif order_item.type %}
+            {% include "orders/cart-order-item-elem.html" with order_elem=order_item.type %}
+        {% elif order_item.dish %}
+            {% include "orders/cart-order-item-elem.html" with order_elem=order_item.dish %}
+        {% elif order_item.menu %}
+            {% include "orders/cart-order-item-elem.html" with order_elem=order_item.menu %}
+        {% endif %}
+    </ul>
+</li>

@@ -1,0 +1,7 @@
+{% if elem.addings %}
+    <ul class="list-group pt-4">
+        {% for adding in elem.addings %}
+            {% include "orders/menu-adding.html" %}
+        {% endfor %}
+    </ul>
+{% endif %}

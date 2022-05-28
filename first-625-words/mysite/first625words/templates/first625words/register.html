@@ -1,0 +1,64 @@
+{% extends "orders/base.html" %}
+
+
+{% block title %}
+    {% if settings.register_label %}
+        {{ settings.register_label.translated.words }}
+    {% else %}
+        Register
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    <h1>
+        {% if settings.register_label %}
+            {{ settings.register_label.translated.words }}
+        {% else %}
+            Register
+        {% endif %}
+    </h1>
+    <ul class="list-group">
+        <li class="list-group-item ln-container01">
+            <div>
+                {% if message %}
+                    {{ message }}
+                {% endif %}
+            </div>
+        </li>
+
+        <li class="list-group-item ln-container01">
+            <form action="{% url 'register' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">
+                        {% if settings.username_label %}
+                            {{ settings.username_label.translated.words }}
+                        {% else %}
+                            Username
+                        {% endif %}
+                    </label>
+
+                    <input required autofocus autocomplete="on" class="form-control" id= "username" name="username" placeholder="Username" type="text">
+
+                    <label for="password">
+                        {% if settings.password_label %}
+                            {{ settings.password_label.translated.words }}
+                        {% else %}
+                            Password
+                        {% endif %}
+                    </label>
+
+                    <input required class="form-control" id= "password" name="password" placeholder="Password" type="password">
+                </div>
+
+                <button class="btn btn-dark" type="submit">
+                    {% if settings.register_label %}
+                        {{ settings.register_label.translated.words }}
+                    {% else %}
+                        Register
+                    {% endif %}
+                </button>
+            </form>
+        </li>
+    </ul>
+{% endblock %}

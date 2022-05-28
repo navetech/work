@@ -1,0 +1,7 @@
+{% if elem.globals %}
+    <ul class="list-group pt-4">
+        {% for global in elem.globals %}
+            {% include "orders/menu-global.html" %}
+        {% endfor %}
+    </ul>
+{% endif %}

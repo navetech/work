@@ -1,0 +1,52 @@
+{% load static %}
+
+<table style="width:100%">
+    <tr>
+        <td>
+            {% if order_elem.elem.img.path %}
+                <figure>
+                    <img style="max-width:15%;height:auto;" class="img-thumbnail" src="{% static order_elem.elem.img.path %}" alt="{{ order_elem.elem.long_name.translated.words }} Image">
+                    <figcaption>{{ order_elem.elem.long_name.translated.words }}</figcaption>
+                </figure>
+            {% else %}
+                {{ order_elem.elem.long_name.translated.words }}
+            {% endif %}
+        </td>
+
+        <td>
+            {% if order_item.status.ready %}
+                {% if settings.ready_label %}
+                    {{ settings.ready_label.translated.words }}
+                {% else %}
+                    Ready
+                {% endif %}
+            {% else %}
+                {% if settings.not_ready_label %}
+                    {{ settings.not_ready_label.translated.words }}
+                {% else %}
+                    Not Ready
+                {% endif %}
+            {% endif %}
+        </td>
+
+        <td>
+            {{ order_elem.elem.quantity.converted.value|floatformat:2 }}
+            {{ order_elem.elem.quantity.converted.unit }}
+        </td>
+
+        <td>
+            <div class="ln-group-divider"></div>
+            <form action="{% url 'alter_order' %}" method="post">
+                {% csrf_token %}
+                <input type='text' style='display:none' name='order-item-id' value={{ order_item.id|default:None }}>
+                
+                <button type="submit" name="submit" value="dec-order-item-count">-</button>
+                <span>{{ order_item.count }}</span>
+                <button type="submit" name="submit" value="inc-order-item-count">+</button>
+
+                {{ order_item.price.value|floatformat:2 }}
+                {{ order_item.price.unit }}
+            </form>
+        </td>
+    </tr>
+</table>

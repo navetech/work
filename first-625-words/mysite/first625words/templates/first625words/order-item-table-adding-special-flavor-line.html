@@ -1,0 +1,39 @@
+<tr>
+    <td>
+        {{ order_adding_flavor.elem.name.translated.words }}
+
+        {% if order_adding_flavor.elem.special %}
+            (
+
+            {% if settings.special_label %}
+                {{ settings.special_label.translated.words }}
+            {% else %}
+                Special
+            {% endif %}
+        
+            )
+        {% endif %}
+    </td>
+
+    {% if not order_adding_flavor.special_size_columns %}
+        <td>
+            {% if order_adding_flavor.elem.quantity.converted.unit %}
+                {{ order_adding_flavor.elem.quantity.converted.value|floatformat:2 }}
+                {{ order_adding_flavor.elem.quantity.converted.unit }}
+            {% endif %}
+        </td>
+    {% else %}
+        <td></td>
+        
+        {% for order_adding_flavor_size in order_adding_flavor.special_size_columns %}
+            <td>
+                {% if order_adding_flavor_size %}
+                    {% if order_adding_flavor_size.elem.quantity.converted.unit %}
+                        {{ order_adding_flavor_size.elem.quantity.converted.value|floatformat:2 }}
+                        {{ order_adding_flavor_size.elem.quantity.converted.unit }}
+                    {% endif %}
+                {% endif %}
+                </td>
+        {% endfor %}
+    {% endif %}
+</tr>

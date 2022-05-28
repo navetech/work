@@ -1,0 +1,14 @@
+{{ flavor.name.translated.words }}
+
+{% if flavor.special %}
+    (
+
+    {% if settings.special_label %}
+        {{ settings.special_label.translated.words }}
+    {% else %}
+        Special
+    {% endif %}
+
+    )
+{% endif %}
+

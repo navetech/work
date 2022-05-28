@@ -1,0 +1,7 @@
+{% if elem.types %}
+    <ul class="list-group pt-4">
+        {% for type in elem.types %}
+            {% include "orders/menu-type.html" %}
+        {% endfor %}
+    </ul>
+{% endif %}

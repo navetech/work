@@ -1,0 +1,175 @@
+<li class="list-group-item ln-container02">
+    <h4>{{ order_adding.elem.name.translated.words }}</h4>
+
+    {% if not order_adding.elem.only_special_selection %}
+        {% if order_adding.status.ready %}
+            {% if settings.ready_label %}
+                {{ settings.ready_label.translated.words }}
+            {% else %}
+                Ready
+            {% endif %}
+
+        {% elif order_adding.status.selections_deficiency %}
+            {% if settings.choose_more_options_label %}
+                {{ settings.choose_more_options_label.translated.words }}
+            {% else %}
+                Choose more options
+            {% endif %}
+
+        {% elif order_adding.status.selections_excess %}
+            {% if settings.choose_less_options_label %}
+                {{ settings.choose_less_options_label.translated.words }}
+            {% else %}
+                Choose less options
+            {% endif %}
+        {% endif %}
+    {% endif %}
+
+    {% if order_adding.price.unit %}
+        {{ order_adding.price.value|floatformat:2 }}
+        {{ order_adding.price.unit }}
+    {% endif %}
+
+    {% if order_adding.flavors %}
+        {% if order_adding.elem.only_special_selection %}
+            <table style="width:100%">
+                <tr>
+                    <th></th>
+
+                    {% if order_adding.special_flavors_table.sizes %}
+                        <th></th>
+
+                        {% for size in order_adding.special_flavors_table.sizes %}
+                            {% include "orders/order-item-table-special-size-header.html" %}
+                        {% endfor %}
+                    {% endif %}
+                </tr>
+
+                {% for order_adding_flavor in order_adding.flavors %}
+                    {% if order_adding_flavor.selected %}
+                        {% include "orders/order-item-table-adding-special-flavor-line.html" %}
+                    {% endif %}
+                {% endfor %}
+            </table>
+        {% else %}
+            {% if order_adding.elem.flavors_selection_limit.max == 0 %}
+            {% else %}
+                {% if not order_adding.elem.flavors_selection_limit %}
+                    <h6>
+                        {% if settings.choose_or_not_options_label %}
+                            {{ settings.choose_or_not_options_label.translated.words }}
+                        {% else %}
+                            Choose or not any options
+                        {% endif %}
+                    </h6>
+                {% else %}
+                    {% if order_adding.elem.flavors_selection_limit.max > 0 %}
+                        {% if order_adding.elem.flavors_selection_limit.min == order_adding.elem.flavors_selection_limit.max %}
+                            <h6>
+                                {% if settings.choose_label %}
+                                    {{ settings.choose_label.translated.words }}
+                                {% else %}
+                                    Choose
+                                {% endif %}
+
+                                {{ order_adding.elem.flavors_selection_limit.min }}
+
+                                {% if settings.option_s_label %}
+                                    {{ settings.option_s_label.translated.words }}
+                                {% else %}
+                                    option(s)
+                                {% endif %}
+                            </h6>
+                        {% else %}
+                            {% if order_adding.elem.flavors_selection_limit.min > 0 %}
+                                <h6>
+                                    {% if settings.choose_from_label %}
+                                        {{ settings.choose_from_label.translated.words }}
+                                    {% else %}
+                                        Choose from
+                                    {% endif %}
+                                    
+                                    {{ order_adding.elem.flavors_selection_limit.min }
+                                    
+                                    {% if settings.up_to_label %}
+                                        {{ settings.up_to_label.translated.words }}
+                                    {% else %}
+                                        up to
+                                    {% endif %}
+                                    
+                                    {{ order_adding.elem.flavors_selection_limit.max }}
+
+                                    {% if settings.options_label %}
+                                        {{ settings.options_label.translated.words }}
+                                    {% else %}
+                                        options
+                                    {% endif %}
+                                </h6>
+                            {% else %}
+                                <h6>
+                                    {% if settings.choose_up_to_label %}
+                                        {{ settings.choose_up_to_label.translated.words }}
+                                    {% else %}
+                                        Choose up to
+                                    {% endif %}
+
+                                    {{ order_adding.elem.flavors_selection_limit.max }}
+
+                                    {% if settings.options_label %}
+                                        {{ settings.options_label.translated.words }}
+                                    {% else %}
+                                        options
+                                    {% endif %}
+                                </h6>
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                        {% if order_adding.elem.flavors_selection_limit.min > 0 %}
+                            <h6>
+                                {% if settings.choose_at_least_label %}
+                                    {{ settings.choose_at_least_label.translated.words }}
+                                {% else %}
+                                    Choose at least
+                                {% endif %}
+                                
+                                {{ order_adding.elem.flavors_selection_limit.min }}
+                                
+                                {% if settings.option_s_label %}
+                                    {{ settings.option_s_label.translated.words }}
+                                {% else %}
+                                    option(s)
+                                {% endif %}
+                            </h6>
+                        {% else %}
+                            <h6>
+                                {% if settings.choose_or_not_options_label %}
+                                    {{ settings.choose_or_not_options_label.translated.words }}
+                                {% else %}
+                                    Choose or not any options
+                                {% endif %}
+                            </h6>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+
+                <table style="width:100%">
+                    <tr>
+                        <th></th>
+
+                        {% if order_adding.flavors_table.sizes %}
+                            <th></th>
+
+                            {% for size in order_adding.flavors_table.sizes %}
+                                {% include "orders/order-item-table-size-header.html" %}
+                            {% endfor %}
+                        {% endif %}
+                    </tr>
+
+                    {% for order_adding_flavor in order_adding.flavors %}
+                        {% include "orders/order-item-table-adding-flavor-line.html" %}
+                    {% endfor %}
+                </table>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+</li>

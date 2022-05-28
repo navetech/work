@@ -1,0 +1,14 @@
+<li class="list-group-item ln-container02">
+    <h5>{{ type.name.translated.words }}</h5>
+
+    {% include "orders/menu-elem-quantity.html" with elem=type %}
+
+    {% include "orders/menu-elem-sizes.html" with elem=type %}
+    
+    {% include "orders/menu-elem-flavors.html" with elem=type %}
+    
+    {% include "orders/menu-elem-addings.html" with elem=type %}
+
+    {% include "orders/menu-elem-globals.html" with elem=type %}
+    </li>
+

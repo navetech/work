@@ -1,0 +1,9 @@
+<li class="list-group-item ln-container02">
+    <h5>{{ adding.name.translated.words }}</h5>
+
+    {{ adding.quantity.converted.value|floatformat:2 }} {{ adding.quantity.converted.unit }}
+
+    {% if adding.flavors_set %}
+        {% include "orders/menu-flavors-set.html" with flavors_set=adding.flavors_set %}
+    {% endif %}
+</li>

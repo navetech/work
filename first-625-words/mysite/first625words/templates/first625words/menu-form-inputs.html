@@ -1,0 +1,29 @@
+{% if menu %}
+    <input type='text' style='display:none' name='menu-id' value={{ menu.id }}>
+{% else %}
+    <input type='text' style='display:none' name='menu-id' value=None }}>
+{% endif %}
+
+{% if dish %}
+    <input type='text' style='display:none' name='dish-id' value={{ dish.id }}>
+{% else %}
+    <input type='text' style='display:none' name='dish-id' value=None }}>
+{% endif %}
+
+{% if type %}
+    <input type='text' style='display:none' name='type-id' value={{ type.id }} }}>
+{% else %}
+    <input type='text' style='display:none' name='type-id' value=None }}>
+{% endif %}
+
+{% if flavor %}
+    <input type='text' style='display:none' name='flavor-id' value={{ flavor.id }}>
+{% else %}
+    <input type='text' style='display:none' name='flavor-id' value=None }}>
+{% endif %}
+
+{% if size %}
+    <input type='text' style='display:none' name='size-id' value={{ size.id }}>
+{% else %}
+    <input type='text' style='display:none' name='size-id' value=None }}>
+{% endif %}

@@ -1,0 +1,76 @@
+<tr>
+    <td>
+        {{ order_adding_flavor.elem.name.translated.words }}
+
+        {% if order_adding_flavor.elem.special %}
+            (
+
+            {% if settings.special_label %}
+                {{ settings.special_label.translated.words }}
+            {% else %}
+                Special
+            {% endif %}
+        
+            )
+        {% endif %}
+    </td>
+
+    {% if not order_adding_flavor.size_columns %}
+        <td>
+            <div class="ln-group-divider"></div>
+            <form action="{% url 'alter_order' %}" method="post">
+                {% csrf_token %}
+
+                <input type='text' style='display:none' name='order-item-id' value={{ order_item.id|default:None }}>
+                <input type='text' style='display:none' name='order-adding-id' value={{ order_adding.id|default:None }}>
+                <input type='text' style='display:none' name='order-adding-flavor-id' value={{ order_adding_flavor.id|default:None }}>
+
+                <button type="submit" name="submit" value="order-adding-flavor-select">
+                    {% if order_adding_flavor.selected %}
+                        <span>&check;</span>
+                    {% else %}
+                        <span>&ensp;</span>
+                        {% endif %}
+                </button>
+
+                {% if order_adding_flavor.elem.quantity.converted.unit %}
+                    {{ order_adding_flavor.elem.quantity.converted.value|floatformat:2 }}
+                    {{ order_adding_flavor.elem.quantity.converted.unit }}
+                {% endif %}
+            </form>
+        </td>
+    {% else %}
+        <td></td>
+        
+        {% for order_adding_flavor_size in order_adding_flavor.size_columns %}
+            {% if order_adding_flavor_size %}
+                <td>
+                    <div class="ln-group-divider"></div>
+                    <form action="{% url 'alter_order' %}" method="post">
+                        {% csrf_token %}
+            
+                        <input type='text' style='display:none' name='order-item-id' value={{ order_item.id|default:None }}>
+                        <input type='text' style='display:none' name='order-adding-id' value={{ order_adding.id|default:None }}>
+                        <input type='text' style='display:none' name='order-adding-flavor-id' value={{ order_adding_flavor.id|default:None }}>
+                        <input type='text' style='display:none' name='order-adding-flavor-size-id' value={{ order_adding_flavor_size.id|default:None }}>
+            
+                        <button type="submit" name="submit" value="order-adding-flavor-size-select">
+                            {% if order_adding_flavor_size.selected %}
+                                <span>&check;</span>
+                            {% else %}
+                                <span>&ensp;</span>
+                                {% endif %}
+                        </button>
+
+                        {% if order_adding_flavor_size.elem.quantity.converted.unit %}
+                            {{ order_adding_flavor_size.elem.quantity.converted.value|floatformat:2 }}
+                            {{ order_adding_flavor_size.elem.quantity.converted.unit }}
+                        {% endif %}
+                    </form>
+                </td>
+            {% else %}
+                <td></td>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+</tr>

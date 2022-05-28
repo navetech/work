@@ -1,0 +1,35 @@
+{% extends "orders/base.html" %}
+
+
+{% block title %}
+    {% if settings.menus_label %}
+        {{ settings.menus_label.translated.words }}
+    {% else %}
+        Menus
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    {% if settings.menus_label %}
+        <h2>{{ settings.menus_label.translated.words }}</h2>
+    {% else %}
+        Menus
+    {% endif %}
+
+    {% if menus %}
+        <ul class="list-group pt-4">
+            {% for menu in menus %}
+                <li class="list-group-item ln-container01">
+
+                    <a class="btn btn-secondary" href="{% url 'menu' menu.id %}" role="button">
+                        {{ menu.name.translated.words }}
+                    </a>
+
+                    {% comment %}
+                    {% include "orders/menu-menu.html" %}
+                    {% endcomment %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

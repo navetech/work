@@ -1,0 +1,150 @@
+{% extends "orders/base.html" %}
+
+
+{% block scripts %}
+    <script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+{% endblock %}
+
+
+{% block title %}
+    {% if settings.cart_label %}
+        {{ settings.cart_label.translated.words }}
+    {% else %}
+        Cart
+    {% endif %}
+{% endblock %}
+
+
+{% block main %}
+    {% if settings.cart_label %}
+        <h3>{{ settings.cart_label.translated.words }}</h3>
+    {% else %}
+        <h3>Cart</h3>
+    {% endif %}
+
+    {% if order.items %}
+        {% if order.status.ready %}
+            {% if settings.ready_label %}
+                {{ settings.ready_label.translated.words }}
+            {% else %}
+                Ready
+            {% endif %}
+        {% else %}
+            {% if settings.not_ready_label %}
+                {{ settings.not_ready_label.translated.words }}
+            {% else %}
+                Not Ready
+            {% endif %}
+        {% endif %}
+
+        <span id="total-price">{{order.price.value|floatformat:2 }}</span>
+        {{ order.price.unit }}
+
+        <br>
+
+        {% if order.status.ready %}
+            <button type="button" id="checkout-button" class="btn btn-secondary">
+                {% if settings.checkout_label %}
+                    {{ settings.checkout_label.translated.words }}
+                {% else %}
+                    Checkout
+                {% endif %}
+            </button>
+        {% else %}
+            <button disabled type="button" id="checkout-button" class="btn btn-secondary">
+                {% if settings.checkout_label %}
+                    {{ settings.checkout_label.translated.words }}
+                {% else %}
+                    Checkout
+                {% endif %}
+            </button>
+        {% endif %}
+
+        <a class="btn btn-secondary" href="{% url 'clear_cart' %}" role="button">
+            {% if settings.clear_cart_label %}
+                {{ settings.clear_cart_label.translated.words }}
+            {% else %}
+                Clear Cart
+            {% endif %}
+        </a>
+
+        {% if settings.items_label %}
+            <h4>{{ settings.items_label.translated.words }}</h4>
+        {% else %}
+            <h4>Items</h4>
+        {% endif %}
+
+        <ul class="list-group pt-4">
+            {% for order_item in order.items %}
+                {% include "orders/cart-order-item.html" %}
+            {% endfor %}
+        </ul>
+
+    {% else %}
+        {% if settings.no_items_label %}
+            <h4>{{ settings.no_items_label.translated.words }}</h4>
+        {% else %}
+            <h4>No Items</h4>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+
+{% block tail %}
+    <script type="text/javascript">
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+
+        // Create an instance of the Stripe object with your publishable API key
+        var stripe = Stripe("pk_test_TYooMQauvdEDq54NiTphI7jx");
+        var checkoutButton = document.getElementById("checkout-button");
+
+        checkoutButton.addEventListener("click", function () {
+            total_price = document.getElementById("total-price").innerHTML
+            const request = new Request(
+                "/create-checkout-session",
+                {headers: {'X-CSRFToken': csrftoken}}
+            );
+            fetch(request, {
+                method: 'POST',
+                mode: 'same-origin',  // Do not send CSRF token to another domain.
+                body: total_price
+            })
+            .then(function (response) {
+            return response.json();
+            })
+            .then(function (session) {
+            return stripe.redirectToCheckout({ sessionId: session.id });
+            })
+            .then(function (result) {
+            // If redirectToCheckout fails due to a browser or network
+            // error, you should display the localized error message to your
+            // customer using error.message.
+            if (result.error) {
+                alert(result.error.message);
+            }
+            })
+            .catch(function (error) {
+            console.error("Error:", error);
+            });
+        });
+    </script>
+{% endblock %}
+

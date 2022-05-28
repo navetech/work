@@ -1,0 +1,44 @@
+{% extends "orders/base.html" %}
+
+
+{% block title %}
+    {% if settings.unregister_label %}
+        {{ settings.unregister_label.translated.words }}
+    {% else %}
+        Unregister
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    <h1>
+        {% if settings.unregister_label %}
+            {{ settings.unregister_label.translated.words }}
+        {% else %}
+            Unregister
+        {% endif %}
+    </h1>
+
+    <ul class="list-group ln-group-width-auto">
+        <li class="list-group-item ln-container01">
+            <form action="{% url 'unregister' %}" method="post">
+                {% csrf_token %}
+                <div class="ln-group-divider"></div>
+                <button class="btn btn-secondary" type="submit" name="confirm-cancel" value="cancel">
+                    {% if settings.cancel_label %}
+                        {{ settings.cancel_label.translated.words }}
+                    {% else %}
+                        Cancel
+                    {% endif %}
+                </button>
+
+                <button class="btn btn-dark" type="submit" name="confirm-cancel" value="confirm">
+                    {% if settings.confirm_label %}
+                        {{ settings.confirm_label.translated.words }}
+                    {% else %}
+                        Confirm
+                    {% endif %}
+                </button>
+            </form>
+        </li>
+    </ul>
+{% endblock %}

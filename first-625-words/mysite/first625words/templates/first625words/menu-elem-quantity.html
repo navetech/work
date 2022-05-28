@@ -1,0 +1,12 @@
+{% if elem.quantity %}
+    <form action="{% url 'put_order' %}" method="post">
+        {% csrf_token %}
+
+        {% include "orders/menu-form-inputs.html" %}
+        
+        <button type="submit" name="submit">
+            {{ elem.quantity.converted.value|floatformat:2 }}
+            {{ elem.quantity.converted.unit }}
+        </button>
+    </form>
+{% endif %}

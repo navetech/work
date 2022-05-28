@@ -1,0 +1,36 @@
+{% extends "orders/base.html" %}
+
+
+{% block title %}
+    {% if settings.success_page_label %}
+        {{ settings.success_page_label.translated.words }}
+    {% else %}
+        Checkout Succeeded
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    <h3>
+        {% if settings.success_page_label %}
+            {{ settings.success_page_label.translated.words }}
+        {% else %}
+            Checkout Succeeded
+        {% endif %}
+    </h3>
+    
+    <h5>
+        {% if settings.success_page_contents_01 %}
+            {{ settings.success_page_contents_01.translated.words }}
+        {% else %}
+            Thanks for your order!
+        {% endif %}
+    </h5>
+
+    <h5>
+        {% if settings.success_page_contents_02 %}
+            {{ settings.success_page_contents_02.translated.words }}
+        {% else %}
+            We appreciate your business!
+        {% endif %}
+    </h5>
+{% endblock %}

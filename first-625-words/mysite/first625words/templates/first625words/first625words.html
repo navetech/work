@@ -1,0 +1,16 @@
+{% extends "first625words/base.html" %}
+
+
+{% block title %}
+    First625Words
+{% endblock %}
+
+{% block main %}
+    <ul class="list-group pt-4">
+        {% for row in rows %}
+            <li class="list-group-item ln-container01">
+                <h6>{{ row.theme.name }}</h6>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
