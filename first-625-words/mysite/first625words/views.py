@@ -19,35 +19,101 @@ def index(request):
 
     languages = Language.objects.all()
 
-    rows = []
-
-    for theme in themes:
-        base_words = BaseWord.objects.filter(theme=theme)
-
-        for base_word in base_words:
-            words = Word.objects.filter(base_word=base_word)
-
-            words_ordered = order_words_by_grouping_keys(words)
-
-            phrases = get_phrases_for_words_ordered(words_ordered, languages)
-
-            first625words = merge_phrases_and_images(words_ordered, phrases)
-
-        row = {
-            'theme': theme,
-            'first625words': first625words
-        }
-
-        rows.append(row)
+    data = build_words_page(themes, languages)
 
     context = {
-        'rows': rows,
+        'data': data,
     }
 
-    return render(request, 'first625words/first625words.html', context)
+    return render(request, 'first625words/words.html', context)
 
     # return HttpResponse("Hello, world. You're at the first625words index.")
 
+
+def build_words_page(themes, languages):
+    data_list = []
+
+    for theme in themes:
+        data = build_words_page_from_theme(theme, languages)
+
+        data_list.append(data)
+
+    counting = calc_words_page_counting(data_list)
+
+    return {
+        'counting': counting,
+        'themes': data_list
+    }
+
+
+def calc_words_page_counting(data_list):
+    count_max_images = 0
+    count_max_languages = 0
+
+    for data in data_list:
+        counting = data['counting']
+
+        count_images = counting['images']
+        if count_images > count_max_images:
+            count_max_images = count_images
+
+        counts_phrases_for_languages = counting['phrases']
+        count_languages = len(counts_phrases_for_languages)
+        if count_languages > count_max_languages:
+            count_max_languages = count_languages
+
+    counts_max_phrases = [0] * count_max_languages
+
+    for data in data_list:
+        counting = data['counting']
+
+        counts_phrases_for_languages = counting['phrases']
+        count_languages = len(counts_phrases_for_languages)
+
+        for i in range(count_languages):
+            count_phrases = counts_phrases_for_languages[i]
+            if count_phrases > counts_max_phrases[i]:
+                counts_max_phrases[i] = count_phrases
+
+    return {
+        'images': count_max_images,
+        'phrases': counts_max_phrases
+    }    
+
+
+def build_words_page_from_theme(theme, languages):
+    data_list = []
+
+    base_words = BaseWord.objects.filter(theme=theme).order_by('sort_number')
+
+    for base_word in base_words:
+        data = build_words_page_from_base_word(base_word, languages)
+
+        data_list.append(data)
+
+    counting = calc_words_page_counting(data_list)
+
+    return {
+        'theme': theme,
+        'counting': counting,
+        'themes': data_list
+    }
+
+
+def build_words_page_from_base_word(base_word, languages):
+    words = Word.objects.filter(base_word=base_word)
+
+    words_ordered = order_words_by_grouping_keys(words)
+
+    data_list = build_words_page_from_words(words_ordered, languages)
+
+    counting = calc_words_page_counting(data_list)
+
+    return {
+        'base_word': base_word,
+        'counting': counting,
+        'themes': data_list
+    }
 
 
 def order_words_by_grouping_keys(words):
@@ -58,51 +124,52 @@ def order_words_by_grouping_keys(words):
 
         keys = grouping_key.split('GROUPING_KEYS_KEYS_SEPARATOR')
 
-        sort_number = calc_sort_number_for_grouping_keys(keys)
+        key_number = calc_key_number_for_grouping_keys(keys)
         
         words_ordered.append({
             'word': word,
-            'sort_number': sort_number
+            'key_number': key_number
         })
 
-    words_ordered.sort(key = lambda e: e['sort_number'])
+    words_ordered.sort(key = lambda e: e['key_number'])
 
     return words_ordered
 
 
-def calc_sort_number_for_grouping_keys(keys):
-    sort_number = 0
-
+def calc_key_number_for_grouping_keys(keys):
+    key_number = 0
     for key in keys:
-        sort_number = sort_number * GROUPING_KEYS_KEY_BASE_NUMBER + int(key) + 1
+        key_number = key_number * GROUPING_KEYS_KEY_BASE_NUMBER + int(key) + 1
 
-    return sort_number
+    return key_number
+
+
+def build_words_page_from_words(words_ordered, languages):
+    phrases_for_languages = get_phrases_for_words_ordered(words_ordered, languages)
+
+    phrases_merged = merge_phrases(words_ordered, phrases_for_languages)
+
+    data_list = merge_images(words_ordered, phrases_merged)
+
+    return data_list
 
 
 def get_phrases_for_words_ordered(words_ordered, languages):
-    phrases = []
+    phrases_for_languages = []
 
     for language in languages:
-        phrases_for_language = []
+        phrases_for_one_language = []
 
         for word_ordered in words_ordered:
             word = word_ordered['word']
 
-            phrases_for_word = Phrase.objects.filter(word=word, language=language)
+            phrases = Phrase.objects.filter(word=word, language=language)
 
-            phrases_for_language.append(phrases_for_word) 
+            phrases_for_one_language.append(phrases) 
 
-        phrases.append(phrases_for_language)
+        phrases_for_languages.append(phrases_for_one_language)
 
-    return phrases
-
-
-def merge_phrases_and_images(words_ordered, phrases):
-    phrases_merged = merge_phrases(words_ordered, phrases)
-
-    phrases_and_images_merged = merge_images(words_ordered, phrases_merged)
-
-    return phrases_and_images_merged
+    return phrases_for_languages
 
 
 def merge_phrases(words_ordered, phrases):
