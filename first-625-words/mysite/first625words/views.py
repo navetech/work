@@ -150,7 +150,9 @@ def build_words_page_from_words(words_ordered, languages):
 
     phrases_mergings = merge_phrases(words_ordered, phrases_for_languages)
 
-    data_list = merge_images(words_ordered, phrases_mergings)
+    mergings = merge_images(words_ordered, phrases_mergings)
+
+    data_list = merge_counting(mergings)
 
     return data_list
 
@@ -311,5 +313,30 @@ def are_grouping_keys_equivalent(grouping_key1, grouping_key2):
 
 
 
-def merge_images(words_ordered, phrases_merged):
-    pass
+def merge_images(words_ordered, phrases_mergings):
+    for phrases_merging in reversed(phrases_mergings):
+        phrases_merging['images'] = []
+
+        found = False
+        for word_ordered in reversed(words_ordered):
+            word = word_ordered['word']
+
+            images = word.images.all()
+            if images.count() < 1:
+                continue
+
+            grouping = word.grouping
+            grouping_key = word.grouping_key
+
+            for phrases_merging_for_one_language in phrases_merging['for_languages']:
+                word_for_one_language = phrases_merging_for_one_language['word']
+                images_for_one_language = word_for_one_language.images.all()
+
+                for image in images:
+                    for image_for_one_language in images_for_one_language:
+                        if image not in phrases_merging['images']:
+                            phrases_merging['images'].append(image)
+
+                if any(item in images_for_one_language for item in images)
+
+
