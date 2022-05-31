@@ -313,30 +313,37 @@ def are_grouping_keys_equivalent(grouping_key1, grouping_key2):
 
 
 
-def merge_images(words_ordered, phrases_mergings):
-    for phrases_merging in reversed(phrases_mergings):
-        phrases_merging['images'] = []
+def merge_images(words_ordered, mergings):
+    for word_ordered in words_ordered:
+        word = word_ordered['word']
 
-        found = False
-        for word_ordered in reversed(words_ordered):
-            word = word_ordered['word']
+        images = word.images.all()
+        if images.count() < 1:
+            continue
 
-            images = word.images.all()
-            if images.count() < 1:
-                continue
+        grouping = word.grouping
 
-            grouping = word.grouping
-            grouping_key = word.grouping_key
+        images_merged = False
 
-            for phrases_merging_for_one_language in phrases_merging['for_languages']:
-                word_for_one_language = phrases_merging_for_one_language['word']
-                images_for_one_language = word_for_one_language.images.all()
+        for merging in mergings:
+            merging['images'] = []
 
-                for image in images:
-                    for image_for_one_language in images_for_one_language:
-                        if image not in phrases_merging['images']:
-                            phrases_merging['images'].append(image)
+            merging_for_languages = merging['for_languages']
+            for merging_for_one_language in merging_for_languages:
+                word_for_one_language = merging_for_one_language['word']
+                grouping_for_one_language = word_for_one_language.grouping
 
-                if any(item in images_for_one_language for item in images)
+                groupings_equivalent = are_groupings_equivalent(
+                    grouping, grouping_for_one_language, reverse=False
+                )
 
+                if groupings_equivalent and not images_merged:
+                    merging['images'].append(images)
+                    images_merged = True
 
+                    break
+
+            if images_merged:
+                break
+
+    return mergings
