@@ -222,9 +222,9 @@ def calc_key_number_for_grouping_key(grouping_key):
 
 
 def build_rows_from_words(ordered_words, languages):
-    ordered_word_phrases_for_languages = get_phrases_for_ordered_words(ordered_words, languages)
+    ordered_word_languages_phrases = get_phrases_for_ordered_words(ordered_words, languages)
 
-    phrases_mergings = merge_phrases(ordered_words, ordered_word_phrases_for_languages)
+    phrases_mergings = merge_phrases(ordered_words, ordered_word_languages_phrases)
 
     mergings = merge_images(ordered_words, phrases_mergings)
 
@@ -237,41 +237,41 @@ def build_rows_from_words(ordered_words, languages):
 
 
 def get_phrases_for_ordered_words(ordered_words, languages):
-    phrases_for_languages = []
+    languages_phrases = []
 
     for language in languages:
-        phrases_for_one_language = []
+        one_language_phrases = []
 
         for ordered_word in ordered_words:
             word = ordered_word['word']
 
             phrases = Phrase.objects.filter(word=word, language=language)
 
-            phrases_for_one_language.append(phrases) 
+            one_language_phrases.append(phrases) 
 
-        phrases_for_languages.append(phrases_for_one_language)
+        languages_phrases.append(one_language_phrases)
 
-    return phrases_for_languages
+    return languages_phrases
 
 
-def merge_phrases(ordered_words, ordered_word_phrases_for_languages):
+def merge_phrases(ordered_words, ordered_word_languages_phrases):
     mergings = []
 
-    word_indexes_for_languages = [0]  * len(ordered_word_phrases_for_languages)
-    word_index = min(word_indexes_for_languages)
+    ordered_word_languages_indexes = [0]  * len(ordered_word_languages_phrases)
+    ordered_word_index = min(ordered_word_languages_indexes)
     
-    while word_index < len(ordered_words):
-        word_indexes_for_languages = get_next_phrases(
-            ordered_word_phrases_for_languages, word_indexes_for_languages
+    while ordered_word_index < len(ordered_words):
+        ordered_word_languages_indexes = get_next_phrases(
+            ordered_word_languages_phrases, ordered_word_languages_indexes
             )
 
-        word_index = min(word_indexes_for_languages)
-        if word_index >= len(ordered_words):
+        ordered_word_index = min(ordered_word_languages_indexes)
+        if ordered_word_index >= len(ordered_words):
             break
 
         merging = build_phrases_merging(
-            ordered_words, ordered_word_phrases_for_languages,
-            word_index, word_indexes_for_languages
+            ordered_words, ordered_word_languages_phrases,
+            ordered_word_index, ordered_word_languages_indexes
             )
 
         mergings.append(merging)
@@ -279,71 +279,76 @@ def merge_phrases(ordered_words, ordered_word_phrases_for_languages):
     return mergings
 
 
-def get_next_phrases(ordered_word_phrases_for_languages, word_indexes_for_languages):
-    for language_index in range(len(ordered_word_phrases_for_languages)):
-        ordered_word_phrases_for_one_language = ordered_word_phrases_for_languages[language_index]
-        word_index_for_one_language = word_indexes_for_languages[language_index]
+def get_next_phrases(ordered_word_languages_phrases, ordered_word_languages_indexes):
 
-        while word_index_for_one_language < len(ordered_word_phrases_for_one_language):
-            phrases = ordered_word_phrases_for_one_language[word_index_for_one_language]
+    for language_index in range(len(ordered_word_languages_phrases)):
+        ordered_word_one_language_phrases = ordered_word_languages_phrases[language_index]
+
+        ordered_word_one_language_index = ordered_word_languages_indexes[language_index]
+
+        while ordered_word_one_language_index < len(ordered_word_one_language_phrases):
+            phrases = ordered_word_one_language_phrases[ordered_word_one_language_index]
 
             if phrases.count() > 0:
                 break
 
-            word_index_for_one_language += 1
+            ordered_word_one_language_index += 1
 
-        word_indexes_for_languages[i] = word_index_for_one_language
+        ordered_word_languages_indexes[i] = ordered_word_one_language_index
 
-    return word_indexes_for_languages
+    return ordered_word_languages_indexes
 
 
 def build_phrases_merging(
-        ordered_words, ordered_word_phrases_for_languages,
-        word_index, word_indexes_for_languages
+        ordered_words, ordered_word_languages_phrases,
+        ordered_word_index, ordered_word_languages_indexes
         ):
 
-    ordered_word = ordered_words[word_index]
+    ordered_word = ordered_words[ordered_word_index]
     word = ordered_word['word']
     grouping = word.grouping
     grouping_key = word.grouping_key
 
-    mergings_for_languages = []
+    languages_mergings = []
 
-    for i in range(len(ordered_word_phrases_for_languages)):
-        ordered_word_phrases_for_one_language = ordered_word_phrases_for_languages[i]
-        word_index_for_one_language = word_indexes_for_languages[i]
+    for language_index in range(len(ordered_word_languages_phrases)):
+        ordered_word_one_language_phrases = ordered_word_languages_phrases[language_index]
 
-        merging_for_one_language = {}
+        ordered_word_one_language_index = ordered_word_languages_indexes[language_index]
 
-        while word_index_for_one_language < len(ordered_word_phrases_for_one_language):
-            phrases = ordered_word_phrases_for_one_language[word_index_for_one_language]
+        one_language_merging = {}
 
-            ordered_word_for_one_language = ordered_words[word_index_for_one_language]
-            word_for_one_language = ordered_word_for_one_language['word']
-            grouping_for_one_language = word_for_one_language.grouping
-            grouping_key_for_one_language = word_for_one_language.grouping_key
+        while ordered_word_one_language_index < len(ordered_word_one_language_phrases):
+            phrases = ordered_word_one_language_phrases[ordered_word_one_language_index]
+
+            one_language_ordered_word = ordered_words[ordered_word_one_language_index]
+
+            one_language_word = one_language_ordered_word['word']
+
+            one_language_grouping = one_language_word.grouping
+            one_language_grouping_key = one_language_word.grouping_key
 
             groupings_equivalent = are_groupings_equivalent(
-                grouping, grouping_for_one_language, reverse=True
+                grouping, one_language_grouping, reverse=True
             )
 
             if groupings_equivalent:
                 grouping_keys_equivalent = are_grouping_keys_equivalent(
-                    grouping_key, grouping_key_for_one_language
+                    grouping_key, one_language_grouping_key
                 )
 
                 if grouping_keys_equivalent:
-                    merging_for_one_language['phrases'] = phrases
-                    merging_for_one_language['word'] = word_for_one_language
+                    one_language_merging['phrases'] = phrases
+                    one_language_merging['word'] = one_language_word
 
                     break
 
-            word_index_for_one_language += 1
+            ordered_word_one_language_index += 1
 
-        mergings_for_languages.append(merging_for_one_language)
+        languages_mergings.append(one_language_merging)
 
     return {
-        'for_languages': mergings_for_languages
+        'for_languages': languages_mergings
     }
 
 
@@ -366,8 +371,8 @@ def is_grouping1_in_grouping2(grouping1, grouping2, reverse=False):
         groups1.reverse()
         groups2.reverse()
 
-    for i in range(len(groups1)):
-        if groups1[i] != groups2[i]:
+    for group_index in range(len(groups1)):
+        if groups1[group_index] != groups2[group_index]:
             return False
     
     return True
@@ -404,13 +409,14 @@ def merge_images(ordered_words, mergings):
         for merging in mergings:
             merging['images'] = []
 
-            merging_for_languages = merging['for_languages']
-            for merging_for_one_language in merging_for_languages:
-                word_for_one_language = merging_for_one_language['word']
-                grouping_for_one_language = word_for_one_language.grouping
+            languages_mergings = merging['for_languages']
+            for one_language_merging in languages_mergings:
+                one_language_word = one_language_merging['word']
+
+                one_language_grouping = one_language_word.grouping
 
                 groupings_equivalent = are_groupings_equivalent(
-                    grouping, grouping_for_one_language, reverse=False
+                    grouping, one_language_grouping, reverse=False
                 )
 
                 if groupings_equivalent and not images_merged:
@@ -430,13 +436,13 @@ def build_row_from_merging(merging):
 
     row['images'] = merging['images']
 
-    phrases_for_languages = []
-    for merging_for_one_language in merging['for_languages']:
-        phrases_for_one_language = merging_for_one_language['phrases']
+    languages_phrases = []
+    for one_language_merging in merging['for_languages']:
+        one_language_phrases = one_language_merging['phrases']
 
-        phrases_for_languages.append(phrases_for_one_language)
+        languages_phrases.append(one_language_phrases)
 
-    row['phrases_for_languages'] = phrases_for_languages
+    row['languages_phrases'] = languages_phrases
 
     return row
 
@@ -444,7 +450,7 @@ def build_row_from_merging(merging):
 def calc_rows_counting(rows):
     counting = {}
 
-    images_and_languages_counts = calc_images_and_languages_counts(rows)
+    images_and_languages_counts = calc_rows_images_and_languages_counts(rows)
     images_count = images_and_languages_counts['images']
     languages_count = images_and_languages_counts['languages']
 
@@ -453,7 +459,7 @@ def calc_rows_counting(rows):
 
     languages_countings = []
     for language_index in range(languages_count):
-        one_language_counting = calc_one_language_counting(rows, language_index)
+        one_language_counting = calc_rows_one_language_counting(rows, language_index)
         languages_countings.append(one_language_counting)
 
     counting['for_languages'] = languages_countings
@@ -461,7 +467,7 @@ def calc_rows_counting(rows):
     return counting
 
 
-def calc_images_and_languages_counts(rows):
+def calc_rows_images_and_languages_counts(rows):
     counts = {}
 
     images_count_max = 0
@@ -471,7 +477,7 @@ def calc_images_and_languages_counts(rows):
         images_count = len(row['images'])
         images_count_max = max(images_count_max, images_count)
 
-        languages_count = len(row['phrases_for_languages'])
+        languages_count = len(row['languages_phrases'])
         languages_count_max = max(languages_count_max, languages_count)
 
     counts['images'] = images_count_max
@@ -480,16 +486,16 @@ def calc_images_and_languages_counts(rows):
     return counts
 
 
-def calc_one_language_counting(rows, language_index):
+def calc_rows_one_language_counting(rows, language_index):
     counting = {}
 
-    phrases_count  = calc_phrases_count(rows, language_index)
+    phrases_count  = calc_rows_phrases_count(rows, language_index)
 
     counting['phrases'] = phrases_count
 
     phrases_countings = []
     for phrase_index in range(phrases_count):
-        one_phrase_counting = calc_one_phrase_counting(rows, language_index, phrase_index)
+        one_phrase_counting = calc_rows_one_phrase_counting(rows, language_index, phrase_index)
         phrases_countings.append(one_phrase_counting)
 
     counting['for_phrases'] = phrases_countings
@@ -497,11 +503,11 @@ def calc_one_language_counting(rows, language_index):
     return counting
 
 
-def calc_phrases_count(rows, language_index):
+def calc_rows_phrases_count(rows, language_index):
     phrases_count_max = 0
 
     for row in rows:
-        languages_count = len(row['phrases_for_languages'])
+        languages_count = len(row['languages_phrases'])
 
         if language_index < languages_count:
             phrases = row['phrases_for_languages'][language_index]
@@ -512,21 +518,21 @@ def calc_phrases_count(rows, language_index):
     return phrases_count_max
 
 
-def calc_one_phrase_counting(rows, language_index, phrase_index):
+def calc_rows_one_phrase_counting(rows, language_index, phrase_index):
     counting = {}
 
-    pronunciations_count  = calc_pronunciations_count(rows, language_index, phrase_index)
+    pronunciations_count  = calc_rows_pronunciations_count(rows, language_index, phrase_index)
 
     counting['pronunciations'] = pronunciations_count
 
     return counting
 
 
-def calc_pronunciations_count(rows, language_index, phrase_index):
+def calc_rows_pronunciations_count(rows, language_index, phrase_index):
     pronunciations_count_max = 0
 
     for row in rows:
-        languages_count = len(row['phrases_for_languages'])
+        languages_count = len(row['languages_phrases'])
 
         if language_index < languages_count:
             phrases = row['phrases_for_languages'][language_index]
