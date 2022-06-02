@@ -44,7 +44,6 @@ def import_data(path=None):
 
     with open(target_path) as file:
         rows = csv.reader(file)
-
         for row in rows:
             name = helpers.get_cell_from_row(
                 row=row, column=LANGUAGE_COLUMN, column_header=LANGUAGE_HEADER
@@ -53,16 +52,21 @@ def import_data(path=None):
             if name is None or not str(name) or str(name).isspace():
                 continue
 
-            data = helpers.get_sort_number_from_row(
-                row=row, column=LANGUAGE_SORT_NUMBER_COLUMN, column_header=LANGUAGE_SORT_NUMBER_HEADER,
+            from_row = helpers.get_sort_number_from_row(
+                row=row,
+                column=LANGUAGE_SORT_NUMBER_COLUMN,
+                column_header=LANGUAGE_SORT_NUMBER_HEADER,
                 model=Language
             )
 
-            sort_number = data['sort_number']
+            if not from_row:
+                continue
+
+            sort_number = from_row['sort_number']
             if sort_number is None:
                 continue
 
-            sort_number_cell = data['cell']
+            sort_number_cell = from_row['cell']
 
             data_valid_in_file = True
 
@@ -71,7 +75,6 @@ def import_data(path=None):
                 language = Language(name=name, sort_number=sort_number)
                 language.save()
                 data_inserted = True
-
             elif str(sort_number_cell) and not str(sort_number_cell).isspace():
                 if language.sort_number != sort_number:
                     language.sort_number = sort_number

@@ -62,7 +62,9 @@ class Word(models.Model):
 
     def __str__(self):
         return (
-            f'{self.base_word}'
+            f'{self.base_word.text}'
+            + ', ' +
+            f'{self.base_word.theme.name}'
             + ', ' +
             f'{self.grouping}'
             + ', ' +
@@ -113,7 +115,7 @@ class PronunciationSpelling(models.Model):
         return (
             f'{self.text}'
             + ', ' +
-            f'{self.system}'
+            f'{self.system.name}'
         )
 
 
@@ -129,7 +131,7 @@ class Pronunciation(models.Model):
         return (
             f'{self.sound}'
             + ', ' +
-            f'{self.spelling}'
+            f'{self.spelling.text}'
         )
 
 
@@ -145,7 +147,7 @@ class Definition(models.Model):
         return (
             f'{self.text}'
             + ', ' +
-            f'{self.language}'
+            f'{self.language.name}'
         )
 
 
@@ -197,7 +199,7 @@ class Phrase(models.Model):
         return (
             f'{self.word}'
             + ', ' +
-            f'{self.spelling}'
+            f'{self.spelling.text}'
             + ', ' +
-            f'{self.language}'
+            f'{self.language.name}'
         )

@@ -1,10 +1,13 @@
 import os
 
-from .settings import FILE_EXISTS_NOT, SORT_NUMBER_DEFAULT, SORT_NUMBER_INC_DEFAULT
+from .settings import DATA_FILES_DIR
+
+# from .settings import FILE_EXISTS_NOT
 from .settings import DATA_VALID_IN_FILE_NOT
 from .settings import DATABASE_MODIFIED_FOR_FILE_NOT
 
-from .settings import DATA_FILES_DIR
+from .settings import SORT_NUMBER_DEFAULT
+from .settings import SORT_NUMBER_INC_DEFAULT
 
 
 def build_target_path(base_name, path=None):
@@ -54,7 +57,10 @@ def get_sort_number_from_row(row, column, column_header, model):
     return data
 
 
-def print_report(file_name='', file_exists=True, data_valid_in_file=True, database_modified=True):
+def print_report(
+        file_name='', file_exists=True, data_valid_in_file=True, database_modified=True
+        ):
+
     if not file_exists:
         pass
         # print(f'{FILE_EXISTS_NOT}: {file_name}')

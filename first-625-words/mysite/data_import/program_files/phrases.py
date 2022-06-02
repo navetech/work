@@ -35,14 +35,12 @@ def import_data_for_words(path=None):
     print()
 
     themes_ = Theme.objects.all()
-
     for theme in themes_:
         import_data_for_words_by_theme(theme=theme, path=path)
 
 
 def import_data_for_words_by_theme(theme, path=None):
     languages_ = Language.objects.all()
-
     for language in languages_:
         import_data_for_words_by_theme_and_language(
             theme=theme, language=language, path=path
@@ -78,10 +76,11 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
 
     with open(target_path) as file:
         rows = csv.reader(file)
-
         for row in rows:
             spelling_text = helpers.get_cell_from_row(
-                row=row, column=PHRASE_SPELLING_COLUMN, column_header=PHRASE_SPELLING_HEADER
+                row=row,
+                column=PHRASE_SPELLING_COLUMN,
+                column_header=PHRASE_SPELLING_HEADER
             )
 
             if (
@@ -114,7 +113,7 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
             word = from_row['data']
             if not word:
                 continue
-            
+
             data_inserted = data_inserted or from_row['data_inserted']
 
             data_valid_in_file = True
@@ -123,7 +122,6 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
             if not spelling:
                 spelling = Spelling(text=spelling_text)
                 spelling.save()
-
                 data_inserted = True
 
             phrase = Phrase.objects.filter(
@@ -131,13 +129,15 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
                 ).first()
 
             if not phrase:
-                phrase = Phrase(word=word, spelling=spelling, language=language)
-                phrase.save()
+                phrase = Phrase(
+                    word=word, spelling=spelling, language=language
+                    )
 
+                phrase.save()
                 data_inserted = True
 
             database_modified = data_inserted
-            if (database_modified):
+            if database_modified:
                 print(
                     word.base_word.text, word.grouping, word.grouping_key,
                     spelling.text
@@ -210,7 +210,11 @@ def get_data_from_row(
         ).first()
 
     if not phrase:
-        if phrase_prev and word == phrase_prev.word and spelling == phrase_prev.spelling:
+        if (
+            phrase_prev
+            and
+            word == phrase_prev.word and spelling == phrase_prev.spelling
+        ):
             phrase = phrase_prev
 
     return phrase

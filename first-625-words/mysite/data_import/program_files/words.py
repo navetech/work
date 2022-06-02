@@ -79,7 +79,6 @@ def get_data_from_row(
                     grouping=grouping, grouping_key=grouping_key
                     )
                 word.save()
-
                 data_inserted = True
 
     return {

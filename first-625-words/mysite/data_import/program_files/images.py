@@ -33,7 +33,6 @@ def import_data_for_words(path=None):
     print()
 
     themes_ = Theme.objects.all()
-
     for theme in themes_:
         import_data_for_words_by_theme(theme=theme, path=path)
 
@@ -68,7 +67,6 @@ def import_data_for_words_by_theme(theme, path=None):
 
     with open(target_path) as file:
         rows = csv.reader(file)
-
         for row in rows:
             image_link = helpers.get_cell_from_row(
                 row=row, column=IMAGE_COLUMN, column_header=IMAGE_HEADER
@@ -108,8 +106,8 @@ def import_data_for_words_by_theme(theme, path=None):
                 word_prev = None
                 continue
 
-            word_prev= word
-            
+            word_prev = word
+
             data_inserted = data_inserted or from_row['data_inserted']
 
             data_valid_in_file = True
@@ -118,17 +116,15 @@ def import_data_for_words_by_theme(theme, path=None):
             if not image:
                 image = Image(link=image_link)
                 image.save()
-
                 data_inserted = True
 
             word_images = word.images.all()
             if image not in word_images:
                 word.images.add(image)
-
                 data_updated = True
 
             database_modified = data_inserted or data_updated
-            if (database_modified):
+            if database_modified:
                 print(
                     word.base_word.text, word.grouping,
                     word.grouping_key, image.link

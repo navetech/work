@@ -1,0 +1,58 @@
+{% extends "first625words/base.html" %}
+
+
+{% block title %}
+    First625Words
+{% endblock %}
+
+{% block main %}
+    <ul class="list-group pt-4">
+        {{ data.counting }}
+
+        {% for language in data.languages %}
+            <li class="list-group-item ln-container01">
+                <h1>{{ language.name }}</h1>
+            </li>
+        {% endfor %}
+
+        {% for theme_data in data.for_themes %}
+            <li class="list-group-item ln-container01">
+                <h1>{{ theme_data.theme.name }}</h1>
+
+                {{ theme_data.counting }}
+
+                <ul class="list-group pt-4">
+                    {% for base_word_data in theme_data.for_base_words %}
+                        <li class="list-group-item ln-container02">
+                            <h2>{{ base_word_data.base_word.text }}</h2>
+
+                            {{ base_word_data.counting }}
+
+                            <ul class="list-group pt-4">
+                                {% for row in base_word_data.rows %}
+                                    <li class="list-group-item ln-container03">
+                                        <ul class="list-group pt-4">
+                                            {% for image in row.images %}
+                                                <li class="list-group-item ln-container04">
+                                                    <h3>{{ image }}</h3>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                        
+                                        <ul class="list-group pt-4">
+                                            {% for phrase in row.languages_phrases %}
+                                                <li class="list-group-item ln-container04">
+                                                    <h3>{{ phrase }}</h3>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -25,7 +25,6 @@ def import_data(path=None):
     print()
 
     themes_ = Theme.objects.all()
-
     for theme in themes_:
         import_data_by_theme(theme=theme, path=path)
 
@@ -56,7 +55,6 @@ def import_data_by_theme(theme, path=None):
 
     with open(target_path) as file:
         rows = csv.reader(file)
-
         for row in rows:
             text = helpers.get_cell_from_row(
                 row=row, column=BASE_WORD_COLUMN,
@@ -66,25 +64,31 @@ def import_data_by_theme(theme, path=None):
             if text is None or not str(text) or str(text).isspace():
                 continue
 
-            data = helpers.get_sort_number_from_row(
-                row=row, column=BASE_WORD_SORT_NUMBER_COLUMN, column_header=BASE_WORD_SORT_NUMBER_HEADER,
+            from_row = helpers.get_sort_number_from_row(
+                row=row,
+                column=BASE_WORD_SORT_NUMBER_COLUMN,
+                column_header=BASE_WORD_SORT_NUMBER_HEADER,
                 model=BaseWord
             )
 
-            sort_number = data['sort_number']
+            if not from_row:
+                continue
+
+            sort_number = from_row['sort_number']
             if sort_number is None:
                 continue
 
-            sort_number_cell = data['cell']
+            sort_number_cell = from_row['cell']
 
             data_valid_in_file = True
 
             base_word = BaseWord.objects.filter(text=text, theme=theme).first()
             if not base_word:
-                base_word = BaseWord(text=text, theme=theme, sort_number=sort_number)
+                base_word = BaseWord(
+                    text=text, theme=theme, sort_number=sort_number
+                    )
                 base_word.save()
                 data_inserted = True
-
             elif str(sort_number_cell) and not str(sort_number_cell).isspace():
                 if base_word.sort_number != sort_number:
                     base_word.sort_number = sort_number
@@ -93,7 +97,9 @@ def import_data_by_theme(theme, path=None):
 
             database_modified = data_inserted or data_updated
             if database_modified:
-                print(base_word.text, base_word.theme.name, base_word.sort_number)
+                print(
+                    base_word.text, base_word.theme.name, base_word.sort_number
+                    )
                 print()
 
     database_modified = data_inserted or data_updated
