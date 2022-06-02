@@ -306,14 +306,14 @@ def merge_phrases(ordered_words, ordered_word_languages_phrases):
 
     ordered_word_index = min(ordered_word_languages_indexes)
 
-    while ordered_word_index < len(ordered_words) - 1:
+    while True:
 
         ordered_word_languages_indexes = get_next_phrases(
             ordered_word_languages_phrases, ordered_word_languages_indexes
             )
 
         ordered_word_index = min(ordered_word_languages_indexes)
-        if ordered_word_index >= len(ordered_words) - 1:
+        if ordered_word_index >= len(ordered_words):
             break
 
         print()
@@ -348,13 +348,13 @@ def get_next_phrases(
             ordered_word_languages_indexes[language_index]
         )
 
+        ordered_word_one_language_index += 1
+
         while (
             ordered_word_one_language_index
             <
-            len(ordered_word_one_language_phrases) - 1
+            len(ordered_word_one_language_phrases)
         ):
-
-            ordered_word_one_language_index += 1
 
             phrases = ordered_word_one_language_phrases[
                 ordered_word_one_language_index
@@ -362,6 +362,8 @@ def get_next_phrases(
 
             if phrases.count() > 0:
                 break
+
+            ordered_word_one_language_index += 1
 
         ordered_word_languages_indexes[language_index] = (
             ordered_word_one_language_index
@@ -450,6 +452,9 @@ def are_groupings_equivalent(grouping1, grouping2, reverse=False):
 
 
 def is_grouping1_in_grouping2(grouping1, grouping2, reverse=False):
+    if not str(grouping1) or str(grouping1).isspace():
+        return True
+
     groups1 = grouping1.split(GROUPING_GROUPS_SEPARATOR)
     groups2 = grouping2.split(GROUPING_GROUPS_SEPARATOR)
 
@@ -520,7 +525,10 @@ def merge_images(ordered_words, mergings):
 def build_row_from_merging(merging):
     row = {}
 
-    row['images'] = merging['images']
+    if 'images' in merging:
+        row['images'] = merging['images']
+    else:
+        row['images'] = []
 
     languages_phrases = []
     for one_language_merging in merging['for_languages']:
