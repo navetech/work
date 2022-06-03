@@ -56,17 +56,15 @@ def build_words_page(languages, themes):
 def calc_list_counting(data_list):
     counting = {}
 
-    images_and_languages_counts = (
-        calc_list_images_and_languages_counts(data_list)
+    images_and_languages_counting = (
+        calc_list_images_and_languages_counting(data_list)
     )
 
-    images_count = images_and_languages_counts['images']
-    languages_count = images_and_languages_counts['languages']
-
-    counting['images'] = images_count
-    counting['languages'] = languages_count
+    counting['images'] = images_and_languages_counting['images']
+    counting['languages'] = images_and_languages_counting['languages']
 
     languages_countings = []
+    languages_count = len(images_and_languages_counting['languages'])
     for language_index in range(languages_count):
 
         one_language_counting = calc_list_one_language_counting(
@@ -80,25 +78,30 @@ def calc_list_counting(data_list):
     return counting
 
 
-def calc_list_images_and_languages_counts(data_list):
-    counts = {}
+def calc_list_images_and_languages_counting(data_list):
+    counting = {}
+    counting['images'] = []
+    counting['languages'] = []
 
     images_count_max = 0
     languages_count_max = 0
 
     for data in data_list:
-        counting = data['counting']
+        data_counting = data['counting']
 
-        images_count = counting['images']
-        images_count_max = max(images_count_max, images_count)
+        images_count = len(data_counting['images'])
+        if images_count > images_count_max:
+            images_count_max = images_count
 
-        languages_count = counting['languages']
-        languages_count_max = max(languages_count_max, languages_count)
+            counting['images'] = data_counting['images']
 
-    counts['images'] = images_count_max
-    counts['languages'] = languages_count_max
+        languages_count = len(data_counting['languages'])
+        if languages_count > languages_count_max:
+            languages_count_max = languages_count
 
-    return counts
+            counting['languages'] = data_counting['languages']
+
+    return counting
 
 
 def calc_list_one_language_counting(data_list, language_index):
@@ -205,13 +208,7 @@ def build_words_page_from_base_word(base_word, languages):
 
     ordered_words = order_words_by_grouping_keys(words)
 
-    print()
-    print('ANTES BUILD********************')
-
     rows = build_rows_from_words(ordered_words, languages)
-
-    print()
-    print('DEPOIS BUILD********************')
 
     counting = calc_rows_counting(rows)
 
@@ -255,21 +252,12 @@ def build_rows_from_words(ordered_words, languages):
     ordered_word_languages_phrases = get_phrases_for_ordered_words(
         ordered_words, languages
         )
-    
-    print()
-    print("ANTES MERGE_PHRASESE +++++++++++++++++++++++++")
 
     phrases_mergings = merge_phrases(
         ordered_words, ordered_word_languages_phrases
         )
-    
-    print()
-    print("ANTES MERGE_IMAGES -------------------------")
 
     mergings = merge_images(ordered_words, phrases_mergings)
-    
-    print()
-    print("ANTES MERGE_ROWS -------------------------")
 
     rows = []
     for merging in mergings:
@@ -316,18 +304,10 @@ def merge_phrases(ordered_words, ordered_word_languages_phrases):
         if ordered_word_index >= len(ordered_words):
             break
 
-        print()
-        print("ANTES BUILD_PHRASES_MERGING")
-        print(ordered_word_index)
-        print(ordered_word_languages_indexes)
-
         merging = build_phrases_merging(
             ordered_words, ordered_word_languages_phrases,
             ordered_word_index, ordered_word_languages_indexes
             )
-
-        print()
-        print("ANTES BUILD_PHRASES_MERGING")
 
         mergings.append(merging)
 
@@ -511,7 +491,10 @@ def merge_images(ordered_words, mergings):
                 )
 
                 if groupings_equivalent and not images_merged:
-                    merging['images'].append(images)
+                    for image in images:
+                        if image not in merging['images']:
+                            merging['images'].append(image)
+
                     images_merged = True
 
                     break
@@ -544,15 +527,13 @@ def build_row_from_merging(merging):
 def calc_rows_counting(rows):
     counting = {}
 
-    images_and_languages_counts = calc_rows_images_and_languages_counts(rows)
+    images_and_languages_counting = calc_rows_images_and_languages_counting(rows)
 
-    images_count = images_and_languages_counts['images']
-    languages_count = images_and_languages_counts['languages']
-
-    counting['images'] = images_count
-    counting['languages'] = languages_count
+    counting['images'] = images_and_languages_counting['images']
+    counting['languages'] = images_and_languages_counting['languages']
 
     languages_countings = []
+    languages_count = len(images_and_languages_counting['languages'])
     for language_index in range(languages_count):
 
         one_language_counting = calc_rows_one_language_counting(
@@ -566,33 +547,39 @@ def calc_rows_counting(rows):
     return counting
 
 
-def calc_rows_images_and_languages_counts(rows):
-    counts = {}
+def calc_rows_images_and_languages_counting(rows):
+    counting = {}
+    counting['images'] = []
+    counting['languages'] = []
 
     images_count_max = 0
     languages_count_max = 0
 
     for row in rows:
         images_count = len(row['images'])
-        images_count_max = max(images_count_max, images_count)
+        if images_count > images_count_max:
+            images_count_max = images_count
+
+            counting['images'] = row['images']
 
         languages_count = len(row['languages_phrases'])
-        languages_count_max = max(languages_count_max, languages_count)
+        if languages_count > languages_count_max:
+            languages_count_max = languages_count
 
-    counts['images'] = images_count_max
-    counts['languages'] = languages_count_max
+            counting['languages'] = list(range(languages_count_max))
 
-    return counts
+    return counting
 
 
 def calc_rows_one_language_counting(rows, language_index):
     counting = {}
 
-    phrases_count = calc_rows_phrases_count(rows, language_index)
+    phrases_counting = calc_rows_phrases_counting(rows, language_index)
 
-    counting['phrases'] = phrases_count
+    counting['phrases'] = phrases_counting
 
     phrases_countings = []
+    phrases_count = len(phrases_counting)
     for phrase_index in range(phrases_count):
 
         one_phrase_counting = calc_rows_one_phrase_counting(
@@ -605,7 +592,9 @@ def calc_rows_one_language_counting(rows, language_index):
     return counting
 
 
-def calc_rows_phrases_count(rows, language_index):
+def calc_rows_phrases_counting(rows, language_index):
+    counting = []
+
     phrases_count_max = 0
 
     for row in rows:
@@ -615,9 +604,12 @@ def calc_rows_phrases_count(rows, language_index):
             phrases = row['languages_phrases'][language_index]
 
             phrases_count = len(phrases)
-            phrases_count_max = max(phrases_count_max, phrases_count)
+            if phrases_count > phrases_count_max:
+                phrases_count_max = phrases_count
 
-    return phrases_count_max
+                counting = phrases
+
+    return counting
 
 
 def calc_rows_one_phrase_counting(rows, language_index, phrase_index):

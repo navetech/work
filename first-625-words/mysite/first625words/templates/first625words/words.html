@@ -6,6 +6,80 @@
 {% endblock %}
 
 {% block main %}
+    {% for theme_data in data.for_themes %}
+        <h5>{{ theme_data.theme.name }}</h5>
+
+        <table style="width:100%">
+            <tr>
+                <th>Number</th>
+                <th>Base Word</th>
+
+                {% for image in theme_data.counting.images %}
+                    <th>Image {{ forloop.counter }}</th>
+                {% endfor %}
+
+                {% for language_index in theme_data.counting.languages %}
+                    {% for language in data.languages %}
+                        {% if language_index == forloop.counter0 %}
+                            <th>{{ language.name }}</th>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </tr>
+
+            <tr>
+                <td></td>
+                <td></td>
+
+                {% for image in theme_data.counting.images %}
+                    <td></td>
+                {% endfor %}
+            </tr>
+            {% for base_word_data in theme_data.for_base_words %}
+                {% for row in base_word_data.rows %}
+                    <tr>
+                        {% if forloop.first %}
+                            <td>{{ forloop.parentloop.counter }}</td>
+                            <td>{{ base_word_data.base_word.text }}</td>
+                        {% else %}
+                            <td></td>
+                            <td></td>
+                        {% endif %}
+
+                        {% for image in row.images %}
+                            {% if forloop.counter0 < theme_data.counting.images|length %}
+                                <td>
+                                    <a href={{ image.link }}>&#10004;</a>
+                                </td>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% for language_index in row.languages_phrases %}
+                            {% if forloop.counter0 < theme_data.counting.languages|length %}
+                                <td>
+                                    LANGUAGES_PHRASES {{ forloop.counter0 }}
+                                </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                <tr></tr>
+            {% endfor %}
+        </table>
+
+            {% for base_word_data in theme_data.for_base_words %}
+            <li class="list-group-item ln-container01">
+                <h6>{{ forloop.counter }} {{ base_word_data.base_word.text }}</h6>
+
+                <table style="width:100%">
+                    <tr>
+                        <th></th>
+                    </tr>
+                </table>
+            </li>
+        {% endfor %}
+    {% endfor %}
+
     <ul class="list-group pt-4">
         {{ data.counting }}
 
