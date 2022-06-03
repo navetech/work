@@ -107,17 +107,17 @@ def calc_list_images_and_languages_counting(data_list):
 def calc_list_one_language_counting(data_list, language_index):
     counting = {}
 
-    phrases_count = calc_list_phrases_count(data_list, language_index)
+    phrases_counting = calc_list_phrases_counting(data_list, language_index)
 
-    counting['phrases'] = phrases_count
+    counting['phrases'] = phrases_counting
 
     phrases_countings = []
+    phrases_count = len(phrases_counting)
     for phrase_index in range(phrases_count):
 
         one_phrase_counting = calc_list_one_phrase_counting(
             data_list, language_index, phrase_index
             )
-
         phrases_countings.append(one_phrase_counting)
 
     counting['for_phrases'] = phrases_countings
@@ -125,61 +125,71 @@ def calc_list_one_language_counting(data_list, language_index):
     return counting
 
 
-def calc_list_phrases_count(data_list, language_index):
+def calc_list_phrases_counting(data_list, language_index):
+    counting = []
+
     phrases_count_max = 0
 
     for data in data_list:
-        counting = data['counting']
+        data_counting = data['counting']
 
-        languages_count = len(counting['for_languages'])
+        languages_count = len(data_counting['for_languages'])
 
         if language_index < languages_count:
-            one_language_counting = counting['for_languages'][language_index]
+            one_language_counting = data_counting['for_languages'][language_index]
+            phrases = one_language_counting['phrases']
 
-            phrases_count = one_language_counting['phrases']
-            phrases_count_max = max(phrases_count_max, phrases_count)
+            phrases_count = len(phrases)
+            if phrases_count > phrases_count_max:
+                phrases_count_max = phrases_count
 
-    return phrases_count_max
+                counting = phrases
+
+    return counting
 
 
 def calc_list_one_phrase_counting(data_list, language_index, phrase_index):
     counting = {}
 
-    pronunciations_count = calc_list_pronunciations_count(
+    pronunciations_counting = calc_list_pronunciations_counting(
         data_list, language_index, phrase_index
         )
 
-    counting['pronunciations'] = pronunciations_count
+    counting['pronunciations'] = pronunciations_counting
 
     return counting
 
 
-def calc_list_pronunciations_count(data_list, language_index, phrase_index):
+def calc_list_pronunciations_counting(data_list, language_index, phrase_index):
+    counting = []
+
     pronunciations_count_max = 0
 
     for data in data_list:
-        counting = data['counting']
+        data_counting = data['counting']
 
-        languages_count = len(counting['for_languages'])
+        languages_count = len(data_counting['for_languages'])
 
         if language_index < languages_count:
-            one_language_counting = counting['for_languages'][language_index]
+            one_language_counting = data_counting['for_languages'][language_index]
+            phrases = one_language_counting['phrases']
 
-            phrases_count = one_language_counting['phrases']
-
+            phrases_count = len(phrases)
             if phrase_index < phrases_count:
 
                 one_phrase_counting = (
                     one_language_counting['for_phrases'][phrase_index]
                 )
 
-                pronunciations_count = one_phrase_counting['pronunciations']
+                pronunciations = one_phrase_counting['pronunciations']
 
-                pronunciations_count_max = max(
-                    pronunciations_count_max, pronunciations_count
-                    )
+                pronunciations_count = len(pronunciations)
+                if pronunciations_count > pronunciations_count_max:
+                    pronunciations_count_max = pronunciations_count
 
-    return pronunciations_count_max
+                    counting = pronunciations
+
+    return counting
 
 
 def build_words_page_from_theme(theme, languages):
@@ -615,16 +625,18 @@ def calc_rows_phrases_counting(rows, language_index):
 def calc_rows_one_phrase_counting(rows, language_index, phrase_index):
     counting = {}
 
-    pronunciations_count = calc_rows_pronunciations_count(
+    pronunciations_counting = calc_rows_pronunciations_counting(
         rows, language_index, phrase_index
         )
 
-    counting['pronunciations'] = pronunciations_count
+    counting['pronunciations'] = pronunciations_counting
 
     return counting
 
 
-def calc_rows_pronunciations_count(rows, language_index, phrase_index):
+def calc_rows_pronunciations_counting(rows, language_index, phrase_index):
+    counting = []
+
     pronunciations_count_max = 0
 
     for row in rows:
@@ -640,8 +652,9 @@ def calc_rows_pronunciations_count(rows, language_index, phrase_index):
                 pronunciations = phrase.pronunciations.all()
 
                 pronunciations_count = len(pronunciations)
-                pronunciations_count_max = max(
-                    pronunciations_count_max, pronunciations_count
-                    )
+                if pronunciations_count > pronunciations_count_max:
+                    pronunciations_count_max = pronunciations_count
 
-    return pronunciations_count_max
+                    counting = pronunciations
+
+    return counting

@@ -11,7 +11,7 @@
 
         <table style="width:100%">
             <tr>
-                <th>Number</th>
+                <th>#</th>
                 <th>Base Word</th>
 
                 {% for image in theme_data.counting.images %}
@@ -28,13 +28,39 @@
             </tr>
 
             <tr>
-                <td></td>
-                <td></td>
+                <th></th>
+                <th></th>
 
                 {% for image in theme_data.counting.images %}
-                    <td></td>
+                    <th></th>
+                {% endfor %}
+
+                {% for language_counting in theme_data.counting.for_languages %}
+                    {% for phrase in language_counting.phrases %}
+                        <th>Phrase {{ forloop.counter }}</th>
+                    {% endfor %}
                 {% endfor %}
             </tr>
+
+            <tr>
+                <th></th>
+                <th></th>
+
+                {% for image in theme_data.counting.images %}
+                    <th></th>
+                {% endfor %}
+
+                {% for language_counting in theme_data.counting.for_languages %}
+                    {% for phrase_counting in language_counting.for_phrases %}
+                        <th>Text</th>
+
+                        {% for pronunciation in phrase_counting.pronunciations %}
+                            <th>Pronunciation {{ forloop.counter }}</th>
+                        {% endfor %}
+                    {% endfor %}
+                {% endfor %}
+            </tr>
+
             {% for base_word_data in theme_data.for_base_words %}
                 {% for row in base_word_data.rows %}
                     <tr>
