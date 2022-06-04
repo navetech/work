@@ -7,7 +7,7 @@
 
 {% block main %}
 
-
+{% comment *%}
 <table style="width:100%">
     <caption style='caption-side:top;'>
         Poster availability
@@ -57,307 +57,196 @@
         </tr>
     </thead>
 </table>
+{% endcomment %}
 
 
-{% for theme_data in data.for_themes %}
-    <table style="width:100%">
-        <caption style='caption-side:top;'>
-            {{ theme_data.theme.name }}
-        </caption>
+    {% for theme_data in data.for_themes %}
+        <table style="width:100%">
+            <caption style='caption-side:top;'>
+                {{ theme_data.theme.name }}
+            </caption>
 
-        <col>
-        <col>
-
-        {% for image_counting in theme_data.counting.images %}
             <col>
-        {% endfor %}
+            <col>
 
-        {% for language_counting in theme_data.counting.for_languages %}
-            {% for phrase_counting in language_counting.for_phrases %}
-                {% with phrase_columns_count=1 %}
-                {% with phrase_pronunciations_count=phrase_counting.pronunciations|length %}
-                {% with phrase_columns_count=phrase_columns_count|add:phrase_pronunciations_count %}
-
-                <colgroup span={{ phrase_columns_count }}></colgroup>
-
-                {% endwith %}
-                {% endwith %}
-                {% endwith %}
+            {% for image_counting in theme_data.counting.images %}
+                <col>
             {% endfor %}
-        {% endfor %}
-    
-        <thead>
-            <tr>
-                <th scope="col"></th>
-                <th scope="col"></th>
 
-                {% for image_counting in theme_data.counting.images %}
-                    <th scope="col"></th>
-                {% endfor %}
+            {% for language_counting in theme_data.counting.for_languages %}
+                {% for phrase_counting in language_counting.for_phrases %}
+                    {% with phrase_columns_count=1 %}
+                    {% with phrase_pronunciations_count=phrase_counting.pronunciations|length %}
+                    {% with phrase_columns_count=phrase_columns_count|add:phrase_pronunciations_count %}
 
-                {% for language_counting in theme_data.counting.for_languages %}
-                    {% with language_columns_count=0 %}
-
-                    {% for phrase_counting in language_counting.for_phrases %}
-                        {% with language_columns_count=language_columns_count|add:1 %}
-                        {% with language_columns_count=language_columns_count|add:phrase_counting.pronunciations|length %}
-                        {% endwith %}
-                        {% endwith %}
-                    {% endfor %}
-
-                    {% for language in data.languages %}
-                        {% if forloop.parentloop.counter0 == forloop.counter0 %}
-
-                        <th colspan={{ language_columns_count }} scope="colgroup">{{ language.name }}</th>
-
-                        {% endif %}
-                    {% endfor %}
+                    <colgroup span={{ phrase_columns_count }}></colgroup>
 
                     {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
                 {% endfor %}
-            </tr>
-
-            <tr>
-                <th scope="col"></th>
-                <th scope="col"></th>
-
-                {% for image_counting in theme_data.counting.images %}
+            {% endfor %}
+        
+            <thead>
+                <tr>
                     <th scope="col"></th>
-                {% endfor %}
+                    <th scope="col"></th>
 
-                {% for language_counting in theme_data.counting.for_languages %}
-                    {% for phrase_counting in language_counting.for_phrases %}
-                        {% with phrase_columns_count=1 %}
-                        {% with phrase_pronunciations_count=phrase_counting.pronunciations|length %}
-                        {% with phrase_columns_count=phrase_columns_count|add:phrase_pronunciations_count %}
-
-                        <th colspan={{ phrase_columns_count }} scope="colgroup">Phrase{{ forloop.counter }}</th>
-
-                        {% endwith %}
-                        {% endwith %}
-                        {% endwith %}
+                    {% for image_counting in theme_data.counting.images %}
+                        <th scope="col"></th>
                     {% endfor %}
-                {% endfor %}
-            </tr>
 
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Base Word</th>
+                    {% for language_counting in theme_data.counting.for_languages %}
+                        {% with language_columns_count=0 %}
 
-                {% for image_counting in theme_data.counting.images %}
-                    <th scope="col">Image{{ forloop.counter }}</th>
-                {% endfor %}
-
-                {% for language_counting in theme_data.counting.for_languages %}
-                    {% for phrase_counting in language_counting.for_phrases %}
-                        <th scope="col">Text</th>
-
-                        {% for pronunciation_counting in phrase_counting.pronunciations %}
-                            <th scope="col">Pronunciation{{ forloop.counter }}</th>
-                        {% endfor %}
-                    {% endfor %}
-                {% endfor %}
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for base_word_data in theme_data.for_base_words %}
-                {% for row in base_word_data.rows %}
-                    <tr>
-                        {% if forloop.first %}
-                            <td>{{ forloop.parentloop.counter }}</td>
-                            <td>{{ base_word_data.base_word.text }}</td>
-                        {% else %}
-                            <td></td>
-                            <td></td>
-                        {% endif %}
-
-                        {% for image in row.images %}
-                            <td>
-                                <a href={{ image.link }}>&#10004;</a>
-                            </td>
+                        {% for phrase_counting in language_counting.for_phrases %}
+                            {% with language_columns_count=language_columns_count|add:1 %}
+                            {% with language_columns_count=language_columns_count|add:phrase_counting.pronunciations|length %}
+                            {% endwith %}
+                            {% endwith %}
                         {% endfor %}
 
-                        {% for image_counting in theme_data.counting.images %}
-                            {% if forloop.counter0 >= row.images|length %}
-                                <td></td>
+                        {% for language in data.languages %}
+                            {% if forloop.parentloop.counter0 == forloop.counter0 %}
+
+                                <th colspan={{ language_columns_count }} scope="colgroup">{{ language.name }}</th>
+
                             {% endif %}
                         {% endfor %}
 
-                        {% for language_phrases in row.languages_phrases %}
-                            {% for phrase in language_phrases %}
-                                <td>
-                                    {{ phrase.spelling.text }}
-                                </td>
+                        {% endwith %}
 
-                                {% for pronunciation in phrase.pronunciations.all %}
-                                    <td>
-                                        <a href={{ pronunciation.sound }}>&#10004;</a>
-                                    </td>
-                                {% empty %}
-                                    <td></td>
+                        {% if not forloop.last %}
+                            {% for phrase_counting in language_counting.for_phrases %}
+                                <th scope="col"></th>
+
+                                {% for pronunciation_counting in phrase_counting.pronunciations %}
+                                    <th scope="col"></th>
                                 {% endfor %}
                             {% endfor %}
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-            {% endfor %}
-        </tbody>
-    </table>
-{% endfor %}
-
-
-{% comment *%}
-    {% for theme_data in data.for_themes %}
-        <h5>{{ theme_data.theme.name }}</h5>
-
-        <table style="width:100%">
-            <tr>
-                <th>#</th>
-                <th>Base Word</th>
-
-                {% for image in theme_data.counting.images %}
-                    <th>Image {{ forloop.counter }}</th>
-                {% endfor %}
-
-                {% for language_index in theme_data.counting.languages %}
-                    {% for language in data.languages %}
-                        {% if language_index == forloop.counter0 %}
-                            <th>{{ language.name }}</th>
                         {% endif %}
                     {% endfor %}
-                {% endfor %}
-            </tr>
+                </tr>
 
-            <tr>
-                <th></th>
-                <th></th>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
 
-                {% for image in theme_data.counting.images %}
-                    <th></th>
-                {% endfor %}
-
-                {% for language_counting in theme_data.counting.for_languages %}
-                    {% for phrase in language_counting.phrases %}
-                        <th>Phrase {{ forloop.counter }}</th>
+                    {% for image_counting in theme_data.counting.images %}
+                        <th scope="col"></th>
                     {% endfor %}
-                {% endfor %}
-            </tr>
 
-            <tr>
-                <th></th>
-                <th></th>
+                    {% for language_counting in theme_data.counting.for_languages %}
+                        {% for phrase_counting in language_counting.for_phrases %}
+                            {% with phrase_columns_count=1 %}
+                            {% with phrase_pronunciations_count=phrase_counting.pronunciations|length %}
+                            {% with phrase_columns_count=phrase_columns_count|add:phrase_pronunciations_count %}
 
-                {% for image in theme_data.counting.images %}
-                    <th></th>
-                {% endfor %}
+                            <th colspan={{ phrase_columns_count }} scope="colgroup">Phrase{{ forloop.counter }}</th>
 
-                {% for language_counting in theme_data.counting.for_languages %}
-                    {% for phrase_counting in language_counting.for_phrases %}
-                        <th>Text</th>
-
-                        {% for pronunciation in phrase_counting.pronunciations %}
-                            <th>Pronunciation {{ forloop.counter }}</th>
+                            {% endwith %}
+                            {% endwith %}
+                            {% endwith %}
                         {% endfor %}
                     {% endfor %}
-                {% endfor %}
-            </tr>
+                </tr>
 
-            {% for base_word_data in theme_data.for_base_words %}
-                {% for row in base_word_data.rows %}
-                    <tr>
-                        {% if forloop.first %}
-                            <td>{{ forloop.parentloop.counter }}</td>
-                            <td>{{ base_word_data.base_word.text }}</td>
-                        {% else %}
-                            <td></td>
-                            <td></td>
-                        {% endif %}
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Base Word</th>
 
-                        {% for image in row.images %}
-                            {% if forloop.counter0 < theme_data.counting.images|length %}
+                    {% for image_counting in theme_data.counting.images %}
+                        <th scope="col">I{{ forloop.counter }}</th>
+                    {% endfor %}
+
+                    {% for language_counting in theme_data.counting.for_languages %}
+                        {% for phrase_counting in language_counting.for_phrases %}
+                            <th scope="col">Text</th>
+
+                            {% for pronunciation_counting in phrase_counting.pronunciations %}
+                                <th scope="col">P{{ forloop.counter }}</th>
+                            {% endfor %}
+                        {% endfor %}
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for base_word_data in theme_data.for_base_words %}
+                    {% for row in base_word_data.rows %}
+                        <tr>
+                            {% if forloop.first %}
+                                <td>{{ forloop.parentloop.counter }}</td>
+                                <td>{{ base_word_data.base_word.text }}</td>
+                            {% else %}
+                                <td></td>
+                                <td></td>
+                            {% endif %}
+
+                            {% for image in row.images %}
                                 <td>
                                     <a href={{ image.link }}>&#10004;</a>
                                 </td>
-                            {% endif %}
-                        {% endfor %}
+                            {% endfor %}
 
-                        {% for language_index in row.languages_phrases %}
-                            {% if forloop.counter0 < theme_data.counting.languages|length %}
-                                <td>
-                                    LANGUAGES_PHRASES {{ forloop.counter0 }}
-                                </td>
-                            {% endif %}
-                        {% endfor %}
+                            {% for image_counting in theme_data.counting.images %}
+                                {% if forloop.counter0 >= row.images|length %}
+                                    <td></td>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% for language_phrases in row.languages_phrases %}
+                                {% for phrase in language_phrases %}
+                                    <td>
+                                        {{ phrase.spelling.text }}
+                                    </td>
+
+                                    {% for pronunciation in phrase.pronunciations.all %}
+                                        <td>
+                                            <a href={{ pronunciation.sound }}>&#10004;</a>
+                                        </td>
+                                    {% empty %}
+                                        <td></td>
+                                    {% endfor %}
+                                {% endfor %}
+
+
+                                {% for language_counting in theme_data.counting.for_languages %}
+                                    {% if forloop.counter0 == forloop.parentloop.counter0 %}
+                                        {% for phrase_counting in language_counting.for_phrases %}
+                                            {% if forloop.counter0 >= languages_phrases|length %}
+                                                <td></td>
+            
+                                                {% for pronunciation_counting in phrase_counting.pronunciations %}
+                                                    <td></td>
+                                                {% endfor %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+
+                            {% endfor %}
+
+                            {% for language_counting in theme_data.counting.for_languages %}
+                                {% if forloop.counter0 >= row.languages_phrases|length %}
+                                    {% for phrase_counting in language_counting.for_phrases %}
+                                        <td></td>
+        
+                                        {% for pronunciation_counting in phrase_counting.pronunciations %}
+                                            <td></td>
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td>
+                            <br>
+                        </td>
                     </tr>
                 {% endfor %}
-                <tr></tr>
-            {% endfor %}
+            </tbody>
         </table>
-
-            {% for base_word_data in theme_data.for_base_words %}
-            <li class="list-group-item ln-container01">
-                <h6>{{ forloop.counter }} {{ base_word_data.base_word.text }}</h6>
-
-                <table style="width:100%">
-                    <tr>
-                        <th></th>
-                    </tr>
-                </table>
-            </li>
-        {% endfor %}
     {% endfor %}
-
-    <ul class="list-group pt-4">
-        {{ data.counting }}
-
-        {% for language in data.languages %}
-            <li class="list-group-item ln-container01">
-                <h1>{{ language.name }}</h1>
-            </li>
-        {% endfor %}
-
-        {% for theme_data in data.for_themes %}
-            <li class="list-group-item ln-container01">
-                <h1>{{ theme_data.theme.name }}</h1>
-
-                {{ theme_data.counting }}
-
-                <ul class="list-group pt-4">
-                    {% for base_word_data in theme_data.for_base_words %}
-                        <li class="list-group-item ln-container02">
-                            <h2>{{ base_word_data.base_word.text }}</h2>
-
-                            {{ base_word_data.counting }}
-
-                            <ul class="list-group pt-4">
-                                {% for row in base_word_data.rows %}
-                                    <li class="list-group-item ln-container03">
-                                        <ul class="list-group pt-4">
-                                            {% for image in row.images %}
-                                                <li class="list-group-item ln-container04">
-                                                    <h3>{{ image }}</h3>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                        
-                                        <ul class="list-group pt-4">
-                                            {% for phrase in row.languages_phrases %}
-                                                <li class="list-group-item ln-container04">
-                                                    <h3>{{ phrase }}</h3>
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </li>
-        {% endfor %}
-    </ul>
-
-{% endcomment %}
-
 {% endblock %}

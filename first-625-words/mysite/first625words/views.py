@@ -18,8 +18,8 @@ from .settings import GROUPING_KEYS_KEY_BASE_NUMBER
 def index(request):
 
     languages = []
-#    language = Language.objects.filter(name='English').first()
-#    languages.append(language)
+    language = Language.objects.filter(name='English').first()
+    languages.append(language)
     language = Language.objects.filter(name='Portuguese').first()
     languages.append(language)
 
@@ -288,8 +288,7 @@ def get_phrases_for_ordered_words(ordered_words, languages):
         for ordered_word in ordered_words:
             word = ordered_word['word']
 
-            phrases = Phrase.objects.filter(word=word, language=language)
-
+            phrases = Phrase.objects.filter(word=word, language=language).all()
             ordered_word_one_language_phrases.append(phrases)
 
         ordered_word_languages_phrases.append(
@@ -303,8 +302,6 @@ def merge_phrases(ordered_words, ordered_word_languages_phrases):
     mergings = []
 
     ordered_word_languages_indexes = [-1] * len(ordered_word_languages_phrases)
-
-    ordered_word_index = min(ordered_word_languages_indexes)
 
     while True:
 
@@ -387,6 +384,8 @@ def build_phrases_merging(
         )
 
         one_language_merging = {}
+        one_language_merging['phrases'] = []
+        one_language_merging['word'] = None
 
         while (
             ordered_word_one_language_index
