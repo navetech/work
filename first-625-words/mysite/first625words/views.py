@@ -18,7 +18,9 @@ from .settings import GROUPING_KEYS_KEY_BASE_NUMBER
 def index(request):
 
     languages = []
-    language = Language.objects.filter(name='English').first()
+#    language = Language.objects.filter(name='English').first()
+#    languages.append(language)
+    language = Language.objects.filter(name='Portuguese').first()
     languages.append(language)
 
     themes = []
