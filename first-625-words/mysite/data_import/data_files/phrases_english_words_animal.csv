@@ -7,10 +7,13 @@ dog,feminine/plural,01/01,bitches
 ,,,
 cat,singular,00,cat
 cat,plural,01,cats
+cat,singular,00,cad
+cat,plural,01,cads
+cat,neutro,02,cax
 ,,,
 fish,singular,00,fish
 fish,plural,01,fish
-fish,plural,02,fishes
+fish,plural,01,fishes
 ,,,
 bird,singular,00,bird
 bird,plural,01,birds

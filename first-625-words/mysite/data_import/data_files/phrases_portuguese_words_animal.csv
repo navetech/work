@@ -15,6 +15,20 @@ cat,masculine/singular,00/00,o gato
 cat,masculine/plural,00/01,os gatos
 cat,feminine/singular,01/00,a gata
 cat,feminine/plural,01/01,as gatas
+cat,masculine/singular,00/00,o gado
+cat,masculine/plural,00/01,os gados
+cat,feminine/singular,01/00,a gada
+cat,feminine/plural,01/01,as gadas
+cat,bissex/singular,02/00,o gado gay
+cat,bissex/plural,02/01,os gados gay
+cat,big/masculine/singular,00/00/00,o gatão
+cat,big/masculine/plural,00/00/01,os gatões
+cat,big/feminine/singular,00/01/00,a gatona
+cat,big/feminine/plural,00/01/01,as gatonas
+cat,small/masculine/singular,01/00/00,o gatinho
+cat,small/masculine/plural,01/00/01,os gatinhos
+cat,small/feminine/singular,01/01/00,a gatinha
+cat,small/feminine/plural,01/01/01,as gatinhas
 ,,,
 fish,singular,00,o peixe
 fish,plural,01,os peixes

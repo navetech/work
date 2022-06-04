@@ -196,7 +196,11 @@
                             {% endfor %}
 
                             {% for language_phrases in row.languages_phrases %}
+                                {% with language_index=forloop.counter0 %}
+
                                 {% for phrase in language_phrases %}
+                                    {% with phrase_index=forloop.counter0 %}
+
                                     <td>
                                         {{ phrase.spelling.text }}
                                     </td>
@@ -205,19 +209,32 @@
                                         <td>
                                             <a href={{ pronunciation.sound }}>&#10004;</a>
                                         </td>
-                                    {% empty %}
-                                        <td></td>
                                     {% endfor %}
+
+                                    {% for language_counting in theme_data.counting.for_languages %}
+                                        {% if forloop.counter0 == language_index %}
+                                            {% for phrase_counting in language_counting.for_phrases %}
+                                                {% if forloop.counter0 == phrase_index %}
+                                                    {% for pronunciation in phrase_counting.pronunciations %}
+                                                        {% if forloop.counter0 >= phrase.pronunciations.count %}
+                                                            <td></td>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% endwith %}
                                 {% endfor %}
 
-
                                 {% for language_counting in theme_data.counting.for_languages %}
-                                    {% if forloop.counter0 == forloop.parentloop.counter0 %}
+                                    {% if forloop.counter0 == language_index %}
                                         {% for phrase_counting in language_counting.for_phrases %}
-                                            {% if forloop.counter0 >= languages_phrases|length %}
+                                            {% if forloop.counter0 >= language_phrases|length %}
                                                 <td></td>
-            
-                                                {% for pronunciation_counting in phrase_counting.pronunciations %}
+
+                                                {% for pronunciation in phrase_counting.pronunciations %}
                                                     <td></td>
                                                 {% endfor %}
                                             {% endif %}
@@ -225,18 +242,7 @@
                                     {% endif %}
                                 {% endfor %}
 
-                            {% endfor %}
-
-                            {% for language_counting in theme_data.counting.for_languages %}
-                                {% if forloop.counter0 >= row.languages_phrases|length %}
-                                    {% for phrase_counting in language_counting.for_phrases %}
-                                        <td></td>
-        
-                                        {% for pronunciation_counting in phrase_counting.pronunciations %}
-                                            <td></td>
-                                        {% endfor %}
-                                    {% endfor %}
-                                {% endif %}
+                                {% endwith %}
                             {% endfor %}
                         </tr>
                     {% endfor %}
