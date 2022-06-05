@@ -29,6 +29,8 @@ cat,small/masculine/singular,01/00/00,o gatinho
 cat,small/masculine/plural,01/00/01,os gatinhos
 cat,small/feminine/singular,01/01/00,a gatinha
 cat,small/feminine/plural,01/01/01,as gatinhas
+cat,singular,00,gat
+cat,plural,01,gats
 ,,,
 fish,singular,00,o peixe
 fish,plural,01,os peixes
