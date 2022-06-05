@@ -34,12 +34,14 @@ def get_data_from_row(
     str_grouping = str(grouping)
     str_grouping_key = str(grouping_key)
 
+    """
     if (
         str_grouping_key and not str_grouping_key.isspace()
         and
         (not str_grouping or str_grouping.isspace())
     ):
         return None
+    """
 
     word_prev = data_prev
     if word_prev:

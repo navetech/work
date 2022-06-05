@@ -53,7 +53,7 @@ def import_data_by_theme(theme, path=None):
 
     file_exists = True
 
-    with open(target_path) as file:
+    with open(target_path, encoding="utf8") as file:
         rows = csv.reader(file)
         for row in rows:
             text = helpers.get_cell_from_row(

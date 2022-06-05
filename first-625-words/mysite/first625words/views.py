@@ -20,7 +20,7 @@ def index(request):
     languages = []
     language = Language.objects.filter(name='English').first()
     languages.append(language)
-    language = Language.objects.filter(name='Portuguese').first()
+    language = Language.objects.filter(name='Chinese').first()
     languages.append(language)
 
     themes = []
@@ -299,7 +299,6 @@ def get_phrases_for_ordered_words(ordered_words, languages):
 
 
 def merge_phrases(ordered_words, ordered_word_languages_phrases):
-    print('MERGE_PHRASERS   @@@@@@@@@@@@@@@@@@@@')
     mergings = []
 
     ordered_word_languages_indexes = [0] * len(ordered_word_languages_phrases)
@@ -448,13 +447,20 @@ def build_phrases_merging(
             one_language_word = one_language_ordered_word['word']
 
             one_language_grouping = one_language_word.grouping
-            one_language_grouping_key = one_language_word.grouping_key
 
-            groupings_equivalent = are_groupings_equivalent(
+            """
+            one_language_grouping_key = one_language_word.grouping_key
+            """
+
+            groupings_equivalent_reverse = are_groupings_equivalent(
                 grouping, one_language_grouping, reverse=True
             )
 
-            if groupings_equivalent:
+            groupings_equivalent_direct = are_groupings_equivalent(
+                grouping, one_language_grouping, reverse=False
+            )
+
+            if groupings_equivalent_reverse or groupings_equivalent_direct:
                 one_language_merging['phrases'] = phrases
                 one_language_merging['word'] = one_language_word
 
@@ -553,6 +559,8 @@ def merge_images(ordered_words, mergings):
             languages_mergings = merging['for_languages']
             for one_language_merging in languages_mergings:
                 one_language_word = one_language_merging['word']
+                if not one_language_word:
+                    continue
 
                 one_language_grouping = one_language_word.grouping
 

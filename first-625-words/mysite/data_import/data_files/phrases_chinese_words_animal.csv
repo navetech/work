@@ -1,0 +1,26 @@
+Base Word,Grouping,Grouping Key,Spelling
+,,,
+dog,masculine,00,狗 (gǒu)
+dog,feminine,01,母狗 (mǔgǒu)
+,,,
+cat,,00,猫 (māo)
+,,,
+fish,,00,鱼 (yú)
+,,,
+bird,,00,鸟 (niǎo)
+,,,
+cow,feminine,00,奶牛 (nǎiniú)
+cow,masculine,01,牛 (niú)
+cow,uncastrated_masculine,02,公牛 (gōngniú)
+,,,
+pig,,00,猪 (zhū)
+,,,
+mouse,,00,鼠 (shǔ)
+,,,
+horse,masculine,00,马 (mǎ)
+horse,feminine,01,母马 (mǔmǎ)
+horse,for-breeding_masculine,02,种马 (zhòngmǎ)
+,,,
+wing,,00,翅膀 (chìbǎng)
+,,,
+animal,,00,动物 (dòngwù)

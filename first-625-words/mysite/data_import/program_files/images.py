@@ -65,7 +65,7 @@ def import_data_for_words_by_theme(theme, path=None):
 
     word_prev = None
 
-    with open(target_path) as file:
+    with open(target_path, encoding="utf8") as file:
         rows = csv.reader(file)
         for row in rows:
             image_link = helpers.get_cell_from_row(

@@ -80,7 +80,7 @@ def import_data_for_phrases_by_theme_and_language(theme, language, path=None):
 
     phrase_prev = None
 
-    with open(target_path) as file:
+    with open(target_path, encoding="utf8") as file:
         rows = csv.reader(file)
         for row in rows:
             text = helpers.get_cell_from_row(

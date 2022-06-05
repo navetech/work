@@ -74,7 +74,7 @@ def import_data_for_words_by_theme_and_language(theme, language, path=None):
 
     file_exists = True
 
-    with open(target_path) as file:
+    with open(target_path, encoding="utf8") as file:
         rows = csv.reader(file)
         for row in rows:
             spelling_text = helpers.get_cell_from_row(
