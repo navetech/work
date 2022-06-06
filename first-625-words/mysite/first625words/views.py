@@ -308,7 +308,7 @@ def get_languages_ordered_phrases(ordered_words, languages):
 def merge_phrases(ordered_words, languages_ordered_phrases):
     mergings = []
 
-    grouping = None
+    last_grouping = ''
 
     languages_ordered_phrases_indexes = [0] * len(languages_ordered_phrases)
 
@@ -317,7 +317,7 @@ def merge_phrases(ordered_words, languages_ordered_phrases):
         data = build_phrases_merging(
             ordered_words,
             languages_ordered_phrases, languages_ordered_phrases_indexes,
-            grouping
+            last_grouping
             )
 
         if not data:
@@ -327,9 +327,9 @@ def merge_phrases(ordered_words, languages_ordered_phrases):
 
         grouping_equivalences = data['grouping_equivalences']
         if True in grouping_equivalences:
-            grouping = data['grouping']
+            last_grouping = data['grouping']
         else:
-            grouping = None
+            last_grouping = ''
 
         languages_ordered_phrases_indexes = data['indexes']
         
@@ -339,7 +339,7 @@ def merge_phrases(ordered_words, languages_ordered_phrases):
 def build_phrases_merging(
         ordered_words,
         languages_ordered_phrases, languages_ordered_phrases_indexes,
-        grouping
+        last_grouping
         ):
 
     ordered_word_index = get_ordered_word_index(
@@ -349,7 +349,9 @@ def build_phrases_merging(
     if ordered_word_index is None or ordered_word_index >= len(ordered_words):
         return None
 
-    if grouping is None:
+    if str(last_grouping) and not str(last_grouping).isspace():
+        grouping = last_grouping
+    else:
         ordered_word = ordered_words[ordered_word_index]
         word = ordered_word['word']
         grouping = word.grouping
@@ -385,13 +387,16 @@ def build_phrases_merging(
 
             one_language_grouping = one_language_word.grouping
 
-            groupings_equivalent_direct = are_groupings_equivalent(
+            groupings_cmp_direct = compare_groupings(
                 grouping, one_language_grouping, reverse=False
             )
 
-            groupings_equivalent_reverse = are_groupings_equivalent(
+            groupings_cmp_reverse = compare_groupings(
                 grouping, one_language_grouping, reverse=True
             )
+
+            groupings_equivalent_direct = groupings_cmp_direct <= 0
+            groupings_equivalent_reverse = groupings_cmp_reverse <= 0
 
             if groupings_equivalent_direct or groupings_equivalent_reverse:
                 one_language_merging['phrases'] = phrases_data['phrases']
@@ -446,15 +451,15 @@ def get_ordered_word_index(
         return ordered_word_index
 
 
-def are_groupings_equivalent(grouping1, grouping2, reverse=False):
+def compare_groupings(grouping1, grouping2, reverse=False):
     if grouping1 == grouping2:
-        return True
+        return 0
     elif is_grouping1_in_grouping2(grouping1, grouping2, reverse):
-        return True
-#    elif is_grouping1_in_grouping2(grouping2, grouping1, reverse):
-#        return True
+        return -1
+    elif is_grouping1_in_grouping2(grouping2, grouping1, reverse):
+        return -2
     else:
-        return False
+        return 1
 
 
 def is_grouping1_in_grouping2(grouping1, grouping2, reverse=False):
@@ -476,22 +481,6 @@ def is_grouping1_in_grouping2(grouping1, grouping2, reverse=False):
             return False
 
     return True
-
-
-def are_grouping_keys_equivalent(grouping_key1, grouping_key2):
-    if grouping_key1 == grouping_key2:
-        return True
-
-    key_number1 = calc_key_number_for_grouping_key(grouping_key1)
-    key_number1 %= key_number1
-
-    key_number2 = calc_key_number_for_grouping_key(grouping_key2)
-    key_number2 %= key_number2
-
-    if key_number1 == key_number2:
-        return True
-    else:
-        return False
 
 
 def merge_images(ordered_words, mergings):
@@ -517,11 +506,13 @@ def merge_images(ordered_words, mergings):
 
                 one_language_grouping = one_language_word.grouping
 
-                groupings_equivalent = are_groupings_equivalent(
+                groupings_cmp_direct = compare_groupings(
                     grouping, one_language_grouping, reverse=False
                 )
 
-                if groupings_equivalent and not images_merged:
+                groupings_equivalent_direct = groupings_cmp_direct <= 0
+
+                if groupings_equivalent_direct and not images_merged:
                     for image in images:
                         if image not in merging['images']:
                             merging['images'].append(image)
