@@ -301,6 +301,8 @@ def get_phrases_for_ordered_words(ordered_words, languages):
 def merge_phrases(ordered_words, ordered_word_languages_phrases):
     mergings = []
 
+    grouping = None
+
     ordered_word_languages_indexes = [0] * len(ordered_word_languages_phrases)
 
     ordered_word_index = min(ordered_word_languages_indexes)
@@ -317,10 +319,17 @@ def merge_phrases(ordered_words, ordered_word_languages_phrases):
 
         data = build_phrases_merging(
             ordered_words, ordered_word_languages_phrases,
-            ordered_word_index, ordered_word_languages_indexes
+            ordered_word_index, ordered_word_languages_indexes,
+            grouping
             )
 
         mergings.append(data['merging'])
+
+        languages_grouping_equivalences = data['grouping_equivalences']
+        if True in languages_grouping_equivalences:
+            grouping = data['grouping']
+        else:
+            grouping = None
 
         ordered_word_languages_indexes = data['indexes']
         
@@ -404,17 +413,26 @@ def get_next_phrases(
 
 def build_phrases_merging(
         ordered_words, ordered_word_languages_phrases,
-        ordered_word_index, ordered_word_languages_indexes
+        ordered_word_index, ordered_word_languages_indexes,
+        grouping
         ):
 
-    ordered_word = ordered_words[ordered_word_index]
-    word = ordered_word['word']
-    grouping = word.grouping
-    grouping_key = word.grouping_key
+    if grouping is None:
+        ordered_word = ordered_words[ordered_word_index]
+        word = ordered_word['word']
+        grouping = word.grouping
+        
+        """
+        grouping_key = word.grouping_key
+        """
+
+    languages_count = len(ordered_word_languages_phrases)
+
+    languages_grouping_equivalences = [False] * languages_count
 
     languages_mergings = []
 
-    for language_index in range(len(ordered_word_languages_phrases)):
+    for language_index in range(languages_count):
 
         ordered_word_one_language_phrases = (
             ordered_word_languages_phrases[language_index]
@@ -442,8 +460,6 @@ def build_phrases_merging(
                 ordered_words[ordered_word_one_language_index]
             )
 
-            ordered_word_one_language_index += 1
-
             one_language_word = one_language_ordered_word['word']
 
             one_language_grouping = one_language_word.grouping
@@ -464,7 +480,10 @@ def build_phrases_merging(
                 one_language_merging['phrases'] = phrases
                 one_language_merging['word'] = one_language_word
 
+                ordered_word_one_language_index += 1
                 ordered_word_languages_indexes[language_index] = ordered_word_one_language_index
+
+                languages_grouping_equivalences[language_index] = True
 
                 break
 
@@ -478,9 +497,11 @@ def build_phrases_merging(
                     one_language_merging['word'] = one_language_word
 
                     ordered_word_languages_indexes[language_index] = ordered_word_one_language_index
-
                     break
+           
                 """
+
+            ordered_word_one_language_index += 1
 
         languages_mergings.append(one_language_merging)
 
@@ -490,7 +511,9 @@ def build_phrases_merging(
 
     data = {
         'merging': merging,
-        'indexes': ordered_word_languages_indexes  
+        'indexes': ordered_word_languages_indexes,
+        'grouping': grouping, 
+        'grouping_equivalences': languages_grouping_equivalences
     }
 
     return data
@@ -501,8 +524,8 @@ def are_groupings_equivalent(grouping1, grouping2, reverse=False):
         return True
     elif is_grouping1_in_grouping2(grouping1, grouping2, reverse):
         return True
-    elif is_grouping1_in_grouping2(grouping2, grouping1, reverse):
-        return True
+#    elif is_grouping1_in_grouping2(grouping2, grouping1, reverse):
+#        return True
     else:
         return False
 
