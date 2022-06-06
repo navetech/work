@@ -340,6 +340,9 @@ def get_next_phrases(
         ordered_word_languages_phrases, ordered_word_languages_indexes
         ):
 
+#    print()
+#    print('next', ordered_word_languages_indexes)
+
     for language_index in range(len(ordered_word_languages_phrases)):
 
         ordered_word_one_language_phrases = (
@@ -368,6 +371,8 @@ def get_next_phrases(
         ordered_word_languages_indexes[language_index] = (
             ordered_word_one_language_index
         )
+
+#    print('next', ordered_word_languages_indexes)
 
     return ordered_word_languages_indexes
 
@@ -417,6 +422,9 @@ def build_phrases_merging(
         grouping
         ):
 
+    print()
+    print('build', grouping, ordered_word_index,ordered_word_languages_indexes)
+
     if grouping is None:
         ordered_word = ordered_words[ordered_word_index]
         word = ordered_word['word']
@@ -442,6 +450,8 @@ def build_phrases_merging(
             ordered_word_languages_indexes[language_index]
         )
 
+        print(language_index, ordered_word_one_language_index, ordered_word_languages_indexes)
+        
         one_language_merging = {}
         one_language_merging['phrases'] = []
         one_language_merging['word'] = None
@@ -480,8 +490,12 @@ def build_phrases_merging(
                 one_language_merging['phrases'] = phrases
                 one_language_merging['word'] = one_language_word
 
+                print(language_index, ordered_word_one_language_index, grouping, one_language_grouping)
+
                 ordered_word_one_language_index += 1
                 ordered_word_languages_indexes[language_index] = ordered_word_one_language_index
+
+                print(ordered_word_languages_indexes)
 
                 languages_grouping_equivalences[language_index] = True
 
@@ -515,6 +529,8 @@ def build_phrases_merging(
         'grouping': grouping, 
         'grouping_equivalences': languages_grouping_equivalences
     }
+
+    print('build', grouping, ordered_word_index,ordered_word_languages_indexes)
 
     return data
 
