@@ -18,11 +18,11 @@ from .settings import GROUPING_KEYS_KEY_BASE_NUMBER
 def index(request):
 
     languages = []
-    language = Language.objects.filter(name='Portuguese').first()
+    language = Language.objects.filter(name='Chinese').first()
     languages.append(language)
-#    language = Language.objects.filter(name='Chinese').first()
-#    languages.append(language)
     language = Language.objects.filter(name='English').first()
+    languages.append(language)
+    language = Language.objects.filter(name='Portuguese').first()
     languages.append(language)
 
     themes = []
@@ -302,7 +302,7 @@ def get_languages_ordered_phrases(ordered_words, languages):
                 phrases_data['merged'] = False
 
                 one_language_ordered_phrases.append(phrases_data)
-
+        
         languages_ordered_phrases.append(
             one_language_ordered_phrases
             )
@@ -350,21 +350,23 @@ def build_phrases_merging(
         last_grouping, last_grouping_ordered_word_index
         ):
 
-    if last_grouping is None:
-        languages_ordered_phrases_indexes = get_languages_ordered_phrases_indexes(
-            languages_ordered_phrases, last_grouping_ordered_word_index
-            )
-
-    ordered_word_index = get_ordered_word_index(
-        languages_ordered_phrases, languages_ordered_phrases_indexes
-        )
-
-    if ordered_word_index is None or ordered_word_index >= len(ordered_words):
+    if last_grouping_ordered_word_index >= len(ordered_words):
         return None
 
     if last_grouping is not None:
         grouping = last_grouping
     else:
+        languages_ordered_phrases_indexes = get_languages_ordered_phrases_indexes(
+            languages_ordered_phrases, last_grouping_ordered_word_index
+            )
+
+        ordered_word_index = get_ordered_word_index(
+            languages_ordered_phrases, languages_ordered_phrases_indexes
+            )
+
+        if ordered_word_index is None or ordered_word_index >= len(ordered_words):
+            return None
+
         ordered_word = ordered_words[ordered_word_index]
         word = ordered_word['word']
         grouping = word.grouping
@@ -597,8 +599,8 @@ def build_row_from_merging(merging):
     for one_language_merging in merging['for_languages']:
 
         one_language_word = one_language_merging['word']
-        if not one_language_word:
-            continue
+#        if not one_language_word:
+#            continue
 
         one_language_phrases = one_language_merging['phrases']
 
