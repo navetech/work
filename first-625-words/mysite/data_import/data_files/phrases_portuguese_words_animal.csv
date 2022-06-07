@@ -31,6 +31,10 @@ cat,small/feminine/singular,01/01/00,a gatinha
 cat,small/feminine/plural,01/01/01,as gatinhas
 cat,singular,00,gat
 cat,plural,01,gats
+cat,,00,gax
+cat,masculine,00,gao
+cat,feminine,01,gaa
+cat,bissex,02,gay
 ,,,
 fish,singular,00,o peixe
 fish,plural,01,os peixes

@@ -9,7 +9,7 @@ cat,singular,01,cat
 cat,plural,02,cats
 cat,singular,01,cad
 cat,plural,02,cads
-cat,neutro,00,cax
+cat,,00,cax
 ,,,
 fish,singular,00,fish
 fish,plural,01,fish
