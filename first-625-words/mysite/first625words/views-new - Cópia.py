@@ -18,8 +18,8 @@ from .settings import GROUPING_KEYS_KEY_BASE_NUMBER
 def index(request):
 
     languages = []
-    language = Language.objects.filter(name='Chinese').first()
-    languages.append(language)
+#    language = Language.objects.filter(name='Chinese').first()
+#    languages.append(language)
     language = Language.objects.filter(name='English').first()
     languages.append(language)
     language = Language.objects.filter(name='Portuguese').first()
@@ -36,6 +36,8 @@ def index(request):
     }
 
     return render(request, 'first625words/words.html', context)
+
+    # return HttpResponse("Hello, world. You're at the first625words index.")
 
 
 def build_words_page(languages, themes):
@@ -383,6 +385,8 @@ def build_phrases_merging(
             grouping, last_grouping, reverse_grouping
             )
 
+#        print('primeiro  ', merges_count, reverse_grouping)
+
         if merges_count < 1 or (merges_count == 1 and languages_count != 1):
             reverse_grouping = not reverse_grouping
 
@@ -391,6 +395,8 @@ def build_phrases_merging(
                 languages_ordered_phrases, languages_ordered_phrases_indexes,
                 grouping, last_grouping, reverse_grouping
                 )
+
+#            print('segundo   ', merges_count, reverse_grouping)
 
             if merges_count < 1 or (merges_count == 1 and languages_count != 1):
                 reverse_grouping = not reverse_grouping
@@ -471,6 +477,7 @@ def count_languages_mergings(
             if groupings_equivalent:
                 merges_count +=1
 
+                print(merges_count, one_language_word)
                 break
 
     return merges_count
@@ -518,6 +525,7 @@ def build_languages_mergings(
 
             one_language_grouping = one_language_word.grouping
 
+            """
             groupings_cmp = compare_groupings(
                 grouping, one_language_grouping, reverse_grouping
             )
@@ -530,8 +538,34 @@ def build_languages_mergings(
                 groupings_equivalent = groupings_cmp <= 0
             else:
                 groupings_equivalent = groupings_cmp == 0
+            """
 
-            if groupings_equivalent:
+            # if groupings_equivalent:
+
+
+
+            groupings_cmp_direct = compare_groupings(
+                grouping, one_language_grouping, reverse=False
+            )
+
+            groupings_cmp_reverse = compare_groupings(
+                grouping, one_language_grouping, reverse=True
+            )
+
+            if (
+                last_grouping is None
+                or
+                (str(last_grouping) and not str(last_grouping).isspace())
+            ):
+
+                # groupings_equivalent_direct = groupings_cmp_direct == 0 or groupings_cmp_direct == -1
+                groupings_equivalent_direct = groupings_cmp_direct <= 0
+                groupings_equivalent_reverse = groupings_cmp_reverse <= 0
+            else:
+                groupings_equivalent_direct = groupings_cmp_direct == 0
+                groupings_equivalent_reverse = groupings_cmp_reverse == 0
+
+            if groupings_equivalent_direct or groupings_equivalent_reverse:
                 one_language_merging['phrases'] = phrases_data['phrases']
                 one_language_merging['word'] = one_language_word
                 phrases_data['merged'] = True
@@ -544,10 +578,10 @@ def build_languages_mergings(
 
         languages_mergings.append(one_language_merging)
 
-    if True in languages_grouping_equivalences:
-        last_grouping = grouping
-    else:
-        last_grouping = None
+        if True in languages_grouping_equivalences:
+            last_grouping = grouping
+        else:
+            last_grouping = None
 
     data = {
         'languages_mergings': languages_mergings,
@@ -689,6 +723,8 @@ def build_row_from_merging(merging):
     for one_language_merging in merging['for_languages']:
 
         one_language_word = one_language_merging['word']
+#        if not one_language_word:
+#            continue
 
         one_language_phrases = one_language_merging['phrases']
 
