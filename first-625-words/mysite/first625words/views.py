@@ -18,11 +18,11 @@ from .settings import GROUPING_KEYS_KEY_BASE_NUMBER
 def index(request):
 
     languages = []
-    language = Language.objects.filter(name='Chinese').first()
-    languages.append(language)
     language = Language.objects.filter(name='English').first()
     languages.append(language)
     language = Language.objects.filter(name='Portuguese').first()
+    languages.append(language)
+    language = Language.objects.filter(name='Chinese').first()
     languages.append(language)
 
     themes = []
@@ -311,7 +311,7 @@ def get_languages_ordered_phrases(ordered_words, languages):
 def merge_phrases(ordered_words, languages_ordered_phrases):
     mergings = []
 
-    initial_reverse_grouping = True
+    initial_reverse_grouping = False
 
     last_grouping_ordered_word_index = 0
     last_grouping = None
@@ -374,26 +374,24 @@ def build_phrases_merging(
         last_grouping_ordered_word_index = ordered_word_index + 1
 
     if not merge:
-
         languages_count = len(languages_ordered_phrases)
 
-        merges_count = count_languages_mergings(
+        merges_count1 = count_languages_mergings(
             ordered_words,
             languages_ordered_phrases, languages_ordered_phrases_indexes,
             grouping, last_grouping, reverse_grouping
             )
 
-        if merges_count < 1 or (merges_count == 1 and languages_count != 1):
+        reverse_grouping = not reverse_grouping
+
+        merges_count2 = count_languages_mergings(
+            ordered_words,
+            languages_ordered_phrases, languages_ordered_phrases_indexes,
+            grouping, last_grouping, reverse_grouping
+            )
+
+        if merges_count1 >= merges_count2:
             reverse_grouping = not reverse_grouping
-
-            merges_count = count_languages_mergings(
-                ordered_words,
-                languages_ordered_phrases, languages_ordered_phrases_indexes,
-                grouping, last_grouping, reverse_grouping
-                )
-
-            if merges_count < 1 or (merges_count == 1 and languages_count != 1):
-                reverse_grouping = not reverse_grouping
 
     merge = True
 
