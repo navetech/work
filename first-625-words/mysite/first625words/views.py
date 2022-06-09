@@ -113,6 +113,8 @@ def calc_list_one_language_counting(data_list, language_index):
 
     counting['phrases'] = phrases_counting
 
+    pronunciations_count = 0
+
     phrases_countings = []
     phrases_count = len(phrases_counting)
     for phrase_index in range(phrases_count):
@@ -122,7 +124,11 @@ def calc_list_one_language_counting(data_list, language_index):
             )
         phrases_countings.append(one_phrase_counting)
 
+        pronunciations_count += len(one_phrase_counting['pronunciations'])
+
     counting['for_phrases'] = phrases_countings
+
+    counting['pronunciations_count'] = pronunciations_count
 
     return counting
 
@@ -275,7 +281,7 @@ def build_rows_from_words(ordered_words, languages):
     for merging in mergings:
         row = build_row_from_merging(merging)
 
-        if row:
+        if row is not None:
             rows.append(row)
 
     return rows
@@ -313,32 +319,34 @@ def merge_phrases(ordered_words, languages_ordered_phrases):
 
     initial_reverse_grouping = False
 
-    last_grouping_ordered_word_index = 0
-    last_grouping = None
-    
-    languages_ordered_phrases_indexes = [0] * len(languages_ordered_phrases)
+    reverse_grouping = initial_reverse_grouping
+    merge = False
+    for i in range(2):
+        last_grouping_ordered_word_index = 0
+        last_grouping = None
+        
+        languages_ordered_phrases_indexes = [0] * len(languages_ordered_phrases)
 
-    while True:
-        if last_grouping is None:
-            reverse_grouping = initial_reverse_grouping
-            merge = False
+        while True:
 
-        data = build_phrases_merging(
-            ordered_words,
-            languages_ordered_phrases, languages_ordered_phrases_indexes,
-            last_grouping, last_grouping_ordered_word_index,
-            reverse_grouping, merge
-            )
+            data = build_phrases_merging(
+                ordered_words,
+                languages_ordered_phrases, languages_ordered_phrases_indexes,
+                last_grouping, last_grouping_ordered_word_index,
+                reverse_grouping, merge
+                )
 
-        if not data:
-            break
+            if not data:
+                break
 
-        mergings.append(data['merging'])
-        languages_ordered_phrases_indexes = data['indexes']
-        last_grouping = data['last_grouping']
-        last_grouping_ordered_word_index = data['last_index']
-        reverse_grouping = data['reverse_grouping']
-        merge = data['merge']
+            mergings.append(data['merging'])
+            languages_ordered_phrases_indexes = data['indexes']
+            last_grouping = data['last_grouping']
+            last_grouping_ordered_word_index = data['last_index']
+            reverse_grouping = data['reverse_grouping']
+            merge = data['merge']
+
+        reverse_grouping = not reverse_grouping
 
     return mergings
 
@@ -681,24 +689,37 @@ def merge_images(ordered_words, mergings):
 
 
 def build_row_from_merging(merging):
-    row = {}
+
+    one_language_phrases_empty = True
+    for one_language_merging in merging['for_languages']:
+
+        one_language_phrases = one_language_merging['phrases']
+        if len(one_language_phrases) > 0:
+            one_language_phrases_empty = False
+
+            break
+
+    if one_language_phrases_empty:
+        return None
 
     languages_phrases = []
     for one_language_merging in merging['for_languages']:
-
-        one_language_word = one_language_merging['word']
 
         one_language_phrases = one_language_merging['phrases']
 
         languages_phrases.append(one_language_phrases)
 
-    if len(languages_phrases) > 0:
-        row['languages_phrases'] = languages_phrases
+    if len(languages_phrases) < 1:
+        return None
 
-        if 'images' in merging:
-            row['images'] = merging['images']
-        else:
-            row['images'] = []
+    row = {}
+
+    row['languages_phrases'] = languages_phrases
+
+    if 'images' in merging:
+        row['images'] = merging['images']
+    else:
+        row['images'] = []
 
     return row
 

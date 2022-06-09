@@ -61,8 +61,8 @@
 
 
     {% for theme_data in data.for_themes %}
-        <table style="width:100%">
-            <caption style='caption-side:top;'>
+        <table class="theme-table">
+            <caption>
                 {{ theme_data.theme.name }}
             </caption>
 
@@ -72,18 +72,18 @@
             {% for image_counting in theme_data.counting.images %}
                 <col>
             {% endfor %}
+            
+            <col>
 
             {% for language_counting in theme_data.counting.for_languages %}
                 {% for phrase_counting in language_counting.for_phrases %}
-                    {% with phrase_columns_count=1 %}
-                    {% with phrase_pronunciations_count=phrase_counting.pronunciations|length %}
-                    {% with phrase_columns_count=phrase_columns_count|add:phrase_pronunciations_count %}
+                    <colgroup>
+                        {% for pronunciation in phrase_counting.pronunciations %}
+                            <col>
+                        {% endfor %}
 
-                    <colgroup span={{ phrase_columns_count }}></colgroup>
-
-                    {% endwith %}
-                    {% endwith %}
-                    {% endwith %}
+                        <col>
+                    </colgroup>
                 {% endfor %}
             {% endfor %}
         
@@ -96,15 +96,11 @@
                         <th scope="col"></th>
                     {% endfor %}
 
-                    {% for language_counting in theme_data.counting.for_languages %}
-                        {% with language_columns_count=0 %}
+                    <th scope="col"></th>
 
-                        {% for phrase_counting in language_counting.for_phrases %}
-                            {% with language_columns_count=language_columns_count|add:1 %}
-                            {% with language_columns_count=language_columns_count|add:phrase_counting.pronunciations|length %}
-                            {% endwith %}
-                            {% endwith %}
-                        {% endfor %}
+                    {% for language_counting in theme_data.counting.for_languages %}
+                        {% with language_columns_count=language_counting.for_phrases|length %}
+                        {% with language_columns_count=language_columns_count|add:language_counting.pronunciations_count %}
 
                         {% for language in data.languages %}
                             {% if forloop.parentloop.counter0 == forloop.counter0 %}
@@ -115,16 +111,7 @@
                         {% endfor %}
 
                         {% endwith %}
-
-                        {% if not forloop.last %}
-                            {% for phrase_counting in language_counting.for_phrases %}
-                                <th scope="col"></th>
-
-                                {% for pronunciation_counting in phrase_counting.pronunciations %}
-                                    <th scope="col"></th>
-                                {% endfor %}
-                            {% endfor %}
-                        {% endif %}
+                        {% endwith %}
                     {% endfor %}
                 </tr>
 
@@ -136,15 +123,15 @@
                         <th scope="col"></th>
                     {% endfor %}
 
+                    <th scope="col"></th>
+                    
                     {% for language_counting in theme_data.counting.for_languages %}
                         {% for phrase_counting in language_counting.for_phrases %}
-                            {% with phrase_columns_count=1 %}
-                            {% with phrase_pronunciations_count=phrase_counting.pronunciations|length %}
-                            {% with phrase_columns_count=phrase_columns_count|add:phrase_pronunciations_count %}
+                            {% with phrase_columns_count=phrase_counting.pronunciations|length %}
+                            {% with phrase_columns_count=phrase_columns_count|add:'1' %}
 
-                            <th colspan={{ phrase_columns_count }} scope="colgroup">Phrase{{ forloop.counter }}</th>
+                            <th colspan={{ phrase_columns_count }} scope="colgroup">Word{{ forloop.counter }}</th>
 
-                            {% endwith %}
                             {% endwith %}
                             {% endwith %}
                         {% endfor %}
@@ -159,13 +146,15 @@
                         <th scope="col">I{{ forloop.counter }}</th>
                     {% endfor %}
 
+                    <th scope="col"></th>
+
                     {% for language_counting in theme_data.counting.for_languages %}
                         {% for phrase_counting in language_counting.for_phrases %}
-                            <th scope="col">Text</th>
-
                             {% for pronunciation_counting in phrase_counting.pronunciations %}
                                 <th scope="col">P{{ forloop.counter }}</th>
                             {% endfor %}
+
+                            <th scope="col">Spelling</th>
                         {% endfor %}
                     {% endfor %}
                 </tr>
@@ -189,6 +178,8 @@
                                 </td>
                             {% endfor %}
 
+                            <td></td>
+
                             {% for image_counting in theme_data.counting.images %}
                                 {% if forloop.counter0 >= row.images|length %}
                                     <td></td>
@@ -200,10 +191,6 @@
 
                                 {% for phrase in language_phrases %}
                                     {% with phrase_index=forloop.counter0 %}
-
-                                    <td>
-                                        {{ phrase.spelling.text }}
-                                    </td>
 
                                     {% for pronunciation in phrase.pronunciations.all %}
                                         <td>
@@ -225,6 +212,10 @@
                                         {% endif %}
                                     {% endfor %}
 
+                                    <td>
+                                        {{ phrase.spelling.text }}
+                                    </td>
+
                                     {% endwith %}
                                 {% endfor %}
 
@@ -232,11 +223,11 @@
                                     {% if forloop.counter0 == language_index %}
                                         {% for phrase_counting in language_counting.for_phrases %}
                                             {% if forloop.counter0 >= language_phrases|length %}
-                                                <td></td>
-
                                                 {% for pronunciation in phrase_counting.pronunciations %}
                                                     <td></td>
                                                 {% endfor %}
+
+                                                <td></td>
                                             {% endif %}
                                         {% endfor %}
                                     {% endif %}
