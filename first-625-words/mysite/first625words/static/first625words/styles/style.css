@@ -100,3 +100,13 @@ table, th, td{
 .blank-spelling-cell {
     color:black;
 }
+
+.phrase-details {
+    list-style-type: none; /* Remove bullets */
+    padding: 0; /* Remove padding */
+    margin: 0; /* Remove margins */
+}
+
+.phrase-detail {
+    list-style-type: disc;
+}

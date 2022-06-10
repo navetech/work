@@ -8,14 +8,14 @@
 {% block main %}
     <h5>{{ phrase.spelling.text }} ({{ phrase.language.name }})</h5>
 
-    <ul style="list-style-type:none;">
+    <ul class="phrase-details">
         {% if phrase.definitions.count > 0 %}
             <br>
 
             <li>
                 <h6>Definitions</h6>
 
-                <ul>
+                <ul class="phrase-detail">
                 {% for definition in phrase.definitions.all %}
                     <li>
                         {{ definition.text }} (in {{ definition.language.name }})
@@ -31,7 +31,7 @@
             <li>
                 <h6>Examples</h6>
 
-                <ul>
+                <ul class="phrase-detail">
                 {% for example in phrase.examples.all %}
                     <li>
                         {% if example.credits %}
@@ -56,7 +56,7 @@
                         <li>
                             <h6>Pronunciations Spellings</h6>
 
-                            <ul>
+                            <ul class="phrase-detail">
                                 <li>
                                     {{ pronunciation.spelling.text}} ({{pronunciation.spelling.system.name }})
                                 </li>
