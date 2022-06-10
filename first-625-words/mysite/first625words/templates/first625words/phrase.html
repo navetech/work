@@ -1,0 +1,79 @@
+{% extends "first625words/base.html" %}
+
+
+{% block title %}
+    Word
+{% endblock %}
+
+{% block main %}
+    <h5>{{ phrase.spelling.text }} ({{ phrase.language.name }})</h5>
+
+    <ul style="list-style-type:none;">
+        {% if phrase.definitions.count > 0 %}
+            <br>
+
+            <li>
+                <h6>Definitions</h6>
+
+                <ul>
+                {% for definition in phrase.definitions.all %}
+                    <li>
+                        {{ definition.text }} (in {{ definition.language.name }})
+                    </li>
+                {% endfor %}
+                </ul>
+            </li>
+        {% endif %}
+
+        {% if phrase.examples.count > 0 %}
+            <br>
+
+            <li>
+                <h6>Examples</h6>
+
+                <ul>
+                {% for example in phrase.examples.all %}
+                    <li>
+                        {% if example.credits %}
+                            {{ example.text }} ({{ example.credits }})
+                        {% else %}
+                            {{ example.text }}
+                        {% endif %}
+                    </li>
+                {% endfor %}
+                </ul>
+            </li>
+        {% endif %}
+
+        {% with pronunciations_spellings_empty=1 %}
+            {% for pronunciation in phrase.pronunciations.all %}
+                {% if pronunciation.spelling and  pronunciation.spelling.text %}
+                    {% with pronunciations_spellings_empty=0 %}
+
+                    {% if forloop.first %}
+                        <br>
+
+                        <li>
+                            <h6>Pronunciations Spellings</h6>
+
+                            <ul>
+                                <li>
+                                    {{ pronunciation.spelling.text}} ({{pronunciation.spelling.system.name }})
+                                </li>
+                    {% else %}
+                        <li>
+                            {{ pronunciation.spelling.text}} ({{pronunciation.spelling.system.name }})
+                        </li>
+                    {% endif %}
+
+                    {% if forloop.last and pronunciations_spellings_empty == 0 %}
+                            </ul>
+                        </li>
+                    {% endif %}
+
+                    {% endwith %}
+                {% endif %}
+            {% endfor %}
+        {% endwith %}
+    </ul>    
+{% endblock %}

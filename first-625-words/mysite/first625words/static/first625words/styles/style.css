@@ -93,6 +93,10 @@ table, th, td{
     color:white;
 }
 
+.spelling-cell a{
+    color:white;
+}
+
 .blank-spelling-cell {
     color:black;
 }

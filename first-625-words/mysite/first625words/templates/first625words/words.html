@@ -173,7 +173,11 @@
                                     {% endfor %}
 
                                     <td class="spelling-cell">
-                                        {{ phrase.spelling.text }}
+                                        {% if phrase.definitions.count > 0 or phrase.examples.count > 0 %}
+                                            <a href="{% url 'phrase' phrase.id %}">{{ phrase.spelling.text }}</a>
+                                        {% else %}
+                                            {{ phrase.spelling.text }}
+                                        {% endif %}
                                     </td>
 
                                     {% endwith %}

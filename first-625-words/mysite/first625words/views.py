@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-# from django.http import HttpResponse
+from django.http import HttpResponse
 
 from first625words.models import Theme
 from first625words.models import BaseWord
@@ -36,6 +36,18 @@ def index(request):
     }
 
     return render(request, 'first625words/words.html', context)
+
+
+def phrase(request, phrase_id):
+    phrase = Phrase.objects.filter(id=phrase_id).first()
+
+    context = {
+        'phrase': phrase
+    }
+
+    return render(request, 'first625words/phrase.html', context)
+
+#    return HttpResponse(f'Phrase {phrase_id}')
 
 
 def build_words_page(languages, themes):
