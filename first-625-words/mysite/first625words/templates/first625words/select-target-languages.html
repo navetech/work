@@ -1,0 +1,24 @@
+{% extends "first625words/base.html" %}
+
+
+{% block title %}
+    Select Target Languages
+{% endblock %}
+
+{% block main %}
+    <form action="{% url 'put_target_languages' %}" method="post">
+        {% csrf_token %}
+
+        <fieldset>      
+            <legend>Select target languages:</legend>
+
+            {% for language in target_languages %}
+            <input type="checkbox" id="language.id" name={{ language.name }} value={{ language.id }}>
+            <label for={{ language.name }}>{{ language.name }}</label><br>
+            {% endfor %}
+
+            <br>      
+            <input type="submit" value="Submit now" />      
+        </fieldset>
+    </form>
+{% endblock %}

@@ -50,6 +50,23 @@ def phrase(request, phrase_id):
 #    return HttpResponse(f'Phrase {phrase_id}')
 
 
+def select_target_languages(request):
+    target_languages = Language.objects.all().order_by('sort_number')
+
+    context = {
+        'target_languages': target_languages
+    }
+
+    return render(request, 'first625words/select-target-languages.html', context)
+
+#    return HttpResponse(f'select_target_languages')
+
+
+def put_target_languages(request):
+    
+    return HttpResponse(f'put_target_languages')
+
+
 def build_words_page(languages, themes):
     data = {}
 
