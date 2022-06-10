@@ -13,3 +13,67 @@ table, th, td{
 .theme-table caption {
     caption-side: top;
 }
+  
+.theme-table th {
+    background-color: WhiteSmoke;    
+}
+
+.language-hdr-row {
+    text-align: center;
+}
+
+.phrase-hdr-row {
+    text-align: center;
+}
+
+.data-hdr-row {
+    font-style: italic
+}
+
+.number-column {
+    background-color: Gainsboro;    
+}
+
+.base-word-column {
+    background-color: Gainsboro;    
+}
+
+.image-column {
+    background-color: Silver;
+}
+
+.image-cell {
+    color:red;
+}
+
+.space-after-image-column {
+    background-color: Silver;
+}
+
+.space-after-image-cell {
+    color: Silver;
+}
+
+.space-before-word-column {
+    background-color: DarkGray ;
+}
+
+.space-before-word-cell {
+    color: DarkGray ;
+}
+
+.pronunciation-column {
+    background-color: DarkGray ;
+}
+
+.pronunciation-cell {
+    color:red;
+}
+
+.spelling-column {
+    background-color: black;
+}
+
+.spelling-cell {
+    color:white;
+}
