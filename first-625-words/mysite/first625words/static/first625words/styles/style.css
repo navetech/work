@@ -7,7 +7,6 @@ table, th, td{
   
 .theme-table {
     width: 100%;
-    background-color: yellow;    
 }
   
 .theme-table caption {
@@ -42,31 +41,47 @@ table, th, td{
     background-color: Silver;
 }
 
+.image-hdr-cell {
+    text-align: center;
+}
+
 .image-cell {
+    text-align: center;
+}
+
+.image-cell a {
     color:red;
 }
 
-.space-after-image-column {
-    background-color: Silver;
+.space-before-language-column {
+    background-color: Gainsboro ;
 }
 
-.space-after-image-cell {
-    color: Silver;
+.space-before-language-cell {
+    color: Gainsboro ;
 }
 
-.space-before-word-column {
-    background-color: DarkGray ;
+.space-before-phrase-column {
+    background-color: Gainsboro ;
 }
 
-.space-before-word-cell {
-    color: DarkGray ;
+.space-before-phrase-cell {
+    color: Gainsboro ;
 }
 
 .pronunciation-column {
     background-color: DarkGray ;
 }
 
+.pronunciation-hdr-cell {
+    text-align: center;
+}
+
 .pronunciation-cell {
+    text-align: center;
+}
+
+.pronunciation-cell a {
     color:red;
 }
 
@@ -76,4 +91,8 @@ table, th, td{
 
 .spelling-cell {
     color:white;
+}
+
+.blank-spelling-cell {
+    color:black;
 }
