@@ -1,20 +1,24 @@
 {% extends "first625words/base.html" %}
 
 
+{% block scripts %}
+    <script src="/static/first625words/scripts/select-target-languages.js"></script>
+{% endblock %}
+
 {% block title %}
     Select Target Languages
 {% endblock %}
 
 {% block main %}
-    <form action="{% url 'put_target_languages' %}" method="post">
+    <form action="{% url 'put_target_languages' %}" method="post" data-selected-target-languages-count-max={{ selected_target_languages_count_max }}>
         {% csrf_token %}
 
         <fieldset>      
             <legend>Select target languages:</legend>
 
             {% for language in target_languages %}
-            <input type="checkbox" id="language.id" name={{ language.name }} value={{ language.id }}>
-            <label for={{ language.name }}>{{ language.name }}</label><br>
+                <input class="select-target-language" type="checkbox" id={{ language.id }} name={{ language.name }} value={{ language.id }}>
+                <label for={{ language.name }}>{{ language.name }}</label><br>
             {% endfor %}
 
             <br>      

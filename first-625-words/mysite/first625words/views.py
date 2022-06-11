@@ -1,6 +1,8 @@
 from django.shortcuts import render
 
 from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 from first625words.models import Theme
 from first625words.models import BaseWord
@@ -11,6 +13,8 @@ from first625words.models import Phrase
 from .settings import GROUPING_GROUPS_SEPARATOR
 from .settings import GROUPING_KEYS_KEYS_SEPARATOR
 from .settings import GROUPING_KEYS_KEY_BASE_NUMBER
+
+from .settings import SELECTED_TARGET_LANGUAGES_COUNT_MAX
 
 
 # Create your views here.
@@ -54,7 +58,8 @@ def select_target_languages(request):
     target_languages = Language.objects.all().order_by('sort_number')
 
     context = {
-        'target_languages': target_languages
+        'target_languages': target_languages,
+        'selected_target_languages_count_max': SELECTED_TARGET_LANGUAGES_COUNT_MAX
     }
 
     return render(request, 'first625words/select-target-languages.html', context)
@@ -63,8 +68,21 @@ def select_target_languages(request):
 
 
 def put_target_languages(request):
+    if request.method != "POST":
+        return HttpResponseRedirect(reverse("index"))
+    else:
+        target_languages = Language.objects.all().order_by('sort_number')
+
+        selected_target_languages = []
+        for language in target_languages:
+
+            if language.name in request.POST:
+                language_id = request.POST[language.name]
+                selected_target_language = Language.objects.filter(id=language_id).first()
+                print(selected_target_language)
+                selected_target_languages.append(selected_target_language)
     
-    return HttpResponse(f'put_target_languages')
+    return HttpResponse(f'put_target_languages {selected_target_languages}')
 
 
 def build_words_page(languages, themes):
