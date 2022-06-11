@@ -15,6 +15,8 @@ from .settings import GROUPING_KEYS_KEYS_SEPARATOR
 from .settings import GROUPING_KEYS_KEY_BASE_NUMBER
 
 from .settings import SELECTED_TARGET_LANGUAGES_COUNT_MAX
+from .settings import LANGUAGE_TO_SORT_NUMBER_SEPARATOR
+from .settings import TARGET_LANGUAGES_SELECTION_COLUMNS_COUNT
 
 
 # Create your views here.
@@ -59,7 +61,9 @@ def select_target_languages(request):
 
     context = {
         'target_languages': target_languages,
-        'selected_target_languages_count_max': SELECTED_TARGET_LANGUAGES_COUNT_MAX
+        'selected_target_languages_count_max': SELECTED_TARGET_LANGUAGES_COUNT_MAX,
+        'language_to_sort_number_separator': LANGUAGE_TO_SORT_NUMBER_SEPARATOR,
+        'target_languages_selection_columns_count': TARGET_LANGUAGES_SELECTION_COLUMNS_COUNT
     }
 
     return render(request, 'first625words/select-target-languages.html', context)

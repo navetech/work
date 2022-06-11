@@ -110,3 +110,7 @@ table, th, td{
 .phrase-detail {
     list-style-type: disc;
 }
+  
+.select-target-languages-table {
+    width: 100%;
+}

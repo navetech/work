@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
     for (let i = 0; i < nodeList.length; i++) {
         nodeList[i].checked = false;
         nodeList[i].value = nodeList[i].id;
-        
+
         nodeList[i].onchange = (e) => {
             if (! e.target.checked ) {
                 selectedTargetLanguagesCount--;
@@ -23,27 +23,67 @@ document.addEventListener("DOMContentLoaded", function() {
                     ret = selectTargetLanguage(e.target, selectedTargetLanguages);
                     selectedTargetLanguages = ret["selectedTargetLanguages"]; 
                     e.target.value = ret["value"];
-                    }
+                }
                 else {
-                    e.target.checked = false
-                    ret = unselectTargetLanguage(e.target, selectedTargetLanguages);
-                    selectedTargetLanguages = ret["selectedTargetLanguages"]; 
-                    e.target.value = ret["value"];
-                    }
+                    e.target.checked = false;
+                }
             } 
-            console.log(e.target.checked);
+
+            showSelectedTargetLanguages(selectedTargetLanguages)
         };
     }
-
+        
     showSelectedTargetLanguages(selectedTargetLanguages)
 });
 
 
-function unselectTargetLanguage(elem, selectedTargetLanguages) {
-    const ret = {}
+function unselectTargetLanguage(targetElem, selectedTargetLanguages) {
+    const ret = {};
 
-    value = elem.id
-    ret["value"] = value
+    const value = targetElem.id;
+    ret["value"] = value;
 
-    return ret
+    for (let i = 0; i < selectedTargetLanguages.length; i++) {
+        if (selectedTargetLanguages[i].id == targetElem.id) {
+            selectedTargetLanguages.splice(i, 1);
+        }
+    }
+
+    const elem = document.querySelector("form");
+    const languageToSortNumberSeparator = elem.getAttribute("data-language-to-sort-number-separator");
+
+    for (let i = 0; i < selectedTargetLanguages.length; i++) {
+        const value = selectedTargetLanguages[i].id + languageToSortNumberSeparator + i;
+        selectedTargetLanguages[i].value = value;
+    }
+
+    ret["selectedTargetLanguages"] = selectedTargetLanguages; 
+
+    return ret;
+}
+
+
+function selectTargetLanguage(targetElem, selectedTargetLanguages) {
+    const ret = {};
+
+    const elem = document.querySelector("form");
+    const languageToSortNumberSeparator = elem.getAttribute("data-language-to-sort-number-separator");
+
+    const value = targetElem.id + languageToSortNumberSeparator + selectedTargetLanguages.length;
+    ret["value"] = value;
+
+    selectedTargetLanguages.push(targetElem);
+
+    ret["selectedTargetLanguages"] = selectedTargetLanguages; 
+
+    return ret;
+}
+
+
+function showSelectedTargetLanguages(selectedTargetLanguages) {
+    console.log(selectedTargetLanguages);
+
+    for (let i = 0; i < selectedTargetLanguages.length; i++) {
+        console.log(selectedTargetLanguages[i].name, selectedTargetLanguages[i].value);
+    }   
 }

@@ -10,19 +10,32 @@
 {% endblock %}
 
 {% block main %}
-    <form action="{% url 'put_target_languages' %}" method="post" data-selected-target-languages-count-max={{ selected_target_languages_count_max }}>
+    <form action="{% url 'put_target_languages' %}" method="post" data-selected-target-languages-count-max={{ selected_target_languages_count_max }} data-language-to-sort-number-separator="{{ language_to_sort_number_separator }}">
         {% csrf_token %}
 
         <fieldset>      
             <legend>Select target languages:</legend>
 
-            {% for language in target_languages %}
-                <input class="select-target-language" type="checkbox" id={{ language.id }} name={{ language.name }} value={{ language.id }}>
-                <label for={{ language.name }}>{{ language.name }}</label><br>
-            {% endfor %}
+            <table class="select-target-languages-table">
+                {% for language in target_languages %}
+                    {% if forloop.counter0|divisibleby:target_languages_selection_columns_count %}
+                        {% if not forloop.first %}
+                            </tr>
+                        {% endif %}
+
+                        <tr>
+                    {% endif %}
+
+                    <td>
+                        <input class="select-target-language" type="checkbox" id={{ language.id }} name={{ language.name }} value={{ language.id }}>
+                        <label for={{ language.name }}>{{ language.name }}</label>
+                    </td>
+                {% endfor %}
+            </table>
 
             <br>      
             <input type="submit" value="Submit now" />      
+
         </fieldset>
     </form>
 {% endblock %}
