@@ -80,14 +80,31 @@ def put_target_languages(request):
     else:
         target_languages = Language.objects.all().order_by('sort_number')
 
-        selected_target_languages = []
+        selections = []
         for language in target_languages:
 
-            if language.name in request.POST:
-                language_id = request.POST[language.name]
-                selected_target_language = Language.objects.filter(id=language_id).first()
-                print(selected_target_language)
-                selected_target_languages.append(selected_target_language)
+            if str(language.id) in request.POST:
+                value = request.POST[str(language.id)]
+
+                parts = value.split(LANGUAGE_TO_SORT_NUMBER_SEPARATOR)
+                language_id = parts[0]
+                sort_number = parts[1]
+
+                selection = {}
+                selection['language'] = language_id
+                selection['sort_number'] = sort_number
+
+                selections.append(selection)
+        
+        selections.sort(key=lambda e: e['sort_number'])
+
+        selected_target_languages = []
+        for selection in selections:
+            language_id = selection['language']
+
+            selected_target_language = Language.objects.filter(id=language_id).first()
+
+            selected_target_languages.append(selected_target_language.name)
     
     return HttpResponse(f'put_target_languages {selected_target_languages}')
 
