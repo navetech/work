@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const nodeList = document.querySelectorAll(".select-target-language");
     for (let i = 0; i < nodeList.length; i++) {
         nodeList[i].checked = false;
-        nodeList[i].value = nodeList[i].id;
+        nodeList[i].value = nodeList[i].name;
 
         nodeList[i].onchange = (e) => {
             if (! e.target.checked ) {
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function() {
 function unselectTargetLanguage(targetElem, selectedTargetLanguages) {
     const ret = {};
 
-    const value = targetElem.id;
+    const value = targetElem.name;
     ret["value"] = value;
 
     for (let i = 0; i < selectedTargetLanguages.length; i++) {
@@ -53,7 +53,7 @@ function unselectTargetLanguage(targetElem, selectedTargetLanguages) {
     const languageToSortNumberSeparator = elem.getAttribute("data-language-to-sort-number-separator");
 
     for (let i = 0; i < selectedTargetLanguages.length; i++) {
-        const value = selectedTargetLanguages[i].id + languageToSortNumberSeparator + i;
+        const value = selectedTargetLanguages[i].name + languageToSortNumberSeparator + i;
         selectedTargetLanguages[i].value = value;
     }
 
@@ -69,7 +69,7 @@ function selectTargetLanguage(targetElem, selectedTargetLanguages) {
     const elem = document.querySelector("form");
     const languageToSortNumberSeparator = elem.getAttribute("data-language-to-sort-number-separator");
 
-    const value = targetElem.id + languageToSortNumberSeparator + selectedTargetLanguages.length;
+    const value = targetElem.name + languageToSortNumberSeparator + selectedTargetLanguages.length;
     ret["value"] = value;
 
     selectedTargetLanguages.push(targetElem);
@@ -81,9 +81,31 @@ function selectTargetLanguage(targetElem, selectedTargetLanguages) {
 
 
 function showSelectedTargetLanguages(selectedTargetLanguages) {
-    console.log(selectedTargetLanguages);
+    const label_elem = document.querySelector("#selected-target-languages-label"); 
+    if (selectedTargetLanguages.length < 1) {
+        label_elem.style.visibility = 'hidden';
+    }
+    else {
+        label_elem.style.visibility = 'visible';
+    }
 
     for (let i = 0; i < selectedTargetLanguages.length; i++) {
-        console.log(selectedTargetLanguages[i].name, selectedTargetLanguages[i].value);
-    }   
+        selector = "#selected-target-language" + i
+        const elem = document.querySelector(selector);
+
+        elem.style.visibility = 'visible';
+
+        labels = selectedTargetLanguages[i].labels
+        elem.textContent = labels[0].textContent
+    }
+
+    const elem = document.querySelector("form");
+    const selectedTargetLanguagesCountMax = elem.getAttribute("data-selected-target-languages-count-max");
+    for (let i = selectedTargetLanguages.length; i < selectedTargetLanguagesCountMax; i++) {
+        selector = "#selected-target-language" + i
+        const elem = document.querySelector(selector);
+
+        elem.style.visibility = 'hidden';
+        elem.textContent = ''
+    }
 }

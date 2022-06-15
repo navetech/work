@@ -14,7 +14,7 @@
         {% csrf_token %}
 
         <fieldset>      
-            <legend>Select target languages:</legend>
+            <legend>Select up to {{ selected_target_languages_count_max }} target languages:</legend>
 
             <table class="select-target-languages-table">
                 {% for language in target_languages %}
@@ -27,15 +27,38 @@
                     {% endif %}
 
                     <td>
-                        <input class="select-target-language" type="checkbox" id={{ language.id }} name={{ language.name }} value={{ language.id }}>
-                        <label for={{ language.name }}>{{ language.name }}</label>
+                        <input class="select-target-language" type="checkbox" id="target-language{{ language.id }}" name={{ language.id }} value={{ language.id }}>
+                        <label for="target-language{{ language.id }}">{{ language.name }}</label>
                     </td>
                 {% endfor %}
             </table>
 
             <br>      
-            <input type="submit" value="Submit now" />      
+            <input type="submit" value="Submit" />      
 
         </fieldset>
     </form>
+
+    <br>
+
+    {% if selected_target_languages and selected_target_languages.0 %}
+        <h5 id="selected-target-languages-label">Selected Target Languages</h5>
+    {% else %}
+         <h5 id="selected-target-languages-label" style="visibility:hidden">Selected Target Languages</h5>
+    {% endif %}
+
+    <ol>
+        {% for selected_target_language in selected_target_languages %}
+            {% if selected_target_language %}
+                <li id="selected-target-language{{ forloop.counter0 }}">
+                    {{ selected_target_language }}
+            {% else %}
+                <li id="selected-target-language{{ forloop.counter0 }}" style="visibility:hidden";>
+            {% endif %}
+
+            </li>
+        {% endfor %}
+    </ol>
+
+
 {% endblock %}

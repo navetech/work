@@ -59,8 +59,11 @@ def phrase(request, phrase_id):
 def select_target_languages(request):
     target_languages = Language.objects.all().order_by('sort_number')
 
+    selected_target_languages = [''] * SELECTED_TARGET_LANGUAGES_COUNT_MAX
+
     context = {
         'target_languages': target_languages,
+        'selected_target_languages': selected_target_languages,
         'selected_target_languages_count_max': SELECTED_TARGET_LANGUAGES_COUNT_MAX,
         'language_to_sort_number_separator': LANGUAGE_TO_SORT_NUMBER_SEPARATOR,
         'target_languages_selection_columns_count': TARGET_LANGUAGES_SELECTION_COLUMNS_COUNT
