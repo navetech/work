@@ -1,6 +1,7 @@
 import csv
 import sys
 
+# from numpy import det
 import itertools
 import numpy as np
 
@@ -91,32 +92,35 @@ def build_estimated_equations_coefficients(non_def_permutation, defined_line=Non
     # equations_coefficients = {}
     equations_coefficients = []
 
-    defined_row = None
-    defined_column = None
-    if defined_line:
-        if defined_line < 4:
-            defined_row = defined_line
-        elif defined_line < 8:
-            defined_column = defined_line - 4
-        elif defined_line == 9:
-            defined_row = 0
-            defined_column = 0
-        elif defined_line == 10:
-            defined_row = 1
-            defined_column = 3
-
-
     for i in range(len(non_def_permutation)):
         coefficients = 16 * [0]
 
-        if defined_row and defined_column:
-            if i < 2:
-                square_row = 0
-                square_column = (i + 1) % 2
-
-        square_row = i / 4
+        square_row = i // 4
         square_column = i % 4
+        
+        if defined_line is not None:
+            if defined_line < 4:
+                if square_row == defined_line:
+                    square_row = (square_row + 3) % 4
 
+            elif defined_line < 8:
+                if square_column == defined_line - 4:
+                    square_column = (square_column + 3) % 4
+
+            elif defined_line == 8:
+                if i < 3:
+                    square_row = 0
+                    square_column = (square_column + 1) % 4
+                else:
+                    square_column = 3
+                    square_row = i - 2
+
+            elif defined_line == 9:
+                if i < 3:
+                    square_row = 0
+                else:
+                    square_column = 0
+                    square_row = i - 2
 
         cell = (square_row * 4) + square_column
         coefficients[cell] = 1
@@ -126,6 +130,57 @@ def build_estimated_equations_coefficients(non_def_permutation, defined_line=Non
 
     return equations_coefficients
 
+
+def build_def_line_equations_coefficients(def_permutation, defined_line):
+    """
+    Build coefficients for defined line equations
+    """
+
+    # equations_coefficients = {}
+    equations_coefficients = []
+
+    for i in range(len(def_permutation)):
+        if def_permutation[i] is not None:
+            coefficients = 16 * [0]
+
+            if defined_line < 4:
+                square_row = (i // 4) + defined_line
+                square_column = i % 4
+
+            elif defined_line < 8:
+                square_column = (i // 4) + defined_line - 4
+                square_row = i % 4
+
+            elif defined_line == 8:
+                square_row = i
+                square_column = i
+
+            elif defined_line == 9:
+                square_row = i
+                square_column = 3 - i
+
+            cell = (square_row * 4) + square_column
+
+            coefficients[cell] = 1
+
+            # equations_coefficients[f"array_{i}"] = coefficients
+            equations_coefficients.append(coefficients)
+
+    return equations_coefficients
+
+
+def build_def_line_equations_constants(def_permutation):
+    """
+    Build constants for defined line equations
+    """
+
+    equations_constants = []
+
+    for value in def_permutation:
+        if value is not None:
+            equations_constants.append(value)
+
+    return equations_constants
 
 
 def main():
@@ -168,11 +223,13 @@ def main():
     fixed_equations_coefficients = build_fixed_equations_coefficients()
     fixed_equations_constants = 10 * [34]
 
-    # IF there are not any inline defined values
+    # IF there are not any inline defined valuese
     if len(inline_defined_values) < 1:
 
         # For each permutation of non-defined values
         for non_def_permutation in non_def_permutations:
+
+            break
 
             # Build estimated equations
             estimated_equations_coefficients = build_estimated_equations_coefficients(non_def_permutation)
@@ -190,14 +247,28 @@ def main():
             a = np.array(coefficients_matrix)
 
             constants_matrix = []
-            coefficients_matrix.append(fixed_equations_constants)
-            coefficients_matrix.append(estimated_equations_constants)
+            constants_matrix.extend(fixed_equations_constants)
+            constants_matrix.extend(estimated_equations_constants)
 
             b = np.array(constants_matrix)
 
-            x = np.linalg.solve((a, b))
+            """
+            for matrix in coefficients_matrix:
+                print(matrix)
 
-            solutions.append(x)
+            print(constants_matrix)
+            """
+
+            try:
+                x = np.linalg.solve(a, b)
+                print(x)
+            except:
+                pass
+
+            # x = np.linalg.solve(a, b)
+
+            # print(x)
+
 
         # Else
         else:
@@ -210,10 +281,10 @@ def main():
 
                     # Build equations for defined line
                     def_line_equations_coefficients = build_def_line_equations_coefficients(def_permutation, defined_line)
-                    def_line_equations_constants = build_def_line_equations_coefficients(def_permutation)
+                    def_line_equations_constants = build_def_line_equations_constants(def_permutation)
 
                     # For each permutation of non-defined values
-                    for non_def_permutation in non_def_perm
+                    for non_def_permutation in non_def_permutations:
 
                         # Build estimated equations
                         estimated_equations_coefficients = build_estimated_equations_coefficients(non_def_permutation, defined_line)
@@ -234,160 +305,81 @@ def main():
                         a = np.array(coefficients_matrix)
 
                         constants_matrix = []
-                        coefficients_matrix.append(fixed_equations_constants)
-                        coefficients_matrix.append(def_line_equations_constants)
-                        coefficients_matrix.append(estimated_equations_constants)
+                        constants_matrix.extend(fixed_equations_constants)
+                        constants_matrix.extend(def_line_equations_constants)
+                        constants_matrix.extend(estimated_equations_constants)
 
                         b = np.array(constants_matrix)
 
-                        x = np.linalg.solve((a, b))
+                        x = np.linalg.solve(a, b)
 
-                        solutions.append(x)
+                        # print(x)
+
+    # a = np.array([[1,1], [1,-1]])
+    # b = np.array([3,1])
+    c0 = [1,1]
+    c1 = [1,-1]
+
+    c = []
+    c.append(c0)
+    c.append(c1)
+
+    # a = np.array(c)
+
+    v0 = [3]
+    v1 = [1]
+
+    v = []
+    v.extend(v0)
+    v.extend(v1)
+
+    c00 = [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    c01 = [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+    c02 = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0]
+    c03 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1]
+    c04 = [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]
+    c05 = [0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
+    c06 = [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0]
+    c07 = [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+    c08 = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+    c09 = [0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0]
+    # c10 = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    # c11 = [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    # c12 = [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    # c13 = [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    # c14 = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    # c15 = [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+    c00 = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    c01 = [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    c02 = [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    c03 = [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    c04 = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    c05 = [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    c06 = [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    c07 = [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+    c08 = [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]
+    c09 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+    c10 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
+    c11 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
+    c12 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
+    c13 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
+    c14 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
+    c15 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+
+
+    a = np.array([c00,c01,c02,c03,c04,c05,c06,c07,c08,c09,c10,c11,c12,c13,c14,c15])
+
+    v = [34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 5, 6, 10, 16, 1, 13]
+
+    b = np.array(v)
+
+    print(np.linalg.det(a))
+
+    x = np.linalg.solve(a, b)
+
+    print(x)
 
 
 if __name__ == "__main__":
     main()
-
-
-"""
-import csv
-import sys
-
-from util import Node, StackFrontier, QueueFrontier
-
-# Maps names to a set of corresponding person_ids
-names = {}
-
-# Maps person_ids to a dictionary of: name, birth, movies (a set of movie_ids)
-people = {}
-
-# Maps movie_ids to a dictionary of: title, year, stars (a set of person_ids)
-movies = {}
-"""
-
-def load_data2(directory):
-    """
-    Load data from CSV files into memory.
-    """
-    # Load people
-    with open(f"{directory}/people.csv", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            people[row["id"]] = {
-                "name": row["name"],
-                "birth": row["birth"],
-                "movies": set()
-            }
-            if row["name"].lower() not in names:
-                names[row["name"].lower()] = {row["id"]}
-            else:
-                names[row["name"].lower()].add(row["id"])
-
-    # Load movies
-    with open(f"{directory}/movies.csv", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            movies[row["id"]] = {
-                "title": row["title"],
-                "year": row["year"],
-                "stars": set()
-            }
-
-    # Load stars
-    with open(f"{directory}/stars.csv", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            try:
-                people[row["person_id"]]["movies"].add(row["movie_id"])
-                movies[row["movie_id"]]["stars"].add(row["person_id"])
-            except KeyError:
-                pass
-
-
-def main2():
-    if len(sys.argv) > 2:
-        sys.exit("Usage: python degrees.py [directory]")
-    directory = sys.argv[1] if len(sys.argv) == 2 else "large"
-
-    # Load data from files into memory
-    print("Loading data...")
-    load_data(directory)
-    print("Data loaded.")
-
-    source = person_id_for_name(input("Name: "))
-    if source is None:
-        sys.exit("Person not found.")
-    target = person_id_for_name(input("Name: "))
-    if target is None:
-        sys.exit("Person not found.")
-
-    path = shortest_path(source, target)
-
-    if path is None:
-        print("Not connected.")
-    else:
-        degrees = len(path)
-        print(f"{degrees} degrees of separation.")
-        path = [(None, source)] + path
-        for i in range(degrees):
-            person1 = people[path[i][1]]["name"]
-            person2 = people[path[i + 1][1]]["name"]
-            movie = movies[path[i + 1][0]]["title"]
-            print(f"{i + 1}: {person1} and {person2} starred in {movie}")
-
-
-def shortest_path(source, target):
-    """
-    Returns the shortest list of (movie_id, person_id) pairs
-    that connect the source to the target.
-
-    If no possible path, returns None.
-    """
-
-    # TODO
-    raise NotImplementedError
-
-
-def person_id_for_name(name):
-    """
-    Returns the IMDB id for a person's name,
-    resolving ambiguities as needed.
-    """
-    person_ids = list(names.get(name.lower(), set()))
-    if len(person_ids) == 0:
-        return None
-    elif len(person_ids) > 1:
-        print(f"Which '{name}'?")
-        for person_id in person_ids:
-            person = people[person_id]
-            name = person["name"]
-            birth = person["birth"]
-            print(f"ID: {person_id}, Name: {name}, Birth: {birth}")
-        try:
-            person_id = input("Intended Person ID: ")
-            if person_id in person_ids:
-                return person_id
-        except ValueError:
-            pass
-        return None
-    else:
-        return person_ids[0]
-
-
-def neighbors_for_person(person_id):
-    """
-    Returns (movie_id, person_id) pairs for people
-    who starred with a given person.
-    """
-    movie_ids = people[person_id]["movies"]
-    neighbors = set()
-    for movie_id in movie_ids:
-        for person_id in movies[movie_id]["stars"]:
-            neighbors.add((movie_id, person_id))
-    return neighbors
-
-"""
-if __name__ == "__main__":
-    main()
-
-"""
