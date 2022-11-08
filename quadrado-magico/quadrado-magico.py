@@ -1,6 +1,9 @@
 import csv
 import sys
 
+import itertools
+import numpy as np
+
 
 def load_data(directory):
     """
@@ -10,13 +13,13 @@ def load_data(directory):
     # Load data
     data_loaded = {}
     data_loaded["precision"] = 0.1
-    data_loaded["inline_defined_values"] = []
+    data_loaded["inline_defined_values"] = set()
 
     try:
         with open(f"{directory}/precision.csv", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                data_loaded["precision"] = row["precision"]
+                data_loaded["precision"] = float(row["precision"])
     except:
         pass
 
@@ -24,12 +27,12 @@ def load_data(directory):
         with open(f"{directory}/inline-defined-values.csv", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                data_loaded["inline_defined_values"].append(row["inline-defined-values"])
+                data_loaded["inline_defined_values"].add(int(row["inline-defined-values"]))
     except:
         pass
 
-    return data_loaded        
-        
+    return data_loaded
+
 
 def main():
     # Get command line arguments
@@ -42,18 +45,87 @@ def main():
     loaded_data = load_data(directory)
     print("Data loaded.")
 
-    print(loaded_data)
-
+    inline_defined_values = loaded_data["inline_defined_values"]
 
     # Build non-define values
+    non_defined_values = set(range(1,17)) - inline_defined_values
 
     # Calculate number of estimated equations
+    number_of_estimated_equations = 6 - len(inline_defined_values)
 
-    # Get permutations of non-defined values
+    # Build permutations of non-defined values
+    permutations = itertools.permutations(non_defined_values, number_of_estimated_equations)
+    non_def_permutations = set()
+    for permutation in permutations:
+        non_def_permutations.add(permutation)
 
     # Get permutations of inline defined values
+    one_line_def_values = list(inline_defined_values)
+    if len(inline_defined_values) > 0:
+        for i in range(len(inline_defined_values), 4):
+            one_line_def_values.append(None)
+
+    permutations = itertools.permutations(one_line_def_values)
+    def_permutations = set()
+    permutations_count = 0
+    for permutation in permutations:
+        def_permutations.add(permutation)
+
+        permutations_count += 1
+
+    print(len(def_permutations))
+    print(permutations_count)
 
     # Build fixed equations
+    equations_coefficients = {}
+
+    for horizontal_equation in range(4):
+        equation_coefficients = 16 * [0]
+        square_row = horizontal_equation
+        for square_column in range(4):
+            cell = (square_row * 4) + square_column
+            equation_coefficients[cell] = 1
+
+        equations_coefficients[f"array_{horizontal_equation}"] = equation_coefficients
+    
+    for vertical_equation in range(4):
+        equation_coefficients = 16 * [0]
+        square_column = vertical_equation
+        for square_row in range(4):
+            cell = (square_row * 4) + square_column
+            equation_coefficients[cell] = 1
+
+        equations_coefficients[f"array_{4 + vertical_equation}"] = equation_coefficients
+    
+    equation_coefficients = 16 * [0]
+    for square_row in range(4):
+        square_column = square_row
+        cell = (square_row * 4) + square_column
+        equation_coefficients[cell] = 1
+
+    equations_coefficients[f"array_8"] = equation_coefficients
+    
+    equation_coefficients = 16 * [0]
+    for square_row in range(4):
+        square_column = 3 - square_row
+        cell = (square_row * 4) + square_column
+        equation_coefficients[cell] = 1
+
+    equations_coefficients[f"array_9"] = equation_coefficients
+
+    a = np.array(
+        equations_coefficients["array_0"],
+        equations_coefficients["array_1"],
+        equations_coefficients["array_2"],
+        equations_coefficients["array_3"],
+        equations_coefficients["array_4"],
+        equations_coefficients["array_5"],
+        equations_coefficients["array_6"],
+        equations_coefficients["array_7"],
+        equations_coefficients["array_8"],
+        equations_coefficients["array_9"],
+        )
+
 
     # For each permutation of non-defined values
 
