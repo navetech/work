@@ -34,6 +34,100 @@ def load_data(directory):
     return data_loaded
 
 
+def build_fixed_equations_coefficients():
+    """
+    Build coefficients for fixed equations
+    """
+
+    # equations_coefficients = {}
+    equations_coefficients = []
+
+    for horizontal_equation in range(4):
+        coefficients = 16 * [0]
+        square_row = horizontal_equation
+        for square_column in range(4):
+            cell = (square_row * 4) + square_column
+            coefficients[cell] = 1
+
+        # equations_coefficients[f"array_{horizontal_equation}"] = coefficients
+        equations_coefficients.append(coefficients)
+    
+    for vertical_equation in range(4):
+        coefficients = 16 * [0]
+        square_column = vertical_equation
+        for square_row in range(4):
+            cell = (square_row * 4) + square_column
+            coefficients[cell] = 1
+
+        # equations_coefficients[f"array_{4 + vertical_equation}"] = coefficients
+        equations_coefficients.append(coefficients)
+    
+    coefficients = 16 * [0]
+    for square_row in range(4):
+        square_column = square_row
+        cell = (square_row * 4) + square_column
+        coefficients[cell] = 1
+
+    # equations_coefficients[f"array_8"] = coefficients
+    equations_coefficients.append(coefficients)
+    
+    coefficients = 16 * [0]
+    for square_row in range(4):
+        square_column = 3 - square_row
+        cell = (square_row * 4) + square_column
+        coefficients[cell] = 1
+
+    # equations_coefficients[f"array_9"] = coefficients
+    equations_coefficients.append(coefficients)
+
+    return equations_coefficients
+
+
+def build_estimated_equations_coefficients(non_def_permutation, defined_line=None):
+    """
+    Build coefficients for estimated equations
+    """
+
+    # equations_coefficients = {}
+    equations_coefficients = []
+
+    defined_row = None
+    defined_column = None
+    if defined_line:
+        if defined_line < 4:
+            defined_row = defined_line
+        elif defined_line < 8:
+            defined_column = defined_line - 4
+        elif defined_line == 9:
+            defined_row = 0
+            defined_column = 0
+        elif defined_line == 10:
+            defined_row = 1
+            defined_column = 3
+
+
+    for i in range(len(non_def_permutation)):
+        coefficients = 16 * [0]
+
+        if defined_row and defined_column:
+            if i < 2:
+                square_row = 0
+                square_column = (i + 1) % 2
+
+        square_row = i / 4
+        square_column = i % 4
+
+
+        cell = (square_row * 4) + square_column
+        coefficients[cell] = 1
+
+        # equations_coefficients[f"array_{i}"] = coefficients
+        equations_coefficients.append(coefficients)
+
+    return equations_coefficients
+
+
+
 def main():
     # Get command line arguments
     if len(sys.argv) > 2:
@@ -67,85 +161,88 @@ def main():
 
     permutations = itertools.permutations(one_line_def_values)
     def_permutations = set()
-    permutations_count = 0
     for permutation in permutations:
         def_permutations.add(permutation)
 
-        permutations_count += 1
-
-    print(len(def_permutations))
-    print(permutations_count)
-
     # Build fixed equations
-    equations_coefficients = {}
+    fixed_equations_coefficients = build_fixed_equations_coefficients()
+    fixed_equations_constants = 10 * [34]
 
-    for horizontal_equation in range(4):
-        equation_coefficients = 16 * [0]
-        square_row = horizontal_equation
-        for square_column in range(4):
-            cell = (square_row * 4) + square_column
-            equation_coefficients[cell] = 1
+    # IF there are not any inline defined values
+    if len(inline_defined_values) < 1:
 
-        equations_coefficients[f"array_{horizontal_equation}"] = equation_coefficients
-    
-    for vertical_equation in range(4):
-        equation_coefficients = 16 * [0]
-        square_column = vertical_equation
-        for square_row in range(4):
-            cell = (square_row * 4) + square_column
-            equation_coefficients[cell] = 1
+        # For each permutation of non-defined values
+        for non_def_permutation in non_def_permutations:
 
-        equations_coefficients[f"array_{4 + vertical_equation}"] = equation_coefficients
-    
-    equation_coefficients = 16 * [0]
-    for square_row in range(4):
-        square_column = square_row
-        cell = (square_row * 4) + square_column
-        equation_coefficients[cell] = 1
-
-    equations_coefficients[f"array_8"] = equation_coefficients
-    
-    equation_coefficients = 16 * [0]
-    for square_row in range(4):
-        square_column = 3 - square_row
-        cell = (square_row * 4) + square_column
-        equation_coefficients[cell] = 1
-
-    equations_coefficients[f"array_9"] = equation_coefficients
-
-    a = np.array(
-        equations_coefficients["array_0"],
-        equations_coefficients["array_1"],
-        equations_coefficients["array_2"],
-        equations_coefficients["array_3"],
-        equations_coefficients["array_4"],
-        equations_coefficients["array_5"],
-        equations_coefficients["array_6"],
-        equations_coefficients["array_7"],
-        equations_coefficients["array_8"],
-        equations_coefficients["array_9"],
-        )
-
-
-    # For each permutation of non-defined values
-
-        # Build estimated equations
-
-        # IF there are not any inline defined values
+            # Build estimated equations
+            estimated_equations_coefficients = build_estimated_equations_coefficients(non_def_permutation)
+            estimated_equations_constants = list(non_def_permutation)
 
             # Solve equations
+            coefficients_matrix = []
+
+            for coefficients in fixed_equations_coefficients:
+                coefficients_matrix.append(coefficients)
+
+            for coefficients in estimated_equations_coefficients:
+                coefficients_matrix.append(coefficients)
+
+            a = np.array(coefficients_matrix)
+
+            constants_matrix = []
+            coefficients_matrix.append(fixed_equations_constants)
+            coefficients_matrix.append(estimated_equations_constants)
+
+            b = np.array(constants_matrix)
+
+            x = np.linalg.solve((a, b))
+
+            solutions.append(x)
 
         # Else
+        else:
 
-            # For each permutation of inline defioned values
+            # For each permutation of inline defined values
+            for def_permutation in def_permutations:
 
                 # for each line of the magic square
+                for defined_line in range(10):
 
-                    # Build equations for the line
+                    # Build equations for defined line
+                    def_line_equations_coefficients = build_def_line_equations_coefficients(def_permutation, defined_line)
+                    def_line_equations_constants = build_def_line_equations_coefficients(def_permutation)
 
-                    # Solve equations
+                    # For each permutation of non-defined values
+                    for non_def_permutation in non_def_perm
 
-    # Save solutions
+                        # Build estimated equations
+                        estimated_equations_coefficients = build_estimated_equations_coefficients(non_def_permutation, defined_line)
+                        estimated_equations_constants = list(non_def_permutation)
+
+                        # Solve equationsutations:
+                        coefficients_matrix = []
+
+                        for coefficients in fixed_equations_coefficients:
+                            coefficients_matrix.append(coefficients)
+
+                        for coefficients in def_line_equations_coefficients:
+                            coefficients_matrix.append(coefficients)
+
+                        for coefficients in estimated_equations_coefficients:
+                            coefficients_matrix.append(coefficients)
+
+                        a = np.array(coefficients_matrix)
+
+                        constants_matrix = []
+                        coefficients_matrix.append(fixed_equations_constants)
+                        coefficients_matrix.append(def_line_equations_constants)
+                        coefficients_matrix.append(estimated_equations_constants)
+
+                        b = np.array(constants_matrix)
+
+                        x = np.linalg.solve((a, b))
+
+                        solutions.append(x)
 
 
 if __name__ == "__main__":
