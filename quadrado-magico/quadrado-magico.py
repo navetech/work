@@ -139,6 +139,60 @@ def build_estimated_values(max_value, defined_lines):
     return estimated_values
 
 
+def build_estimated_values_combs(estimated_values, line_length, line_sum):
+    """
+    Build valid estimated values combinations
+    """
+
+    print(estimated_values)
+
+    comb_length = len(estimated_values) // line_length
+
+    if comb_length == 0:
+        return []
+
+    estimated_values_combs = []
+
+    inds = comb_length * [0]
+    values = comb_length * [0]
+    comb = []
+    values_sum = 0
+    for inds[0] in range(len(estimated_values)):
+
+        values[0] = estimated_values[inds[0]]
+
+        if comb_length == 1:
+            comb.append(values[0])
+
+            estimated_values_combs.append(comb)
+            comb = []
+            values_sum = 0
+
+            continue
+    
+        values_sum += values[0]
+
+        for j in range(1, comb_length):
+
+            for inds[j] in range(inds[j - 1] + 1, len(estimated_values)):
+                values[j] = estimated_values[inds[j]]
+
+                values_sum += values[j]
+                if values_sum > line_sum:
+                    break
+
+                if comb_length == j + 1:
+
+                    for k in range(0, j + 1):
+                        comb.append(values[k])
+
+                    estimated_values_combs.append(comb)
+                    comb = []
+                    values_sum = 0
+    
+    return estimated_values_combs
+
+
 def main():
     # Get command line arguments
     if len(sys.argv) > 2:
@@ -204,8 +258,15 @@ def main():
     # Build all estimated values
     estimated_values = build_estimated_values(max_value, defined_lines)
 
-    print(estimated_values)
-    
+    # Build valid estimated values combinations
+    estimated_values_combs = build_estimated_values_combs(estimated_values, line_length, line_sum)
+
+    for comb in estimated_values_combs:
+        print(comb)
+
+    print(len(estimated_values_combs))
+
+
 
     
 
