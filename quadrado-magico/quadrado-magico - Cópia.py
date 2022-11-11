@@ -5,138 +5,185 @@ import sys
 import itertools
 import numpy as np
 
+import random
 
-def load_line_length(directory):
+
+
+def load_data(directory):
     """
-    Load line length from CSV file into memory.
+    Load data from CSV files into memory.
     """
 
     # Load data
-    line_length = 4
+    data_loaded = {}
+    data_loaded["precision"] = 0.1
+    data_loaded["inline_defined_values"] = set()
 
     try:
-        with open(f"{directory}/line-length.csv", encoding="utf-8") as f:
+        with open(f"{directory}/precision.csv", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                line_length = int(row["length"])
+                data_loaded["precision"] = float(row["precision"])
     except:
         pass
 
-    return line_length
+    try:
+        with open(f"{directory}/inline-defined-values.csv", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                data_loaded["inline_defined_values"].add(int(row["inline-defined-values"]))
+    except:
+        pass
+
+    return data_loaded
 
 
-def load_defined_lines(directory, num_lines):
-    """
-    Load defined lines from CSV files into memory.
-    """
-
-    # Load data
-    defined_lines = []
-
-    for i in range(num_lines):
-        line_values = []
-
-        try:
-            with open(f"{directory}/defined-line-{i}.csv", encoding="utf-8") as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    line_values.append(int(row["value"]))
-        except:
-            pass
-
-        if len(line_values) > 0 :
-            defined_lines.append(line_values)
-
-    return defined_lines
-
-
-def line_length_is_valid(line_length, line_sum):
-    """
-    Check if line legth is valid
-    """
-
-    return (line_length % 2) == (line_sum) % 2
-
-
-def defined_lines_are_valid(defined_lines, line_length, num_lines, max_value, line_sum):
-    """
-    Check if defined lines legth are valid
-    """
-
-    num_def_lines = len(defined_lines)
-    if num_def_lines == 0:
-        return True
-    elif num_def_lines > num_lines:
-        return False
-    else:
-        lines_set = set()
-
-        for line in defined_lines:
-            line_set = set(line)
-
-            num_line_values = len(line_set)
-            if num_line_values != line_length:
-                return False
-
-            elif len(lines_set.intersection(line_set)) > 0:
-                return False
-
-            else:
-                values_sum = 0
-                for value in line:
-                    if value < 1 or value > max_value:
-                        return False
-                    
-                    else:
-                        values_sum += value
-
-                if values_sum != line_sum:
-                    return False
-
-                else:
-                    lines_set= lines_set.union(line_set)
-
-        return True
-
-
-def build_fixed_equations_coefs(num_fixed_equations, total_num_values, line_length):
+def build_fixed_equations_coefficients():
     """
     Build coefficients for fixed equations
     """
 
-    equations_coefs = []
+    # equations_coefficients = {}
+    equations_coefficients = []
 
-    for equation in range(num_fixed_equations):
-        coefs = total_num_values * [0]
-        row = equation
-        for column in range(line_length):
-            cell = (row * num_fixed_equations) + column
-            coefs[cell] = 1
+    for horizontal_equation in range(4):
+        coefficients = 16 * [0]
+        square_row = horizontal_equation
+        for square_column in range(4):
+            cell = (square_row * 4) + square_column
+            coefficients[cell] = 1
 
-        equations_coefs.append(coefs)
+        # equations_coefficients[f"array_{horizontal_equation}"] = coefficients
+        equations_coefficients.append(coefficients)
+    
+    for vertical_equation in range(4):
+        coefficients = 16 * [0]
+        square_column = vertical_equation
+        for square_row in range(4):
+            cell = (square_row * 4) + square_column
+            coefficients[cell] = 1
 
-    return equations_coefs
+        # equations_coefficients[f"array_{4 + vertical_equation}"] = coefficients
+        equations_coefficients.append(coefficients)
+    
+    coefficients = 16 * [0]
+    for square_row in range(4):
+        square_column = square_row
+        cell = (square_row * 4) + square_column
+        coefficients[cell] = 1
+
+    # equations_coefficients[f"array_8"] = coefficients
+    equations_coefficients.append(coefficients)
+    
+    coefficients = 16 * [0]
+    for square_row in range(4):
+        square_column = 3 - square_row
+        cell = (square_row * 4) + square_column
+        coefficients[cell] = 1
+
+    # equations_coefficients[f"array_9"] = coefficients
+    equations_coefficients.append(coefficients)
+
+    return equations_coefficients
 
 
-def build_estimated_values(max_value, defined_lines):
+def build_estimated_equations_coefficients(non_def_permutation, defined_line=None):
     """
-    Build sorted estimated values
+    Build coefficients for estimated equations
     """
 
-    estimated_values = set(range(1, max_value + 1))
+    # equations_coefficients = {}
+    equations_coefficients = []
 
-    defined_values = set()
-    for line in defined_lines:
-        values = set(line)
-        defined_values = defined_values.union(values)
+    for i in range(len(non_def_permutation)):
+        coefficients = 16 * [0]
 
-    estimated_values = estimated_values.difference(defined_values)
+        square_row = i // 4
+        square_column = i % 4
+        
+        if defined_line is not None:
+            if defined_line < 4:
+                if square_row == defined_line:
+                    square_row = (square_row + 3) % 4
 
-    estimated_values = list(estimated_values)
+            elif defined_line < 8:
+                if square_column == defined_line - 4:
+                    square_column = (square_column + 3) % 4
 
-    estimated_values.sort()
+            elif defined_line == 8:
+                if i < 3:
+                    square_row = 0
+                    square_column = (square_column + 1) % 4
+                else:
+                    square_column = 3
+                    square_row = i - 2
 
-    return estimated_values
+            elif defined_line == 9:
+                if i < 3:
+                    square_row = 0
+                else:
+                    square_column = 0
+                    square_row = i - 2
+
+        cell = (square_row * 4) + square_column
+        coefficients[cell] = 1
+
+        # equations_coefficients[f"array_{i}"] = coefficients
+        equations_coefficients.append(coefficients)
+
+    return equations_coefficients
+
+
+def build_def_line_equations_coefficients(def_permutation, defined_line):
+    """
+    Build coefficients for defined line equations
+    """
+
+    # equations_coefficients = {}
+    equations_coefficients = []
+
+    for i in range(len(def_permutation)):
+        if def_permutation[i] is not None:
+            coefficients = 16 * [0]
+
+            if defined_line < 4:
+                square_row = (i // 4) + defined_line
+                square_column = i % 4
+
+            elif defined_line < 8:
+                square_column = (i // 4) + defined_line - 4
+                square_row = i % 4
+
+            elif defined_line == 8:
+                square_row = i
+                square_column = i
+
+            elif defined_line == 9:
+                square_row = i
+                square_column = 3 - i
+
+            cell = (square_row * 4) + square_column
+
+            coefficients[cell] = 1
+
+            # equations_coefficients[f"array_{i}"] = coefficients
+            equations_coefficients.append(coefficients)
+
+    return equations_coefficients
+
+
+def build_def_line_equations_constants(def_permutation):
+    """
+    Build constants for defined line equations
+    """
+
+    equations_constants = []
+
+    for value in def_permutation:
+        if value is not None:
+            equations_constants.append(value)
+
+    return equations_constants
 
 
 def main():
@@ -145,75 +192,10 @@ def main():
         sys.exit("Usage: python quadrado-magico.py [directory]")
     directory = sys.argv[1] if len(sys.argv) == 2 else ""
 
-    # Load line length
-    line_length = load_line_length(directory)
-
-    # Set number of lines
-    num_lines = line_length
-
-    # Calculate max value
-    max_value = line_length * num_lines
-
-    # Calculate total number of values
-    total_num_values = max_value
-
-    # Calculate total sum of values
-    total_sum = ((1 + max_value) * total_num_values) / 2
-
-    #dCalculate sum of values of each line
-    line_sum = int(total_sum / num_lines)
-
-    # Check if line length is valid
-    if not line_length_is_valid(line_length, line_sum):
-        sys.exit(f"Line length {line_length} is invalid")
-
-    # Load defined lines
-    defined_lines = load_defined_lines(directory, num_lines)
-
-    # Check if defined lines are valis
-    if not defined_lines_are_valid(defined_lines, line_length, num_lines, max_value, line_sum):
-        sys.exit(f"Defined lines are invalid")
-
-    # Calculate total number of equations
-    total_num_equations = total_num_values
-
-    # Calculate number of defined lines
-    num_def_lines = len(defined_lines)
-
-    # Calculate total number of defined lines equations
-    num_def_lines_equations = num_def_lines
-
-    # Calculate number of fixed lines equations
-    num_fixed_equations = total_num_equations - num_def_lines_equations
-    if num_fixed_equations > num_lines:
-        num_fixed_equations = num_lines
-
-    # Check number of fixed lines equations
-    if num_fixed_equations < num_lines:
-        sys.exit(f"Number of fixed equations {num_fixed_equations} < number of lines {num_lines}")
-
-    # Calculate number of estimated values equations
-    num_estimated_equations = total_num_equations - num_def_lines_equations - num_fixed_equations
-
-    # Build coefficients for fixed equations
-    fixed_equations_coefs = build_fixed_equations_coefs(num_fixed_equations, total_num_values, line_length)
-
-    # Build constants for fixed equations
-    fixed_equations_consts = num_fixed_equations * [line_sum]
-
-    # Build all estimated values
-    estimated_values = build_estimated_values(max_value, defined_lines)
-
-    print(estimated_values)
-    
-
-    
-
-    
-
-
-
-    return
+    # Load data from files into memory
+    print("Loading data...")
+    loaded_data = load_data(directory)
+    print("Data loaded.")
 
     inline_defined_values = loaded_data["inline_defined_values"]
 
