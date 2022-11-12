@@ -11,7 +11,7 @@ def load_line_length(directory):
     Load line length from CSV file into memory.
     """
 
-    # Load data
+    # Line length default
     line_length = 4
 
     try:
@@ -25,13 +25,13 @@ def load_line_length(directory):
     return line_length
 
 
-def load_defined_lines(directory, num_lines):
+def load_def_lines(directory, num_lines):
     """
     Load defined lines from CSV files into memory.
     """
 
-    # Load data
-    defined_lines = []
+    # Defined lines default (none)
+    def_lines = []
 
     for i in range(num_lines):
         line_values = []
@@ -45,9 +45,9 @@ def load_defined_lines(directory, num_lines):
             pass
 
         if len(line_values) > 0 :
-            defined_lines.append(line_values)
+            def_lines.append(line_values)
 
-    return defined_lines
+    return def_lines
 
 
 def line_length_is_valid(line_length, line_sum):
@@ -58,12 +58,12 @@ def line_length_is_valid(line_length, line_sum):
     return (line_length % 2) == (line_sum) % 2
 
 
-def defined_lines_are_valid(defined_lines, line_length, num_lines, max_value, line_sum):
+def def_lines_are_valid(def_lines, line_length, num_lines, max_value, line_sum):
     """
-    Check if defined lines legth are valid
+    Check if defined lines are valid
     """
 
-    num_def_lines = len(defined_lines)
+    num_def_lines = len(def_lines)
     if num_def_lines == 0:
         return True
     elif num_def_lines > num_lines:
@@ -71,7 +71,7 @@ def defined_lines_are_valid(defined_lines, line_length, num_lines, max_value, li
     else:
         lines_set = set()
 
-        for line in defined_lines:
+        for line in def_lines:
             line_set = set(line)
 
             num_line_values = len(line_set)
@@ -94,12 +94,12 @@ def defined_lines_are_valid(defined_lines, line_length, num_lines, max_value, li
                     return False
 
                 else:
-                    lines_set= lines_set.union(line_set)
+                    lines_set = lines_set.union(line_set)
 
         return True
 
 
-def build_fixed_equations_coefs(num_fixed_equations, total_num_values, line_length):
+def build_fixed_equations_coefs(num_fixed_equations, num_values, line_length):
     """
     Build coefficients for fixed equations
     """
@@ -107,7 +107,7 @@ def build_fixed_equations_coefs(num_fixed_equations, total_num_values, line_leng
     equations_coefs = []
 
     for equation in range(num_fixed_equations):
-        coefs = total_num_values * [0]
+        coefs = num_values * [0]
         row = equation
         for column in range(line_length):
             cell = (row * num_fixed_equations) + column
@@ -118,79 +118,135 @@ def build_fixed_equations_coefs(num_fixed_equations, total_num_values, line_leng
     return equations_coefs
 
 
-def build_estimated_values(max_value, defined_lines):
+def build_estim_vals(max_value, def_lines):
     """
     Build sorted estimated values
     """
 
-    estimated_values = set(range(1, max_value + 1))
+    estim_vals = set(range(1, max_value + 1))
 
-    defined_values = set()
-    for line in defined_lines:
+    def_vals = set()
+    for line in def_lines:
         values = set(line)
-        defined_values = defined_values.union(values)
+        def_vals = def_vals.union(values)
 
-    estimated_values = estimated_values.difference(defined_values)
+    estim_vals = estim_vals.difference(def_vals)
 
-    estimated_values = list(estimated_values)
+    estim_vals = list(estim_vals)
 
-    estimated_values.sort()
+    estim_vals.sort()
 
-    return estimated_values
+    return estim_vals
 
 
-def build_estimated_values_combs(estimated_values, line_length, line_sum):
+def build_valid_estim_vals_combs(estim_vals, combs_length, line_sum):
     """
     Build valid estimated values combinations
     """
 
-    print(estimated_values)
+    valid_combs = []
 
-    comb_length = len(estimated_values) // line_length
+    combs = itertools.combinations(estim_vals, combs_length)
 
-    if comb_length == 0:
-        return []
+    for comb in combs:
+        comb_sum = 0
+        for value in comb:
+            comb_sum += value
 
-    estimated_values_combs = []
+        if comb_sum <= line_sum:
+            valid_combs.append(comb)
 
-    inds = comb_length * [0]
-    values = comb_length * [0]
-    comb = []
-    values_sum = 0
-    for inds[0] in range(len(estimated_values)):
+    return valid_combs
 
-        values[0] = estimated_values[inds[0]]
 
-        if comb_length == 1:
-            comb.append(values[0])
+def build_valid_estim_vals_permuts(
+    estim_vals, num_estim_vals_equations, line_length, line_sum, max_value
+    ):
+    """
+    Build valid estimated values permutations
+    """
 
-            estimated_values_combs.append(comb)
-            comb = []
-            values_sum = 0
+    permuts_length = num_estim_vals_equations // line_length
 
-            continue
+    max_permuts_sum = 0
+    for i in range(permuts_length):
+        max_permuts_sum += max_value - i
+
+    if max_permuts_sum <= line_sum:
+        valid_permutations = list(itertools.permutations(estim_vals, permuts_length))
     
-        values_sum += values[0]
+    else:
+        valid_combs = build_valid_estim_vals_combs(estim_vals, permuts_length, line_sum)
 
-        for j in range(1, comb_length):
+        valid_permutations = []
 
-            for inds[j] in range(inds[j - 1] + 1, len(estimated_values)):
-                values[j] = estimated_values[inds[j]]
+        for comb in valid_combs:
+            comb_permuts = itertools.permutations(comb)
 
-                values_sum += values[j]
-                if values_sum > line_sum:
+            valid_permutations.extend(comb_permuts)
+
+    return valid_permutations
+
+
+def build_def_lines_vals_permuts(def_lines, num_def_lines):
+    """
+    Build defined lines values permutations
+    """
+
+    permutations = []
+
+    for line in def_lines:
+        line_permuts = itertools.permutations(line)
+
+        permutations.append(line_permuts)
+
+
+    all_permuts = []
+    i_permut = 0
+    while True:
+        end = True
+        permuts = []
+
+        for i in range(num_def_lines):
+            count = 0
+
+            for permut in permutations[i]:
+                if count == i_permut:
+                    permuts.append(permut)
+                    end = False
                     break
 
-                if comb_length == j + 1:
+                count += 1
 
-                    for k in range(0, j + 1):
-                        comb.append(values[k])
+        if end:
+            break
 
-                    estimated_values_combs.append(comb)
-                    comb = []
-                    values_sum = 0
-    
-    return estimated_values_combs
+        all_permuts.append(permuts)
+
+        i_permut += 1
+
+
+    return all_permuts
+
+
+def build_def_lines_pos_ids(num_lines):
+    """
+    Build defined lines positions ids
+    """
+
+    ids = []
+
+    id_rows = list(range(num_lines))
+    id_columns = list(range(num_lines, 2 * num_lines))
+    id_diagonal_1 = (2 * num_lines) + 1
+    id_diagonal_2 = (2 * num_lines) + 2
+
+    ids.extend(id_rows)
+    ids.extend(id_columns)
+    ids.append(id_diagonal_1)
+    ids.append(id_diagonal_2)
+
+    return ids
 
 
 def main():
@@ -209,12 +265,12 @@ def main():
     max_value = line_length * num_lines
 
     # Calculate total number of values
-    total_num_values = max_value
+    num_values = max_value
 
     # Calculate total sum of values
-    total_sum = ((1 + max_value) * total_num_values) / 2
+    total_sum = ((1 + max_value) * num_values) / 2
 
-    #dCalculate sum of values of each line
+    # Calculate sum of values of each line
     line_sum = int(total_sum / num_lines)
 
     # Check if line length is valid
@@ -222,51 +278,117 @@ def main():
         sys.exit(f"Line length {line_length} is invalid")
 
     # Load defined lines
-    defined_lines = load_defined_lines(directory, num_lines)
+    def_lines = load_def_lines(directory, num_lines)
 
-    # Check if defined lines are valis
-    if not defined_lines_are_valid(defined_lines, line_length, num_lines, max_value, line_sum):
+    # Check if defined lines are valid
+    if not def_lines_are_valid(def_lines, line_length, num_lines, max_value, line_sum):
         sys.exit(f"Defined lines are invalid")
 
-    # Calculate total number of equations
-    total_num_equations = total_num_values
+    # Calculate number of equations
+    num_equations = num_values
 
     # Calculate number of defined lines
-    num_def_lines = len(defined_lines)
+    num_def_lines = len(def_lines)
 
-    # Calculate total number of defined lines equations
-    num_def_lines_equations = num_def_lines
+    # Calculate number of defined lines equations
+    num_def_lines_equations = num_def_lines * line_length
 
-    # Calculate number of fixed lines equations
-    num_fixed_equations = total_num_equations - num_def_lines_equations
+    # Calculate number of fixed equations
+    num_fixed_equations = num_equations - num_def_lines_equations
     if num_fixed_equations > num_lines:
         num_fixed_equations = num_lines
 
-    # Check number of fixed lines equations
+    # Check number of fixed equations
     if num_fixed_equations < num_lines:
         sys.exit(f"Number of fixed equations {num_fixed_equations} < number of lines {num_lines}")
 
     # Calculate number of estimated values equations
-    num_estimated_equations = total_num_equations - num_def_lines_equations - num_fixed_equations
+    num_estim_vals_equations = num_equations - num_def_lines_equations - num_fixed_equations
 
     # Build coefficients for fixed equations
-    fixed_equations_coefs = build_fixed_equations_coefs(num_fixed_equations, total_num_values, line_length)
+    fixed_equations_coefs = build_fixed_equations_coefs(num_fixed_equations, num_values, line_length)
 
     # Build constants for fixed equations
     fixed_equations_consts = num_fixed_equations * [line_sum]
 
     # Build all estimated values
-    estimated_values = build_estimated_values(max_value, defined_lines)
+    estim_vals = build_estim_vals(max_value, def_lines)
 
-    # Build valid estimated values combinations
-    estimated_values_combs = build_estimated_values_combs(estimated_values, line_length, line_sum)
+    # Build valid estimated values permutations
+    valid_estim_vals_permuts = build_valid_estim_vals_permuts(
+        estim_vals, num_estim_vals_equations, line_length, line_sum, max_value
+        )
 
-    for comb in estimated_values_combs:
-        print(comb)
+    # Build estimated values permutations for equations
+    equations_estim_vals_permuts = itertools.permutations(valid_estim_vals_permuts, line_length)
 
-    print(len(estimated_values_combs))
+    # Build defined lines values permutations
+    def_lines_vals_permuts = build_def_lines_vals_permuts(def_lines, num_def_lines)
+
+    for permuts in def_lines_vals_permuts:
+        print(permuts)
+
+    print(len(def_lines_vals_permuts))
+
+    """
+    for line_permuts in def_lines_vals_permuts:
+        count = 0
+        for permut in line_permuts:
+            count += 1
+            print(permut)
+        print(count)
+    """
 
 
+    # Build defined lines positions ids
+    def_lines_pos_ids = build_def_lines_pos_ids(num_lines)
+
+    # Build defined lines positions permutations
+    def_lines_pos_permuts = itertools.permutations(def_lines_pos_ids, num_def_lines)
+
+    # If there are not any defined lines
+    if num_def_lines < 1:
+
+        # Build coefficients for estimated values equations
+
+        # For each estimated values permutation for equations
+        for permut in equations_estim_vals_permuts:
+            break
+            
+            # Build constants for estimated values equations
+
+            # Build coefficients for all equations
+
+            # Build constants for all equations
+
+            # Solve equations
+
+    # Else there are defined lines
+    else:
+
+        # For each defined lines values permutations
+        
+            # For each defined lines positions permutation
+                
+                # Build coefficients for defined line equations  
+                
+                # Build constants for defined line equations
+
+                # Build coefficients for estimated values equations
+    
+                # For each estimated values permutation for equations
+                for permut in equations_estim_vals_permuts:
+                    break
+                    
+                    # Build constants for estimated values equations
+
+                    # If constants for estimated values equations are valid
+
+                        # Build coefficients for all equations
+
+                        # Build constants for all equations
+
+                        # Solve equations
 
     
 
