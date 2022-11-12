@@ -193,60 +193,123 @@ def build_def_lines_vals_permuts(def_lines, num_def_lines):
     Build defined lines values permutations
     """
 
-    permutations = []
+    val_permuts = {}
 
+    direct_permuts = []
     for line in def_lines:
-        line_permuts = itertools.permutations(line)
+        line_permuts = list(itertools.permutations(line))
 
-        permutations.append(line_permuts)
+        direct_permuts.append(line_permuts)
+
+    val_permuts["direct"] = direct_permuts
 
 
-    all_permuts = []
+    inverted_permuts = []
     i_permut = 0
     while True:
         end = True
         permuts = []
+        for i_line in range(num_def_lines):
+            line_permuts = direct_permuts[i_line]
+            if i_permut < len(line_permuts):
+                end = False
 
-        for i in range(num_def_lines):
-            count = 0
-
-            for permut in permutations[i]:
-                if count == i_permut:
-                    permuts.append(permut)
-                    end = False
-                    break
-
-                count += 1
+                permut = line_permuts[i_permut]
+                permuts.append(permut)
+            else:
+                permuts.append([])
 
         if end:
             break
 
-        all_permuts.append(permuts)
+        inverted_permuts.append(permuts)
 
         i_permut += 1
 
+    val_permuts["inverted"] = inverted_permuts
 
-    return all_permuts
+
+    return val_permuts
 
 
-def build_def_lines_pos_ids(num_lines):
+def build_def_lines_pos_permuts(num_def_lines, line_length):
     """
-    Build defined lines positions ids
+    Build defined lines positions permutations
     """
 
-    ids = []
+    if num_def_lines < 1:
+        return []
 
-    id_rows = list(range(num_lines))
-    id_columns = list(range(num_lines, 2 * num_lines))
-    id_diagonal_1 = (2 * num_lines) + 1
-    id_diagonal_2 = (2 * num_lines) + 2
+    permuts = []
 
-    ids.extend(id_rows)
-    ids.extend(id_columns)
-    ids.append(id_diagonal_1)
-    ids.append(id_diagonal_2)
+    id_rows = list(range(line_length))
+    id_columns = list(range(line_length, 2 * line_length))
+    id_diagonals = [2 * line_length, 2 * line_length + 1]
 
-    return ids
+    rows_permuts = list(itertools.permutations(id_rows, num_def_lines))
+    columns_permuts = list(itertools.permutations(id_columns, num_def_lines))
+
+    permuts.extend(rows_permuts)
+    permuts.extend(columns_permuts)
+
+    if num_def_lines < 3:
+        diagonals_permuts = list(itertools.permutations(id_diagonals, num_def_lines))
+        permuts.extend(diagonals_permuts)
+
+    return permuts
+
+
+def build_def_lines_equations_coefs(num_def_lines, def_lines_pos_permut, line_length, num_values):
+    """ 
+    Build coefficients for defined lines equations
+    """
+
+    equations_coeffs = []
+
+    for line in range(num_def_lines):
+        position = def_lines_pos_permut[line]
+
+        if position < line_length:
+            row = position
+            for i_value in range(line_length):
+                column = i_value
+                i_x = (row * line_length) + column
+
+                one_equation_coeffs = num_values * [0]
+                one_equation_coeffs[i_x] = 1
+                equations_coeffs.append(one_equation_coeffs)
+
+        elif position < 2 * line_length:
+            column = position % line_length
+            for i_value in range(line_length):
+                row = i_value
+                i_x = (row * line_length) + column
+
+                one_equation_coeffs = num_values * [0]
+                one_equation_coeffs[i_x] = 1
+                equations_coeffs.append(one_equation_coeffs)
+
+        elif position == 2 * line_length:
+            row = position
+            for i_value in range(line_length):
+                column = i_value
+                i_x = (row * line_length) + column
+
+                one_equation_coeffs = num_values * [0]
+                one_equation_coeffs[i_x] = 1
+                equations_coeffs.append(one_equation_coeffs)
+
+        elif position == (2 * line_length) + 1:
+            row = position
+            for i_value in range(line_length):
+                column = (line_length - 1) - i_value
+                i_x = (row * line_length) + column
+
+                one_equation_coeffs = num_values * [0]
+                one_equation_coeffs[i_x] = 1
+                equations_coeffs.append(one_equation_coeffs)
+
+    return equations_coeffs
 
 
 def main():
@@ -322,30 +385,6 @@ def main():
     # Build estimated values permutations for equations
     equations_estim_vals_permuts = itertools.permutations(valid_estim_vals_permuts, line_length)
 
-    # Build defined lines values permutations
-    def_lines_vals_permuts = build_def_lines_vals_permuts(def_lines, num_def_lines)
-
-    for permuts in def_lines_vals_permuts:
-        print(permuts)
-
-    print(len(def_lines_vals_permuts))
-
-    """
-    for line_permuts in def_lines_vals_permuts:
-        count = 0
-        for permut in line_permuts:
-            count += 1
-            print(permut)
-        print(count)
-    """
-
-
-    # Build defined lines positions ids
-    def_lines_pos_ids = build_def_lines_pos_ids(num_lines)
-
-    # Build defined lines positions permutations
-    def_lines_pos_permuts = itertools.permutations(def_lines_pos_ids, num_def_lines)
-
     # If there are not any defined lines
     if num_def_lines < 1:
 
@@ -365,13 +404,42 @@ def main():
 
     # Else there are defined lines
     else:
+        # Build defined lines values permutations
+        def_lines_vals_permuts = build_def_lines_vals_permuts(def_lines, num_def_lines)
+
+        """
+        print()
+        print("inverted")
+        for permuts in def_lines_vals_permuts["inverted"]:
+            print(permuts)
+
+        print(len(def_lines_vals_permuts["inverted"]))
+
+        print()
+        print("direct")
+        for i in range(num_def_lines):
+            print()
+            for permut in def_lines_vals_permuts["direct"][i]:
+                print(permut)
+            count = len(def_lines_vals_permuts["direct"][i])
+            print(f"{count} permuts of line {i}")
+        """
+
+
+        # Build defined lines positions permutations
+        def_lines_pos_permuts = build_def_lines_pos_permuts(num_def_lines, line_length)
 
         # For each defined lines values permutations
+        for def_lines_vals_permut in def_lines_vals_permuts:
         
             # For each defined lines positions permutation
+            for def_lines_pos_permut in def_lines_pos_permuts:
                 
-                # Build coefficients for defined line equations  
-                
+                # Build coefficients for defined line equations
+                build_def_lines_equations_coefs(
+                    num_def_lines, def_lines_pos_permut, line_length, num_values
+                    )
+
                 # Build constants for defined line equations
 
                 # Build coefficients for estimated values equations
