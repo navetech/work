@@ -351,73 +351,98 @@ def build_estim_vals_equations_coefs(num_estim_vals_equations, def_lines_pos_per
     total_free_rows = set(list(range(line_length)))
     total_free_columns = set(list(range(line_length)))
 
-    occupied_rows = set()
-    occupied_columns = set()
+    occupied_cells = set()
 
     for position in def_lines_pos_permut:
-        if position < line_length
+        if position < line_length:
             row = position
-            total_free_rows.difference(set(row))
+            total_free_rows.remove(row)
+
+            for column in range(line_length):
+                total_free_columns.remove(column)
 
         elif position < 2 * line_length:
             column = position % line_length
-            total_free_columns.difference(set(column))
+            total_free_columns.remove(column)
+
+            for row in range(line_length):
+                total_free_rows.remove(row)
 
         elif position == 2 * line_length:
             for i_value in range(line_length):
                 row = i_value
                 column = i_value
-                occupied_rows.add(row)
-                occupied_columns.add(column)
+                occupied_cells.add((row, column))
 
         elif position == (2 * line_length) + 1:
             for i_value in range(line_length):
                 row = i_value
                 column = (line_length - 1) - i_value
-                occupied_rows.add(row)
-                occupied_columns.add(column)
+                occupied_cells.add((row, column))
 
     if len(total_free_rows) > 0:
         total_free_rows = list(total_free_rows)
         total_free_rows.sort()
 
         i_free_row = 0
-        for i_equation in range(num_estim_vals_equations):
+        column = 0
+        i_equation = 0
+        while i_equation < num_estim_vals_equations:
             one_equation_coeffs = num_values * [0]
 
-            row = total_free_rows[i_free_row]
-            i_free_row += 1
+            if column >= line_length:
+                column = 0
+                i_free_row += 1
 
-            column = 0
-            while column in occupied_columns:
+            if i_free_row >= len(total_free_rows):
+                break
+            else:
+                row = total_free_rows[i_free_row]
+
+            if (row, column) in occupied_cells:
                 column += 1
+                continue
 
             if column < line_length:
                 i_x = (row * line_length) + column
                 one_equation_coeffs[i_x] = 1
                 equations_coeffs.append(one_equation_coeffs)
 
+                column += 1
+                i_equation += 1
+
     elif len(total_free_columns) > 0:
         total_free_columns = list(total_free_columns)
         total_free_columns.sort()
 
         i_free_column = 0
-        for i_equation in range(num_estim_vals_equations):
+        row = 0
+        i_equation = 0
+        while i_equation < num_estim_vals_equations:
             one_equation_coeffs = num_values * [0]
 
-            column = total_free_columns[i_free_column]
-            i_free_column += 1
+            if row >= line_length:
+                row = 0
+                i_free_column += 1
 
-            row = 0
-            while row in occupied_rows:
+            if i_free_column >= len(total_free_columns):
+                break
+            else:
+                column = total_free_columns[i_free_column]
+
+            if (row, column) in occupied_cells:
                 row += 1
+                continue
 
             if row < line_length:
                 i_x = (row * line_length) + column
                 one_equation_coeffs[i_x] = 1
                 equations_coeffs.append(one_equation_coeffs)
 
-    
+                row += 1
+                i_equation += 1
+
+
     return equations_coeffs    
 
 
@@ -498,6 +523,17 @@ def main():
     if num_def_lines < 1:
 
         # Build coefficients for estimated values equations
+        def_lines_pos_permut = []
+        estim_vals_equations_coefs = build_estim_vals_equations_coefs(
+            num_estim_vals_equations, def_lines_pos_permut, line_length, num_values
+            )
+
+        """
+        print()
+        print(def_lines_pos_permut) 
+        for equation_coefs in estim_vals_equations_coefs:
+            print(equation_coefs)
+        """
 
         # For each estimated values permutation for equations
         for permut in equations_estim_vals_permuts:
@@ -575,6 +611,13 @@ def main():
             estim_vals_equations_coefs = build_estim_vals_equations_coefs(
                 num_estim_vals_equations, def_lines_pos_permut, line_length, num_values
                 )
+
+            """
+            print()
+            print(def_lines_pos_permut) 
+            for equation_coefs in estim_vals_equations_coefs:
+                print(equation_coefs)
+            """
 
         # For each defined lines values permutations
         for i_def_lines_vals_permut in range(len(def_lines_vals_permuts["inverted"])):
