@@ -324,6 +324,7 @@ def build_def_lines_pos_permuts(num_def_lines, line_length):
     id_columns = list(range(line_length, 2 * line_length))
     id_diagonals = [2 * line_length, 2 * line_length + 1]
 
+    """
     if num_def_lines == 1:
         for id in id_rows:
             id_list = [id]
@@ -347,6 +348,17 @@ def build_def_lines_pos_permuts(num_def_lines, line_length):
         if num_def_lines < 3:
             diagonals_permuts = list(itertools.permutations(id_diagonals, num_def_lines))
             permuts.extend(diagonals_permuts)
+    """
+
+    rows_permuts = list(build_permutations(id_rows, num_def_lines))
+    columns_permuts = list(build_permutations(id_columns, num_def_lines))
+
+    permuts.extend(rows_permuts)
+    permuts.extend(columns_permuts)
+
+    if num_def_lines < 3:
+        diagonals_permuts = list(build_permutations(id_diagonals, num_def_lines))
+        permuts.extend(diagonals_permuts)
 
     return permuts
 
@@ -446,18 +458,17 @@ def build_estim_vals_equations_coeffs(num_estim_vals_equations, def_lines_pos_pe
             for row in range(line_length):
                 total_free_rows.discard(row)
 
-        else:
-            if position == 2 * line_length:
-                for i_value in range(line_length):
-                    row = i_value
-                    column = i_value
-                    occupied_cells.add((row, column))
+        elif position == 2 * line_length:
+            for i_value in range(line_length):
+                row = i_value
+                column = i_value
+                occupied_cells.add((row, column))
 
-            elif position == (2 * line_length) + 1:
-                for i_value in range(line_length):
-                    row = i_value
-                    column = (line_length - 1) - i_value
-                    occupied_cells.add((row, column))
+        elif position == (2 * line_length) + 1:
+            for i_value in range(line_length):
+                row = i_value
+                column = (line_length - 1) - i_value
+                occupied_cells.add((row, column))
 
     if len(total_free_rows) > 0:
         total_free_rows = list(total_free_rows)
@@ -473,7 +484,7 @@ def build_estim_vals_equations_coeffs(num_estim_vals_equations, def_lines_pos_pe
             if i_free_row >= len(total_free_rows):
                 break
 
-            if (cells_count > max_num_cells_per_line) or (column >= line_length):
+            if (cells_count >= max_num_cells_per_line) or (column >= line_length):
                 cells_count = 0
                 column = 0
                 i_free_row += 1
@@ -509,7 +520,7 @@ def build_estim_vals_equations_coeffs(num_estim_vals_equations, def_lines_pos_pe
             if i_free_column >= len(total_free_columns):
                 break
 
-            if (cells_count > max_num_cells_per_line) or (row >= line_length):
+            if (cells_count >= max_num_cells_per_line) or (row >= line_length):
                 cells_count = 0
                 row = 0
                 i_free_column += 1
@@ -727,15 +738,16 @@ def main():
     count = 0
     for permut in estim_vals_permuts:
         count += 1
-        print(permut)
+        # print(permut)
 
     print(count)
     """
 
+    solutions_count = 0
+    solve_exceptions_count = 0
+
     # If there are not any defined lines
     if num_def_lines < 1:
-
-        return
 
         # Build coefficients for estimated values equations
         def_lines_pos_permut = []
@@ -762,9 +774,6 @@ def main():
             for coeffs in fixed_equations_coeffs:
                 coeffs_matrix.append(coeffs)
 
-            for coeffs in def_lines_equations_coeffs:
-                coeffs_matrix.append(coeffs)
-
             for coeffs in estim_vals_equations_coeffs:
                 coeffs_matrix.append(coeffs)
 
@@ -772,7 +781,6 @@ def main():
             consts_matrix = []
 
             consts_matrix.extend(fixed_equations_consts)
-            consts_matrix.extend(def_lines_equations_consts)
             consts_matrix.extend(estim_vals_equations_consts)
 
             # Solve equations
@@ -781,8 +789,16 @@ def main():
 
             try:
                 x = np.linalg.solve(a, b)
+
+                solutions_count += 1
+
                 print(x)
+
             except:
+                solve_exceptions_count += 1
+
+                print(solve_exceptions_count)
+
                 pass
 
     # Else there are defined lines
@@ -826,7 +842,11 @@ def main():
             # Build constants for defined line equations
             def_lines_equations_consts = build_def_lines_equations_consts(def_lines_vals_permut)
 
-            # print(def_lines_equations_consts)
+            """
+            print()
+            print(def_lines_vals_permut)
+            print(def_lines_equations_consts)
+            """
 
             # For each defined lines positions permutation
             for def_lines_pos_permut in def_lines_pos_permuts:
@@ -848,12 +868,14 @@ def main():
                     num_estim_vals_equations, def_lines_pos_permut, line_length, num_values
                     )
 
-                """
                 print()
-                print(def_lines_pos_permut) 
+                print(num_estim_vals_equations)
+                print(def_lines_pos_permut)
+                print(estim_vals_equations_coeffs) 
                 for equation_coeffs in estim_vals_equations_coeffs:
                     print(equation_coeffs)
-                """
+
+                continue
 
                 # For each estimated values permutation
                 estim_vals_permut_counts = 0
@@ -861,10 +883,13 @@ def main():
                     estim_vals_permut_counts += 1
 
                     # If estimated values crossed with defined lines values are valid
+                    """
                     if estim_vals_cross_def_lines_are_valid(
                         estim_vals_permut, num_def_lines, def_lines_vals_permut, def_lines_pos_permut,
                         line_length, line_sum
                         ):
+                    """
+                    if True:
 
                         # Build constants for estimated values equations
                         estim_vals_equations_consts = build_estim_vals_equations_consts(estim_vals_permut)
@@ -894,8 +919,16 @@ def main():
 
                         try:
                             x = np.linalg.solve(a, b)
+
+                            solutions_count += 1
+
                             print(x)
+
                         except:
+                            solve_exceptions_count += 1
+
+                            print(solve_exceptions_count)
+
                             pass
 
                 # if there are not any estimated values permutations 
@@ -922,14 +955,25 @@ def main():
 
                     try:
                         x = np.linalg.solve(a, b)
+
+                        solutions_count += 1
+
                         print(x)
+
                     except:
+                        solve_exceptions_count += 1
+
+                        print(solve_exceptions_count)
+
                         pass
-
-
     
+    print()
+    print('Number of Solutions')
+    print(solutions_count)
 
-
+    print()
+    print('Number of Solve Exceptions')
+    print(solve_exceptions_count)
 
     return
 
