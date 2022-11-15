@@ -906,7 +906,7 @@ def check_solution(x, line_length, num_values, max_value, line_sum):
         if value_int > max_value:
             return []
 
-        x_int.append(value)
+        x_int.append(value_int)
 
     x_set = set(x_int)
     if len(x_set) != num_values:
@@ -962,6 +962,81 @@ def check_solution(x, line_length, num_values, max_value, line_sum):
         return []
 
     return x_int
+
+def output_solutions(solutions, line_length, max_value):
+    """ 
+    Output solutions
+    """
+
+    output_line_length = 80
+
+    space = " "
+
+    values_space = 1 * space
+    frames_space = 3 * space
+
+    value_length = (max_value // 10) + 1
+    value_format = "{:^" + f"{value_length}"+ "}"
+
+    values_row = line_length * [1]
+    one_frame_output = ""
+
+    for i in range(len(values_row) - 1):
+        one_frame_output += f"{value_format}{values_space}".format(values_row[i])
+    one_frame_output += f"{value_format}".format(values_row[len(values_row) - 1])
+
+    num_frames_per_output_row = (output_line_length - len(frames_space)) // (len(one_frame_output) + len(frames_space))
+
+    frames_row = 0
+    frames_column = 0
+    values_row = 0
+
+    print()
+    print()
+    while True:
+
+        if frames_column >= num_frames_per_output_row:
+            print()
+
+            frames_column = 0
+
+            values_row += 1
+            if values_row >= line_length:
+                values_row = 0
+                frames_row += 1
+
+                i_solution = (frames_row * num_frames_per_output_row) + frames_column
+                if i_solution >= len(solutions):
+                    break
+
+                print()
+                print()
+
+                continue
+
+        i_solution = (frames_row * num_frames_per_output_row) + frames_column
+        if i_solution >= len(solutions):
+            frames_column += 1
+            continue
+
+        solution = solutions[i_solution]
+
+        for values_column in range(line_length - 1):
+            i_value = (values_row * line_length) + values_column
+
+            value_output = f"{value_format}{values_space}".format(solution[i_value])
+            print(value_output, end=" ")
+
+        values_column = line_length - 1
+        i_value = (values_row * line_length) + values_column
+
+        value_output = f"{value_format}".format(solution[i_value])
+        print(value_output, end=" ")
+
+        if frames_column < num_frames_per_output_row - 1:
+            print(frames_space, end=" ")
+
+        frames_column += 1
 
 
 def main():
@@ -1061,6 +1136,7 @@ def main():
     exceptions_stats["exceptions_count"] = exceptions_count
 
     valid_solution_count = 0
+    valid_solutions = []
 
     # If there are not any defined lines
     if num_def_lines < 1:
@@ -1108,6 +1184,8 @@ def main():
             solution_check = check_solution(x, line_length, num_values, max_value, line_sum)
             if len(solution_check) > 0:
                 valid_solution_count += 1
+
+                valid_solutions.append(solution_check)
 
 
     # Else there are defined lines
@@ -1235,6 +1313,8 @@ def main():
                         if len(solution_check) > 0:
                             valid_solution_count += 1
 
+                            valid_solutions.append(solution_check)
+
 
                 # if there are not any estimated values permutations 
                 if estim_vals_permut_counts < 1:
@@ -1264,6 +1344,13 @@ def main():
                     if len(solution_check) > 0:
                         valid_solution_count += 1
 
+                        valid_solutions.append(solution_check)
+
+
+    print()
+    print()
+
+    output_solutions(valid_solutions, line_length, max_value)
 
     print()
     print()
@@ -1281,7 +1368,7 @@ def main():
     exceptions_count = exceptions_stats["exceptions_count"]
 
     print()
-    print('Number of Solve Exceptions')
+    print('Number of Exceptions')
     print(exceptions_count)
 
     return
