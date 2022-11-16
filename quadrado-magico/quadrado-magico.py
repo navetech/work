@@ -267,12 +267,12 @@ def build_estim_vals_permuts2(estim_vals, num_estim_vals_equations, line_length,
     return permuts
 
 
-def build_estim_vals_permuts(all_estim_vals, num_estim_vals_equations, line_length, line_sum, num_def_lines):
+def build_estim_vals_permuts(all_estim_vals, num_estim_vals_to_permut):
     """
     Build estimated values permutations
     """
 
-    permut_length = num_estim_vals_equations
+    permut_length = num_estim_vals_to_permut
 
     permuts = build_permutations(all_estim_vals, permut_length)
 
@@ -1106,8 +1106,10 @@ def main():
     all_estim_vals = build_estim_vals(max_value, def_lines)
 
     # Build estimated values permutations
+    num_estim_vals_to_permut = num_estim_vals_equations
+
     estim_vals_permuts = build_estim_vals_permuts(
-        all_estim_vals, num_estim_vals_equations, line_length, line_sum, num_def_lines
+        all_estim_vals, num_estim_vals_to_permut
         )
 
     """

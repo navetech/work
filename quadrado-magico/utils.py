@@ -18,7 +18,7 @@ def load_line_length(directory):
             reader = csv.DictReader(f)
             for row in reader:
                 line_length = int(row["length"])
-    except:
+    except Exception:
         pass
 
     return line_length
@@ -36,14 +36,15 @@ def load_def_lines(directory, num_lines):
         line_values = []
 
         try:
-            with open(f"{directory}/defined-line-{i}.csv", encoding="utf-8") as f:
+            with open(
+              f"{directory}/defined-line-{i}.csv", encoding="utf-8") as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     line_values.append(int(row["value"]))
-        except:
+        except Exception:
             pass
 
-        if len(line_values) > 0 :
+        if len(line_values) > 0:
             def_lines.append(line_values)
 
     return def_lines
@@ -57,7 +58,9 @@ def line_length_is_valid(line_length, line_sum):
     return (line_length % 2) == (line_sum) % 2
 
 
-def def_lines_are_valid(def_lines, line_length, num_lines, max_value, line_sum):
+def def_lines_are_valid(
+        def_lines, line_length, num_lines, max_value, line_sum
+        ):
     """
     Check if defined lines are valid
     """
@@ -85,7 +88,7 @@ def def_lines_are_valid(def_lines, line_length, num_lines, max_value, line_sum):
                 for value in line:
                     if value < 1 or value > max_value:
                         return False
-                    
+
                     else:
                         values_sum += value
 
@@ -137,6 +140,18 @@ def build_permutations(iterable, permut_length):
     return permuts
 
 
+def build_estim_vals_permuts(all_estim_vals, num_estim_vals_to_permut):
+    """
+    Build estimated values permutations
+    """
+
+    permut_length = num_estim_vals_to_permut
+
+    permuts = build_permutations(all_estim_vals, permut_length)
+
+    return permuts
+
+
 def build_def_lines_vals_permuts(def_lines, num_def_lines):
     """
     Build defined lines values permutations
@@ -151,7 +166,6 @@ def build_def_lines_vals_permuts(def_lines, num_def_lines):
         direct_permuts.append(line_permuts)
 
     val_permuts["direct"] = direct_permuts
-
 
     inverted_permuts = []
     i_permut = 0
@@ -177,12 +191,11 @@ def build_def_lines_vals_permuts(def_lines, num_def_lines):
 
     val_permuts["inverted"] = inverted_permuts
 
-
     return val_permuts
 
 
 def output_solutions(solutions, line_length, max_value):
-    """ 
+    """
     Output solutions
     """
 
@@ -194,16 +207,24 @@ def output_solutions(solutions, line_length, max_value):
     frames_space = 3 * space
 
     value_length = (max_value // 10) + 1
-    value_format = "{:^" + f"{value_length}"+ "}"
+    value_format = "{:^" + f"{value_length}" + "}"
 
     values_row = line_length * [1]
     one_frame_output = ""
 
     for i in range(len(values_row) - 1):
-        one_frame_output += f"{value_format}{values_space}".format(values_row[i])
-    one_frame_output += f"{value_format}".format(values_row[len(values_row) - 1])
+        one_frame_output += (
+            f"{value_format}{values_space}".format(values_row[i])
+        )
+    one_frame_output += (
+        f"{value_format}".format(values_row[len(values_row) - 1])
+    )
 
-    num_frames_per_output_row = (output_line_length - len(frames_space)) // (len(one_frame_output) + len(frames_space))
+    num_frames_per_output_row = (
+        (output_line_length - len(frames_space))
+        //
+        (len(one_frame_output) + len(frames_space))
+    )
 
     frames_row = 0
     frames_column = 0
@@ -223,7 +244,9 @@ def output_solutions(solutions, line_length, max_value):
                 values_row = 0
                 frames_row += 1
 
-                i_solution = (frames_row * num_frames_per_output_row) + frames_column
+                i_solution = (
+                    (frames_row * num_frames_per_output_row) + frames_column
+                )
                 if i_solution >= len(solutions):
                     break
 
@@ -242,7 +265,9 @@ def output_solutions(solutions, line_length, max_value):
         for values_column in range(line_length - 1):
             i_value = (values_row * line_length) + values_column
 
-            value_output = f"{value_format}{values_space}".format(solution[i_value])
+            value_output = (
+                f"{value_format}{values_space}".format(solution[i_value])
+            )
             print(value_output, end=" ")
 
         values_column = line_length - 1
@@ -258,7 +283,7 @@ def output_solutions(solutions, line_length, max_value):
 
 
 def check_solution(x, line_length, num_values, max_value, line_sum):
-    """ 
+    """
     Check solution
     """
 
@@ -289,10 +314,8 @@ def check_solution(x, line_length, num_values, max_value, line_sum):
             sum += x_int[i_value]
             if sum > line_sum:
                 return []
-        
         if sum != line_sum:
             return []
-
 
     for column in range(line_length):
         sum = 0
@@ -302,7 +325,7 @@ def check_solution(x, line_length, num_values, max_value, line_sum):
             sum += x_int[i_value]
             if sum > line_sum:
                 return []
-        
+
         if sum != line_sum:
             return []
 
