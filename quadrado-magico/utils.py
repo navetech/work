@@ -5,119 +5,143 @@ import csv
 import itertools
 
 
-def load_line_length(directory):
+def load_line_len(directory):
     """
     Load line length from CSV file into memory.
     """
 
     # Line length default
-    line_length = 4
+    line_len = 4
 
     try:
-        with open(f"{directory}/line-length.csv", encoding="utf-8") as f:
+        with open(f"{directory}/line-len.csv", encoding="utf-8") as f:
             reader = csv.DictReader(f)
+
             for row in reader:
-                line_length = int(row["length"])
+                line_len = int(row["length"])
+
     except Exception:
         pass
 
-    return line_length
+    return line_len
 
 
-def load_def_lines(directory, num_lines):
+def load_def_lines(directory, num_lines, line_len):
     """
     Load defined lines from CSV files into memory.
     """
 
     # Defined lines default (none)
-    def_lines = []
+    def_lines = set()
 
-    for i in range(num_lines):
-        line_values = []
+    lines = set()
+
+    for i_line in range(num_lines):
+        line_values = ()
 
         try:
             with open(
-              f"{directory}/defined-line-{i}.csv", encoding="utf-8") as f:
+              f"{directory}/def-line-{num_lines}x{line_len}-{i_line}.csv",
+              encoding="utf-8"
+              ) as f:
+
                 reader = csv.DictReader(f)
+
                 for row in reader:
-                    line_values.append(int(row["value"]))
+                    line_values.add(int(row["value"]))
+
         except Exception:
             pass
 
-        if len(line_values) > 0:
-            def_lines.append(line_values)
+        line_values_count = len(line_values)
+
+        if (line_values_count > 0) and (line_values_count <= line_len):
+            lines.add(line_values)
+
+    for line in lines:
+        line_values = list(line)
+
+        line_values_count = len(line_values)
+
+        non_def_values = (line_len - line_values_count) * [None]
+
+        line_values.extend(non_def_values)
+
+        def_lines.add(line_values)
 
     return def_lines
 
 
-def line_length_is_valid(line_length, line_sum):
+def line_len_is_valid(line_len, line_sum):
     """
     Check if line legth is valid
     """
 
-    return (line_length % 2) == (line_sum) % 2
+    return (line_len > 0) and ((line_len % 2) == (line_sum % 2))
 
 
 def def_lines_are_valid(
-        def_lines, line_length, num_lines, max_value, line_sum
+        def_lines, line_len, num_lines, max_value, line_sum
         ):
     """
     Check if defined lines are valid
     """
 
     num_def_lines = len(def_lines)
+
     if num_def_lines == 0:
         return True
+
     elif num_def_lines > num_lines:
         return False
+
     else:
-        lines_set = set()
-
         for line in def_lines:
-            line_set = set(line)
+            values_count = 0
+            values_sum = 0
 
-            num_line_values = len(line_set)
-            if num_line_values != line_length:
-                return False
-
-            elif len(lines_set.intersection(line_set)) > 0:
-                return False
-
-            else:
-                values_sum = 0
-                for value in line:
-                    if value < 1 or value > max_value:
+            for value in line:
+                if value is not None:
+                    if (value < 1) or (value > max_value):
                         return False
 
                     else:
+                        values_count += 1
                         values_sum += value
 
+                        if values_sum > line_sum:
+                            return False
+
+            if values_count == line_len:
                 if values_sum != line_sum:
                     return False
 
-                else:
-                    lines_set = lines_set.union(line_set)
-
-        return True
+    return True
 
 
-def build_estim_vals(max_value, def_lines):
+def get_def_lines_vals(def_lines):
     """
-    Build sorted estimated values
+    Get defined lines values
     """
 
-    estim_vals = set(range(1, max_value + 1))
+    def_lines_vals = set()
 
-    def_vals = set()
     for line in def_lines:
-        values = set(line)
-        def_vals = def_vals.union(values)
+        for value in line:
+            if value is not None:
+                def_lines_vals.add(value)
 
-    estim_vals = estim_vals.difference(def_vals)
+    return def_lines_vals
 
-    estim_vals = list(estim_vals)
 
-    estim_vals.sort()
+def build_estim_vals(max_value, def_lines_vals):
+    """
+    Build estimated values
+    """
+
+    all_values = set(range(1, max_value + 1))
+
+    estim_vals = all_values.difference(def_lines_vals)
 
     return estim_vals
 
@@ -150,6 +174,50 @@ def build_estim_vals_permuts(all_estim_vals, num_estim_vals_to_permut):
     permuts = build_permutations(all_estim_vals, permut_length)
 
     return permuts
+
+
+def build_def_lines_pos_permuts(num_def_lines, line_len):
+    """
+    Build defined lines positions permutations
+    """
+
+    permuts = set()
+
+    if num_def_lines < 1:
+        return permuts
+
+    id_rows = list(range(line_len))
+    id_columns = list(range(line_len, 2 * line_len))
+    id_diagonals = [2 * line_len, 2 * line_len + 1]
+
+    rows_permuts = build_permutations(id_rows, num_def_lines)
+    columns_permuts = build_permutations(id_columns, num_def_lines)
+
+    permuts.union(rows_permuts)
+    permuts.union(columns_permuts)
+
+    if num_def_lines < 3:
+        diagonals_permuts = build_permutations(id_diagonals, num_def_lines)
+        permuts.union(diagonals_permuts)
+
+    return permuts
+
+
+def build_vals_pernuts_for_def_lines(
+        def_lines, num_def_lines, line_len
+        ):
+    """
+    Build values permutations for defined lines 
+    """
+
+    vals_permuts = set(0)
+
+    # Build defined lines positions permutations
+    def_lines_pos_permuts = build_def_lines_pos_permuts(
+        num_def_lines, line_len
+        )
+
+    return vals_permuts
 
 
 def build_def_lines_vals_permuts(def_lines, num_def_lines):

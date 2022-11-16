@@ -1,74 +1,76 @@
 from utils import build_permutations
 from utils import build_estim_vals_permuts
-from utils import build_def_lines_vals_permuts
+from utils import build_vals_pernuts_for_def_lines
 from utils import check_solution, output_solutions
 
 
 def build_estim_vals_2_lines_permuts(
-        all_estim_vals, line_length, line_sum, max_value
+        estim_vals, line_len, line_sum, max_value
         ):
     """
     Build 2 lines estimated values permutations
     """
 
-    permut_length = line_length - 1
+    permut_len = line_len - 1
 
-    permuts = build_permutations(all_estim_vals, permut_length)
+    permuts = build_permutations(estim_vals, permut_len)
 
     valid_permuts = []
 
     for permut in permuts:
         invalid_permut = False
-        permut_sum = 0
+        values_sum = 0
 
         for value in permut:
-            permut_sum += value
+            values_sum += value
 
-            if permut_sum >= line_sum:
+            if values_sum >= line_sum:
                 invalid_permut = True
                 break
 
         if (not invalid_permut):
-            last_value = line_sum - permut_sum
+            last_value = line_sum - values_sum
 
             if (last_value >= 1) and (last_value <= max_value):
-
                 for value in permut:
                     valid_permuts.append(value)
                     valid_permuts.append(last_value)
 
-    permut_length = 2
+    permut_len = 2
 
-    two_lines_permuts = build_permutations(valid_permuts, permut_length)
+    two_lines_permuts = build_permutations(valid_permuts, permut_len)
 
     return two_lines_permuts
 
 
 def build_remain_estim_vals_permuts(
-        all_estim_vals, estim_vals_2_lines_permut
+        estim_vals, estim_vals_2_lines_permut
         ):
     """
     Build remaining estimated values permutations
     """
 
     two_lines_vals = set()
+
     for line_values in estim_vals_2_lines_permut:
         values = set(line_values)
 
         two_lines_vals = two_lines_vals.union(values)
 
-    remain_estim_vals = all_estim_vals.difference(two_lines_vals)
+    remain_estim_vals = estim_vals.difference(two_lines_vals)
 
-    remain_estim_vals = list(remain_estim_vals)
+    permut_len = len(remain_estim_vals)
 
-    remain_estim_vals.sort()
+    remain_estim_vals_permuts = build_permutations(
+        remain_estim_vals, permut_len
+        )
 
-    return remain_estim_vals
+    return remain_estim_vals_permuts
 
 
 def get_solution_estim_vals(
         estim_vals_2_lines_permut, remain_estim_vals_permut,
-        line_length, num_values, max_value, line_sum
+        line_len, num_values, max_value, line_sum
         ):
     """
     Get solution
@@ -82,7 +84,7 @@ def get_solution_estim_vals(
     values.extend(remain_estim_vals_permut)
 
     solution = check_solution(
-        values, line_length, num_values, max_value, line_sum
+        values, line_len, num_values, max_value, line_sum
         )
 
     return solution
@@ -90,7 +92,7 @@ def get_solution_estim_vals(
 
 def get_solution_def_lines_estim_vals(
         def_lines_vals_permut, estim_vals_permut,
-        line_length, num_values, max_value, line_sum
+        line_len, num_values, max_value, line_sum
         ):
     """
     Get solution
@@ -104,7 +106,7 @@ def get_solution_def_lines_estim_vals(
     values.extend(estim_vals_permut)
 
     solution = check_solution(
-        values, line_length, num_values, max_value, line_sum
+        values, line_len, num_values, max_value, line_sum
         )
 
     return solution
@@ -112,7 +114,7 @@ def get_solution_def_lines_estim_vals(
 
 def get_solution_def_lines(
         def_lines_vals_permut,
-        line_length, num_values, max_value, line_sum
+        line_len, num_values, max_value, line_sum
         ):
     """
     Get solution
@@ -125,8 +127,8 @@ def get_solution_def_lines(
 
     last_values = []
 
-    columns_sum = line_length * [0]
-    for column in range(line_length):
+    columns_sum = line_len * [0]
+    for column in range(line_len):
 
         for lines_values in def_lines_vals_permut:
             value = lines_values[column]
@@ -139,15 +141,16 @@ def get_solution_def_lines(
     values.extend(last_values)
 
     solution = check_solution(
-        values, line_length, num_values, max_value, line_sum
+        values, line_len, num_values, max_value, line_sum
         )
 
     return solution
 
 
 def quadrado_magico_sem_equacoes(
-        line_length, max_value, num_values, line_sum,
-        def_lines, num_def_lines, all_estim_vals
+        line_len, max_value, num_values, line_sum,
+        def_lines, num_def_lines, num_def_lines_vals,
+        num_estim_vals, estim_vals
         ):
     """
     Quadrado magico sem equacoes
@@ -161,7 +164,7 @@ def quadrado_magico_sem_equacoes(
 
         # Build 2 lines estimated values permutations
         estim_vals_2_lines_permuts = build_estim_vals_2_lines_permuts(
-            all_estim_vals, line_length, line_sum, max_value
+            estim_vals, line_len, line_sum, max_value
             )
 
         """
@@ -179,8 +182,8 @@ def quadrado_magico_sem_equacoes(
 
             # Build remaining estimated values permutations
             remain_estim_vals_permuts = build_remain_estim_vals_permuts(
-                all_estim_vals, estim_vals_2_lines_permut,
-                line_length, line_sum
+                estim_vals, estim_vals_2_lines_permut,
+                line_len, line_sum
                 )
 
             # For each remaining estimated values permutation
@@ -188,7 +191,8 @@ def quadrado_magico_sem_equacoes(
 
                 # Get solution
                 solution = get_solution_estim_vals(
-                    estim_vals_2_lines_permut, remain_estim_vals_permut
+                    estim_vals_2_lines_permut, remain_estim_vals_permut,
+                    line_len, num_values, max_value, line_sum
                     )
 
                 if len(solution) > 1:
@@ -198,9 +202,9 @@ def quadrado_magico_sem_equacoes(
     # Else there are defined lines
     else:
 
-        # Build defined lines values permutations
-        def_lines_vals_permuts = build_def_lines_vals_permuts(
-            def_lines, num_def_lines
+        # Build values permutations for defined lines 
+        vals_permuts = build_vals_pernuts_for_def_lines(
+            def_lines, num_def_lines, line_len
             )
 
         """
@@ -222,7 +226,7 @@ def quadrado_magico_sem_equacoes(
         """
 
         # Build estimated values permutations
-        num_estim_vals_equations = num_values - (num_def_lines * line_length)
+        num_estim_vals_equations = num_values - (num_def_lines * line_len)
 
         estim_vals_permuts = build_estim_vals_permuts(
             all_estim_vals, num_estim_vals_equations
@@ -264,7 +268,7 @@ def quadrado_magico_sem_equacoes(
     print()
     print()
 
-    output_solutions(solutions, line_length, max_value)
+    output_solutions(solutions, line_len, max_value)
 
     print()
     print()
