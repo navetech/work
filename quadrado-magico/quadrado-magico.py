@@ -963,6 +963,7 @@ def check_solution(x, line_length, num_values, max_value, line_sum):
 
     return x_int
 
+
 def output_solutions(solutions, line_length, max_value):
     """ 
     Output solutions
