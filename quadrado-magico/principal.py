@@ -7,6 +7,7 @@ from utils import get_def_lines_vals
 from utils import build_estim_vals
 
 from sem_equacoes import quadrado_magico_sem_equacoes
+from com_equacoes import quadrado_magico_com_equacoes
 
 
 def main():
@@ -67,10 +68,18 @@ def main():
     # Calculate number of estimated alues
     num_estim_vals = len(estim_vals)
 
-    quadrado_magico_sem_equacoes(
-        lines_len, max_value, num_values, lines_sum,
-        def_lines, num_def_lines, num_def_lines_vals,
-        num_estim_vals, estim_vals
+    sols_without_equations = quadrado_magico_sem_equacoes(
+        def_lines, num_def_lines,
+        def_lines_vals, num_def_lines_vals,
+        estim_vals, num_estim_vals,
+        lines_len, lines_sum, max_value, num_values
+        )
+
+    sols_with_equations = quadrado_magico_com_equacoes(
+        def_lines, num_def_lines,
+        def_lines_vals, num_def_lines_vals,
+        estim_vals, num_estim_vals,
+        lines_len, lines_sum, max_value, num_values
         )
 
 

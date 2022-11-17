@@ -207,7 +207,7 @@ def build_vals_pernuts_for_def_lines(
         def_lines, num_def_lines, line_len
         ):
     """
-    Build values permutations for defined lines 
+    Build values permutations for defined lines
     """
 
     vals_permuts = set(0)
@@ -350,75 +350,92 @@ def output_solutions(solutions, line_length, max_value):
         frames_column += 1
 
 
-def check_solution(x, line_length, num_values, max_value, line_sum):
+def check_solution(
+        values,
+        lines_len, lines_sum, num_values, max_value
+        ):
     """
     Check solution
     """
 
-    if len(x) != num_values:
+    # Check number of values of solution
+    if len(values) != num_values:
         return []
 
-    x_int = []
-    for value in x:
+    # Check each value of solution
+    values_int = []
+    for value in values:
         value_int = int(value)
 
-        if value_int < 1:
+        if (value_int < 1) or (value_int > max_value):
             return []
 
-        if value_int > max_value:
-            return []
+        values_int.append(value_int)
 
-        x_int.append(value_int)
-
-    x_set = set(x_int)
-    if len(x_set) != num_values:
+    # Check if values of solution are different
+    valus_set = set(values_int)
+    if len(valus_set) != num_values:
         return []
 
-    for row in range(line_length):
-        sum = 0
-        for column in range(line_length):
-            i_value = (row * line_length) + column
+    num_rows = lines_len
+    num_columns = lines_len
 
-            sum += x_int[i_value]
-            if sum > line_sum:
-                return []
-        if sum != line_sum:
-            return []
+    # Check rows sums of solution
+    for row in range(num_rows):
+        values_sum = 0
 
-    for column in range(line_length):
-        sum = 0
-        for row in range(line_length):
-            i_value = (row * line_length) + column
+        for column in range(num_columns):
+            i_value = (row * num_columns) + column
 
-            sum += x_int[i_value]
-            if sum > line_sum:
+            values_sum += values_int[i_value]
+
+            if values_sum > lines_sum:
                 return []
 
-        if sum != line_sum:
+        if values_sum != lines_sum:
             return []
 
+    # Check columns sums of solution
+    for column in range(num_columns):
+        values_sum = 0
+
+        for row in range(num_rows):
+            i_value = (row * num_columns) + column
+
+            values_sum += values_int[i_value]
+
+            if values_sum > lines_sum:
+                return []
+
+        if values_sum != lines_sum:
+            return []
+
+    # Check diagonals sums of solution
     sum_diagonal_1 = 0
     sum_diagonal_2 = 0
-    for i in range(line_length):
+
+    for i in range(lines_len):
         row = i
         column = i
-        i_value = (row * line_length) + column
 
-        sum_diagonal_1 += x_int[i_value]
-        if sum_diagonal_1 > line_sum:
+        i_value = (row * num_columns) + column
+
+        sum_diagonal_1 += values_int[i_value]
+        if sum_diagonal_1 > lines_sum:
             return []
 
-        column = (line_length - 1) - i_value
-        i_value = (row * line_length) + column
+        column = (num_columns - 1) - i
 
-        sum_diagonal_2 += x_int[i_value]
-        if sum_diagonal_2 > line_sum:
+        i_value = (row * num_columns) + column
+
+        sum_diagonal_2 += values_int[i_value]
+        if sum_diagonal_2 > lines_sum:
             return []
 
-    if sum_diagonal_1 != line_sum:
+    if sum_diagonal_1 != lines_sum:
         return []
 
-    if sum_diagonal_2 != line_sum:
+    if sum_diagonal_2 != lines_sum:
         return []
 
-    return x_int
+    return values_int
