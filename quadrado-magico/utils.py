@@ -220,48 +220,6 @@ def build_vals_pernuts_for_def_lines(
     return vals_permuts
 
 
-def build_def_lines_vals_permuts(def_lines, num_def_lines):
-    """
-    Build defined lines values permutations
-    """
-
-    val_permuts = {}
-
-    direct_permuts = []
-    for line in def_lines:
-        line_permuts = list(itertools.permutations(line))
-
-        direct_permuts.append(line_permuts)
-
-    val_permuts["direct"] = direct_permuts
-
-    inverted_permuts = []
-    i_permut = 0
-    while True:
-        end = True
-        permuts = []
-        for i_line in range(num_def_lines):
-            line_permuts = direct_permuts[i_line]
-            if i_permut < len(line_permuts):
-                end = False
-
-                permut = line_permuts[i_permut]
-                permuts.append(permut)
-            else:
-                permuts.append([])
-
-        if end:
-            break
-
-        inverted_permuts.append(permuts)
-
-        i_permut += 1
-
-    val_permuts["inverted"] = inverted_permuts
-
-    return val_permuts
-
-
 def output_solutions(solutions, line_length, max_value):
     """
     Output solutions
@@ -352,7 +310,7 @@ def output_solutions(solutions, line_length, max_value):
 
 def check_solution(
         values,
-        lines_len, lines_sum, num_values, max_value
+        lines_len, lines_sum, max_value, num_values
         ):
     """
     Check solution

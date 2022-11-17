@@ -80,7 +80,7 @@ def get_solution_vertical_estim_vals(
 
     solution = check_solution(
         values,
-        lines_len, lines_sum, num_values, max_value
+        lines_len, lines_sum, max_value, num_values
         )
 
     return solution
@@ -150,7 +150,7 @@ def get_solution_horizontal_estim_vals(
 
     solution = check_solution(
         values,
-        lines_len, lines_sum, num_values, max_value
+        lines_len, lines_sum, max_value, num_values
         )
 
     return solution
@@ -336,7 +336,7 @@ def get_solution_diagonal_estim_vals(
 
     solution = check_solution(
         values,
-        lines_len, lines_sum, num_values, max_value
+        lines_len, lines_sum, max_value, num_values
         )
 
     return solution

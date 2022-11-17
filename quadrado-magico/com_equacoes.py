@@ -46,29 +46,36 @@ def build_estim_vals_permuts(
     return permuts
 
 
-def build_def_lines_vals_permuts(def_lines, num_def_lines):
+def build_def_lines_vals_permuts(
+        def_lines, num_def_lines
+        ):
     """
     Build defined lines values permutations
     """
 
-    val_permuts = {}
+    vals_permuts = {}
 
     direct_permuts = []
     for line in def_lines:
-        line_permuts = list(itertools.permutations(line))
+        permut_length = len(line)
+
+        line_permuts = list(build_permutations(line, permut_length))
 
         direct_permuts.append(line_permuts)
 
-    val_permuts["direct"] = direct_permuts
+    vals_permuts["direct"] = direct_permuts
 
 
     inverted_permuts = []
     i_permut = 0
+
     while True:
         end = True
         permuts = []
+
         for i_line in range(num_def_lines):
             line_permuts = direct_permuts[i_line]
+
             if i_permut < len(line_permuts):
                 end = False
 
@@ -84,13 +91,15 @@ def build_def_lines_vals_permuts(def_lines, num_def_lines):
 
         i_permut += 1
 
-    val_permuts["inverted"] = inverted_permuts
+    vals_permuts["inverted"] = inverted_permuts
 
 
-    return val_permuts
+    return vals_permuts
 
 
-def build_def_lines_pos_permuts(num_def_lines, line_length):
+def build_def_lines_pos_permuts(
+        num_def_lines, lines_len
+        ):
     """
     Build defined lines positions permutations
     """
@@ -100,9 +109,9 @@ def build_def_lines_pos_permuts(num_def_lines, line_length):
 
     permuts = []
 
-    id_rows = list(range(line_length))
-    id_columns = list(range(line_length, 2 * line_length))
-    id_diagonals = [2 * line_length, 2 * line_length + 1]
+    id_rows = list(range(lines_len))
+    id_columns = list(range(lines_len, 2 * lines_len))
+    id_diagonals = [2 * lines_len, 2 * lines_len + 1]
 
     rows_permuts = list(build_permutations(id_rows, num_def_lines))
     columns_permuts = list(build_permutations(id_columns, num_def_lines))
@@ -117,50 +126,61 @@ def build_def_lines_pos_permuts(num_def_lines, line_length):
     return permuts
 
 
-def build_def_lines_equations_coeffs(def_lines_pos_permut, line_length, num_values):
+def build_def_lines_equations_coeffs(
+        def_lines_pos_permut,
+        lines_len, num_values
+        ):
     """ 
     Build coefficients for defined lines equations
     """
 
     equations_coeffs = []
 
+    num_colums = lines_len
+
     for position in def_lines_pos_permut:
 
-        if position < line_length:
+        if position < lines_len:
             row = position
-            for i_value in range(line_length):
-                column = i_value
-                i_x = (row * line_length) + column
+
+            for i in range(lines_len):
+                column = i
+
+                i_x = (row * num_colums) + column
 
                 one_equation_coeffs = num_values * [0]
                 one_equation_coeffs[i_x] = 1
                 equations_coeffs.append(one_equation_coeffs)
 
-        elif position < 2 * line_length:
-            column = position % line_length
-            for i_value in range(line_length):
-                row = i_value
-                i_x = (row * line_length) + column
+        elif position < 2 * lines_len:
+            column = position % lines_len
+
+            for i in range(lines_len):
+                row = i
+
+                i_x = (row * num_colums) + column
 
                 one_equation_coeffs = num_values * [0]
                 one_equation_coeffs[i_x] = 1
                 equations_coeffs.append(one_equation_coeffs)
 
-        elif position == 2 * line_length:
-            for i_value in range(line_length):
-                row = i_value
-                column = i_value
-                i_x = (row * line_length) + column
+        elif position == 2 * lines_len:
+            for i in range(lines_len):
+                row = i
+                column = i
+
+                i_x = (row * num_colums) + column
 
                 one_equation_coeffs = num_values * [0]
                 one_equation_coeffs[i_x] = 1
                 equations_coeffs.append(one_equation_coeffs)
 
-        elif position == (2 * line_length) + 1:
-            for i_value in range(line_length):
-                row = i_value
-                column = (line_length - 1) - i_value
-                i_x = (row * line_length) + column
+        elif position == (2 * lines_len) + 1:
+            for i in range(lines_len):
+                row = i
+                column = (num_colums - 1) - i
+
+                i_x = (row * num_colums) + column
 
                 one_equation_coeffs = num_values * [0]
                 one_equation_coeffs[i_x] = 1
@@ -176,9 +196,9 @@ def build_def_lines_equations_consts(def_lines_vals_permut):
 
     equations_consts = []
 
-    for def_line_values in def_lines_vals_permut:
+    for values in def_lines_vals_permut:
 
-        for value in def_line_values:
+        for value in values:
             equations_consts.append(value)
 
     return equations_consts
@@ -462,20 +482,27 @@ def build_equations_consts(
     return consts_matrix
 
 
-def handle_exception(e, exceptions,
-    coeffs_matrix, fixed_equations_coeffs, def_lines_equations_coeffs, estim_vals_equations_coeffs,
-    consts_matrix, fixed_equations_consts, def_lines_equations_consts, estim_vals_equations_consts
-    ):
+def handle_exception(
+        e, result,
+        coeffs_matrix, consts_matrix,
+
+        fixed_equations_coeffs,
+        def_lines_equations_coeffs,
+        estim_vals_equations_coeffs,
+
+        fixed_equations_consts,
+        def_lines_equations_consts,
+        estim_vals_equations_consts
+        ):
 
     """ 
     Handle exception
     """
 
-    if (str(e) in exceptions):
+    if str(e) in result["exceptions"]:
         return False
-    else:
-        exceptions.add(str(e))
 
+    else:
         print()
         print()
 
@@ -529,6 +556,7 @@ def handle_exception(e, exceptions,
 
 def solve_equations(
         coeffs_array, consts_array,
+        result,
 
         coeffs_matrix, consts_matrix,
 
@@ -538,9 +566,7 @@ def solve_equations(
 
         fixed_equations_consts,
         def_lines_equations_consts,
-        estim_vals_equations_consts,
-
-        solution_stats,
+        estim_vals_equations_consts
         ):
     """ 
     Solve equations
@@ -548,13 +574,12 @@ def solve_equations(
 
     solution = {}
 
-    solutions_count = solution_stats["solutions_count"]
-
-    exceptions = solution_stats["exceptions"]
-    exceptions_count = solution_stats["exceptions_count"]
-
     x = []
+    solutions_count = result["solutions_count"]
 
+    exception = None
+    exceptions_count = result["exceptions_count"]
+    
     try:
         x = np.linalg.solve(coeffs_array, consts_array)
 
@@ -562,11 +587,17 @@ def solve_equations(
         exception = e
         exceptions_count += 1
 
-        exceptions.add(exception)
+        handle_exception(
+            e, result,
+            coeffs_matrix, consts_matrix,
 
-        handle_exception(e, exceptions,
-            coeffs_matrix, fixed_equations_coeffs, def_lines_equations_coeffs, estim_vals_equations_coeffs,
-            consts_matrix, fixed_equations_consts, def_lines_equations_consts, estim_vals_equations_consts,
+            fixed_equations_coeffs,
+            def_lines_equations_coeffs,
+            estim_vals_equations_coeffs,
+
+            fixed_equations_consts,
+            def_lines_equations_consts,
+            estim_vals_equations_consts
             )
 
     else:
@@ -578,17 +609,10 @@ def solve_equations(
             )
 
     solution["x"] = x
+    solution["solutions_count"] = solutions_count
 
-    solution_error = ""
-    solution["error"] = solution_error
-
-    solution_stats["solutions_count"] = solutions_count
-
-    solution_stats["exception"] = exception
-    solution_stats["exceptions"] = exceptions
-    solution_stats["exceptions_count"] = exceptions_count
-
-    solution["stats"] = solution_stats
+    solution["exception"] = exception
+    solution["exceptions_count"] = exceptions_count
 
     return solution
 
@@ -603,34 +627,19 @@ def quadrado_magico_com_equacoes(
     Quadrado magico sem equacoes
     """
 
-    # Initialize solution
-    solutions = []
+    # Initialize result
+    result = {}
 
-    solution = {}
+    result["solutions"] = []
+    result["solutions_count"] = 0
 
-    solution["x"] = []
+    result["valid_solutions"] = []
+    result["valid_solutions_count"] = 0
 
-    solution_error = ""
-    solution["error"] = solution_error
+    result["exceptions"] = set()
+    result["exceptions_count"] = 0
 
-    solution_stats = {}
-
-    solutions_count = 0
-    solution_stats["solutions_count"] = solutions_count
-
-    valid_solution_count = 0
-    solution_stats["valid_solution_count"] = valid_solution_count
-
-    exception = None
-    solution_stats["exception"] = exception
-
-    exceptions = set()
-    solution_stats["exceptions"] = exceptions
-
-    exceptions_count = 0
-    solution_stats["exceptions_count"] = exceptions_count
-
-    solution["stats"] = solution_stats
+    result["erro"] = ""
 
     # Calculate number of lines
     num_lines = lines_len
@@ -648,12 +657,11 @@ def quadrado_magico_com_equacoes(
 
     # Check number of fixed equations
     if num_fixed_equations < num_lines:
-        solution_error = f"Number of fixed equations {num_fixed_equations} < number of lines {num_lines}"
-        solution["error"] = solution_error
+        error = f"Number of fixed equations {num_fixed_equations} < number of lines {num_lines}"
 
-        solutions.append(solution)
+        result["error"] = error
 
-        return solutions
+        return result
 
     # Calculate number of estimated values equations
     num_estim_vals_equations = num_equations - num_def_lines_equations - num_fixed_equations
@@ -718,7 +726,8 @@ def quadrado_magico_com_equacoes(
             # Solve equations
             solution = solve_equations(
                 coeffs_array, consts_array,
-                
+                result,
+
                 coeffs_matrix, consts_matrix,
 
                 fixed_equations_coeffs,
@@ -727,67 +736,51 @@ def quadrado_magico_com_equacoes(
 
                 fixed_equations_consts,
                 def_lines_equations_consts,
-                estim_vals_equations_consts,
-
-                solution_stats,
+                estim_vals_equations_consts
                 )
 
-            solution_stats = solution["solution_stats"]
-            exceptions_stats = solution["exceptions_stats"]
-            x = solution["x"]
+            result["solutions"].append(solution["x"])
+            result["solutions_count"] = solution["solutions_count"]
 
-            solution_check = check_solution(x, line_length, num_values, max_value, line_sum)
+            result["exceptions"].add(solution["exception"])
+            result["exceptions_count"] = solution["exceptions_count"]
+
+            solution_check = check_solution(
+                solution["x"],
+                lines_len, lines_sum, max_value, num_values
+                )
+
             if len(solution_check) > 0:
-                valid_solution_count += 1
+                result["valid_solution_count"] += 1
 
-                valid_solutions.append(solution_check)
-
+                result["valid_solutions"].append(solution_check)
 
     # Else there are defined lines
     else:
 
-        # Convert estimated values permutations to list because if not it cause failures on iterating this sequence,
-        # and if the conversion is made at the sequence generation it cause memory error when the sequence is too big
+        # Convert estimated values permutations to list because if not
+        # it cause failures on iterating this sequence,
+        # and if the conversion is made at the sequence generation
+        # it cause memory error when the sequence is too big
         estim_vals_permuts_list = list(estim_vals_permuts)
 
         # Build defined lines values permutations
-        def_lines_vals_permuts = build_def_lines_vals_permuts(def_lines, num_def_lines)
-
-        """
-        print()
-        print("inverted")
-        for permuts in def_lines_vals_permuts["inverted"]:
-            print(permuts)
-
-        print(len(def_lines_vals_permuts["inverted"]))
-
-        print()
-        print("direct")
-        for i in range(num_def_lines):
-            print()
-            for permut in def_lines_vals_permuts["direct"][i]:
-                print(permut)
-            count = len(def_lines_vals_permuts["direct"][i])
-            print(f"{count} permuts of line {i}")
-        """
+        def_lines_vals_permuts = build_def_lines_vals_permuts(
+            def_lines, num_def_lines
+            )
 
         # Build defined lines positions permutations
-        def_lines_pos_permuts = build_def_lines_pos_permuts(num_def_lines, line_length)
-
-        """
-        print()
-        for permut in def_lines_pos_permuts:
-            print(permut)
-
-        print(len(def_lines_pos_permuts))
-        """
+        def_lines_pos_permuts = build_def_lines_pos_permuts(
+            num_def_lines, lines_len
+            )
 
         # For each defined lines positions permutation
         for def_lines_pos_permut in def_lines_pos_permuts:
-            
+
             # Build coefficients for defined line equations
             def_lines_equations_coeffs = build_def_lines_equations_coeffs(
-                def_lines_pos_permut, line_length, num_values
+                def_lines_pos_permut,
+                lines_len, num_values
                 )
 
             # Build coefficients for estimated values equations
@@ -800,85 +793,74 @@ def quadrado_magico_com_equacoes(
             for def_lines_vals_permut in def_lines_vals_permuts["inverted"]:
 
                 # Build constants for defined line equations
-                def_lines_equations_consts = build_def_lines_equations_consts(def_lines_vals_permut)
-
-                """
-                print()
-                print(def_lines_vals_permut)
-                print(def_lines_equations_consts)
-
-                print()
-                print(def_lines_pos_permut) 
-                for equation_coeffs in def_lines_equations_coeffs:
-                    print(equation_coeffs)
-                """
+                def_lines_equations_consts = build_def_lines_equations_consts(
+                    def_lines_vals_permut
+                    )
 
                 # For each estimated values permutation
                 estim_vals_permut_counts = 0
+
                 for estim_vals_permut in estim_vals_permuts_list:
                     estim_vals_permut_counts += 1
 
-                    # If estimated values crossed with defined lines values are valid
-                    """
-                    if estim_vals_cross_def_lines_are_valid(
-                        estim_vals_permut, num_def_lines, def_lines_vals_permut, def_lines_pos_permut,
-                        line_length, line_sum
-                        ):
-                    """
-                    if True:
+                    # Build constants for estimated values equations
+                    estim_vals_equations_consts = (
+                        build_estim_vals_equations_consts(
+                        estim_vals_permut
+                        )
+                    )
 
-                        # Build constants for estimated values equations
-                        estim_vals_equations_consts = build_estim_vals_equations_consts(
-                            estim_vals_permut
-                            )
+                    # Build coefficients for all equations
+                    coeffs_matrix = build_equations_coeffs(
+                        fixed_equations_coeffs,
+                        def_lines_equations_coeffs,
+                        estim_vals_equations_coeffs
+                        )
 
-                        # Build coefficients for all equations
-                        coeffs_matrix = build_equations_coeffs(
-                            fixed_equations_coeffs,
-                            def_lines_equations_coeffs,
-                            estim_vals_equations_coeffs
-                            )
+                    coeffs_array = np.array(coeffs_matrix)
 
-                        coeffs_array = np.array(coeffs_matrix)
+                    # Build constants for all equations
+                    consts_matrix = build_equations_consts(
+                        fixed_equations_consts,
+                        def_lines_equations_consts,
+                        estim_vals_equations_consts
+                        )
 
-                        # Build constants for all equations
-                        consts_matrix = build_equations_consts(
-                            fixed_equations_consts,
-                            def_lines_equations_consts,
-                            estim_vals_equations_consts
-                            )
+                    consts_array = np.array(consts_matrix)
 
-                        consts_array = np.array(consts_matrix)
+                    # Solve equations
+                    solution = solve_equations(
+                        coeffs_array, consts_array,
+                        result,
 
-                        # Solve equations
-                        solution = solve_equations(
-                            coeffs_array, consts_array,
-                            
-                            coeffs_matrix, consts_matrix,
+                        coeffs_matrix, consts_matrix,
 
-                            fixed_equations_coeffs,
-                            def_lines_equations_coeffs,
-                            estim_vals_equations_coeffs,
+                        fixed_equations_coeffs,
+                        def_lines_equations_coeffs,
+                        estim_vals_equations_coeffs,
 
-                            fixed_equations_consts,
-                            def_lines_equations_consts,
-                            estim_vals_equations_consts,
+                        fixed_equations_consts,
+                        def_lines_equations_consts,
+                        estim_vals_equations_consts
+                        )
 
-                            solution_stats,
-                            )
+                    result["solutions"].append(solution["x"])
+                    result["solutions_count"] = solution["solutions_count"]
 
-                        solution_stats = solution["solution_stats"]
-                        exceptions_stats = solution["exceptions_stats"]
-                        x = solution["x"]
+                    result["exceptions"].add(solution["exception"])
+                    result["exceptions_count"] = solution["exceptions_count"]
 
-                        solution_check = check_solution(x, line_length, num_values, max_value, line_sum)
-                        if len(solution_check) > 0:
-                            valid_solution_count += 1
+                    solution_check = check_solution(
+                        solution["x"],
+                        lines_len, lines_sum, max_value, num_values
+                        )
 
-                            valid_solutions.append(solution_check)
+                    if len(solution_check) > 0:
+                        result["valid_solution_count"] += 1
 
+                        result["valid_solutions"].append(solution_check)
 
-                # if there are not any estimated values permutations 
+                # if there are not any estimated values permutations
                 if estim_vals_permut_counts < 1:
 
                     # Build coefficients for all equations
@@ -901,13 +883,13 @@ def quadrado_magico_com_equacoes(
                         estim_vals_equations_consts
                         )
 
-
                     consts_array = np.array(consts_matrix)
 
                     # Solve equations
                     solution = solve_equations(
                         coeffs_array, consts_array,
-                        
+                        result,
+
                         coeffs_matrix, consts_matrix,
 
                         fixed_equations_coeffs,
@@ -916,42 +898,23 @@ def quadrado_magico_com_equacoes(
 
                         fixed_equations_consts,
                         def_lines_equations_consts,
-                        estim_vals_equations_consts,
-
-                        solution_stats,
+                        estim_vals_equations_consts
                         )
 
-                    solution_stats = solution["solution_stats"]
-                    exceptions_stats = solution["exceptions_stats"]
-                    x = solution["x"]
+                    result["solutions"].append(solution["x"])
+                    result["solutions_count"] = solution["solutions_count"]
 
-                    solution_check = check_solution(x, line_length, num_values, max_value, line_sum)
+                    result["exceptions"].add(solution["exception"])
+                    result["exceptions_count"] = solution["exceptions_count"]
+
+                    solution_check = check_solution(
+                        solution["x"],
+                        lines_len, lines_sum, max_value, num_values
+                        )
+
                     if len(solution_check) > 0:
-                        valid_solution_count += 1
+                        result["valid_solution_count"] += 1
 
-                        valid_solutions.append(solution_check)
+                        result["valid_solutions"].append(solution_check)
 
-
-    print()
-    print()
-
-    output_solutions(valid_solutions, line_length, max_value)
-
-    print()
-    print()
-
-    solutions_count = solution_stats["solutions_count"]
-
-    print()
-    print('Number of Valid Solutions')
-    print(valid_solution_count)
-
-    print()
-    print('Number of Solutions')
-    print(solutions_count)
-
-    exceptions_count = exceptions_stats["exceptions_count"]
-
-    print()
-    print('Number of Exceptions')
-    print(exceptions_count)
+    return result
