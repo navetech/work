@@ -1,4 +1,3 @@
-import itertools
 import numpy as np
 
 
@@ -65,7 +64,6 @@ def build_def_lines_vals_permuts(
 
     vals_permuts["direct"] = direct_permuts
 
-
     inverted_permuts = []
     i_permut = 0
 
@@ -93,7 +91,6 @@ def build_def_lines_vals_permuts(
 
     vals_permuts["inverted"] = inverted_permuts
 
-
     return vals_permuts
 
 
@@ -120,7 +117,9 @@ def build_def_lines_pos_permuts(
     permuts.extend(columns_permuts)
 
     if num_def_lines < 3:
-        diagonals_permuts = list(build_permutations(id_diagonals, num_def_lines))
+        diagonals_permuts = list(
+            build_permutations(id_diagonals, num_def_lines)
+            )
         permuts.extend(diagonals_permuts)
 
     return permuts
@@ -130,7 +129,7 @@ def build_def_lines_equations_coeffs(
         def_lines_pos_permut,
         lines_len, num_values
         ):
-    """ 
+    """
     Build coefficients for defined lines equations
     """
 
@@ -190,7 +189,7 @@ def build_def_lines_equations_coeffs(
 
 
 def build_def_lines_equations_consts(def_lines_vals_permut):
-    """ 
+    """
     Build constants for defined lines equations
     """
 
@@ -206,8 +205,8 @@ def build_def_lines_equations_consts(def_lines_vals_permut):
 
 def get_def_lines_cells_occupation(
         def_lines_pos_permut, lines_len
-        ) 
-    """ 
+        ):
+    """
     Get cells occupation for defined lines
     """
 
@@ -282,10 +281,10 @@ def get_def_lines_cells_occupation(
 
 
 def build_estim_vals_equations_coeffs(
-        num_estim_vals_equations, def_lines_pos_permut, 
+        num_estim_vals_equations, def_lines_pos_permut,
         lines_len, num_values
         ):
-    """ 
+    """
     Build coefficients for estimated values equations
     """
 
@@ -296,13 +295,18 @@ def build_estim_vals_equations_coeffs(
 
     def_lines_cells_occupation = get_def_lines_cells_occupation(
         def_lines_pos_permut, lines_len
-        ) 
+        )
 
     rows_with_free_cells = def_lines_cells_occupation["rows_with_free_cells"]
-    columns_with_free_cells = def_lines_cells_occupation["columns_with_free_cells"]
+    columns_with_free_cells = (
+        def_lines_cells_occupation["columns_with_free_cells"]
+    )
 
     rows_num_free_cells = def_lines_cells_occupation["rows_num_free_cells"]
-    columns_num_free_cells = def_lines_cells_occupation["columns_num_free_cells"]
+
+    columns_num_free_cells = (
+        def_lines_cells_occupation["columns_num_free_cells"]
+    )
 
     occupied_cells = def_lines_cells_occupation["occupied_cells"]
 
@@ -334,7 +338,6 @@ def build_estim_vals_equations_coeffs(
             if (vals_count >= num_vals_per_line) or (column >= num_columns):
                 vals_count = 0
                 column = 0
-                
                 i_free_cells_row += 1
                 if i_free_cells_row >= len(rows_with_free_cells):
                     break
@@ -393,7 +396,7 @@ def build_estim_vals_equations_coeffs(
             if (vals_count >= num_vals_per_line) or (row >= num_rows):
                 vals_count = 0
                 row = 0
-                
+
                 i_free_cells_column += 1
                 if i_free_cells_column >= len(columns_with_free_cells):
                     break
@@ -405,7 +408,8 @@ def build_estim_vals_equations_coeffs(
 
                 else:
                     num_vals_per_line = min(
-                        columns_num_free_cells[column], num_estim_vals_equations // lines_len
+                        columns_num_free_cells[column],
+                        num_estim_vals_equations // lines_len
                         )
 
             if (row, column) in occupied_cells:
@@ -420,18 +424,17 @@ def build_estim_vals_equations_coeffs(
 
                 vals_count += 1
                 row += 1
-                
+
                 i_equation += 1
                 one_equation_coeffs = num_values * [0]
 
-
-    return equations_coeffs    
+    return equations_coeffs
 
 
 def build_estim_vals_equations_consts(
         estim_vals_permut
         ):
-    """ 
+    """
     Build constants for estimated values equations
     """
 
@@ -443,14 +446,15 @@ def build_estim_vals_equations_consts(
     return equations_consts
 
 
-def build_equations_coeffs(fixed_equations_coeffs,
-    def_lines_equations_coeffs,
-    estim_vals_equations_coeffs
-    ):
-    """ 
+def build_equations_coeffs(
+        fixed_equations_coeffs,
+        def_lines_equations_coeffs,
+        estim_vals_equations_coeffs
+        ):
+    """
     Build coefficients for all equations
     """
-                        
+
     coeffs_matrix = []
 
     for coeffs in fixed_equations_coeffs:
@@ -470,7 +474,7 @@ def build_equations_consts(
         def_lines_equations_consts,
         estim_vals_equations_consts
         ):
-    """ 
+    """
     Build constants for all equations
     """
     consts_matrix = []
@@ -495,7 +499,7 @@ def handle_exception(
         estim_vals_equations_consts
         ):
 
-    """ 
+    """
     Handle exception
     """
 
@@ -568,7 +572,7 @@ def solve_equations(
         def_lines_equations_consts,
         estim_vals_equations_consts
         ):
-    """ 
+    """
     Solve equations
     """
 
@@ -579,7 +583,7 @@ def solve_equations(
 
     exception = None
     exceptions_count = result["exceptions_count"]
-    
+
     try:
         x = np.linalg.solve(coeffs_array, consts_array)
 
@@ -605,7 +609,12 @@ def solve_equations(
 
     finally:
         print(
-            f"{solutions_count} Solut   {exceptions_count} Except   {exception}   Solution: {x}", end="\r"
+            (
+                f"{solutions_count} Solut   "
+                f"{exceptions_count} Except   "
+                f"{exception}   Solution: {x}"
+            ),
+            end="\r"
             )
 
     solution["x"] = x
@@ -657,14 +666,19 @@ def quadrado_magico_com_equacoes(
 
     # Check number of fixed equations
     if num_fixed_equations < num_lines:
-        error = f"Number of fixed equations {num_fixed_equations} < number of lines {num_lines}"
+        error = (
+            f"Number of fixed equations {num_fixed_equations} <"
+            f"number of lines {num_lines}"
+            )
 
         result["error"] = error
 
         return result
 
     # Calculate number of estimated values equations
-    num_estim_vals_equations = num_equations - num_def_lines_equations - num_fixed_equations
+    num_estim_vals_equations = (
+        num_equations - num_def_lines_equations - num_fixed_equations
+    )
 
     # Build coefficients for fixed equations
     fixed_equations_coeffs = build_fixed_equations_coeffs(
@@ -695,7 +709,7 @@ def quadrado_magico_com_equacoes(
 
         # For each estimated values permutation
         for estim_vals_permut in estim_vals_permuts:
-            
+
             # Build constants for estimated values equations
             estim_vals_equations_consts = build_estim_vals_equations_consts(
                 estim_vals_permut
@@ -806,7 +820,7 @@ def quadrado_magico_com_equacoes(
                     # Build constants for estimated values equations
                     estim_vals_equations_consts = (
                         build_estim_vals_equations_consts(
-                        estim_vals_permut
+                            estim_vals_permut
                         )
                     )
 
