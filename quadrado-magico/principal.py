@@ -1,8 +1,8 @@
 import sys
 
 
-from utils import load_line_len, load_def_lines
-from utils import line_len_is_valid, def_lines_are_valid
+from utils import load_lines_len, load_def_lines
+from utils import lines_len_is_valid, def_lines_are_valid
 from utils import get_def_lines_vals
 from utils import build_estim_vals
 
@@ -17,34 +17,38 @@ def main():
 
     directory = sys.argv[1] if len(sys.argv) == 2 else ""
 
-    # Load line length
-    line_len = load_line_len(directory)
+    # Load lines length
+    lines_len = load_lines_len(directory)
 
     # Set number of lines
-    num_lines = line_len
+    num_lines = lines_len
+
+    # Set number of rows and columns
+    num_rows = num_lines
+    num_columns = num_lines
+
+    # Calculate number of values
+    num_values = num_rows * num_columns
 
     # Calculate max value
-    max_value = num_lines * line_len
-
-    # Calculate total number of values
-    num_values = max_value
+    max_value = num_values
 
     # Calculate total sum of values
     total_sum = ((1 + max_value) * num_values) / 2
 
     # Calculate sum of values of each line
-    line_sum = int(total_sum / num_lines)
+    lines_sum = int(total_sum / num_lines)
 
     # Check if line length is valid
-    if not line_len_is_valid(line_len, line_sum):
-        sys.exit(f"Line length {line_len} is invalid")
+    if not lines_len_is_valid(lines_len, lines_sum):
+        sys.exit(f"Lines length {lines_len} is invalid")
 
     # Load defined lines
     def_lines = load_def_lines(directory, num_lines)
 
     # Check if defined lines are valid
     if not def_lines_are_valid(
-            def_lines, line_len, num_lines, max_value, line_sum):
+            def_lines, lines_len, num_lines, max_value, lines_sum):
 
         sys.exit("Defined lines are invalid")
 
@@ -64,7 +68,7 @@ def main():
     num_estim_vals = len(estim_vals)
 
     quadrado_magico_sem_equacoes(
-        line_len, max_value, num_values, line_sum,
+        lines_len, max_value, num_values, lines_sum,
         def_lines, num_def_lines, num_def_lines_vals,
         num_estim_vals, estim_vals
         )

@@ -5,28 +5,28 @@ import csv
 import itertools
 
 
-def load_line_len(directory):
+def load_lines_len(directory):
     """
-    Load line length from CSV file into memory.
+    Load lines length from CSV file into memory.
     """
 
-    # Line length default
-    line_len = 4
+    # Lines length default
+    lines_len = 4
 
     try:
-        with open(f"{directory}/line-len.csv", encoding="utf-8") as f:
+        with open(f"{directory}/lines-len.csv", encoding="utf-8") as f:
             reader = csv.DictReader(f)
 
             for row in reader:
-                line_len = int(row["length"])
+                lines_len = int(row["length"])
 
     except Exception:
         pass
 
-    return line_len
+    return lines_len
 
 
-def load_def_lines(directory, num_lines, line_len):
+def load_def_lines(directory, num_lines, lines_len):
     """
     Load defined lines from CSV files into memory.
     """
@@ -41,7 +41,7 @@ def load_def_lines(directory, num_lines, line_len):
 
         try:
             with open(
-              f"{directory}/def-line-{num_lines}x{line_len}-{i_line}.csv",
+              f"{directory}/def-line-{num_lines}x{lines_len}-{i_line}.csv",
               encoding="utf-8"
               ) as f:
 
@@ -55,7 +55,7 @@ def load_def_lines(directory, num_lines, line_len):
 
         line_values_count = len(line_values)
 
-        if (line_values_count > 0) and (line_values_count <= line_len):
+        if (line_values_count > 0) and (line_values_count <= lines_len):
             lines.add(line_values)
 
     for line in lines:
@@ -63,7 +63,7 @@ def load_def_lines(directory, num_lines, line_len):
 
         line_values_count = len(line_values)
 
-        non_def_values = (line_len - line_values_count) * [None]
+        non_def_values = (lines_len - line_values_count) * [None]
 
         line_values.extend(non_def_values)
 
@@ -72,16 +72,16 @@ def load_def_lines(directory, num_lines, line_len):
     return def_lines
 
 
-def line_len_is_valid(line_len, line_sum):
+def lines_len_is_valid(lines_len, lines_sum):
     """
-    Check if line legth is valid
+    Check if lines legth is valid
     """
 
-    return (line_len > 0) and ((line_len % 2) == (line_sum % 2))
+    return (lines_len > 0) and ((lines_len % 2) == (lines_sum % 2))
 
 
 def def_lines_are_valid(
-        def_lines, line_len, num_lines, max_value, line_sum
+        def_lines, lines_len, num_lines, max_value, lines_sum
         ):
     """
     Check if defined lines are valid
@@ -109,11 +109,11 @@ def def_lines_are_valid(
                         values_count += 1
                         values_sum += value
 
-                        if values_sum > line_sum:
+                        if values_sum > lines_sum:
                             return False
 
-            if values_count == line_len:
-                if values_sum != line_sum:
+            if values_count == lines_len:
+                if values_sum != lines_sum:
                     return False
 
     return True
