@@ -47,6 +47,11 @@ def main():
     # Load defined lines
     def_lines = load_def_lines(directory, num_lines, lines_len)
 
+    print(def_lines)
+    print(lines_len)
+
+    return
+
     # Check if defined lines are valid
     if not def_lines_are_valid(
             def_lines,
@@ -70,12 +75,14 @@ def main():
     # Calculate number of estimated alues
     num_estim_vals = len(estim_vals)
 
+    """
     sols_without_equations = quadrado_magico_sem_equacoes(
         def_lines, num_def_lines,
         def_lines_vals, num_def_lines_vals,
         estim_vals, num_estim_vals,
         lines_len, lines_sum, max_value, num_values
         )
+    """
 
     sols_with_equations = quadrado_magico_com_equacoes(
         def_lines, num_def_lines,

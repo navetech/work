@@ -20,8 +20,8 @@ def load_lines_len(directory):
             for row in reader:
                 lines_len = int(row["length"])
 
-    except Exception:
-        pass
+    except Exception as e:
+        print(e)
 
     return lines_len
 
@@ -34,10 +34,10 @@ def load_def_lines(directory, num_lines, lines_len):
     # Defined lines default (none)
     def_lines = set()
 
-    lines = set()
+    lines = []
 
     for i_line in range(num_lines):
-        line_values = ()
+        line_values = set()
 
         try:
             with open(
@@ -50,13 +50,13 @@ def load_def_lines(directory, num_lines, lines_len):
                 for row in reader:
                     line_values.add(int(row["value"]))
 
-        except Exception:
-            pass
+        except Exception as e:
+            print(e)
 
         line_values_count = len(line_values)
 
         if (line_values_count > 0) and (line_values_count <= lines_len):
-            lines.add(line_values)
+            lines.append(line_values)
 
     for line in lines:
         line_values = list(line)

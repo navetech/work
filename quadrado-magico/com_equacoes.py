@@ -656,7 +656,7 @@ def quadrado_magico_com_equacoes(
     num_equations = num_values
 
     # Calculate number of defined lines equations
-    num_def_lines_equations = def_lines_vals
+    num_def_lines_equations = len(def_lines_vals)
 
     # Calculate number of fixed equations
     num_fixed_equations = num_equations - num_def_lines_equations
