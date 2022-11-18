@@ -165,6 +165,150 @@ def build_permutations(iterable, permut_length):
     return permuts
 
 
+def build_estim_vals_permuts(all_estim_vals, num_estim_vals_to_permut):
+    """
+    Build estimated values permutations
+    """
+
+    permut_length = num_estim_vals_to_permut
+
+    permuts = build_permutations(all_estim_vals, permut_length)
+
+    return permuts
+
+
+def build_def_lines_pos_permuts(num_def_lines, line_len):
+    """
+    Build defined lines positions permutations
+    """
+
+    permuts = set()
+
+    if num_def_lines < 1:
+        return permuts
+
+    id_rows = list(range(line_len))
+    id_columns = list(range(line_len, 2 * line_len))
+    id_diagonals = [2 * line_len, 2 * line_len + 1]
+
+    rows_permuts = build_permutations(id_rows, num_def_lines)
+    columns_permuts = build_permutations(id_columns, num_def_lines)
+
+    permuts.union(rows_permuts)
+    permuts.union(columns_permuts)
+
+    if num_def_lines < 3:
+        diagonals_permuts = build_permutations(id_diagonals, num_def_lines)
+        permuts.union(diagonals_permuts)
+
+    return permuts
+
+
+def build_vals_pernuts_for_def_lines(
+        def_lines, num_def_lines, line_len
+        ):
+    """
+    Build values permutations for defined lines
+    """
+
+    vals_permuts = set(0)
+
+    # Build defined lines positions permutations
+    def_lines_pos_permuts = build_def_lines_pos_permuts(
+        num_def_lines, line_len
+        )
+
+    return vals_permuts
+
+
+def output_solutions(solutions, line_length, max_value):
+    """
+    Output solutions
+    """
+
+    output_line_length = 80
+
+    space = " "
+
+    values_space = 1 * space
+    frames_space = 3 * space
+
+    value_length = (max_value // 10) + 1
+    value_format = "{:^" + f"{value_length}" + "}"
+
+    values_row = line_length * [1]
+    one_frame_output = ""
+
+    for i in range(len(values_row) - 1):
+        one_frame_output += (
+            f"{value_format}{values_space}".format(values_row[i])
+        )
+    one_frame_output += (
+        f"{value_format}".format(values_row[len(values_row) - 1])
+    )
+
+    num_frames_per_output_row = (
+        (output_line_length - len(frames_space))
+        //
+        (len(one_frame_output) + len(frames_space))
+    )
+
+    frames_row = 0
+    frames_column = 0
+    values_row = 0
+
+    print()
+    print()
+    while True:
+
+        if frames_column >= num_frames_per_output_row:
+            print()
+
+            frames_column = 0
+
+            values_row += 1
+            if values_row >= line_length:
+                values_row = 0
+                frames_row += 1
+
+                i_solution = (
+                    (frames_row * num_frames_per_output_row) + frames_column
+                )
+                if i_solution >= len(solutions):
+                    break
+
+                print()
+                print()
+
+                continue
+
+        i_solution = (frames_row * num_frames_per_output_row) + frames_column
+        if i_solution >= len(solutions):
+            frames_column += 1
+            continue
+
+        solution = solutions[i_solution]
+
+        for values_column in range(line_length - 1):
+            i_value = (values_row * line_length) + values_column
+
+            value_output = (
+                f"{value_format}{values_space}".format(solution[i_value])
+            )
+            print(value_output, end=" ")
+
+        values_column = line_length - 1
+        i_value = (values_row * line_length) + values_column
+
+        value_output = f"{value_format}".format(solution[i_value])
+        print(value_output, end=" ")
+
+        if frames_column < num_frames_per_output_row - 1:
+            print(frames_space, end=" ")
+
+        frames_column += 1
+
+
 def check_solution(
         values,
         lines_len, lines_sum, max_value, num_values
@@ -254,91 +398,3 @@ def check_solution(
         return []
 
     return values_int
-
-
-def output_solutions(solutions, line_length, max_value):
-    """
-    Output solutions
-    """
-
-    output_line_length = 80
-
-    space = " "
-
-    values_space = 1 * space
-    frames_space = 3 * space
-
-    value_length = (max_value // 10) + 1
-    value_format = "{:^" + f"{value_length}" + "}"
-
-    values_row = line_length * [1]
-    one_frame_output = ""
-
-    for i in range(len(values_row) - 1):
-        one_frame_output += (
-            f"{value_format}{values_space}".format(values_row[i])
-        )
-    one_frame_output += (
-        f"{value_format}".format(values_row[len(values_row) - 1])
-    )
-
-    num_frames_per_output_row = (
-        (output_line_length - len(frames_space))
-        //
-        (len(one_frame_output) + len(frames_space))
-    )
-
-    frames_row = 0
-    frames_column = 0
-    values_row = 0
-
-    print()
-    print()
-    while True:
-
-        if frames_column >= num_frames_per_output_row:
-            print()
-
-            frames_column = 0
-
-            values_row += 1
-            if values_row >= line_length:
-                values_row = 0
-                frames_row += 1
-
-                i_solution = (
-                    (frames_row * num_frames_per_output_row) + frames_column
-                )
-                if i_solution >= len(solutions):
-                    break
-
-                print()
-                print()
-
-                continue
-
-        i_solution = (frames_row * num_frames_per_output_row) + frames_column
-        if i_solution >= len(solutions):
-            frames_column += 1
-            continue
-
-        solution = solutions[i_solution]
-
-        for values_column in range(line_length - 1):
-            i_value = (values_row * line_length) + values_column
-
-            value_output = (
-                f"{value_format}{values_space}".format(solution[i_value])
-            )
-            print(value_output, end=" ")
-
-        values_column = line_length - 1
-        i_value = (values_row * line_length) + values_column
-
-        value_output = f"{value_format}".format(solution[i_value])
-        print(value_output, end=" ")
-
-        if frames_column < num_frames_per_output_row - 1:
-            print(frames_space, end=" ")
-
-        frames_column += 1

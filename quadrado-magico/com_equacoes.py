@@ -628,8 +628,7 @@ def solve_equations(
 
 def quadrado_magico_com_equacoes(
         def_lines, num_def_lines,
-        def_lines_vals, num_def_lines_vals,
-        estim_vals, num_estim_vals,
+        def_lines_vals, estim_vals,
         lines_len, lines_sum, max_value, num_values
         ):
     """

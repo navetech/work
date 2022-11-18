@@ -45,11 +45,13 @@ def main():
         sys.exit(f"Lines length {lines_len} is invalid")
 
     # Load defined lines
-    def_lines = load_def_lines(directory, num_lines)
+    def_lines = load_def_lines(directory, num_lines, lines_len)
 
     # Check if defined lines are valid
     if not def_lines_are_valid(
-            def_lines, lines_len, num_lines, max_value, lines_sum):
+            def_lines,
+            lines_len, num_lines, lines_sum, max_value
+            ):
 
         sys.exit("Defined lines are invalid")
 
@@ -77,8 +79,7 @@ def main():
 
     sols_with_equations = quadrado_magico_com_equacoes(
         def_lines, num_def_lines,
-        def_lines_vals, num_def_lines_vals,
-        estim_vals, num_estim_vals,
+        def_lines_vals, estim_vals,
         lines_len, lines_sum, max_value, num_values
         )
 
