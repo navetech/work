@@ -26,7 +26,56 @@ def load_lines_len(directory):
     return lines_len
 
 
-def load_def_lines(directory, num_lines, lines_len):
+def load_def_lines(directory, lines_len):
+    """
+    Load defined lines from CSV file into memory.
+    """
+
+    # Defined lines default (none)
+    def_lines = []
+
+    num_rows = lines_len
+    num_columns = lines_len
+
+    try:
+        with open(
+            f"{directory}/def-line-{num_rows}x{num_columns}.csv",
+            encoding="utf-8"
+            ) as f:
+
+            reader = csv.DictReader(f)
+
+            for row in reader:
+                row_keys = row.keys()
+
+                num_row_columns = len(row_keys)
+                if num_row_columns > num_columns:
+                    return None
+
+                row_values = []
+
+                for i in range(1, num_row_columns + 1):
+                    key = f"value{i}"
+
+                    try:
+                        row_values.append(int(row[key]))
+
+                    except Exception as e:
+                        print("key")
+                        print(e)
+
+                        return None
+
+                def_lines.append(row_values)
+
+    except Exception as e:
+        print("with")
+        print(e)
+
+    return def_lines
+
+
+def load_def_lines2(directory, num_lines, lines_len):
     """
     Load defined lines from CSV files into memory.
     """

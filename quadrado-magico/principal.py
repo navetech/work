@@ -45,7 +45,8 @@ def main():
         sys.exit(f"Lines length {lines_len} is invalid")
 
     # Load defined lines
-    def_lines = load_def_lines(directory, num_lines, lines_len)
+    # def_lines = load_def_lines(directory, num_lines, lines_len)
+    def_lines = load_def_lines(directory, lines_len)
 
     print(def_lines)
     print(lines_len)
