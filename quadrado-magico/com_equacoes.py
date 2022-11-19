@@ -5,6 +5,21 @@ from utils import build_permutations
 from utils import check_solution
 
 
+def def_lines_are_full_lines(def_lines, lines_len):
+    """
+    Check if defined lines are full lines
+    """
+
+    if len(def_lines) == 0:
+        return True
+
+    for line in def_lines:
+        if len(line) != lines_len:
+            return False
+
+    return True
+
+
 def build_fixed_equations_coeffs(
         num_fixed_equations,
         lines_len, num_values
@@ -612,7 +627,8 @@ def solve_equations(
             (
                 f"{solutions_count} Solut   "
                 f"{exceptions_count} Except   "
-                f"{exception}   Solution: {x}"
+                f"{exception}   "
+                f"Solution: {x}"
             ),
             end="\r"
             )
@@ -620,7 +636,7 @@ def solve_equations(
     solution["x"] = x
     solution["solutions_count"] = solutions_count
 
-    solution["exception"] = exception
+    solution["exception"] = str(exception)
     solution["exceptions_count"] = exceptions_count
 
     return solution
@@ -647,10 +663,18 @@ def quadrado_magico_com_equacoes(
     result["exceptions"] = set()
     result["exceptions_count"] = 0
 
-    result["erro"] = ""
+    result["error"] = ""
 
     # Calculate number of lines
     num_lines = lines_len
+
+    # Check if defined lines are full lines
+    if not def_lines_are_full_lines(def_lines, lines_len):
+        error = "Defined lines are not full lines"
+
+        result["error"] = error
+
+        return result
 
     # Calculate number of equations
     num_equations = num_values
@@ -764,7 +788,7 @@ def quadrado_magico_com_equacoes(
                 )
 
             if len(solution_check) > 0:
-                result["valid_solution_count"] += 1
+                result["valid_solutions_count"] += 1
 
                 result["valid_solutions"].append(solution_check)
 
@@ -869,7 +893,7 @@ def quadrado_magico_com_equacoes(
                         )
 
                     if len(solution_check) > 0:
-                        result["valid_solution_count"] += 1
+                        result["valid_solutions_count"] += 1
 
                         result["valid_solutions"].append(solution_check)
 
@@ -926,7 +950,7 @@ def quadrado_magico_com_equacoes(
                         )
 
                     if len(solution_check) > 0:
-                        result["valid_solution_count"] += 1
+                        result["valid_solutions_count"] += 1
 
                         result["valid_solutions"].append(solution_check)
 

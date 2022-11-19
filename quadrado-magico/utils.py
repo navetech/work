@@ -5,28 +5,7 @@ import csv
 import itertools
 
 
-def load_lines_len(directory):
-    """
-    Load lines length from CSV file into memory.
-    """
-
-    # Lines length default
-    lines_len = 4
-
-    try:
-        with open(f"{directory}/lines-len.csv", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-
-            for row in reader:
-                lines_len = int(row["length"])
-
-    except Exception as e:
-        print(e)
-
-    return lines_len
-
-
-def load_def_lines(directory, lines_len):
+def load_def_lines(filename, lines_len):
     """
     Load defined lines from CSV file into memory.
     """
@@ -38,10 +17,7 @@ def load_def_lines(directory, lines_len):
     num_columns = lines_len
 
     try:
-        with open(
-            f"{directory}/def-line-{num_rows}x{num_columns}.csv",
-            encoding="utf-8"
-            ) as f:
+        with open(filename, encoding="utf-8") as f:
 
             reader = csv.DictReader(f)
 
@@ -61,110 +37,84 @@ def load_def_lines(directory, lines_len):
                         row_values.append(int(row[key]))
 
                     except Exception as e:
-                        print("key")
+                        print("key exception")
                         print(e)
 
                         return None
 
                 def_lines.append(row_values)
 
+                if len(def_lines) > num_rows:
+                    return None
+
     except Exception as e:
-        print("with")
+        print("with exception")
         print(e)
 
     return def_lines
 
 
-def load_def_lines2(directory, num_lines, lines_len):
-    """
-    Load defined lines from CSV files into memory.
-    """
-
-    # Defined lines default (none)
-    def_lines = set()
-
-    lines = []
-
-    for i_line in range(num_lines):
-        line_values = set()
-
-        try:
-            with open(
-              f"{directory}/def-line-{num_lines}x{lines_len}-{i_line}.csv",
-              encoding="utf-8"
-              ) as f:
-
-                reader = csv.DictReader(f)
-
-                for row in reader:
-                    line_values.add(int(row["value"]))
-
-        except Exception as e:
-            print(e)
-
-        line_values_count = len(line_values)
-
-        if (line_values_count > 0) and (line_values_count <= lines_len):
-            lines.append(line_values)
-
-    for line in lines:
-        line_values = list(line)
-
-        line_values_count = len(line_values)
-
-        non_def_values = (lines_len - line_values_count) * [None]
-
-        line_values.extend(non_def_values)
-
-        def_lines.add(line_values)
-
-    return def_lines
-
-
-def lines_len_is_valid(lines_len, lines_sum):
+# def lines_len_is_valid(lines_len, lines_sum):
     """
     Check if lines legth is valid
     """
 
-    return (lines_len > 0) and ((lines_len % 2) == (lines_sum % 2))
+    # return (lines_len > 0) and ((lines_len % 2) == (lines_sum % 2))
 
 
 def def_lines_are_valid(
         def_lines,
-        lines_len, num_lines, lines_sum, max_value
+        lines_len, lines_sum, max_value
         ):
     """
     Check if defined lines are valid
     """
+
+    if def_lines is None:
+        return False
 
     num_def_lines = len(def_lines)
 
     if num_def_lines == 0:
         return True
 
-    elif num_def_lines > num_lines:
+    num_lines = lines_len
+
+    if num_def_lines > num_lines:
         return False
 
-    else:
-        for line in def_lines:
-            values_count = 0
-            values_sum = 0
+    lines_diff_values = set()
 
-            for value in line:
-                if value is not None:
-                    if (value < 1) or (value > max_value):
-                        return False
+    for line_values in def_lines:
+        line_values_count = len(line_values)
 
-                    else:
-                        values_count += 1
-                        values_sum += value
+        if line_values_count > lines_len:
+            return False
 
-                        if values_sum > lines_sum:
-                            return False
+        line_diff_values = set(line_values)
 
-            if values_count == lines_len:
-                if values_sum != lines_sum:
-                    return False
+        if len(line_diff_values) != line_values_count:
+            return False
+
+        if len(lines_diff_values.intersection(line_diff_values)) > 0:
+            return False
+
+        lines_diff_values = lines_diff_values.union(line_diff_values)
+
+        values_sum = 0
+
+        for value in line_values:
+            if (value < 1) or (value > max_value):
+                return False
+
+            values_sum += value
+
+            if values_sum > lines_sum:
+                return False
+
+        if line_values_count == lines_len:
+            if values_sum != lines_sum:
+                return False
 
     return True
 
@@ -174,14 +124,12 @@ def get_def_lines_vals(def_lines):
     Get defined lines values
     """
 
-    values = set()
+    lines_vals = set()
 
-    for line in def_lines:
-        for value in line:
-            if value is not None:
-                values.add(value)
+    for line_vals in def_lines:
+        lines_vals = lines_vals.union(set(line_vals))
 
-    return values
+    return lines_vals
 
 
 def build_estim_vals(max_value, def_lines_vals):
@@ -305,12 +253,12 @@ def check_solution(
     return values_int
 
 
-def output_solutions(solutions, line_length, max_value):
+def output_solutions(solutions, lines_len, max_value):
     """
     Output solutions
     """
 
-    output_line_length = 80
+    output_line_len = 80
 
     space = " "
 
@@ -318,23 +266,29 @@ def output_solutions(solutions, line_length, max_value):
     frames_space = 3 * space
 
     value_length = (max_value // 10) + 1
+
     value_format = "{:^" + f"{value_length}" + "}"
 
-    values_row = line_length * [1]
-    one_frame_output = ""
+    num_values_rows = lines_len
+    num_values_columns = lines_len
 
-    for i in range(len(values_row) - 1):
-        one_frame_output += (
-            f"{value_format}{values_space}".format(values_row[i])
+    example_value = 1
+
+    frame_output = ""
+
+    for i in range(num_values_columns - 1):
+        frame_output += (
+            f"{value_format}{values_space}".format(example_value)
         )
-    one_frame_output += (
-        f"{value_format}".format(values_row[len(values_row) - 1])
+
+    frame_output += (
+        f"{value_format}".format(example_value)
     )
 
-    num_frames_per_output_row = (
-        (output_line_length - len(frames_space))
+    num_frames_per_output_line = (
+        (output_line_len - len(frames_space))
         //
-        (len(one_frame_output) + len(frames_space))
+        (len(frame_output) + len(frames_space))
     )
 
     frames_row = 0
@@ -343,21 +297,25 @@ def output_solutions(solutions, line_length, max_value):
 
     print()
     print()
+    
     while True:
 
-        if frames_column >= num_frames_per_output_row:
+        if frames_column >= num_frames_per_output_line:
             print()
 
             frames_column = 0
 
             values_row += 1
-            if values_row >= line_length:
+
+            if values_row >= num_values_rows:
                 values_row = 0
+
                 frames_row += 1
 
                 i_solution = (
-                    (frames_row * num_frames_per_output_row) + frames_column
+                    (frames_row * num_frames_per_output_line) + frames_column
                 )
+
                 if i_solution >= len(solutions):
                     break
 
@@ -366,28 +324,33 @@ def output_solutions(solutions, line_length, max_value):
 
                 continue
 
-        i_solution = (frames_row * num_frames_per_output_row) + frames_column
+        i_solution = (frames_row * num_frames_per_output_line) + frames_column
+
         if i_solution >= len(solutions):
             frames_column += 1
+
             continue
 
         solution = solutions[i_solution]
 
-        for values_column in range(line_length - 1):
-            i_value = (values_row * line_length) + values_column
+        for values_column in range(num_values_columns - 1):
+            i_value = (values_row * num_values_columns) + values_column
 
             value_output = (
                 f"{value_format}{values_space}".format(solution[i_value])
             )
+
             print(value_output, end=" ")
 
-        values_column = line_length - 1
-        i_value = (values_row * line_length) + values_column
+        values_column = num_values_columns - 1
+
+        i_value = (values_row * num_values_columns) + values_column
 
         value_output = f"{value_format}".format(solution[i_value])
+
         print(value_output, end=" ")
 
-        if frames_column < num_frames_per_output_row - 1:
+        if frames_column < num_frames_per_output_line - 1:
             print(frames_space, end=" ")
 
         frames_column += 1

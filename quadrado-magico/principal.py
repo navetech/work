@@ -1,10 +1,12 @@
 import sys
+import argparse
 
 
-from utils import load_lines_len, load_def_lines
-from utils import lines_len_is_valid, def_lines_are_valid
+from utils import load_def_lines
+from utils import def_lines_are_valid
 from utils import get_def_lines_vals
 from utils import build_estim_vals
+from utils import output_solutions
 
 from sem_equacoes import quadrado_magico_sem_equacoes
 from com_equacoes import quadrado_magico_com_equacoes
@@ -13,13 +15,17 @@ from com_equacoes import quadrado_magico_com_equacoes
 def main():
 
     # Get command line arguments
-    if len(sys.argv) > 2:
-        sys.exit("Usage: python quadrado-magico.py [directory]")
+    parser = argparse.ArgumentParser()
 
-    directory = sys.argv[1] if len(sys.argv) == 2 else ""
+    parser.add_argument("filename", nargs="?", default="")
+    parser.add_argument(
+        "-l", "--lineslen", type=int, choices=range(1, 5), default=4
+        )
 
-    # Load lines length
-    lines_len = load_lines_len(directory)
+    args = parser.parse_args()
+
+    lines_len = args.lineslen
+    filename = args.filename
 
     # Set number of lines
     num_lines = lines_len
@@ -40,23 +46,14 @@ def main():
     # Calculate sum of values of each line
     lines_sum = int(total_sum / num_lines)
 
-    # Check if line length is valid
-    if not lines_len_is_valid(lines_len, lines_sum):
-        sys.exit(f"Lines length {lines_len} is invalid")
-
     # Load defined lines
     # def_lines = load_def_lines(directory, num_lines, lines_len)
-    def_lines = load_def_lines(directory, lines_len)
-
-    print(def_lines)
-    print(lines_len)
-
-    return
+    def_lines = load_def_lines(filename, lines_len)
 
     # Check if defined lines are valid
     if not def_lines_are_valid(
             def_lines,
-            lines_len, num_lines, lines_sum, max_value
+            lines_len, lines_sum, max_value
             ):
 
         sys.exit("Defined lines are invalid")
@@ -77,7 +74,7 @@ def main():
     num_estim_vals = len(estim_vals)
 
     """
-    sols_without_equations = quadrado_magico_sem_equacoes(
+    result_without_equations = quadrado_magico_sem_equacoes(
         def_lines, num_def_lines,
         def_lines_vals, num_def_lines_vals,
         estim_vals, num_estim_vals,
@@ -85,11 +82,35 @@ def main():
         )
     """
 
-    sols_with_equations = quadrado_magico_com_equacoes(
+    result_with_equations = quadrado_magico_com_equacoes(
         def_lines, num_def_lines,
         def_lines_vals, estim_vals,
         lines_len, lines_sum, max_value, num_values
         )
+
+    error = result_with_equations["error"]
+    if error:
+        sys.exit(error)
+
+    valid_solutions = result_with_equations["valid_solutions"]
+
+    output_solutions(valid_solutions, lines_len, max_value)
+
+    solutions_count = result_with_equations["solutions_count"]
+    valid_solutions_count = result_with_equations["valid_solutions_count"]
+    exceptions_count = result_with_equations["exceptions_count"]
+
+
+    print()
+    print()
+    print()
+    print(
+            (
+                f"{solutions_count} Solutions   "
+                f"{valid_solutions_count} Valid Solutions   "
+                f"{exceptions_count} Exceptiions"
+            )
+         )
 
 
 if __name__ == "__main__":
