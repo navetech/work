@@ -92,22 +92,24 @@ def main():
     if error:
         sys.exit(error)
 
-    valid_solutions = result_with_equations["valid_solutions"]
+    diff_solutions = result_with_equations["diff_solutions"]
 
-    output_solutions(valid_solutions, lines_len, max_value)
+    diff_solutions_count = len(diff_solutions)
+
+    output_solutions(diff_solutions, lines_len, max_value)
 
     solutions_count = result_with_equations["solutions_count"]
     valid_solutions_count = result_with_equations["valid_solutions_count"]
     exceptions_count = result_with_equations["exceptions_count"]
-
 
     print()
     print()
     print()
     print(
             (
-                f"{solutions_count} Solutions   "
+                f"{diff_solutions_count} Different Solutions   "
                 f"{valid_solutions_count} Valid Solutions   "
+                f"{solutions_count} Solutions   "
                 f"{exceptions_count} Exceptiions"
             )
          )

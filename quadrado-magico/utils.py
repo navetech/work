@@ -297,7 +297,7 @@ def output_solutions(solutions, lines_len, max_value):
 
     print()
     print()
-    
+
     while True:
 
         if frames_column >= num_frames_per_output_line:

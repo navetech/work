@@ -654,11 +654,11 @@ def quadrado_magico_com_equacoes(
     # Initialize result
     result = {}
 
-    result["solutions"] = []
     result["solutions_count"] = 0
 
-    result["valid_solutions"] = []
     result["valid_solutions_count"] = 0
+
+    result["diff_solutions"] = []
 
     result["exceptions"] = set()
     result["exceptions_count"] = 0
@@ -776,7 +776,6 @@ def quadrado_magico_com_equacoes(
                 estim_vals_equations_consts
                 )
 
-            result["solutions"].append(solution["x"])
             result["solutions_count"] = solution["solutions_count"]
 
             result["exceptions"].add(solution["exception"])
@@ -790,7 +789,8 @@ def quadrado_magico_com_equacoes(
             if len(solution_check) > 0:
                 result["valid_solutions_count"] += 1
 
-                result["valid_solutions"].append(solution_check)
+                if solution_check not in result["diff_solutions"]:
+                    result["diff_solutions"].append(solution_check)
 
     # Else there are defined lines
     else:
@@ -881,7 +881,6 @@ def quadrado_magico_com_equacoes(
                         estim_vals_equations_consts
                         )
 
-                    result["solutions"].append(solution["x"])
                     result["solutions_count"] = solution["solutions_count"]
 
                     result["exceptions"].add(solution["exception"])
@@ -895,7 +894,8 @@ def quadrado_magico_com_equacoes(
                     if len(solution_check) > 0:
                         result["valid_solutions_count"] += 1
 
-                        result["valid_solutions"].append(solution_check)
+                        if solution_check not in result["diff_solutions"]:
+                            result["diff_solutions"].append(solution_check)
 
                 # if there are not any estimated values permutations
                 if estim_vals_permut_counts < 1:
@@ -938,7 +938,6 @@ def quadrado_magico_com_equacoes(
                         estim_vals_equations_consts
                         )
 
-                    result["solutions"].append(solution["x"])
                     result["solutions_count"] = solution["solutions_count"]
 
                     result["exceptions"].add(solution["exception"])
@@ -952,6 +951,7 @@ def quadrado_magico_com_equacoes(
                     if len(solution_check) > 0:
                         result["valid_solutions_count"] += 1
 
-                        result["valid_solutions"].append(solution_check)
+                        if solution_check not in result["diff_solutions"]:
+                            result["diff_solutions"].append(solution_check)
 
     return result
