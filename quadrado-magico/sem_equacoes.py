@@ -395,6 +395,8 @@ def quadrado_magico_sem_equacoes(
     Quadrado magico sem equacoes
     """
 
+    return None
+
     solutions = []
 
     # If there are defined lines

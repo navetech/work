@@ -18,14 +18,27 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("filename", nargs="?", default="")
+
     parser.add_argument(
         "-l", "--lineslen", type=int, choices=range(1, 5), default=4
+        )
+
+    parser.add_argument(
+        "-n", "--withouteq", action="store_true"
+        )
+
+    parser.add_argument(
+        "-e", "--witheq", action="store_true"
         )
 
     args = parser.parse_args()
 
     lines_len = args.lineslen
+
     filename = args.filename
+
+    without_equations = args.withouteq
+    with_equations = args.witheq
 
     # Set number of lines
     num_lines = lines_len
@@ -73,46 +86,92 @@ def main():
     # Calculate number of estimated alues
     num_estim_vals = len(estim_vals)
 
-    """
-    result_without_equations = quadrado_magico_sem_equacoes(
-        def_lines, num_def_lines,
-        def_lines_vals, num_def_lines_vals,
-        estim_vals, num_estim_vals,
-        lines_len, lines_sum, max_value, num_values
-        )
-    """
+    with_equations_valid = True
+    if (lines_len > 4) or ((lines_len == 4) and (num_def_lines < 2)):
+        with_equations_valid = False
 
-    result_with_equations = quadrado_magico_com_equacoes(
-        def_lines, num_def_lines,
-        def_lines_vals, estim_vals,
-        lines_len, lines_sum, max_value, num_values
-        )
+    if without_equations or (not without_equations and not with_equations):
+        print()
+        print()
 
-    error = result_with_equations["error"]
-    if error:
-        sys.exit(error)
+        print()
+        print("WITHOUT EQUATIONS")
 
-    diff_solutions = result_with_equations["diff_solutions"]
-
-    diff_solutions_count = len(diff_solutions)
-
-    output_solutions(diff_solutions, lines_len, max_value)
-
-    solutions_count = result_with_equations["solutions_count"]
-    valid_solutions_count = result_with_equations["valid_solutions_count"]
-    exceptions_count = result_with_equations["exceptions_count"]
-
-    print()
-    print()
-    print()
-    print(
-            (
-                f"{diff_solutions_count} Different Solutions   "
-                f"{valid_solutions_count} Valid Solutions   "
-                f"{solutions_count} Solutions   "
-                f"{exceptions_count} Exceptiions"
+        result_without_equations = quadrado_magico_sem_equacoes(
+            def_lines, num_def_lines,
+            def_lines_vals, num_def_lines_vals,
+            estim_vals, num_estim_vals,
+            lines_len, lines_sum, max_value, num_values
             )
-         )
+
+        print()
+        print(result_without_equations)
+
+        print()
+        print()
+
+    if with_equations:
+        print()
+        print()
+
+        print()
+        print("WITH EQUATIONS")
+
+        if not with_equations_valid:
+            print()
+            print("With Equations is not Valid")
+
+        else:
+            result_with_equations = quadrado_magico_com_equacoes(
+                def_lines, num_def_lines,
+                def_lines_vals, estim_vals,
+                lines_len, lines_sum, max_value, num_values
+                )
+
+            error = result_with_equations["error"]
+            if error:
+                print()
+                print(error)
+
+            else:
+                diff_solutions = result_with_equations["diff_solutions"]
+
+                diff_solutions_count = len(diff_solutions)
+
+                solutions_output = False
+                if not without_equations:
+                    print()
+                    output_solutions(diff_solutions, lines_len, max_value)
+
+                    solutions_output = True
+
+                solutions_count = result_with_equations["solutions_count"]
+
+                valid_solutions_count = (
+                    result_with_equations["valid_solutions_count"]
+                )
+
+                exceptions_count = result_with_equations["exceptions_count"]
+
+                if solutions_output:
+                    print()
+                    print()
+
+                    print()
+                    print("WITH EQUATIONS")
+
+                print()
+                print(
+                        (
+                            f"{diff_solutions_count} Different Solutions   "
+                            f"{valid_solutions_count} Valid Solutions   "
+                            f"{solutions_count} Solutions   "
+                            f"{exceptions_count} Exceptiions"
+                        )
+                    )
+
+        print()
+        print()
 
 
 if __name__ == "__main__":
