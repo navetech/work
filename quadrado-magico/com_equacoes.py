@@ -2,6 +2,7 @@ import numpy as np
 
 
 from utils import build_permutations
+from utils import build_def_lines_vals_permuts
 from utils import check_solution
 
 
@@ -58,55 +59,6 @@ def build_estim_vals_permuts(
     permuts = build_permutations(estim_vals, permut_length)
 
     return permuts
-
-
-def build_def_lines_vals_permuts(
-        def_lines, num_def_lines
-        ):
-    """
-    Build defined lines values permutations
-    """
-
-    vals_permuts = {}
-
-    direct_permuts = []
-    for line in def_lines:
-        permut_length = len(line)
-
-        line_permuts = list(build_permutations(line, permut_length))
-
-        direct_permuts.append(line_permuts)
-
-    vals_permuts["direct"] = direct_permuts
-
-    inverted_permuts = []
-    i_permut = 0
-
-    while True:
-        end = True
-        permuts = []
-
-        for i_line in range(num_def_lines):
-            line_permuts = direct_permuts[i_line]
-
-            if i_permut < len(line_permuts):
-                end = False
-
-                permut = line_permuts[i_permut]
-                permuts.append(permut)
-            else:
-                permuts.append([])
-
-        if end:
-            break
-
-        inverted_permuts.append(permuts)
-
-        i_permut += 1
-
-    vals_permuts["inverted"] = inverted_permuts
-
-    return vals_permuts
 
 
 def build_def_lines_pos_permuts(

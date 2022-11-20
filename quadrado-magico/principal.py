@@ -104,8 +104,30 @@ def main():
             lines_len, lines_sum, max_value, num_values
             )
 
+        diff_solutions = result_without_equations
+
+        diff_solutions_count = len(diff_solutions)
+
+        solutions_output = False
+        if not without_equations:
+            print()
+            output_solutions(diff_solutions, lines_len, max_value)
+
+            solutions_output = True
+
+        if solutions_output:
+            print()
+            print()
+
+            print()
+            print("WITHOUT EQUATIONS")
+
         print()
-        print(result_without_equations)
+        print(
+                (
+                    f"{diff_solutions_count} Different Solutions   "
+                )
+            )
 
         print()
         print()

@@ -162,6 +162,110 @@ def build_permutations(iterable, permut_length):
     return permuts
 
 
+def build_def_lines_vals_permuts(
+        def_lines, num_def_lines
+        ):
+    """
+    Build defined lines values permutations
+    """
+
+    vals_permuts = {}
+
+    direct_permuts = []
+    for line in def_lines:
+        permut_length = len(line)
+
+        line_permuts = list(build_permutations(line, permut_length))
+
+        direct_permuts.append(line_permuts)
+
+    vals_permuts["direct"] = direct_permuts
+
+    inverted_permuts = []
+    i_permut = 0
+
+    while True:
+        end = True
+        permuts = []
+
+        for i_line in range(num_def_lines):
+            line_permuts = direct_permuts[i_line]
+
+            if i_permut < len(line_permuts):
+                end = False
+
+                permut = line_permuts[i_permut]
+                permuts.append(permut)
+            else:
+                permuts.append([])
+
+        if end:
+            break
+
+        inverted_permuts.append(permuts)
+
+        i_permut += 1
+
+    vals_permuts["inverted"] = inverted_permuts
+
+    return vals_permuts
+
+
+def diagonal_1_sum_is_valid(values, lines_len, lines_sum):
+    """
+    Check sum of diagonal 1
+    """
+
+    num_rows = lines_len
+    num_columns = lines_len
+
+    diagonal_sum = 0
+    i_value = 0
+
+    for row in range(num_rows):
+        diagonal_sum += values[i_value]
+
+        i_value += num_columns + 1
+
+    if diagonal_sum == lines_sum:
+        return True
+
+    return False
+
+
+def diagonal_2_sum_is_valid(values, lines_len, lines_sum):
+    """
+    Check sum of diagonal 2
+    """
+
+    num_rows = lines_len
+    num_columns = lines_len
+
+    diagonal_sum = 0
+    i_value = num_columns - 1
+
+    for row in range(num_rows):
+        diagonal_sum += values[i_value]
+
+        i_value += num_columns - 1
+
+    if diagonal_sum == lines_sum:
+        return True
+
+    return False
+
+
+def diagonals_sums_are_valid(values, lines_len, lines_sum):
+    """
+    Check sums of diagonals
+    """
+
+    if not diagonal_1_sum_is_valid(values, lines_len, lines_sum):
+        return False
+
+    return diagonal_2_sum_is_valid(values, lines_len, lines_sum)
+
+
 def check_solution(
         values,
         lines_len, lines_sum, max_value, num_values
