@@ -120,43 +120,69 @@ def get_solutions_vertical_estim_vals(
 def get_solution_horiz_estim_vals(
         full_estim_vals_lines_permut, estim_vals,
         horiz_def_lines_permut, def_lines_vals_permut,
+        num_def_lines,
         lines_len, lines_sum
         ):
     """
     Get a solution for horizontal estimated values
     """
 
-    values = []
+    num_rows = lines_len
+    num_columns = lines_len
 
-    for lines_values in full_estim_vals_lines_permut:
-        values.extend(lines_values)
+    values = (num_rows * num_columns) * [0]
+
+    free_rows = list(range(num_rows))
+
+    columns_sums = num_columns * [0]
+
+    for i_line in num_def_lines:
+        row = horiz_def_lines_permut[i_line]
+        line_values = def_lines_vals_permut[i_line]
+
+        i_value = row * num_columns
+
+        for column in range(num_columns):
+            values[i_value] = line_values[column]
+
+            columns_sums[column] += values[i_value]
+
+            i_value += 1
+
+            free_rows.remove(row)
+
+    for i_line in range(len(full_estim_vals_lines_permut)):
+        row = free_rows[i_line]
+        line_values = full_estim_vals_lines_permut[i_line]
+
+        i_value = row * num_columns
+
+        for column in range(num_columns):
+            values[i_value] = line_values[column]
+
+            columns_sums[column] += values[i_value]
+
+            i_value += 1
 
     possible_values = estim_vals.difference(set(values))
 
-    num_columns = lines_len
+    i_line = len(free_rows) - 1
 
-    last_line_values = []
+    row = free_rows[i_line]
+
+    i_value = row * num_columns
 
     for column in range(num_columns):
-        column_sum = 0
-
-        i_value = column
-
-        for row in range(len(full_estim_vals_lines_permut)):
-            column_sum += values[i_value]
-
-            i_value += num_columns
-
-        last_value = lines_sum - column_sum
+        last_value = lines_sum - columns_sums[column]
 
         if last_value not in possible_values:
             return []
 
         possible_values.discard(last_value)
 
-        last_line_values.append(last_value)
+        values[i_value] = last_value
 
-    values.extend(last_line_values)
+        i_value += 1
 
     if not diagonals_sums_are_valid(values, lines_len, lines_sum):
         return []
@@ -213,6 +239,7 @@ def get_solution_horizontal_estim_vals(
 def get_solutions_horiz_estim_vals(
         full_estim_vals_lines_permuts, estim_vals,
         horiz_def_lines_permut, def_lines_vals_permut,
+        num_def_lines,
         lines_len, lines_sum
         ):
     """
@@ -233,6 +260,7 @@ def get_solutions_horiz_estim_vals(
         solution = get_solution_horiz_estim_vals(
             full_estim_vals_lines_permut, estim_vals,
             horiz_def_lines_permut, def_lines_vals_permut,
+            num_def_lines,
             lines_len, lines_sum
             )
 
@@ -368,6 +396,7 @@ def get_solutions_horizontal_def_lines(
             sols = get_solutions_horiz_estim_vals(
                 full_estim_vals_lines_permuts, estim_vals,
                 horiz_def_lines_permut, def_lines_vals_permut,
+                num_def_lines,
                 lines_len, lines_sum
                 )
 
