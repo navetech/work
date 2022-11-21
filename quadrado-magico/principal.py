@@ -2,11 +2,13 @@ import sys
 import argparse
 
 
+from utils import remove_duplicates_list
+
 from utils import load_def_lines
 from utils import def_lines_are_valid
 from utils import get_def_lines_vals
 from utils import build_estim_vals
-from utils import output_solutions
+from utils import print_solutions
 
 from sem_equacoes import quadrado_magico_sem_equacoes
 from com_equacoes import quadrado_magico_com_equacoes
@@ -17,18 +19,22 @@ def main():
     # Get command line arguments
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("filename", nargs="?", default="")
-
     parser.add_argument(
         "-l", "--lineslen", type=int, choices=range(1, 5), default=4
         )
 
+    parser.add_argument("filename", nargs="?", default="")
+
     parser.add_argument(
-        "-n", "--withouteq", action="store_true"
+        "-n", "--withoutequations", action="store_true"
         )
 
     parser.add_argument(
-        "-e", "--witheq", action="store_true"
+        "-e", "--withequations", action="store_true"
+        )
+
+    parser.add_argument(
+        "-o", "--outputsolutions", action="store_true"
         )
 
     args = parser.parse_args()
@@ -37,8 +43,10 @@ def main():
 
     filename = args.filename
 
-    without_equations = args.withouteq
-    with_equations = args.witheq
+    without_equations = args.withoutequations
+    with_equations = args.withequations
+
+    output_solutions = args.outputsolutions
 
     # Set number of lines
     num_lines = lines_len
@@ -104,14 +112,21 @@ def main():
             lines_len, lines_sum, max_value, num_values
             )
 
-        diff_solutions = result_without_equations
+        sols_count = result_without_equations["sols_count"]
+        valid_sols_count = result_without_equations["valid_sols_count"]
 
-        diff_solutions_count = len(diff_solutions)
+        valid_sols_len = len(result_without_equations["valid_sols"])
+
+        diff_sols = remove_duplicates_list(
+            result_without_equations["valid_sols"]
+            )
+
+        diff_sols_count = len(diff_sols)
 
         solutions_output = False
-        if not without_equations:
+        if output_solutions and not with_equations:
             print()
-            output_solutions(diff_solutions, lines_len, max_value)
+            print_solutions(diff_sols, lines_len, max_value)
 
             solutions_output = True
 
@@ -125,7 +140,10 @@ def main():
         print()
         print(
                 (
-                    f"{diff_solutions_count} Different Solutions   "
+                    f"{diff_sols_count} Different Solutions   "
+                    f"{valid_sols_count} Valid Solutions   "
+                    f"{valid_sols_len} Valid Solutions Length   "
+                    f"{sols_count} Solutions   "
                 )
             )
 
@@ -156,24 +174,25 @@ def main():
                 print(error)
 
             else:
-                diff_solutions = result_with_equations["diff_solutions"]
+                sols_count = result_with_equations["sols_count"]
+                valid_sols_count = result_with_equations["valid_sols_count"]
 
-                diff_solutions_count = len(diff_solutions)
+                valid_sols_len = len(result_with_equations["valid_sols"])
+
+                excepts_count = result_with_equations["excepts_count"]
+
+                diff_sols = remove_duplicates_list(
+                    result_with_equations["valid_sols"]
+                    )
+
+                diff_sols_count = len(diff_sols)
 
                 solutions_output = False
-                if not without_equations:
+                if output_solutions and not without_equations:
                     print()
-                    output_solutions(diff_solutions, lines_len, max_value)
+                    print_solutions(diff_sols, lines_len, max_value)
 
                     solutions_output = True
-
-                solutions_count = result_with_equations["solutions_count"]
-
-                valid_solutions_count = (
-                    result_with_equations["valid_solutions_count"]
-                )
-
-                exceptions_count = result_with_equations["exceptions_count"]
 
                 if solutions_output:
                     print()
@@ -185,10 +204,11 @@ def main():
                 print()
                 print(
                         (
-                            f"{diff_solutions_count} Different Solutions   "
-                            f"{valid_solutions_count} Valid Solutions   "
-                            f"{solutions_count} Solutions   "
-                            f"{exceptions_count} Exceptiions"
+                            f"{diff_sols_count} Different Solutions   "
+                            f"{valid_sols_count} Valid Solutions   "
+                            f"{valid_sols_len} Valid Solutions Length   "
+                            f"{sols_count} Solutions   "
+                            f"{excepts_count} Exceptiions"
                         )
                     )
 

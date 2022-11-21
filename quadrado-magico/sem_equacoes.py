@@ -4,6 +4,41 @@ from utils import diagonals_sums_are_valid
 from utils import check_solution
 
 
+def build_estim_vals_part_lines_permuts(
+        estim_vals,
+        partial_lines_len,
+        lines_sum
+        ):
+    """
+    Build permutations for partial lines of estimated values
+    """
+
+    permut_len = partial_lines_len
+
+    permuts = build_permutations(estim_vals, permut_len)
+
+    valid_lines = []
+
+    for permut in permuts:
+        valid_line = []
+
+        values_sum = 0
+        for value in permut:
+            values_sum += value
+
+            if values_sum < lines_sum:
+                valid_line.append(value)
+
+        if len(valid_line) > 0:
+            valid_lines.append(valid_line)
+
+    permut_len = partial_lines_len
+
+    part_lines_permuts = build_permutations(valid_lines, permut_len)
+
+    return part_lines_permuts
+
+
 def build_estim_vals_full_lines_permuts(
         estim_vals,
         num_full_lines,
@@ -119,7 +154,7 @@ def get_solutions_vertical_estim_vals(
 
 def get_solution_horiz_estim_vals(
         full_estim_vals_lines_permut, estim_vals,
-        horiz_def_lines_permut, def_lines_vals_permut,
+        def_lines_pos_permut, def_lines_vals_permut,
         num_def_lines,
         lines_len, lines_sum
         ):
@@ -130,14 +165,17 @@ def get_solution_horiz_estim_vals(
     num_rows = lines_len
     num_columns = lines_len
 
-    values = (num_rows * num_columns) * [0]
+    values = (num_rows * num_columns) * [None]
 
     free_rows = list(range(num_rows))
 
     columns_sums = num_columns * [0]
 
-    for i_line in num_def_lines:
-        row = horiz_def_lines_permut[i_line]
+    for i_line in range(num_def_lines):
+        row = def_lines_pos_permut[i_line]
+
+        free_rows.remove(row)
+
         line_values = def_lines_vals_permut[i_line]
 
         i_value = row * num_columns
@@ -149,10 +187,9 @@ def get_solution_horiz_estim_vals(
 
             i_value += 1
 
-            free_rows.remove(row)
-
     for i_line in range(len(full_estim_vals_lines_permut)):
         row = free_rows[i_line]
+
         line_values = full_estim_vals_lines_permut[i_line]
 
         i_value = row * num_columns
@@ -183,6 +220,81 @@ def get_solution_horiz_estim_vals(
         values[i_value] = last_value
 
         i_value += 1
+
+    if not diagonals_sums_are_valid(values, lines_len, lines_sum):
+        return []
+
+    return values
+
+
+def get_solution_vert_estim_vals(
+        full_estim_vals_lines_permut, estim_vals,
+        def_lines_pos_permut, def_lines_vals_permut,
+        num_def_lines,
+        lines_len, lines_sum
+        ):
+    """
+    Get a solution for vertical estimated values
+    """
+
+    num_rows = lines_len
+    num_columns = lines_len
+
+    values = (num_rows * num_columns) * [None]
+
+    free_columns = list(range(num_columns))
+
+    rows_sums = num_rows * [0]
+
+    for i_line in range(num_def_lines):
+        column = def_lines_pos_permut[i_line] % lines_len
+
+        free_columns.remove(column)
+
+        line_values = def_lines_vals_permut[i_line]
+
+        i_value = column
+
+        for row in range(num_rows):
+            values[i_value] = line_values[row]
+
+            rows_sums[row] += values[i_value]
+
+            i_value += num_columns
+
+    for i_line in range(len(full_estim_vals_lines_permut)):
+        column = free_columns[i_line]
+
+        line_values = full_estim_vals_lines_permut[i_line]
+
+        i_value = column
+
+        for row in range(num_rows):
+            values[i_value] = line_values[row]
+
+            rows_sums[row] += values[i_value]
+
+            i_value += num_columns
+
+    possible_values = estim_vals.difference(set(values))
+
+    i_line = len(free_columns) - 1
+
+    column = free_columns[i_line]
+
+    i_value = column
+
+    for row in range(num_rows):
+        last_value = lines_sum - rows_sums[row]
+
+        if last_value not in possible_values:
+            return []
+
+        possible_values.discard(last_value)
+
+        values[i_value] = last_value
+
+        i_value += num_columns
 
     if not diagonals_sums_are_valid(values, lines_len, lines_sum):
         return []
@@ -238,43 +350,203 @@ def get_solution_horizontal_estim_vals(
 
 def get_solutions_horiz_estim_vals(
         full_estim_vals_lines_permuts, estim_vals,
-        horiz_def_lines_permut, def_lines_vals_permut,
+        def_lines_pos_permut, def_lines_vals_permut,
         num_def_lines,
-        lines_len, lines_sum
+        lines_len, lines_sum,
+        result
         ):
     """
     Get solutions for horizontal estimated values
     """
 
-    solutions = []
-
     # For each permutation of full lines of estimated values
-    i = 0
-    valid_count = 0
-    diff_count = 0
-
+    full_estim_vals_lines_permuts_count = 0
     for full_estim_vals_lines_permut in full_estim_vals_lines_permuts:
-        i += 1
+        full_estim_vals_lines_permuts_count += 1
 
         # Get solution for horizontal estimated values
         solution = get_solution_horiz_estim_vals(
             full_estim_vals_lines_permut, estim_vals,
-            horiz_def_lines_permut, def_lines_vals_permut,
+            def_lines_pos_permut, def_lines_vals_permut,
             num_def_lines,
             lines_len, lines_sum
             )
 
+        result["sols_count"] += 1
+
         if len(solution) > 0:
-            valid_count += 1
+            result["valid_sols"].append(solution)
 
-            if solution not in solutions:
-                diff_count += 1
+            result["valid_sols_count"] += 1
 
-                solutions.append(solution)
+        print(
+            full_estim_vals_lines_permuts_count,
+            result["sols_count"], result["valid_sols_count"],
+            solution, end="\r"
+            )
 
-        print(i, valid_count, diff_count, solution, end="\r")
+    # This check is necessry because full_estim_vals_lines_permuts
+    # does not have len() method
+    if full_estim_vals_lines_permuts_count < 1:
+        full_estim_vals_lines_permut = []
 
-    return solutions
+        # Get solution for horizontal estimated values
+        solution = get_solution_horiz_estim_vals(
+            full_estim_vals_lines_permut, estim_vals,
+            def_lines_pos_permut, def_lines_vals_permut,
+            num_def_lines,
+            lines_len, lines_sum
+            )
+
+        result["sols_count"] += 1
+
+        if len(solution) > 0:
+            result["valid_sols"].append(solution)
+
+            result["valid_sols_count"] += 1
+
+        print(
+            full_estim_vals_lines_permuts_count,
+            result["sols_count"], result["valid_sols_count"],
+            solution, end="\r"
+            )
+
+    return result
+
+
+def get_solutions_vert_estim_vals(
+        full_estim_vals_lines_permuts, estim_vals,
+        def_lines_pos_permut, def_lines_vals_permut,
+        num_def_lines,
+        lines_len, lines_sum,
+        result
+        ):
+    """
+    Get solutions for vertical estimated values
+    """
+
+    # For each permutation of full lines of estimated values
+    full_estim_vals_lines_permuts_count = 0
+    for full_estim_vals_lines_permut in full_estim_vals_lines_permuts:
+        full_estim_vals_lines_permuts_count += 1
+
+        # Get solution for vertical estimated values
+        solution = get_solution_vert_estim_vals(
+            full_estim_vals_lines_permut, estim_vals,
+            def_lines_pos_permut, def_lines_vals_permut,
+            num_def_lines,
+            lines_len, lines_sum
+            )
+
+        result["sols_count"] += 1
+
+        if len(solution) > 0:
+            result["valid_sols"].append(solution)
+
+            result["valid_sols_count"] += 1
+
+        print(
+            full_estim_vals_lines_permuts_count,
+            result["sols_count"], result["valid_sols_count"],
+            solution, end="\r"
+            )
+
+    # This check is necessry because full_estim_vals_lines_permuts
+    # does not have len() method
+    if full_estim_vals_lines_permuts_count < 1:
+        full_estim_vals_lines_permut = []
+
+        # Get solution for vertical estimated values
+        solution = get_solution_vert_estim_vals(
+            full_estim_vals_lines_permut, estim_vals,
+            def_lines_pos_permut, def_lines_vals_permut,
+            num_def_lines,
+            lines_len, lines_sum
+            )
+
+        result["sols_count"] += 1
+
+        if len(solution) > 0:
+            result["valid_sols"].append(solution)
+
+            result["valid_sols_count"] += 1
+
+        print(
+            full_estim_vals_lines_permuts_count,
+            result["sols_count"], result["valid_sols_count"],
+            solution, end="\r"
+            )
+
+    return result
+
+
+PAREI AQUI
+
+            # Get solutions for diagonal defined lines with estimated values
+            result = get_sols_diag_def_lines_estim_vals(
+                part_estim_vals_lines_permuts, estim_vals,
+                diag_def_lines_permut, def_lines_vals_permut,
+                num_def_lines,
+                lines_len, lines_sum,
+                result
+                )
+    """
+    Get solutions for vertical estimated values
+    """
+
+    # For each permutation of full lines of estimated values
+    full_estim_vals_lines_permuts_count = 0
+    for full_estim_vals_lines_permut in full_estim_vals_lines_permuts:
+        full_estim_vals_lines_permuts_count += 1
+
+        # Get solution for vertical estimated values
+        solution = get_solution_vert_estim_vals(
+            full_estim_vals_lines_permut, estim_vals,
+            def_lines_pos_permut, def_lines_vals_permut,
+            num_def_lines,
+            lines_len, lines_sum
+            )
+
+        result["sols_count"] += 1
+
+        if len(solution) > 0:
+            result["valid_sols"].append(solution)
+
+            result["valid_sols_count"] += 1
+
+        print(
+            full_estim_vals_lines_permuts_count,
+            result["sols_count"], result["valid_sols_count"],
+            solution, end="\r"
+            )
+
+    # This check is necessry because full_estim_vals_lines_permuts
+    # does not have len() method
+    if full_estim_vals_lines_permuts_count < 1:
+        full_estim_vals_lines_permut = []
+
+        # Get solution for vertical estimated values
+        solution = get_solution_vert_estim_vals(
+            full_estim_vals_lines_permut, estim_vals,
+            def_lines_pos_permut, def_lines_vals_permut,
+            num_def_lines,
+            lines_len, lines_sum
+            )
+
+        result["sols_count"] += 1
+
+        if len(solution) > 0:
+            result["valid_sols"].append(solution)
+
+            result["valid_sols_count"] += 1
+
+        print(
+            full_estim_vals_lines_permuts_count,
+            result["sols_count"], result["valid_sols_count"],
+            solution, end="\r"
+            )
+
+    return result
 
 
 def get_solutions_horizontal_estim_vals(
@@ -370,16 +642,49 @@ def build_horiz_def_lines_permuts(
     return permuts
 
 
+def build_vert_def_lines_permuts(
+        num_def_lines, lines_len
+        ):
+    """
+    Build permutations for vertical defined lines
+    """
+
+    if num_def_lines < 1:
+        return []
+
+    id_columns = list(range(lines_len, 2 * lines_len))
+
+    permuts = list(build_permutations(id_columns, num_def_lines))
+
+    return permuts
+
+
+def build_diag_def_lines_permuts(
+        num_def_lines, lines_len
+        ):
+    """
+    Build permutations for diagonal defined lines
+    """
+
+    if (num_def_lines < 1) or (num_def_lines > 2):
+        return []
+
+    id_diagonals = [2 * lines_len, (2 * lines_len) + 1)]
+
+    permuts = list(build_permutations(id_diagonals, num_def_lines))
+
+    return permuts
+
+
 def get_solutions_horizontal_def_lines(
         def_lines_vals_permuts, num_def_lines,
         full_estim_vals_lines_permuts, estim_vals,
-        lines_len, lines_sum, max_value, num_values
+        lines_len, lines_sum,
+        result
         ):
     """
     Get solutions for horizontal defined lines
     """
-
-    solutions = []
 
     # Build permutations for horizontal defined lines
     horiz_def_lines_permuts = build_horiz_def_lines_permuts(
@@ -393,42 +698,59 @@ def get_solutions_horizontal_def_lines(
         for def_lines_vals_permut in def_lines_vals_permuts["inverted"]:
 
             # Get solutions for horizontal estimated values
-            sols = get_solutions_horiz_estim_vals(
+            result = get_solutions_horiz_estim_vals(
                 full_estim_vals_lines_permuts, estim_vals,
                 horiz_def_lines_permut, def_lines_vals_permut,
                 num_def_lines,
-                lines_len, lines_sum
+                lines_len, lines_sum,
+                result
                 )
 
-            solutions.extend(sols)
-
-    return solutions
+    return result
 
 
 def get_solutions_vertical_def_lines(
         def_lines_vals_permuts, num_def_lines,
         full_estim_vals_lines_permuts, estim_vals,
-        lines_len, lines_sum, max_value, num_values
+        lines_len, lines_sum,
+        result
         ):
     """
     Get solutions for vertical defined lines
     """
 
-    solutions = []
+    # Build permutations for vertical defined lines
+    vert_def_lines_permuts = build_vert_def_lines_permuts(
+        num_def_lines, lines_len
+        )
 
-    return solutions
+    # For each permutation of vertical defined lines
+    for vert_def_lines_permut in vert_def_lines_permuts:
+
+        # For each permutation of defined lines values
+        for def_lines_vals_permut in def_lines_vals_permuts["inverted"]:
+
+            # Get solutions for vertical estimated values
+            result = get_solutions_vert_estim_vals(
+                full_estim_vals_lines_permuts, estim_vals,
+                vert_def_lines_permut, def_lines_vals_permut,
+                num_def_lines,
+                lines_len, lines_sum,
+                result
+                )
+
+    return result
 
 
 def get_solutions_parallel_def_lines(
         def_lines_vals_permuts, num_def_lines,
         estim_vals,
-        lines_len, lines_sum, max_value, num_values
+        lines_len, lines_sum,
+        result
         ):
     """
     Get solutions for parallel defined lines
     """
-
-    solutions = []
 
     # Build permutations for full lines of estimated values
     num_lines = lines_len
@@ -441,38 +763,107 @@ def get_solutions_parallel_def_lines(
         )
 
     # Get solutions for horizontal defined lines
-    sols = get_solutions_horizontal_def_lines(
+    result = get_solutions_horizontal_def_lines(
         def_lines_vals_permuts, num_def_lines,
         full_estim_vals_lines_permuts, estim_vals,
-        lines_len, lines_sum, max_value, num_values
+        lines_len, lines_sum,
+        result
         )
-
-    solutions.extend(sols)
 
     # Get solutions for vertical defined lines
-    sols = get_solutions_vertical_def_lines(
+    result = get_solutions_vertical_def_lines(
         def_lines_vals_permuts, num_def_lines,
         full_estim_vals_lines_permuts, estim_vals,
-        lines_len, lines_sum, max_value, num_values
+        lines_len, lines_sum,
+        result
         )
 
-    solutions.extend(sols)
+    return result
 
-    return solutions
+
+def get_solutions_perpend_def_lines(
+        def_lines_vals_permuts, num_def_lines,
+        estim_vals,
+        lines_len, lines_sum,
+        result
+        ):
+    """
+    Get solutions for perpendicular defined lines
+    """
+
+    return result
+
+
+def get_solutions_diag_def_lines(
+        def_lines_vals_permuts, num_def_lines,
+        estim_vals,
+        lines_len, lines_sum,
+        result
+        ):
+    """
+    Get solutions for diagonal defined lines
+    """
+
+    # Build permutations for partial lines of estimated values
+    num_lines = lines_len
+    partial_lines_len = num_lines - num_def_lines - 1
+
+    part_estim_vals_lines_permuts = build_estim_vals_part_lines_permuts(
+        estim_vals,
+        partial_lines_len,
+        lines_sum
+        )
+
+    # Build permutations for diagonal defined lines
+    diag_def_lines_permuts = build_diag_def_lines_permuts(
+        num_def_lines, lines_len
+        )
+
+    # For each permutation of diagonal defined lines
+    for diag_def_lines_permut in diag_def_lines_permuts:
+
+        # For each permutation of defined lines values
+        for def_lines_vals_permut in def_lines_vals_permuts["inverted"]:
+
+            # Get solutions for diagonal defined lines with estimated values
+            result = get_sols_diag_def_lines_estim_vals(
+                part_estim_vals_lines_permuts, estim_vals,
+                diag_def_lines_permut, def_lines_vals_permut,
+                num_def_lines,
+                lines_len, lines_sum,
+                result
+                )
+
+    return result
 
 
 def get_solutions_non_parallel_def_lines(
-        def_lines, num_def_lines,
+        def_lines_vals_permuts, num_def_lines,
         estim_vals,
-        lines_len, lines_sum, max_value, num_values
+        lines_len, lines_sum,
+        result
         ):
     """
     Get solutions for non parallel defined lines
     """
 
-    solutions = []
+    # Get solutions for perpendicular defined lines
+    result = get_solutions_perpend_def_lines(
+        def_lines_vals_permuts, num_def_lines,
+        estim_vals,
+        lines_len, lines_sum,
+        result
+        )
 
-    return solutions
+    # Get solutions for diagonal defined lines
+    result = get_solutions_diag_def_lines(
+        def_lines_vals_permuts, num_def_lines,
+        estim_vals,
+        lines_len, lines_sum,
+        result
+        )
+
+    return result
 
 
 def get_solution_diagonal_estim_vals(
@@ -554,6 +945,14 @@ def quadrado_magico_sem_equacoes(
     Quadrado magico sem equacoes
     """
 
+    # Initialize result
+    result = {}
+
+    result["sols_count"] = 0
+
+    result["valid_sols_count"] = 0
+    result["valid_sols"] = []
+
     solutions = []
 
     # If there are defined lines
@@ -565,22 +964,20 @@ def quadrado_magico_sem_equacoes(
             )
 
         # Get solutions for parallel defined lines
-        sols = get_solutions_parallel_def_lines(
+        result = get_solutions_parallel_def_lines(
             def_lines_vals_permuts, num_def_lines,
             estim_vals,
-            lines_len, lines_sum, max_value, num_values
+            lines_len, lines_sum,
+            result
             )
-
-        solutions.extend(sols)
 
         # Get solutions for non parallel defined lines
-        sols = get_solutions_non_parallel_def_lines(
+        result = get_solutions_non_parallel_def_lines(
             def_lines_vals_permuts, num_def_lines,
             estim_vals,
-            lines_len, lines_sum, max_value, num_values
+            lines_len, lines_sum,
+            result
             )
-
-        solutions.extend(sols)
 
     # Else there are not any defined lines
     else:
@@ -601,4 +998,4 @@ def quadrado_magico_sem_equacoes(
 
         solutions.extend(sols)
 
-    return solutions
+    return result

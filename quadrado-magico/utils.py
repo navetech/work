@@ -5,6 +5,20 @@ import csv
 import itertools
 
 
+def remove_duplicates_list(src):
+    """
+    Remove duplicates from a list.
+    """
+
+    dst = []
+
+    for x in src:
+        if x not in dst:
+            dst.append(x)
+
+    return dst
+
+
 def load_def_lines(filename, lines_len):
     """
     Load defined lines from CSV file into memory.
@@ -357,9 +371,9 @@ def check_solution(
     return values_int
 
 
-def output_solutions(solutions, lines_len, max_value):
+def print_solutions(solutions, lines_len, max_value):
     """
-    Output solutions
+    Print solutions
     """
 
     output_line_len = 80
