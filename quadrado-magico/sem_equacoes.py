@@ -819,17 +819,14 @@ def get_sols_parallel_def_lines(
     return result
 
 
-def get_solutions_diag_def_lines(
-        def_lines_vals_permuts, num_def_lines,
-        estim_vals,
-        lines_len, lines_sum,
-        result
+def get_sols_diag_def_lines(
+        def_lines_vals_permuts
         ):
     """
     Get solutions for diagonal defined lines
     """
 
-    return result
+    return
 
     # Build permutations for partial lines of estimated values
     num_lines = lines_len
@@ -860,29 +857,6 @@ def get_solutions_diag_def_lines(
                 lines_len, lines_sum,
                 result
                 )
-
-    return result
-
-
-def get_solutions_non_parallel_def_lines(
-        def_lines_vals_permuts, num_def_lines,
-        estim_vals,
-        lines_len, lines_sum,
-        result
-        ):
-    """
-    Get solutions for non parallel defined lines
-    """
-
-    return result
-
-    # Get solutions for diagonal defined lines
-    result = get_solutions_diag_def_lines(
-        def_lines_vals_permuts, num_def_lines,
-        estim_vals,
-        lines_len, lines_sum,
-        result
-        )
 
     return result
 
@@ -1027,14 +1001,9 @@ def quadrado_magico_sem_equacoes(
             def_lines_vals_permuts
             )
 
-        return result
-
-        # Get solutions for non parallel defined lines
-        result = get_solutions_non_parallel_def_lines(
-            def_lines_vals_permuts, num_def_lines,
-            estim_vals,
-            lines_len, lines_sum,
-            result
+        # Get solutions for diagonal defined lines
+        get_sols_diag_def_lines(
+            def_lines_vals_permuts
             )
 
     # Else there are not any defined lines
