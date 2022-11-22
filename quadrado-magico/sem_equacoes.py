@@ -434,6 +434,9 @@ def get_solution_diag_def_lines_estim_vals(
     i_value = 0
 
     for row in range(num_rows - 1):
+        if row >= len(part_estim_vals_lines_permut):
+            break
+
         vals_to_insert = part_estim_vals_lines_permut[row]
 
         i_val_to_insert = 0
@@ -444,6 +447,9 @@ def get_solution_diag_def_lines_estim_vals(
 
             if values[i_value] is None:
                 i_val_to_insert += 1
+
+                if i_val_to_insert >= len(vals_to_insert):
+                    break
 
                 possible_values.discard(value)
 
@@ -469,10 +475,10 @@ def get_solution_diag_def_lines_estim_vals(
 
         i_val_free = i_value
 
-        while value[i_val_free] is not None:
+        while values[i_val_free] is not None:
             i_val_free -= 1
 
-        value[i_val_free] = last_value
+        values[i_val_free] = last_value
 
         columns_sums[column] += last_value
 
@@ -492,10 +498,10 @@ def get_solution_diag_def_lines_estim_vals(
 
         i_val_free = i_value
 
-        while value[i_val_free] is not None:
+        while values[i_val_free] is not None:
             i_val_free -= num_columns
 
-        value[i_val_free] = last_value
+        values[i_val_free] = last_value
 
         i_value += 1
 
