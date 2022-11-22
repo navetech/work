@@ -14,6 +14,18 @@ from sem_equacoes import quadrado_magico_sem_equacoes
 from com_equacoes import quadrado_magico_com_equacoes
 
 
+global lines_len
+global lines_sum
+
+global max_value
+global num_values
+
+global def_lines
+global num_def_lines
+
+global estim_vals
+
+
 def main():
 
     # Get command line arguments
@@ -107,8 +119,7 @@ def main():
 
         result_without_equations = quadrado_magico_sem_equacoes(
             def_lines, num_def_lines,
-            def_lines_vals, num_def_lines_vals,
-            estim_vals, num_estim_vals,
+            estim_vals,
             lines_len, lines_sum, max_value, num_values
             )
 
