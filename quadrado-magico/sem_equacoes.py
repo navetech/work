@@ -172,7 +172,6 @@ def get_solution_horiz_estim_vals(
     Get a solution for horizontal estimated values
     """
 
-
     def put_horiz_def_lines_vals_in_sol(
             horiz_def_lines_permut, def_lines_vals_permut
             ):
@@ -201,7 +200,6 @@ def get_solution_horiz_estim_vals(
                 i_value += 1
 
         return
-
 
     def put_full_horiz_estim_vals_lines_in_sol(
             full_estim_vals_lines_permut
@@ -257,7 +255,6 @@ def get_solution_horiz_estim_vals(
             i_value += 1
 
         return
-
 
     num_rows = lines_len
     num_columns = lines_len
@@ -352,6 +349,9 @@ def get_solution_vert_estim_vals(
     for row in range(num_rows):
         last_value = lines_sum - rows_sums[row]
 
+        if (last_value < 1) or (last_value > max_value):
+            return []
+
         if last_value not in possible_values:
             return []
 
@@ -363,6 +363,141 @@ def get_solution_vert_estim_vals(
 
     if not diagonals_sums_are_valid(values, lines_len, lines_sum):
         return []
+
+    return values
+
+
+def get_solution_diag_def_lines_estim_vals(
+        part_estim_vals_lines_permut,
+        diag_def_lines_permut, def_lines_vals_permut,
+        ):
+    """
+    Get a solution for diagonal defined lines with estimated values
+    """
+
+    num_rows = lines_len
+    num_columns = lines_len
+
+    values = num_values * [None]
+
+    rows_sums = num_rows * [0]
+    columns_sums = num_columns * [0]
+
+    # Put diagonal defined lines values in solution
+    for i_line in range(num_def_lines):
+        diagonal = diag_def_lines_permut[i_line]
+
+        line_values = def_lines_vals_permut[i_line]
+
+        # Put diagonal 1 defined lines values in solution
+        if diagonal == ID_DIAGONAL_1:
+            column = 0
+
+            i_value = column
+
+            for row in range(num_rows):
+                value = line_values[row]
+
+                values[i_value] = value
+
+                rows_sums[row] += value
+                columns_sums[column] += value
+
+                i_value += num_columns + 1
+
+                column += 1
+
+        # Put diagonal 2 defined lines values in solution
+        elif diagonal == ID_DIAGONAL_2:
+            column = num_columns - 1
+
+            i_value = column
+
+            for row in range(num_rows):
+                value = line_values[row]
+
+                values[i_value] = value
+
+                rows_sums[row] += value
+                columns_sums[column] += value
+
+                i_value += num_columns - 1
+
+                column -= 1
+
+        else:
+            return []
+
+    # Put partial estimated values lines and last column in solution
+    possible_values = estim_vals.copy()
+
+    i_value = 0
+
+    for row in range(num_rows - 1):
+        vals_to_insert = part_estim_vals_lines_permut[row]
+
+        i_val_to_insert = 0
+
+        # Put columns values except the last columns of row
+        for column in range(num_columns - 1):
+            value = vals_to_insert[i_val_to_insert]
+
+            if values[i_value] is None:
+                i_val_to_insert += 1
+
+                possible_values.discard(value)
+
+                values[i_value] = value
+
+                rows_sums[row] += value
+                columns_sums[column] += value
+
+            i_value += 1
+
+        # Put last column value of row
+        last_value = lines_sum - rows_sums[row]
+
+        if (last_value < 1) or (last_value > max_value):
+            return []
+
+        if last_value not in possible_values:
+            return []
+
+        possible_values.discard(last_value)
+
+        column = num_columns - 1
+
+        i_val_free = i_value
+
+        while value[i_val_free] is not None:
+            i_val_free -= 1
+
+        value[i_val_free] = last_value
+
+        columns_sums[column] += last_value
+
+        i_value += 1
+
+    # Fill last row with estimated values
+    for column in range(num_columns):
+        last_value = lines_sum - columns_sums[column]
+
+        if (last_value < 1) or (last_value > max_value):
+            return []
+
+        if last_value not in possible_values:
+            return []
+
+        possible_values.discard(last_value)
+
+        i_val_free = i_value
+
+        while value[i_val_free] is not None:
+            i_val_free -= num_columns
+
+        value[i_val_free] = last_value
+
+        i_value += 1
 
     return values
 
@@ -533,31 +668,23 @@ def get_sols_vert_estim_vals(
     return
 
 
-            # Get solutions for diagonal defined lines with estimated values
 def get_sols_diag_def_lines_estim_vals(
-        part_estim_vals_lines_permuts, estim_vals,
-        diag_def_lines_permut, def_lines_vals_permut,
-        num_def_lines,
-        lines_len, lines_sum,
-        result
+        part_estim_vals_lines_permuts,
+        diag_def_lines_permut, def_lines_vals_permut
         ):
     """
     Get solutions for diagonal defined lines with estimated values
     """
 
-    return result
+    # For each permutation of partial lines of estimated values
+    part_estim_vals_lines_permuts_count = 0
+    for part_estim_vals_lines_permut in part_estim_vals_lines_permuts:
+        part_estim_vals_lines_permuts_count += 1
 
-    # For each permutation of full lines of estimated values
-    full_estim_vals_lines_permuts_count = 0
-    for full_estim_vals_lines_permut in full_estim_vals_lines_permuts:
-        full_estim_vals_lines_permuts_count += 1
-
-        # Get solution for vertical estimated values
-        solution = get_solution_vert_estim_vals(
-            full_estim_vals_lines_permut, estim_vals,
-            def_lines_pos_permut, def_lines_vals_permut,
-            num_def_lines,
-            lines_len, lines_sum
+        # Get solution for diagonal defined lines with estimated values
+        solution = get_solution_diag_def_lines_estim_vals(
+            part_estim_vals_lines_permut,
+            diag_def_lines_permut, def_lines_vals_permut,
             )
 
         result["sols_count"] += 1
@@ -568,22 +695,20 @@ def get_sols_diag_def_lines_estim_vals(
             result["valid_sols_count"] += 1
 
         print(
-            full_estim_vals_lines_permuts_count,
+            part_estim_vals_lines_permuts_count,
             result["sols_count"], result["valid_sols_count"],
             solution, end="\r"
             )
 
     # This check is necessry because full_estim_vals_lines_permuts
     # does not have len() method
-    if full_estim_vals_lines_permuts_count < 1:
-        full_estim_vals_lines_permut = []
+    if part_estim_vals_lines_permuts_count < 1:
+        part_estim_vals_lines_permut = []
 
-        # Get solution for vertical estimated values
-        solution = get_solution_vert_estim_vals(
-            full_estim_vals_lines_permut, estim_vals,
-            def_lines_pos_permut, def_lines_vals_permut,
-            num_def_lines,
-            lines_len, lines_sum
+        # Get solution for diagonal defined lines with estimated values
+        solution = get_solution_diag_def_lines_estim_vals(
+            part_estim_vals_lines_permut,
+            diag_def_lines_permut, def_lines_vals_permut,
             )
 
         result["sols_count"] += 1
@@ -594,12 +719,12 @@ def get_sols_diag_def_lines_estim_vals(
             result["valid_sols_count"] += 1
 
         print(
-            full_estim_vals_lines_permuts_count,
+            part_estim_vals_lines_permuts_count,
             result["sols_count"], result["valid_sols_count"],
             solution, end="\r"
             )
 
-    return result
+    return
 
 
 def get_solutions_horizontal_estim_vals(
@@ -707,7 +832,7 @@ def build_vert_def_lines_permuts(
     if num_def_lines < 1:
         return []
 
-    id_columns = list(range(lines_len, 2 * lines_len))
+    id_columns = list(range(ID_COLUMNS_BASE, ID_COLUMNS_BASE + lines_len))
 
     permuts = list(build_permutations(id_columns, num_def_lines))
 
@@ -721,10 +846,14 @@ def build_diag_def_lines_permuts(
     Build permutations for diagonal defined lines
     """
 
-    if (num_def_lines < 1) or (num_def_lines > 2):
+    if (
+        (num_def_lines < 1)
+        or (num_def_lines > 2)
+        or ((num_def_lines == 2) and (lines_len % 2) != 0)
+    ):
         return []
 
-    id_diagonals = [2 * lines_len, (2 * lines_len) + 1]
+    id_diagonals = [ID_DIAGONAL_1, ID_DIAGONAL_2]
 
     permuts = list(build_permutations(id_diagonals, num_def_lines))
 
@@ -826,11 +955,8 @@ def get_sols_diag_def_lines(
     Get solutions for diagonal defined lines
     """
 
-    return
-
     # Build permutations for partial lines of estimated values
-    num_lines = lines_len
-    partial_lines_len = num_lines - num_def_lines - 1
+    partial_lines_len = lines_len - num_def_lines - 1
 
     part_estim_vals_lines_permuts = build_estim_vals_part_lines_permuts(
         estim_vals,
@@ -850,15 +976,12 @@ def get_sols_diag_def_lines(
         for def_lines_vals_permut in def_lines_vals_permuts["inverted"]:
 
             # Get solutions for diagonal defined lines with estimated values
-            result = get_sols_diag_def_lines_estim_vals(
-                part_estim_vals_lines_permuts, estim_vals,
-                diag_def_lines_permut, def_lines_vals_permut,
-                num_def_lines,
-                lines_len, lines_sum,
-                result
+            get_sols_diag_def_lines_estim_vals(
+                part_estim_vals_lines_permuts,
+                diag_def_lines_permut, def_lines_vals_permut
                 )
 
-    return result
+    return
 
 
 def get_solution_diagonal_estim_vals(
@@ -975,7 +1098,7 @@ def quadrado_magico_sem_equacoes(
     ID_DIAGONAL_1 = ID_DIAGONALS_BASE
 
     global ID_DIAGONAL_2
-    ID_DIAGONAL_2 = ID_DIAGONALS_BASE +1
+    ID_DIAGONAL_2 = ID_DIAGONALS_BASE + 1
 
     # Initialize result
     global result
@@ -989,7 +1112,7 @@ def quadrado_magico_sem_equacoes(
     solutions = []
 
     # If there are defined lines
-    if num_def_lines > 1:
+    if num_def_lines > 0:
 
         # Build defined lines values permutations
         def_lines_vals_permuts = build_def_lines_vals_permuts(
@@ -997,14 +1120,21 @@ def quadrado_magico_sem_equacoes(
             )
 
         # Get solutions for parallel defined lines
+        """
         get_sols_parallel_def_lines(
             def_lines_vals_permuts
             )
+        """
 
         # Get solutions for diagonal defined lines
-        get_sols_diag_def_lines(
-            def_lines_vals_permuts
-            )
+        if (
+            (num_def_lines == 1)
+            or ((num_def_lines == 2) and ((lines_len % 2) == 0))
+        ):
+
+            get_sols_diag_def_lines(
+                def_lines_vals_permuts
+                )
 
     # Else there are not any defined lines
     else:
