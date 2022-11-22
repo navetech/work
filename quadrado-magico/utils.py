@@ -133,6 +133,21 @@ def def_lines_are_valid(
     return True
 
 
+def def_lines_are_full_lines(def_lines, lines_len):
+    """
+    Check if defined lines are full lines
+    """
+
+    if len(def_lines) == 0:
+        return True
+
+    for line in def_lines:
+        if len(line) != lines_len:
+            return False
+
+    return True
+
+
 def get_def_lines_vals(def_lines):
     """
     Get defined lines values
@@ -232,9 +247,6 @@ def diagonal_1_sum_is_valid(values, lines_len, lines_sum):
 
     num_rows = lines_len
     num_columns = lines_len
-    
-    if len(values) != num_rows * num_columns:
-        return False
 
     diagonal_sum = 0
     i_value = 0
@@ -257,9 +269,6 @@ def diagonal_2_sum_is_valid(values, lines_len, lines_sum):
 
     num_rows = lines_len
     num_columns = lines_len
-    
-    if len(values) != num_rows * num_columns:
-        return False
 
     diagonal_sum = 0
     i_value = num_columns - 1
@@ -279,12 +288,6 @@ def diagonals_sums_are_valid(values, lines_len, lines_sum):
     """
     Check sums of diagonals
     """
-
-    num_rows = lines_len
-    num_columns = lines_len
-    
-    if len(values) != num_rows * num_columns:
-        return False
 
     if not diagonal_1_sum_is_valid(values, lines_len, lines_sum):
         return False

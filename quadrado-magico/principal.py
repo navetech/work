@@ -6,24 +6,13 @@ from utils import remove_duplicates_list
 
 from utils import load_def_lines
 from utils import def_lines_are_valid
+from utils import def_lines_are_full_lines
 from utils import get_def_lines_vals
 from utils import build_estim_vals
 from utils import print_solutions
 
 from sem_equacoes import quadrado_magico_sem_equacoes
 from com_equacoes import quadrado_magico_com_equacoes
-
-
-global lines_len
-global lines_sum
-
-global max_value
-global num_values
-
-global def_lines
-global num_def_lines
-
-global estim_vals
 
 
 def main():
@@ -90,6 +79,10 @@ def main():
             ):
 
         sys.exit("Defined lines are invalid")
+
+    # Check if defined lines are full lines
+    if not def_lines_are_full_lines(def_lines, lines_len):
+        sys.exit("Defined lines are not full lines")
 
     # Calculate number of defined lines
     num_def_lines = len(def_lines)

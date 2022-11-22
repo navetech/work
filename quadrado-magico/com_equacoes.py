@@ -6,21 +6,6 @@ from utils import build_def_lines_vals_permuts
 from utils import check_solution
 
 
-def def_lines_are_full_lines(def_lines, lines_len):
-    """
-    Check if defined lines are full lines
-    """
-
-    if len(def_lines) == 0:
-        return True
-
-    for line in def_lines:
-        if len(line) != lines_len:
-            return False
-
-    return True
-
-
 def build_fixed_equations_coeffs(
         num_fixed_equations,
         lines_len, num_values
@@ -618,14 +603,6 @@ def quadrado_magico_com_equacoes(
 
     # Calculate number of lines
     num_lines = lines_len
-
-    # Check if defined lines are full lines
-    if not def_lines_are_full_lines(def_lines, lines_len):
-        error = "Defined lines are not full lines"
-
-        result["error"] = error
-
-        return result
 
     # Calculate number of equations
     num_equations = num_values
