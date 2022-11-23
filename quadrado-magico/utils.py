@@ -191,7 +191,7 @@ def build_permutations(iterable, permut_length):
     return permuts
 
 
-def build_def_lines_vals_permuts(
+def build_def_lines_vals_permuts_save(
         def_lines, num_def_lines
         ):
     """
@@ -238,6 +238,26 @@ def build_def_lines_vals_permuts(
     vals_permuts["inverted"] = inverted_permuts
 
     return vals_permuts
+
+
+def build_def_lines_vals_permuts(
+        def_lines, num_def_lines
+        ):
+    """
+    Build defined lines values permutations
+    """
+
+    lines_permuts = []
+    for line in def_lines:
+        permut_length = len(line)
+
+        line_permuts = list(build_permutations(line, permut_length))
+
+        lines_permuts.append(line_permuts)
+
+    permuts = list(build_permutations(lines_permuts, num_def_lines))
+
+    return permuts
 
 
 def diagonal_1_sum_is_valid(values, lines_len, lines_sum):
