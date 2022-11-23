@@ -337,9 +337,9 @@ def get_solution_vert_estim_vals(
 
             i_value += num_columns
 
+    # Fill last vertical line with estimated values
     possible_values = estim_vals.difference(set(values))
 
-    # Fill last vertical line with estimated values
     i_line = len(free_columns) - 1
 
     column = free_columns[i_line]
@@ -367,7 +367,7 @@ def get_solution_vert_estim_vals(
     return values
 
 
-def get_solution_diag_def_lines_estim_vals(
+def get_solution_diag_def_lines_estim_vals_save(
         part_estim_vals_lines_permut,
         diag_def_lines_permut, def_lines_vals_permut,
         ):
@@ -504,6 +504,162 @@ def get_solution_diag_def_lines_estim_vals(
         values[i_val_free] = last_value
 
         i_value += 1
+
+    return values
+
+
+def get_solution_diag_def_lines_estim_vals(
+        part_estim_vals_lines_permut,
+        diag_def_lines_permut, def_lines_vals_permut,
+        ):
+    """
+    Get a solution for diagonal defined lines with estimated values
+    """
+
+    num_rows = lines_len
+    num_columns = lines_len
+
+    values = num_values * [None]
+
+    rows_sums = num_rows * [0]
+    columns_sums = num_columns * [0]
+
+    # Put diagonal defined lines values in solution
+    for i_line in range(num_def_lines):
+        diagonal = diag_def_lines_permut[i_line]
+
+        line_values = def_lines_vals_permut[i_line]
+
+        # Put diagonal 1 defined lines values in solution
+        if diagonal == ID_DIAGONAL_1:
+            column = 0
+
+            i_value = column
+
+            for row in range(num_rows):
+                value = line_values[row]
+
+                values[i_value] = value
+
+                rows_sums[row] += value
+                columns_sums[column] += value
+
+                i_value += num_columns + 1
+
+                column += 1
+
+        # Put diagonal 2 defined lines values in solution
+        elif diagonal == ID_DIAGONAL_2:
+            column = num_columns - 1
+
+            i_value = column
+
+            for row in range(num_rows):
+                value = line_values[row]
+
+                values[i_value] = value
+
+                rows_sums[row] += value
+                columns_sums[column] += value
+
+                i_value += num_columns - 1
+
+                column -= 1
+
+        else:
+            return []
+
+    # Put partial estimated values lines in solution
+    first_col_to_insert = 0
+    if values[0] is not None:
+        first_col_to_insert += 1
+
+    for row in range(num_rows - 1):
+        if row >= len(part_estim_vals_lines_permut):
+            break
+
+        vals_to_insert = part_estim_vals_lines_permut[row]
+
+        if (first_col_to_insert + len(vals_to_insert)) > num_columns:
+            first_col_to_insert = 0
+
+        i_val_to_insert = 0
+
+        # Put columns values
+        for column in range(first_col_to_insert, num_columns):
+            if i_val_to_insert >= len(vals_to_insert):
+                break
+
+            value = vals_to_insert[i_val_to_insert]
+
+            i_value = (row * num_columns) + column
+
+            if values[i_value] is None:
+                i_val_to_insert += 1
+
+                values[i_value] = value
+
+                rows_sums[row] += value
+                columns_sums[column] += value
+
+        first_col_to_insert += 1
+
+        # Put last column value of row
+        last_value = lines_sum - rows_sums[row]
+
+        if (last_value < 1) or (last_value > max_value):
+            return []
+
+        if last_value not in possible_values:
+            return []
+
+        possible_values.discard(last_value)
+
+        column = num_columns - 1
+
+        i_val_free = i_value
+
+        while values[i_val_free] is not None:
+            i_val_free -= 1
+
+        values[i_val_free] = last_value
+
+        columns_sums[column] += last_value
+
+        i_value += 1
+
+    # Fill last row with estimated values
+    possible_values = estim_vals.difference(set(values))
+
+    row = num_rows - 1
+
+    for column in range(num_columns):
+        i_value = (row * num_columns) + column
+
+        if values[i_value] is not None:
+            continue
+
+        last_value = lines_sum - columns_sums[column]
+
+        if (last_value < 1) or (last_value > max_value):
+            return []
+
+        if last_value not in possible_values:
+            return []
+
+        possible_values.discard(last_value)
+
+        values[i_value] = last_value
+
+    # Check rows sums
+    for row in range(num_rows):
+        if rows_sums[row] != lines_sum:
+            return []
+
+    # Check columns sums
+    for column in range(num_columns):
+        if columns_sums[column] != lines_sum:
+            return []
 
     return values
 
