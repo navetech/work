@@ -38,6 +38,18 @@ def main():
         "-o", "--outputsolutions", action="store_true"
         )
 
+    parser.add_argument(
+        "-h", "--horizontal", action="store_true"
+        )
+
+    parser.add_argument(
+        "v", "--vertical", action="store_true"
+        )
+
+    parser.add_argument(
+        "d", "--diagonal", action="store_true"
+        )
+
     args = parser.parse_args()
 
     lines_len = args.lineslen
@@ -48,6 +60,10 @@ def main():
     with_equations = args.withequations
 
     output_solutions = args.outputsolutions
+
+    horizontal = args.horizontal
+    vertical = args.vertical
+    diagonal = args.diagonal
 
     # Set number of lines
     num_lines = lines_len
@@ -90,14 +106,8 @@ def main():
     # Get defined lines values
     def_lines_vals = get_def_lines_vals(def_lines)
 
-    # Calculate number of defined lines values
-    num_def_lines_vals = len(def_lines_vals)
-
     # Build estimated values
     estim_vals = build_estim_vals(max_value, def_lines_vals)
-
-    # Calculate number of estimated alues
-    num_estim_vals = len(estim_vals)
 
     with_equations_valid = True
     if (lines_len > 4) or ((lines_len == 4) and (num_def_lines < 2)):
@@ -111,6 +121,7 @@ def main():
         print("WITHOUT EQUATIONS")
 
         result_without_equations = quadrado_magico_sem_equacoes(
+            horizontal, vertical, diagonal,
             def_lines, num_def_lines,
             estim_vals,
             lines_len, lines_sum, max_value, num_values

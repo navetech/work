@@ -949,6 +949,7 @@ def get_sols_vert_def_lines(
 
 
 def get_sols_parallel_def_lines(
+        horizontal, vertical,
         def_lines_vals_permuts
         ):
     """
@@ -956,26 +957,29 @@ def get_sols_parallel_def_lines(
     """
 
     # Build permutations for full lines of estimated values
-    num_lines = lines_len
-    num_full_lines = num_lines - num_def_lines - 1
+    if horizontal or vertical:
+        num_lines = lines_len
+        num_full_lines = num_lines - num_def_lines - 1
 
-    full_estim_vals_lines_permuts = build_estim_vals_full_lines_permuts(
-        estim_vals,
-        num_full_lines,
-        lines_len, lines_sum
-        )
+        full_estim_vals_lines_permuts = build_estim_vals_full_lines_permuts(
+            estim_vals,
+            num_full_lines,
+            lines_len, lines_sum
+            )
 
     # Get solutions for horizontal defined lines
-    get_sols_horiz_def_lines(
-        def_lines_vals_permuts, num_def_lines,
-        full_estim_vals_lines_permuts
-        )
+    if horizontal:
+        get_sols_horiz_def_lines(
+            def_lines_vals_permuts, num_def_lines,
+            full_estim_vals_lines_permuts
+            )
 
     # Get solutions for vertical defined lines
-    get_sols_vert_def_lines(
-        def_lines_vals_permuts, num_def_lines,
-        full_estim_vals_lines_permuts
-        )
+    if vertical:
+        get_sols_vert_def_lines(
+            def_lines_vals_permuts, num_def_lines,
+            full_estim_vals_lines_permuts
+            )
 
     return result
 
@@ -1086,6 +1090,7 @@ def get_solutions_diagonal_estim_vals_only(
 
 
 def quadrado_magico_sem_equacoes(
+        horizontal, vertical, diagonal,
         def_lines_, num_def_lines_,
         estim_vals_,
         lines_len_, lines_sum_, max_value_, num_values_
@@ -1154,14 +1159,19 @@ def quadrado_magico_sem_equacoes(
         # Get solutions for parallel defined lines
         """
         get_sols_parallel_def_lines(
+            horizontal, vertical,
             def_lines_vals_permuts
             )
         """
 
         # Get solutions for diagonal defined lines
         if (
-            (num_def_lines == 1)
-            or ((num_def_lines == 2) and ((lines_len % 2) == 0))
+            diagonal
+            and
+            (
+                (num_def_lines == 1)
+                or ((num_def_lines == 2) and ((lines_len % 2) == 0))
+            )
         ):
 
             get_sols_diag_def_lines(
