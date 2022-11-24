@@ -457,27 +457,46 @@ def get_solution_diag_def_lines_estim_vals(
             if i_val_to_insert >= len(vals_to_insert):
                 break
 
+            i_value = (row * num_columns) + column
+            if values[i_value] is not None:
+                continue
+
             value = vals_to_insert[i_val_to_insert]
 
-            i_value = (row * num_columns) + column
+            i_val_to_insert += 1
 
-            if values[i_value] is None:
-                i_val_to_insert += 1
+            values[i_value] = value
 
-                values[i_value] = value
-
-                rows_sums[row] += value
-                columns_sums[column] += value
+            rows_sums[row] += value
+            columns_sums[column] += value
 
         first_col_to_insert += 1
 
-    print (values)
-
-    return []
-
-    # Fill last row with estimated values
+    # Fill rows, except the last, with estimated values
     possible_values = estim_vals.difference(set(values))
 
+    for row in range(num_rows - 1):
+        for column in range(num_columns):
+            i_value = (row * num_columns) + column
+            if values[i_value] is not None:
+                continue
+
+            last_value = lines_sum - rows_sums[row]
+
+            if (last_value < 1) or (last_value > max_value):
+                return []
+
+            if last_value not in possible_values:
+                return []
+
+            possible_values.discard(last_value)
+
+            values[i_value] = last_value
+
+            rows_sums[row] += last_value
+            columns_sums[column] += last_value
+
+    # Fill last row with estimated values
     row = num_rows - 1
 
     for column in range(num_columns):
@@ -497,6 +516,9 @@ def get_solution_diag_def_lines_estim_vals(
         possible_values.discard(last_value)
 
         values[i_value] = last_value
+
+        rows_sums[row] += last_value
+        columns_sums[column] += last_value
 
     # Check rows sums
     for row in range(num_rows):
