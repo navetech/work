@@ -46,7 +46,7 @@ def build_estim_vals_part_lines_permuts(
 
     permut_len = lines_len - 1
 
-    part_lines_permuts = build_permutations(valid_lines, permut_len)
+    part_lines_permuts = list(build_permutations(valid_lines, permut_len))
 
     """
     count = 0
@@ -471,7 +471,7 @@ def get_solution_diag_def_lines_estim_vals(
 
         first_col_to_insert += 1
 
-    # print (values)
+    print (values)
 
     return []
 
@@ -692,9 +692,6 @@ def get_sols_diag_def_lines_estim_vals(
         print(permut)
     print(count)
     """
-
-    return
-
 
     # For each permutation of partial lines of estimated values
     part_estim_vals_lines_permuts_count = 0
@@ -1004,6 +1001,7 @@ def get_sols_diag_def_lines(
         for def_lines_vals_permut in def_lines_vals_permuts:
 
             # Get solutions for diagonal defined lines with estimated values
+            """
             count = 0
             for permut in part_estim_vals_lines_permuts:
                 count += 1
@@ -1016,6 +1014,7 @@ def get_sols_diag_def_lines(
                 return
 
             continue
+            """
 
             get_sols_diag_def_lines_estim_vals(
                 part_estim_vals_lines_permuts,
