@@ -240,6 +240,39 @@ def build_def_lines_vals_permuts_save(
     return vals_permuts
 
 
+def group_iterables(
+        iterables, iterable_index
+        ):
+    """
+    Group iterables
+    """
+
+    groups = []
+
+    if iterable_index == 0:
+        group = []
+
+        for iterable in iterables[iterable_index]:
+            new_group = group.copy()
+
+            new_group.append(iterable)
+
+            groups.append(new_group)
+
+    else:
+        last_groups = group_iterables(iterables, iterable_index - 1)
+
+        for iterable in iterables[iterable_index]:
+            for group in last_groups:
+                new_group = group.copy()
+
+                new_group.append(iterable)
+
+                groups.append(new_group)
+
+    return groups
+
+
 def build_def_lines_vals_permuts(
         def_lines, num_def_lines
         ):
@@ -251,13 +284,15 @@ def build_def_lines_vals_permuts(
     for line in def_lines:
         permut_length = len(line)
 
-        line_permuts = list(build_permutations(line, permut_length))
+        line_permuts = build_permutations(line, permut_length)
 
         lines_permuts.append(line_permuts)
 
-    permuts = list(build_permutations(lines_permuts, num_def_lines))
+    permuts_groups = group_iterables(
+        iterables=lines_permuts, iterable_index=num_def_lines - 1
+        )
 
-    return permuts
+    return permuts_groups
 
 
 def diagonal_1_sum_is_valid(values, lines_len, lines_sum):

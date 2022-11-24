@@ -44,9 +44,17 @@ def build_estim_vals_part_lines_permuts(
         if len(valid_line) > 0:
             valid_lines.append(valid_line)
 
-    permut_len = partial_lines_len
+    permut_len = lines_len - 1
 
     part_lines_permuts = build_permutations(valid_lines, permut_len)
+
+    """
+    count = 0
+    for permut in part_lines_permuts:
+        count += 1
+        print(permut)
+    print(count)
+    """
 
     return part_lines_permuts
 
@@ -426,17 +434,12 @@ def get_solution_diag_def_lines_estim_vals(
                 column -= 1
 
         else:
-            print("diagonal invalid")
             return []
-
-    print (values)
-
-    return []
 
     # Put partial estimated values lines in solution
     first_col_to_insert = 0
     if values[0] is not None:
-        first_col_to_insert += 1
+        first_col_to_insert = 1
 
     for row in range(num_rows - 1):
         if row >= len(part_estim_vals_lines_permut):
@@ -467,6 +470,10 @@ def get_solution_diag_def_lines_estim_vals(
                 columns_sums[column] += value
 
         first_col_to_insert += 1
+
+    # print (values)
+
+    return []
 
     # Fill last row with estimated values
     possible_values = estim_vals.difference(set(values))
@@ -678,6 +685,17 @@ def get_sols_diag_def_lines_estim_vals(
     Get solutions for diagonal defined lines with estimated values
     """
 
+    """
+    count = 0
+    for permut in part_estim_vals_lines_permuts:
+        count += 1
+        print(permut)
+    print(count)
+    """
+
+    return
+
+
     # For each permutation of partial lines of estimated values
     part_estim_vals_lines_permuts_count = 0
     for part_estim_vals_lines_permut in part_estim_vals_lines_permuts:
@@ -879,7 +897,7 @@ def get_sols_horiz_def_lines(
     for horiz_def_lines_permut in horiz_def_lines_permuts:
 
         # For each permutation of defined lines values
-        for def_lines_vals_permut in def_lines_vals_permuts["inverted"]:
+        for def_lines_vals_permut in def_lines_vals_permuts:
 
             # Get solutions for horizontal estimated values
             get_sols_horiz_estim_vals(
@@ -907,7 +925,7 @@ def get_sols_vert_def_lines(
     for vert_def_lines_permut in vert_def_lines_permuts:
 
         # For each permutation of defined lines values
-        for def_lines_vals_permut in def_lines_vals_permuts["inverted"]:
+        for def_lines_vals_permut in def_lines_vals_permuts:
 
             # Get solutions for vertical estimated values
             get_sols_vert_estim_vals(
@@ -966,6 +984,14 @@ def get_sols_diag_def_lines(
         lines_sum
         )
 
+    """
+    count = 0
+    for permut in part_estim_vals_lines_permuts:
+        count += 1
+        print(permut)
+    print(count)
+    """
+
     # Build permutations for diagonal defined lines
     diag_def_lines_permuts = build_diag_def_lines_permuts(
         num_def_lines, lines_len
@@ -975,9 +1001,22 @@ def get_sols_diag_def_lines(
     for diag_def_lines_permut in diag_def_lines_permuts:
 
         # For each permutation of defined lines values
-        for def_lines_vals_permut in def_lines_vals_permuts["inverted"]:
+        for def_lines_vals_permut in def_lines_vals_permuts:
 
             # Get solutions for diagonal defined lines with estimated values
+            count = 0
+            for permut in part_estim_vals_lines_permuts:
+                count += 1
+                print(permut)
+            print(count)
+
+            if count == 0:
+                print()
+                print('ZERO')
+                return
+
+            continue
+
             get_sols_diag_def_lines_estim_vals(
                 part_estim_vals_lines_permuts,
                 diag_def_lines_permut, def_lines_vals_permut
@@ -1121,15 +1160,6 @@ def quadrado_magico_sem_equacoes(
             def_lines, num_def_lines
             )
 
-        count = 0
-        for permut in def_lines_vals_permuts:
-            print(permut)
-            count += 1
-
-        print(count)
-
-        return result
-        
         # Get solutions for parallel defined lines
         """
         get_sols_parallel_def_lines(
