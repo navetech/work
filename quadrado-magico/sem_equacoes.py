@@ -975,6 +975,10 @@ def get_sols_parallel_def_lines(
 
     # Get solutions for horizontal defined lines
     if horizontal:
+        print()
+        print("Horizontal")
+        print()
+
         get_sols_horiz_def_lines(
             def_lines_vals_permuts, num_def_lines,
             full_estim_vals_lines_permuts
@@ -982,6 +986,10 @@ def get_sols_parallel_def_lines(
 
     # Get solutions for vertical defined lines
     if vertical:
+        print()
+        print("Vertical")
+        print()
+
         get_sols_vert_def_lines(
             def_lines_vals_permuts, num_def_lines,
             full_estim_vals_lines_permuts
@@ -1163,12 +1171,10 @@ def quadrado_magico_sem_equacoes(
             )
 
         # Get solutions for parallel defined lines
-        """
         get_sols_parallel_def_lines(
             horizontal, vertical,
             def_lines_vals_permuts
             )
-        """
 
         # Get solutions for diagonal defined lines
         if (
@@ -1179,6 +1185,9 @@ def quadrado_magico_sem_equacoes(
                 or ((num_def_lines == 2) and ((lines_len % 2) == 0))
             )
         ):
+            print()
+            print("Diagonal")
+            print()
 
             get_sols_diag_def_lines(
                 def_lines_vals_permuts
