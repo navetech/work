@@ -609,6 +609,9 @@ def get_sols_horiz_estim_vals(
     # This check is necessry because full_estim_vals_lines_permuts
     # does not have len() method
     if full_estim_vals_lines_permuts_count < 1:
+        print()
+        print("estim_vals_lines_permuts EMPTY")
+
         full_estim_vals_lines_permut = []
 
         # Get solution for horizontal estimated values
@@ -670,6 +673,9 @@ def get_sols_vert_estim_vals(
     # This check is necessry because full_estim_vals_lines_permuts
     # does not have len() method
     if full_estim_vals_lines_permuts_count < 1:
+        print()
+        print("estim_vals_lines_permuts EMPTY")
+
         full_estim_vals_lines_permut = []
 
         # Get solution for vertical estimated values
@@ -731,6 +737,9 @@ def get_sols_diag_def_lines_estim_vals(
     # This check is necessry because full_estim_vals_lines_permuts
     # does not have len() method
     if part_estim_vals_lines_permuts_count < 1:
+        print()
+        print("estim_vals_lines_permuts EMPTY")
+
         part_estim_vals_lines_permut = []
 
         # Get solution for diagonal defined lines with estimated values
