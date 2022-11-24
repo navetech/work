@@ -48,14 +48,6 @@ def build_estim_vals_part_lines_permuts(
 
     part_lines_permuts = list(build_permutations(valid_lines, permut_len))
 
-    """
-    count = 0
-    for permut in part_lines_permuts:
-        count += 1
-        print(permut)
-    print(count)
-    """
-
     return part_lines_permuts
 
 
@@ -98,7 +90,7 @@ def build_estim_vals_full_lines_permuts(
 
     permut_len = num_full_lines
 
-    full_lines_permuts = build_permutations(valid_lines, permut_len)
+    full_lines_permuts = list(build_permutations(valid_lines, permut_len))
 
     return full_lines_permuts
 
@@ -608,6 +600,7 @@ def get_sols_horiz_estim_vals(
             result["valid_sols_count"] += 1
 
         print(
+            "  ",
             full_estim_vals_lines_permuts_count,
             result["sols_count"], result["valid_sols_count"],
             solution, end="\r"
@@ -632,6 +625,7 @@ def get_sols_horiz_estim_vals(
             result["valid_sols_count"] += 1
 
         print(
+            "  ",
             full_estim_vals_lines_permuts_count,
             result["sols_count"], result["valid_sols_count"],
             solution, end="\r"
@@ -667,6 +661,7 @@ def get_sols_vert_estim_vals(
             result["valid_sols_count"] += 1
 
         print(
+            "  ",
             full_estim_vals_lines_permuts_count,
             result["sols_count"], result["valid_sols_count"],
             solution, end="\r"
@@ -691,6 +686,7 @@ def get_sols_vert_estim_vals(
             result["valid_sols_count"] += 1
 
         print(
+            "  ",
             full_estim_vals_lines_permuts_count,
             result["sols_count"], result["valid_sols_count"],
             solution, end="\r"
@@ -705,14 +701,6 @@ def get_sols_diag_def_lines_estim_vals(
         ):
     """
     Get solutions for diagonal defined lines with estimated values
-    """
-
-    """
-    count = 0
-    for permut in part_estim_vals_lines_permuts:
-        count += 1
-        print(permut)
-    print(count)
     """
 
     # For each permutation of partial lines of estimated values
@@ -734,6 +722,7 @@ def get_sols_diag_def_lines_estim_vals(
             result["valid_sols_count"] += 1
 
         print(
+            "  ",
             part_estim_vals_lines_permuts_count,
             result["sols_count"], result["valid_sols_count"],
             solution, end="\r"
@@ -758,6 +747,7 @@ def get_sols_diag_def_lines_estim_vals(
             result["valid_sols_count"] += 1
 
         print(
+            "  ",
             part_estim_vals_lines_permuts_count,
             result["sols_count"], result["valid_sols_count"],
             solution, end="\r"
@@ -798,7 +788,10 @@ def get_solutions_horizontal_estim_vals(
 
                 solutions.append(solution)
 
-        print(i, valid_count, diff_count, solution, end="\r")
+        print(
+            "  ",
+            i, valid_count, diff_count, solution, end="\r"
+            )
 
     return solutions
 
@@ -1003,14 +996,6 @@ def get_sols_diag_def_lines(
         lines_sum
         )
 
-    """
-    count = 0
-    for permut in part_estim_vals_lines_permuts:
-        count += 1
-        print(permut)
-    print(count)
-    """
-
     # Build permutations for diagonal defined lines
     diag_def_lines_permuts = build_diag_def_lines_permuts(
         num_def_lines, lines_len
@@ -1023,21 +1008,6 @@ def get_sols_diag_def_lines(
         for def_lines_vals_permut in def_lines_vals_permuts:
 
             # Get solutions for diagonal defined lines with estimated values
-            """
-            count = 0
-            for permut in part_estim_vals_lines_permuts:
-                count += 1
-                print(permut)
-            print(count)
-
-            if count == 0:
-                print()
-                print('ZERO')
-                return
-
-            continue
-            """
-
             get_sols_diag_def_lines_estim_vals(
                 part_estim_vals_lines_permuts,
                 diag_def_lines_permut, def_lines_vals_permut
