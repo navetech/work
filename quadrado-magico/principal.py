@@ -39,15 +39,15 @@ def main():
         )
 
     parser.add_argument(
-        "-h", "--horizontal", action="store_true"
+        "-z", "--horizontal", action="store_true"
         )
 
     parser.add_argument(
-        "v", "--vertical", action="store_true"
+        "-v", "--vertical", action="store_true"
         )
 
     parser.add_argument(
-        "d", "--diagonal", action="store_true"
+        "-d", "--diagonal", action="store_true"
         )
 
     args = parser.parse_args()
