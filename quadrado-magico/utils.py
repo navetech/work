@@ -68,14 +68,6 @@ def load_def_lines(filename, lines_len):
     return def_lines
 
 
-# def lines_len_is_valid(lines_len, lines_sum):
-    """
-    Check if lines legth is valid
-    """
-
-    # return (lines_len > 0) and ((lines_len % 2) == (lines_sum % 2))
-
-
 def def_lines_are_valid(
         def_lines,
         lines_len, lines_sum, max_value
@@ -181,7 +173,6 @@ def build_permutations(iterable, permut_length):
     permuts = []
 
     if permut_length > 1:
-        # permuts = list(itertools.permutations(iterable, permut_length))
         permuts = itertools.permutations(iterable, permut_length)
 
     elif permut_length == 1:
@@ -191,33 +182,102 @@ def build_permutations(iterable, permut_length):
     return permuts
 
 
-def group_iterables(
-        iterables, iterable_index
+def build_lines_permuts(sequence, num_lines):
+    """
+    Build lines permutations
+    """
+
+    all_lines_permuts = []
+
+    if num_lines < 1:
+        return all_lines_permuts
+
+    print()
+
+    lines_indexes = list(range(num_lines))
+
+    while lines_indexes[0] < (len(sequence) - num_lines + 1):
+        lines = []
+        lines_values = set()
+
+        for i_line in range(num_lines):
+            i = lines_indexes[i_line]
+
+            one_line = sequence[i]
+            line_is_valid = True
+
+            for value in one_line:
+                if value in lines_values:
+                    line_is_valid = False
+                    break
+
+                lines_values.add(value)
+
+            if not line_is_valid:
+                break
+
+            lines.append(one_line)
+
+        if len(lines) == num_lines:
+            lines_permuts = list(build_permutations(
+                lines, permut_length=len(lines)
+                ))
+
+            all_lines_permuts.extend(lines_permuts)
+
+            for permut in lines_permuts:
+                print("  ", permut, end="\r")
+
+        lines_indexes_incremented = (num_lines - 1) * [False]
+
+        i_line = num_lines - 1
+        lines_indexes[i_line] += 1
+
+        for i_line in reversed(range(1, num_lines)):
+            if (
+                lines_indexes[i_line]
+                == len(sequence) - num_lines + i_line + 1
+            ):
+                lines_indexes[i_line - 1] += 1
+                lines_indexes_incremented[i_line - 1] = True
+
+        for i_line in range(num_lines - 1):
+            if lines_indexes_incremented[i_line]:
+                lines_indexes[i_line + 1] = lines_indexes[i_line] + 1
+
+    print()
+    print()
+
+    return all_lines_permuts
+
+
+def group_sequences(
+        sequences, sequence_index
         ):
     """
-    Group iterables
+    Group sequences
     """
 
     groups = []
 
-    if iterable_index == 0:
+    if sequence_index == 0:
         group = []
 
-        for iterable in iterables[iterable_index]:
+        for sequence in sequences[sequence_index]:
             new_group = group.copy()
 
-            new_group.append(iterable)
+            new_group.append(sequence)
 
             groups.append(new_group)
 
     else:
-        last_groups = group_iterables(iterables, iterable_index - 1)
+        last_groups = group_sequences(sequences, sequence_index - 1)
 
-        for iterable in iterables[iterable_index]:
+        for sequence in sequences[sequence_index]:
             for group in last_groups:
                 new_group = group.copy()
 
-                new_group.append(iterable)
+                new_group.append(sequence)
 
                 groups.append(new_group)
 
@@ -239,8 +299,8 @@ def build_def_lines_vals_permuts(
 
         lines_permuts.append(line_permuts)
 
-    permuts_groups = group_iterables(
-        iterables=lines_permuts, iterable_index=num_def_lines - 1
+    permuts_groups = group_sequences(
+        sequences=lines_permuts, sequence_index=num_def_lines - 1
         )
 
     return permuts_groups
