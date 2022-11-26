@@ -2,7 +2,6 @@ from utils import build_permutations
 from utils import build_lines_permuts
 from utils import build_def_lines_vals_permuts
 from utils import diagonals_sums_are_valid
-from utils import check_solution
 
 
 global lines_len
@@ -245,28 +244,23 @@ def build_estim_vals_full_lines_only_permuts(
     return full_lines_permuts
 
 
-def build_remain_estim_vals_permuts(
-        estim_vals, estim_vals_lines_permut
+def get_remain_estim_vals(
+        estim_vals, full_estim_vals_lines_permut
         ):
     """
-    Build permutations for the remaining estimated values
+    Get remaining estimated values
     """
 
     lines_vals = set()
 
-    for line_values in estim_vals_lines_permut:
+    for line_values in full_estim_vals_lines_permut:
         values = set(line_values)
 
         lines_vals = lines_vals.union(values)
 
     remain_estim_vals = estim_vals.difference(lines_vals)
-    permut_len = len(remain_estim_vals)
 
-    remain_estim_vals_permuts = build_permutations(
-        remain_estim_vals, permut_len
-        )
-
-    return remain_estim_vals_permuts
+    return remain_estim_vals
 
 
 def get_solution_horiz_estim_vals(
@@ -1287,28 +1281,160 @@ def get_sols_diag_def_lines(
     return
 
 
-def get_solution_diagonal_estim_vals(
+def get_solution_diag_estim_vals_only(
         full_estim_vals_lines_permut,
-        remain_estim_vals_permut,
-        lines_len, lines_sum, max_value, num_values
+        remain_estim_vals, remain_estim_vals_permut
         ):
     """
-    Get a solution for diagonal estimated values
+    Get a solution for diagonal estimated values only
     """
 
-    values = []
+    num_rows = lines_len
+    num_columns = lines_len
 
-    for lines_values in full_estim_vals_lines_permut:
-        values.extend(lines_values)
+    values = num_values * [None]
 
-    values.extend(remain_estim_vals_permut)
+    rows_sums = num_rows * [0]
+    columns_sums = num_columns * [0]
 
-    solution = check_solution(
-        values,
-        lines_len, lines_sum, max_value, num_values
-        )
+    # Put diagonals of estimated values in solution
+    for i_line in range(len(full_estim_vals_lines_permut)):
+        line_values = full_estim_vals_lines_permut[i_line]
 
-    return solution
+        # Put diagonal 1 of estimated values in solution
+        if i_line == 0:
+            column = 0
+
+            i_value = column
+
+            for row in range(num_rows):
+                value = line_values[row]
+
+                values[i_value] = value
+
+                rows_sums[row] += value
+                columns_sums[column] += value
+
+                i_value += num_columns + 1
+
+                column += 1
+
+        # Put diagonal 2 of estimated values in solution
+        elif i_line == 1:
+            column = num_columns - 1
+
+            i_value = column
+
+            for row in range(num_rows):
+                value = line_values[row]
+
+                values[i_value] = value
+
+                rows_sums[row] += value
+                columns_sums[column] += value
+
+                i_value += num_columns - 1
+
+                column -= 1
+
+        else:
+            return []
+
+    # Put remaning estimated values in solution
+    first_col_to_insert = 0
+    if values[0] is not None:
+        first_col_to_insert = 1
+
+    for row in range(num_rows - 1):
+        if row >= len(remain_estim_vals_permut):
+            break
+
+        vals_to_insert = remain_estim_vals_permut[row]
+
+        if (first_col_to_insert + len(vals_to_insert)) > num_columns:
+            first_col_to_insert = 0
+
+        i_val_to_insert = 0
+
+        # Put columns values
+        for column in range(first_col_to_insert, num_columns):
+            if i_val_to_insert >= len(vals_to_insert):
+                break
+
+            i_value = (row * num_columns) + column
+            if values[i_value] is not None:
+                continue
+
+            value = vals_to_insert[i_val_to_insert]
+
+            i_val_to_insert += 1
+
+            values[i_value] = value
+
+            rows_sums[row] += value
+            columns_sums[column] += value
+
+        first_col_to_insert += 1
+
+    # Fill rows, except the last, with estimated values
+    possible_values = remain_estim_vals.difference(set(values))
+
+    for row in range(num_rows - 1):
+        for column in range(num_columns):
+            i_value = (row * num_columns) + column
+            if values[i_value] is not None:
+                continue
+
+            last_value = lines_sum - rows_sums[row]
+
+            if (last_value < 1) or (last_value > max_value):
+                return []
+
+            if last_value not in possible_values:
+                return []
+
+            possible_values.discard(last_value)
+
+            values[i_value] = last_value
+
+            rows_sums[row] += last_value
+            columns_sums[column] += last_value
+
+    # Fill last row with estimated values
+    row = num_rows - 1
+
+    for column in range(num_columns):
+        i_value = (row * num_columns) + column
+
+        if values[i_value] is not None:
+            continue
+
+        last_value = lines_sum - columns_sums[column]
+
+        if (last_value < 1) or (last_value > max_value):
+            return []
+
+        if last_value not in possible_values:
+            return []
+
+        possible_values.discard(last_value)
+
+        values[i_value] = last_value
+
+        rows_sums[row] += last_value
+        columns_sums[column] += last_value
+
+    # Check rows sums
+    for row in range(num_rows):
+        if rows_sums[row] != lines_sum:
+            return []
+
+    # Check columns sums
+    for column in range(num_columns):
+        if columns_sums[column] != lines_sum:
+            return []
+
+    return values
 
 
 def get_sols_diagonal_estim_vals_only():
@@ -1318,6 +1444,8 @@ def get_sols_diagonal_estim_vals_only():
 
     # Build permutations for full lines of estimated values
     num_full_lines = 2
+    if (lines_len % 2) != 0:
+        num_full_lines = 1
 
     full_estim_vals_lines_permuts = build_estim_vals_full_lines_only_permuts(
         estim_vals,
@@ -1326,29 +1454,52 @@ def get_sols_diagonal_estim_vals_only():
         )
 
     # For each permutation of full lines of estimated values
+    full_estim_vals_lines_permuts_count = 0
     for full_estim_vals_lines_permut in full_estim_vals_lines_permuts:
+        full_estim_vals_lines_permuts_count += 1
 
-        PAREI
-
-        # Build permutations for the remaining estimated values
-        remain_estim_vals_permuts = build_remain_estim_vals_permuts(
+        # Get remaining estimated values
+        remain_estim_vals = get_remain_estim_vals(
             estim_vals, full_estim_vals_lines_permut
             )
 
-        # For each permutation of the remaining estimated values
-        for remain_estim_vals_permut in remain_estim_vals_permuts:
+        # Build permutations for the remaining estimated values
+        partial_lines_len = lines_len - num_full_lines - 1
 
-            # Get solution for diagonal estimated values
-            solution = get_solution_diagonal_estim_vals(
+        remain_estim_vals_permuts = build_estim_vals_part_lines_permuts(
+            remain_estim_vals,
+            partial_lines_len,
+            lines_sum
+            )
+
+        # For each permutation of the remaining estimated values
+        remain_estim_vals_permuts_count = 0
+        for remain_estim_vals_permut in remain_estim_vals_permuts:
+            remain_estim_vals_permuts_count += 1
+
+            # Get solution for diagonal estimated values only
+            solution = get_solution_diag_estim_vals_only(
                 full_estim_vals_lines_permut,
-                remain_estim_vals_permut,
-                lines_len, lines_sum, max_value, num_values
+                remain_estim_vals, remain_estim_vals_permut
                 )
 
-            if len(solution) > 0:
-                solutions.append(solution)
+            result["sols_count"] += 1
 
-    return solutions
+            if len(solution) > 0:
+                result["valid_sols"].append(solution)
+
+                result["valid_sols_count"] += 1
+
+            print(
+                "  ",
+                "     ",
+                full_estim_vals_lines_permuts_count,
+                remain_estim_vals_permuts_count,
+                result["sols_count"], result["valid_sols_count"],
+                solution, end="\r"
+                )
+
+        return
 
 
 def quadrado_magico_sem_equacoes(
@@ -1407,8 +1558,6 @@ def quadrado_magico_sem_equacoes(
 
     result["valid_sols_count"] = 0
     result["valid_sols"] = []
-
-    solutions = []
 
     # If there are defined lines
     if num_def_lines > 0:
